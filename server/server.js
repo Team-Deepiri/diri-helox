@@ -1,148 +1,174 @@
-// server/server.js
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const helmet = require('helmet');
+const compression = require('compression');
+const morgan = require('morgan');
+const rateLimit = require('express-rate-limit');
+const path = require('path');
+const mongoose = require('mongoose');
+const { createServer } = require('http');
+const { Server } = require('socket.io');
+require('dotenv').config();
 
-// Import the initialized Firebase Admin SDK
-const { realtimeDB } = require('./config/firebaseAdmin');
+// Import services
+const adventureService = require('./services/adventureService');
+const userService = require('./services/userService');
+const eventService = require('./services/eventService');
+const notificationService = require('./services/notificationService');
+const aiOrchestrator = require('./services/aiOrchestrator');
+const cacheService = require('./services/cacheService');
 
-const apiRoutes = require('./routes/apiRoutes');
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const adventureRoutes = require('./routes/adventureRoutes');
+const eventRoutes = require('./routes/eventRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
+const externalRoutes = require('./routes/externalRoutes');
+
+// Import middleware
+const authenticateJWT = require('./middleware/authenticateJWT');
+const errorHandler = require('./middleware/errorHandler');
+const logger = require('./utils/logger');
 
 const app = express();
+const server = createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+    methods: ["GET", "POST"]
+  }
+});
+
+const PORT = process.env.PORT || 5000;
+
+// Security middleware
+app.use(helmet());
+app.use(compression());
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+app.use('/api/', limiter);
+
+// Logging
+app.use(morgan('combined', { stream: { write: message => logger.info(message.trim()) } }));
 
 // CORS configuration
-const corsOptions = {
-  origin: ['http://localhost:5173', 'http://jaxk_client:3000'],
-  methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization',
-};
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  credentials: true
+}));
 
-// Middleware
-app.use(cors(corsOptions));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// Body parsing middleware
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
-// Routes
-app.use('/api', apiRoutes);
-
-// Error handling
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
+// Database connection
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/trailblip_mag', {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => {
+  logger.info('Connected to MongoDB');
+})
+.catch((error) => {
+  logger.error('MongoDB connection error:', error);
+  process.exit(1);
 });
 
-// ✅ Test write to Realtime DB
-realtimeDB.ref('test-connection').set({
-  timestamp: new Date().toISOString(),
-  status: 'Firebase is working!'
-}).then(() => {
-  console.log('✅ Realtime DB test write successful. Database Connected.');
-}).catch(err => {
-  console.error('❌ Error writing to Realtime DB: Failed to Connect', err);
+// Initialize services
+cacheService.initialize();
+aiOrchestrator.initialize();
+
+// Socket.IO connection handling
+io.on('connection', (socket) => {
+  logger.info(`User connected: ${socket.id}`);
+  
+  socket.on('join_user_room', (userId) => {
+    socket.join(`user_${userId}`);
+    logger.info(`User ${userId} joined their room`);
+  });
+  
+  socket.on('join_adventure_room', (adventureId) => {
+    socket.join(`adventure_${adventureId}`);
+    logger.info(`User joined adventure room: ${adventureId}`);
+  });
+  
+  socket.on('disconnect', () => {
+    logger.info(`User disconnected: ${socket.id}`);
+  });
 });
 
-const PORT = 5000; // Default port, can be overridden by environment variable
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+// Make io available to routes
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
 
+// API Routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', authenticateJWT, userRoutes);
+app.use('/api/adventures', authenticateJWT, adventureRoutes);
+app.use('/api/events', authenticateJWT, eventRoutes);
+app.use('/api/notifications', authenticateJWT, notificationRoutes);
+app.use('/api/external', externalRoutes);
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    version: '2.0.0',
+    services: {
+      database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+      cache: cacheService.isConnected() ? 'connected' : 'disconnected',
+      ai: aiOrchestrator.isInitialized() ? 'ready' : 'initializing'
+    }
+  });
+});
 
+// Serve static files from the React app in production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client/dist')));
+  
+  // Catch all handler: send back React's index.html file
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+  });
+}
 
+// Error handling middleware
+app.use(errorHandler);
 
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    mongoose.connection.close();
+    process.exit(0);
+  });
+});
 
-// latest of 4-21-25
-// require('dotenv').config();
-// const express = require('express');
-// const cors = require('cors');
-// const bodyParser = require('body-parser');
-// const firebaseAdmin = require('firebase-admin');
-// const apiRoutes = require('./routes/apiRoutes');
+process.on('SIGINT', () => {
+  logger.info('SIGINT received, shutting down gracefully');
+  server.close(() => {
+    logger.info('Process terminated');
+    mongoose.connection.close();
+    process.exit(0);
+  });
+});
 
-// // Initialize Firebase Admin SDK
-// const serviceAccount = require('../config/jaxk-website-firebase-adminsdk-fbsvc-4461c645c4.json');
+server.listen(PORT, () => {
+  logger.info(`MAG 2.0 Server is running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+});
 
-// // Check if already initialized to prevent duplicates
-// if (!firebaseAdmin.apps.length) {
-//   firebaseAdmin.initializeApp({
-//     credential: firebaseAdmin.credential.cert(serviceAccount),
-//     databaseURL: 'https://jaxk-website-default-rtdb.firebaseio.com'
-//   });
-// }
-
-// const app = express();
-
-// // CORS configuration: Allow requests from localhost:5173
-// const corsOptions = {
-//   origin: 'http://localhost:5173', // Allow this origin
-//   methods: 'GET,POST,PUT,DELETE',  // Allow these HTTP methods
-//   allowedHeaders: 'Content-Type,Authorization',  // Allow these headers
-// };
-
-// // Middleware
-// app.use(cors(corsOptions));  // Use CORS with the specified options
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-// +
-// // Routes
-// app.use('/api', apiRoutes);
-
-// // Error handling
-// app.use((err, req, res, next) => {
-//   console.error(err.stack);
-//   res.status(500).send('Something broke!');
-// });
-
-// const PORT = process.env.PORT || 5000;
-// app.listen(PORT, () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
-
-
-
-
-
-
-
-
-// // was working at 4-19-25 at 1:53 am
-// // require('dotenv').config();
-// // const express = require('express');
-// // const cors = require('cors');
-// // const bodyParser = require('body-parser');
-// // const apiRoutes = require('./routes/apiRoutes');
-
-// // const app = express();
-
-// // // CORS configuration: Allow requests from localhost:5173
-// // const corsOptions = {
-// //   origin: 'http://localhost:5173', // Allow this origin
-// //   methods: 'GET,POST,PUT,DELETE',  // Allow these HTTP methods
-// //   allowedHeaders: 'Content-Type,Authorization',  // Allow these headers
-// // };
-
-// // // Middleware
-// // app.use(cors({ origin: 'http://localhost:5173' }));
-// // app.use(cors(corsOptions));  // Use CORS with the specified options
-// // app.use(bodyParser.json());
-// // app.use(bodyParser.urlencoded({ extended: true }));
-
-
-// // app.get('/api/ping', (req, res) => {
-// //   res.json({ message: 'pong' });
-// // });
-
-
-// // // Routes
-// // app.use('/api', apiRoutes);
-
-// // // Error handling
-// // app.use((err, req, res, next) => {
-// //   console.error(err.stack);
-// //   res.status(500).send('Something broke!');
-// // });
-
-// // const PORT = process.env.PORT || 5000;
-// // app.listen(PORT, () => {
-// //   console.log(`Server running on port ${PORT}`);
-// // });
+module.exports = { app, server, io };

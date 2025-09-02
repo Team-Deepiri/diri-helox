@@ -1,94 +1,151 @@
-// server/models/User.js
-const { realtimeDB } = require('../config/firebaseAdmin');
-const dataRef = realtimeDB.ref('data');
+const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
-module.exports = {
-  async create(data) {
-    const newDataRef = dataRef.push();
-    await newDataRef.set(data);
-    return { id: newDataRef.key, ...data };
+const userSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 100
   },
-
-  async getAll() {
-    const snapshot = await dataRef.once('value');
-    const data = snapshot.val();
-    return data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
   },
-
-  async getById(id) {
-    const snapshot = await dataRef.child(id).once('value');
-    const data = snapshot.val();
-    return data ? { id, ...data } : null;
+  password: {
+    type: String,
+    required: true,
+    minlength: 6
   },
-
-  async update(id, newData) {
-    const dataSnapshot = await dataRef.child(id).once('value');
-    if (!dataSnapshot.exists()) {
-      return null;
+  preferences: {
+    interests: [{
+      type: String,
+      enum: ['bars', 'music', 'food', 'outdoors', 'art', 'sports', 'social', 'solo', 'nightlife', 'culture']
+    }],
+    skillLevel: {
+      type: String,
+      enum: ['beginner', 'intermediate', 'advanced'],
+      default: 'beginner'
+    },
+    maxDistance: {
+      type: Number,
+      default: 5000,
+      min: 1000,
+      max: 20000
+    },
+    preferredDuration: {
+      type: Number,
+      default: 60,
+      min: 30,
+      max: 90
+    },
+    socialMode: {
+      type: String,
+      enum: ['solo', 'friends', 'meet_new_people'],
+      default: 'solo'
+    },
+    budget: {
+      type: String,
+      enum: ['low', 'medium', 'high'],
+      default: 'medium'
+    },
+    timePreferences: {
+      morning: { type: Boolean, default: false },
+      afternoon: { type: Boolean, default: true },
+      evening: { type: Boolean, default: true },
+      night: { type: Boolean, default: false }
     }
-    await dataRef.child(id).update(newData);
-    return { id, ...newData };
   },
-
-  async delete(id) {
-    const dataSnapshot = await dataRef.child(id).once('value');
-    if (!dataSnapshot.exists()) {
-      return null;
+  friends: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  }],
+  favoriteVenues: [{
+    venueId: String,
+    name: String,
+    type: String,
+    location: {
+      lat: Number,
+      lng: Number,
+      address: String
     }
-    await dataRef.child(id).remove();
-    return { id };
+  }],
+  stats: {
+    adventuresCompleted: { type: Number, default: 0 },
+    totalPoints: { type: Number, default: 0 },
+    badges: [String],
+    streak: { type: Number, default: 0 },
+    lastAdventureDate: Date
+  },
+  location: {
+    lat: Number,
+    lng: Number,
+    address: String,
+    lastUpdated: Date
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  profilePicture: String,
+  bio: {
+    type: String,
+    maxlength: 500
   }
+}, {
+  timestamps: true
+});
+
+// Hash password before saving
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Compare password method
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
 };
 
+// Get public profile (without sensitive data)
+userSchema.methods.getPublicProfile = function() {
+  const userObject = this.toObject();
+  delete userObject.password;
+  delete userObject.email;
+  return userObject;
+};
 
+// Update stats after adventure completion
+userSchema.methods.updateStats = function(adventure) {
+  this.stats.adventuresCompleted += 1;
+  this.stats.totalPoints += adventure.points || 10;
+  this.stats.lastAdventureDate = new Date();
+  
+  // Update streak
+  const today = new Date();
+  const lastAdventure = this.stats.lastAdventureDate;
+  if (lastAdventure) {
+    const daysDiff = Math.floor((today - lastAdventure) / (1000 * 60 * 60 * 24));
+    if (daysDiff === 1) {
+      this.stats.streak += 1;
+    } else if (daysDiff > 1) {
+      this.stats.streak = 1;
+    }
+  } else {
+    this.stats.streak = 1;
+  }
+  
+  return this.save();
+};
 
-
-
-
-// old semi working
-// const admin = require('firebase-admin');
-// //const firebaseConfig = require('../config/firebaseConfig'); utilizing actual config file
-// const firebaseConfig = require('../config/jaxk-website-firebase-adminsdk-fbsvc-4461c645c4.json');
-
-// const db = admin.database();
-// const dataRef = db.ref('data');
-
-// module.exports = {
-//   async create(data) {
-//     const newDataRef = dataRef.push();
-//     await newDataRef.set(data);
-//     return { id: newDataRef.key, ...data };
-//   },
-
-//   async getAll() {
-//     const snapshot = await dataRef.once('value');
-//     const data = snapshot.val();
-//     return data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
-//   },
-
-//   async getById(id) {
-//     const snapshot = await dataRef.child(id).once('value');
-//     const data = snapshot.val();
-//     return data ? { id, ...data } : null;
-//   },
-
-//   async update(id, newData) {
-//     const dataSnapshot = await dataRef.child(id).once('value');
-//     if (!dataSnapshot.exists()) {
-//       return null;
-//     }
-//     await dataRef.child(id).update(newData);
-//     return { id, ...newData };
-//   },
-
-//   async delete(id) {
-//     const dataSnapshot = await dataRef.child(id).once('value');
-//     if (!dataSnapshot.exists()) {
-//       return null;
-//     }
-//     await dataRef.child(id).remove();
-//     return { id };
-//   }
-// };
-
-
+module.exports = mongoose.model('User', userSchema);

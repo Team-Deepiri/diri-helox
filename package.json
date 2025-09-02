@@ -1,6 +1,7 @@
 {
-  "name": "jaxk-website",
-  "version": "0.1.0",
+  "name": "trailblip-mag",
+  "version": "2.0.0",
+  "description": "Micro-Adventures Generator 2.0 - AI-powered local experience platform",
   "private": true,
   "type": "module",
   "dependencies": {
@@ -17,7 +18,11 @@
     "test": "vitest",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx --fix",
     "prepare": "husky install",
-    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\""
+    "dev": "concurrently \"cd server && npm run dev\" \"cd client && npm run dev\"",
+    "setup": "npm install && cd server && npm install && cd ../client && npm install",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
   },
   "browserslist": {
     "production": [

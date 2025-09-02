@@ -1,17 +1,19 @@
 {
-  "name": "server",
-  "version": "1.0.0",
-  "description": "",
+  "name": "trailblip-mag-server",
+  "version": "2.0.0",
+  "description": "MAG 2.0 Backend - Microservices for Adventure Generation",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "server": "node server.js",
-    "client": "cd ../client && npm run dev",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "test": "jest",
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "dev:all": "concurrently \"npm run dev\" \"cd ../client && npm run dev\"",
+    "migrate": "node scripts/migrate.js",
+    "seed": "node scripts/seed.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["adventure", "ai", "microservices", "local-events"],
+  "author": "Trailblip Team",
+  "license": "MIT",
   "dependencies": {
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
@@ -20,12 +22,29 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "firebase-admin": "^13.2.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.11.3",
+    "redis": "^4.6.12",
+    "mongoose": "^8.0.3",
+    "joi": "^17.11.0",
+    "helmet": "^7.1.0",
+    "express-rate-limit": "^7.1.5",
+    "socket.io": "^4.7.4",
+    "node-cron": "^3.0.3",
+    "openai": "^4.20.1",
+    "langchain": "^0.1.0",
+    "winston": "^3.11.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0",
+    "swagger-ui-express": "^5.0.0",
+    "swagger-jsdoc": "^6.2.8"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.4.0",
     "concurrently": "^9.1.2",
     "nodemon": "^3.1.9",
-    "vite": "^7.0.6"
+    "vite": "^7.0.6",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
   }
 }
