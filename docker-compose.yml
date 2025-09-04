@@ -145,6 +145,19 @@ services:
       - backend
       - pyagent
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: trailblip-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+    networks:
+      - trailblip-network
+    depends_on:
+      - prometheus
+
   # NGINX Reverse Proxy (Optional for production)
   nginx:
     image: nginx:alpine

@@ -22,6 +22,11 @@ spec:
           env:
             - name: OPENAI_MODEL
               value: gpt-4o-mini
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: trailblip-secrets
+                  key: openai_api_key
           resources:
             requests:
               cpu: "200m"

@@ -22,6 +22,21 @@ spec:
           env:
             - name: NODE_ENV
               value: production
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: trailblip-secrets
+                  key: jwt_secret
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: trailblip-secrets
+                  key: openai_api_key
+            - name: MONGODB_URI
+              valueFrom:
+                secretKeyRef:
+                  name: trailblip-secrets
+                  key: mongo_uri
           resources:
             requests:
               cpu: "200m"
