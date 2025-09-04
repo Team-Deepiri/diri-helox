@@ -1,33 +1,35 @@
-# 🗺️ Trailblip MAG 2.0 - Micro-Adventures Generator
+# Trailblip MAG 2.0 
+
+## Micro-Adventures Generator v2.0
 
 Welcome to Trailblip MAG 2.0, your AI-powered adventure companion that creates personalized local experiences, connects you with friends, and helps you discover the best your city has to offer.
 
-## ✨ Features
+## Features
 
-### 🤖 AI-Powered Adventure Generation
+###  AI-Powered Adventure Generation
 - **Personalized Recommendations**: AI creates custom adventures based on your interests, location, and preferences
 - **Real-time Weather Integration**: Adventures adapt to current weather conditions
 - **Smart Scheduling**: Optimal timing based on venue hours and travel time
 - **Multi-step Itineraries**: Seamless flow between different locations and activities
 
-### 👥 Social Features
+###  Social Features
 - **Friend Connections**: Connect with friends and adventure together
 - **Event Hosting**: Create and host your own events
 - **RSVP System**: Join events and manage attendance
 - **Adventure Sharing**: Share your experiences and get recommendations
 
-### 🏆 Gamification
+###  Gamification
 - **Points & Badges**: Earn rewards for completing adventures
 - **Leaderboards**: Compete with friends and the community
 - **Streaks**: Maintain adventure streaks for bonus points
 - **Achievement System**: Unlock badges for different types of adventures
 
-### 🌐 Real-time Features
+###  Real-time Features
 - **Live Notifications**: Get updates about your adventures and events
 - **WebSocket Integration**: Real-time chat and updates
 - **Progress Tracking**: Track your adventure progress in real-time
 
-## 🏗️ Architecture
+##  Architecture
 
 MAG 2.0 follows a modern microservices architecture:
 
@@ -51,7 +53,7 @@ MAG 2.0 follows a modern microservices architecture:
 - **Docker**: Containerized deployment
 - **NGINX**: Load balancing and reverse proxy
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -148,7 +150,7 @@ REDIS_PASSWORD=your_redis_password
 JWT_SECRET=your_jwt_secret_key
 ```
 
-## 📖 API Documentation
+##  API Documentation
 
 The API is fully documented with Swagger/OpenAPI. Once the application is running, visit:
 - **Swagger UI**: http://localhost:5000/api-docs
@@ -175,7 +177,7 @@ The API is fully documented with Swagger/OpenAPI. Once the application is runnin
 - `PATCH /api/users/profile` - Update user profile
 - `POST /api/users/friends/add` - Add friend
 
-## 🧪 Testing
+##  Testing
 
 ### Backend Tests
 ```bash
@@ -223,31 +225,7 @@ The application is designed to be cloud-native and can be deployed on:
 - **Azure**: AKS or Container Instances
 - **DigitalOcean**: App Platform or Kubernetes
 
-## 🏗️ Development
-
-### Project Structure
-```
-Trailblip/
-├── client/                 # React frontend
-│   ├── src/
-│   │   ├── api/           # API client layer
-│   │   ├── components/    # Reusable components
-│   │   ├── contexts/      # React contexts
-│   │   ├── pages/         # Page components
-│   │   └── styles/        # CSS and styling
-│   └── Dockerfile
-├── server/                # Node.js backend
-│   ├── config/           # Configuration files
-│   ├── controllers/      # Route controllers
-│   ├── middleware/       # Express middleware
-│   ├── models/           # Database models
-│   ├── routes/           # API routes
-│   ├── services/         # Business logic
-│   └── utils/            # Utility functions
-├── scripts/              # Setup and utility scripts
-├── nginx/                # NGINX configuration
-└── docker-compose.yml    # Container orchestration
-```
+##  Development
 
 ### Adding New Features
 
@@ -269,7 +247,7 @@ Trailblip/
 - **Frontend**: ESLint + Prettier
 - **Git Hooks**: Husky for pre-commit checks
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
@@ -279,11 +257,11 @@ Trailblip/
 6. Push to the branch: `git push origin feature-name`
 7. Submit a pull request
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🆘 Support
+##  Support
 
 ### Common Issues
 
@@ -304,12 +282,12 @@ docker-compose down
 
 ### Getting Help
 
-- 📖 Check the [documentation](./docs/)
-- 🐛 Report bugs via [GitHub Issues]
-- 💬 Join our [Discord community]
-- 📧 Email: support@trailblip.com
+- Check the [documentation](./docs/)
+- Report bugs via [GitHub Issues]
+- Join our [Discord community]
+- Email: support@trailblip.com
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - OpenAI for GPT-4 integration
 - React and Node.js communities
@@ -317,6 +295,5 @@ docker-compose down
 
 ---
 
-Made with ❤️ for adventure seekers everywhere.
 
-**Happy Exploring! 🗺️✨**
+
