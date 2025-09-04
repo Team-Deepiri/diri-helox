@@ -6,6 +6,7 @@ const userService = require('../services/userService');
 const logger = require('../utils/logger');
 const crypto = require('crypto');
 const cookieParser = require('cookie-parser');
+const AuditLog = require('../models/AuditLog');
 
 const router = express.Router();
 router.use(cookieParser());
@@ -78,6 +79,7 @@ router.post('/register', async (req, res) => {
     });
 
     logger.info(`User registered: ${user.email}`);
+    try { await AuditLog.create({ userId: user._id, action: 'register', ip: req.ip, userAgent: req.get('User-Agent') }); } catch {}
 
     res.status(201).json({
       success: true,
@@ -133,6 +135,7 @@ router.post('/login', async (req, res) => {
     );
 
     logger.info(`User logged in: ${user.email}`);
+    try { await AuditLog.create({ userId: user._id, action: 'login', ip: req.ip, userAgent: req.get('User-Agent') }); } catch {}
 
     res.json({
       success: true,
@@ -306,6 +309,7 @@ router.post('/logout', async (req, res) => {
   if (token) await userService.revokeRefreshToken(token);
   res.clearCookie('refresh_token');
   res.json({ success: true, message: 'Logged out successfully' });
+  try { await AuditLog.create({ action: 'logout', ip: req.ip, userAgent: req.get('User-Agent') }); } catch {}
 });
 
 module.exports = router;

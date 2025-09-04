@@ -34,6 +34,7 @@ const errorHandler = require('./middleware/errorHandler');
 const logger = require('./utils/logger');
 const promClient = require('prom-client');
 const { v4: uuidv4 } = require('uuid');
+const ipFilter = require('./middleware/ipFilter');
 
 const app = express();
 const server = createServer(app);
@@ -49,6 +50,7 @@ const PORT = process.env.PORT || 5000;
 // Security middleware
 app.use(helmet());
 app.use(compression());
+app.use(ipFilter());
 
 // Rate limiting
 const limiter = rateLimit({
