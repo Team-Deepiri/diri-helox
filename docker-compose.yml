@@ -83,6 +83,29 @@ services:
       timeout: 10s
       retries: 3
 
+  # Python Agent API
+  pyagent:
+    build:
+      context: ./python_backend
+      dockerfile: Dockerfile
+    container_name: trailblip-pyagent
+    restart: unless-stopped
+    environment:
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - backend
+    networks:
+      - trailblip-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   # Frontend
   frontend:
     build:

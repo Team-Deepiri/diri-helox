@@ -1,6 +1,20 @@
 import axiosInstance from './axiosInstance';
 
 export const externalApi = {
+  pyAgentMessage: async (content, sessionId = null) => {
+    try {
+      const base = process.env.VITE_PYAGENT_URL || 'http://localhost:8000';
+      const res = await fetch(`${base}/agent/message`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, session_id: sessionId })
+      });
+      if (!res.ok) throw await res.json();
+      return await res.json();
+    } catch (error) {
+      throw error;
+    }
+  },
   // Get current weather for location
   getCurrentWeather: async (location) => {
     try {

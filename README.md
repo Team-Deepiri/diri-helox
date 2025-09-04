@@ -33,13 +33,17 @@ Welcome to Trailblip MAG 2.0, your AI-powered adventure companion that creates p
 
 MAG 2.0 follows a modern microservices architecture:
 
-### Backend (Node.js + Express)
+### Backend (Node.js + Express) and Python Agent (FastAPI)
 - **AI Orchestrator**: LangChain-powered adventure generation
 - **User Service**: Authentication and profile management
 - **Adventure Service**: Adventure creation and management
 - **Event Service**: Event management and RSVP system
 - **Notification Service**: Real-time notifications
 - **External API Service**: Integration with maps, weather, and events
+  
+### Python Agent (FastAPI)
+- **Agent Chat Endpoint**: Lightweight chat interface to OpenAI
+- **Training Prep**: Script to convert dataset to JSONL for fine-tune jobs
 
 ### Frontend (React + Vite)
 - **Modern React 18**: Hooks, Context API, and modern patterns
@@ -87,6 +91,7 @@ MAG 2.0 follows a modern microservices architecture:
 5. **Access the application**
    - Frontend: http://localhost:3000
    - Backend API: http://localhost:5000
+   - Python Agent: http://localhost:8000
    - API Documentation: http://localhost:5000/api-docs
 
 ### Local Development
@@ -179,11 +184,17 @@ The API is fully documented with Swagger/OpenAPI. Once the application is runnin
 
 ##  Testing
 
-### Backend Tests
+### Backend Tests (Node)
 ```bash
 cd server
 npm test
 ```
+### Python Agent Tests
+```bash
+cd python_backend
+pytest -q
+```
+
 
 ### Frontend Tests
 ```bash
