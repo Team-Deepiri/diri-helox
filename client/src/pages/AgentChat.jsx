@@ -5,6 +5,7 @@ export default function AgentChat() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [stream, setStream] = useState(false);
 
   const send = async (e) => {
     e.preventDefault();
@@ -14,9 +15,32 @@ export default function AgentChat() {
     setInput('');
     setLoading(true);
     try {
-      const res = await externalApi.pyAgentMessage(userMsg.content);
-      const assistant = { role: 'assistant', content: res?.data?.message || 'No response' };
-      setMessages((m) => [...m, assistant]);
+      if (stream) {
+        const base = import.meta.env.VITE_PYAGENT_URL || 'http://localhost:8000';
+        const res = await fetch(`${base}/agent/message/stream`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ content: userMsg.content })
+        });
+        const reader = res.body.getReader();
+        let decoder = new TextDecoder();
+        let acc = '';
+        setMessages((m) => [...m, { role: 'assistant', content: '' }]);
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          acc += decoder.decode(value, { stream: true });
+          setMessages((m) => {
+            const copy = [...m];
+            copy[copy.length - 1] = { role: 'assistant', content: acc };
+            return copy;
+          });
+        }
+      } else {
+        const res = await externalApi.pyAgentMessage(userMsg.content);
+        const assistant = { role: 'assistant', content: res?.data?.message || 'No response' };
+        setMessages((m) => [...m, assistant]);
+      }
     } catch (err) {
       setMessages((m) => [...m, { role: 'assistant', content: 'Error contacting agent' }]);
     } finally {
@@ -40,13 +64,17 @@ export default function AgentChat() {
         ))}
         {loading && <div className="text-sm text-gray-500">Thinking...</div>}
       </div>
-      <form onSubmit={send} className="flex gap-2">
+      <form onSubmit={send} className="flex gap-2 items-center">
         <input
           className="flex-1 border rounded px-3 py-2"
           placeholder="Type a message"
           value={input}
           onChange={(e) => setInput(e.target.value)}
         />
+        <label className="flex items-center gap-2 text-sm text-gray-600">
+          <input type="checkbox" checked={stream} onChange={(e) => setStream(e.target.checked)} />
+          Stream
+        </label>
         <button className="bg-blue-600 text-white px-4 py-2 rounded" type="submit" disabled={loading}>
           Send
         </button>
