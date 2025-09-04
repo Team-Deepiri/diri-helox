@@ -86,3 +86,45 @@ async def proxy_adventure_data(lat: float, lng: float, radius: int = 5000, inter
         raise HTTPException(status_code=502, detail=f"Proxy error: {str(e)}")
 
 
+@router.get("/tools/external/directions")
+async def proxy_directions(fromLat: float, fromLng: float, toLat: float, toLng: float, mode: str = "walking"):
+    base = os.getenv("NODE_BACKEND_URL", "http://localhost:5000")
+    url = f"{base}/api/external/directions"
+    params = {"fromLat": fromLat, "fromLng": fromLng, "toLat": toLat, "toLng": toLng, "mode": mode}
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.get(url, params=params)
+            r.raise_for_status()
+            return r.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Proxy error: {str(e)}")
+
+
+@router.get("/tools/external/weather/current")
+async def proxy_weather_current(lat: float, lng: float):
+    base = os.getenv("NODE_BACKEND_URL", "http://localhost:5000")
+    url = f"{base}/api/external/weather/current"
+    params = {"lat": lat, "lng": lng}
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.get(url, params=params)
+            r.raise_for_status()
+            return r.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Proxy error: {str(e)}")
+
+
+@router.get("/tools/external/weather/forecast")
+async def proxy_weather_forecast(lat: float, lng: float, days: int = 1):
+    base = os.getenv("NODE_BACKEND_URL", "http://localhost:5000")
+    url = f"{base}/api/external/weather/forecast"
+    params = {"lat": lat, "lng": lng, "days": days}
+    try:
+        async with httpx.AsyncClient(timeout=20.0) as client:
+            r = await client.get(url, params=params)
+            r.raise_for_status()
+            return r.json()
+    except httpx.HTTPError as e:
+        raise HTTPException(status_code=502, detail=f"Proxy error: {str(e)}")
+
+
