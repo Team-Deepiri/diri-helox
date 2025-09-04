@@ -36,6 +36,8 @@ const promClient = require('prom-client');
 const { v4: uuidv4 } = require('uuid');
 const ipFilter = require('./middleware/ipFilter');
 const sanitize = require('./middleware/sanitize');
+const rateBot = require('./middleware/rateBot');
+const auditLogger = require('./middleware/auditLogger');
 const swaggerUi = require('swagger-ui-express');
 const swaggerJsdoc = require('swagger-jsdoc');
 
@@ -55,6 +57,8 @@ app.use(helmet());
 app.use(compression());
 app.use(ipFilter());
 app.use(sanitize());
+app.use(rateBot());
+app.use(auditLogger());
 
 // Rate limiting
 const limiter = rateLimit({
@@ -102,15 +106,24 @@ app.use(cors({
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
-// OpenAPI docs
-const swaggerSpec = swaggerJsdoc({
-  definition: {
-    openapi: '3.0.0',
-    info: { title: 'Trailblip API', version: '2.0.0' }
-  },
-  apis: []
-});
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+// OpenAPI docs (disabled by default in production)
+const swaggerEnabled = process.env.SWAGGER_ENABLED === 'true' || process.env.NODE_ENV !== 'production';
+if (swaggerEnabled) {
+  const swaggerSpec = swaggerJsdoc({
+    definition: {
+      openapi: '3.0.0',
+      info: { title: 'Trailblip API', version: '2.0.0' }
+    },
+    apis: []
+  });
+  app.use('/api-docs', (req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'no-referrer');
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  }, swaggerUi.serve, swaggerUi.setup(swaggerSpec, { explorer: false }));
+}
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/trailblip_mag', {
