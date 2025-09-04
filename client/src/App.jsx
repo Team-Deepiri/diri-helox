@@ -24,6 +24,7 @@ import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import Leaderboard from './pages/Leaderboard';
 import Notifications from './pages/Notifications';
+import AgentChat from './pages/AgentChat';
 
 // Create a client
 const queryClient = new QueryClient({
@@ -105,6 +106,11 @@ function App() {
                     <Route path="/notifications" element={
                       <ProtectedRoute>
                         <Notifications />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/agent" element={
+                      <ProtectedRoute>
+                        <AgentChat />
                       </ProtectedRoute>
                     } />
                   </Routes>
