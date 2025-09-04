@@ -111,7 +111,7 @@ MAG 2.0 follows a modern microservices architecture:
    npm run dev
    ```
 
-## 🔧 Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -207,7 +207,7 @@ npm test
 npm run test:integration
 ```
 
-## 🚢 Deployment
+## Deployment
 
 ### Production Deployment with Docker
 
