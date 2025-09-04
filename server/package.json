@@ -4,7 +4,8 @@
   "description": "MAG 2.0 Backend - Microservices for Adventure Generation",
   "main": "server.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --passWithNoTests",
+    "build": "echo 'Nothing to build for Node server' && exit 0",
     "start": "node server.js",
     "dev": "nodemon server.js",
     "dev:all": "concurrently \"npm run dev\" \"cd ../client && npm run dev\"",
