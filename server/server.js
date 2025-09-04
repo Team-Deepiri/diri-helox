@@ -23,6 +23,7 @@ const cacheService = require('./services/cacheService');
 const authRoutes = require('./routes/authRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adventureRoutes = require('./routes/adventureRoutes');
+const agentRoutes = require('./routes/agentRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const externalRoutes = require('./routes/externalRoutes');
@@ -119,6 +120,7 @@ app.use('/api/adventures', authenticateJWT, adventureRoutes);
 app.use('/api/events', authenticateJWT, eventRoutes);
 app.use('/api/notifications', authenticateJWT, notificationRoutes);
 app.use('/api/external', externalRoutes);
+app.use('/api/agent', authenticateJWT, agentRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
