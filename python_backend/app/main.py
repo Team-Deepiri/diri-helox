@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from .routes.agent import router as agent_router
 from .settings import settings
@@ -33,6 +33,11 @@ async def add_request_id_and_metrics(request: Request, call_next):
     method = request.method
     response = None
     try:
+        # API key guard for non-health/metrics
+        if not path.startswith("/health") and not path.startswith("/metrics"):
+            api_key = request.headers.get("x-api-key")
+            if settings.PYAGENT_API_KEY and api_key != settings.PYAGENT_API_KEY:
+                raise HTTPException(status_code=401, detail="Invalid API key")
         response = await call_next(request)
         return response
     finally:
