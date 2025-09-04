@@ -94,7 +94,17 @@ const userSchema = new mongoose.Schema({
   bio: {
     type: String,
     maxlength: 500
-  }
+  },
+  roles: {
+    type: [String],
+    default: ['user'],
+    enum: ['user', 'admin']
+  },
+  refreshTokens: [{
+    token: String,
+    createdAt: { type: Date, default: Date.now },
+    expiresAt: Date
+  }]
 }, {
   timestamps: true
 });

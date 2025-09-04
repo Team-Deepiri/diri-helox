@@ -46,7 +46,8 @@ const authenticateJWT = async (req, res, next) => {
     // Add user info to request
     req.user = {
       userId: decoded.userId,
-      email: decoded.email
+      email: decoded.email,
+      roles: decoded.roles || ['user']
     };
 
     next();

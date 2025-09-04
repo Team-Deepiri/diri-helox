@@ -4,8 +4,11 @@ const bcrypt = require('bcryptjs');
 const Joi = require('joi');
 const userService = require('../services/userService');
 const logger = require('../utils/logger');
+const crypto = require('crypto');
+const cookieParser = require('cookie-parser');
 
 const router = express.Router();
+router.use(cookieParser());
 
 // Validation schemas
 const registerSchema = Joi.object({
@@ -53,11 +56,26 @@ router.post('/register', async (req, res) => {
     const token = jwt.sign(
       { 
         userId: user._id,
-        email: user.email 
+        email: user.email,
+        roles: user.roles
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
+
+    // Issue refresh token
+    const refreshToken = crypto.randomBytes(32).toString('hex');
+    const rtTtlDays = parseInt(process.env.REFRESH_TOKEN_TTL_DAYS || '30');
+    const expiresAt = new Date(Date.now() + rtTtlDays * 24 * 60 * 60 * 1000);
+    user.refreshTokens.push({ token: refreshToken, expiresAt });
+    await user.save();
+
+    res.cookie('refresh_token', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      expires: expiresAt
+    });
 
     logger.info(`User registered: ${user.email}`);
 
@@ -172,26 +190,24 @@ router.get('/verify', async (req, res) => {
 // Refresh token
 router.post('/refresh', async (req, res) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
-    
+    const token = req.cookies?.refresh_token;
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided'
+        message: 'No refresh token'
       });
     }
-
-    // Verify current token (even if expired)
-    const decoded = jwt.verify(token, process.env.JWT_SECRET, { ignoreExpiration: true });
-    
-    // Get user data
-    const user = await userService.getUserById(decoded.userId);
+    const user = await userService.findByRefreshToken(token);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'Invalid refresh token' });
+    }
 
     // Generate new token
     const newToken = jwt.sign(
       { 
         userId: user._id,
-        email: user.email 
+        email: user.email,
+        roles: user.roles
       },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -285,12 +301,11 @@ router.post('/reset-password', async (req, res) => {
 });
 
 // Logout (client-side token removal)
-router.post('/logout', (req, res) => {
-  // Since we're using JWT, logout is handled client-side by removing the token
-  res.json({
-    success: true,
-    message: 'Logged out successfully'
-  });
+router.post('/logout', async (req, res) => {
+  const token = req.cookies?.refresh_token;
+  if (token) await userService.revokeRefreshToken(token);
+  res.clearCookie('refresh_token');
+  res.json({ success: true, message: 'Logged out successfully' });
 });
 
 module.exports = router;

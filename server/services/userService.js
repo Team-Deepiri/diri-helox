@@ -49,6 +49,19 @@ class UserService {
     }
   }
 
+  async findByRefreshToken(token) {
+    const user = await User.findOne({ 'refreshTokens.token': token, 'refreshTokens.expiresAt': { $gt: new Date() } });
+    return user;
+  }
+
+  async revokeRefreshToken(token) {
+    const user = await User.findOne({ 'refreshTokens.token': token });
+    if (!user) return false;
+    user.refreshTokens = user.refreshTokens.filter(rt => rt.token !== token);
+    await user.save();
+    return true;
+  }
+
   async getUserById(userId) {
     try {
       // Check cache first
