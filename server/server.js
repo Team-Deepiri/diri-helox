@@ -35,6 +35,7 @@ const logger = require('./utils/logger');
 const promClient = require('prom-client');
 const { v4: uuidv4 } = require('uuid');
 const ipFilter = require('./middleware/ipFilter');
+const sanitize = require('./middleware/sanitize');
 
 const app = express();
 const server = createServer(app);
@@ -51,6 +52,7 @@ const PORT = process.env.PORT || 5000;
 app.use(helmet());
 app.use(compression());
 app.use(ipFilter());
+app.use(sanitize());
 
 // Rate limiting
 const limiter = rateLimit({
