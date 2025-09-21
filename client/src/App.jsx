@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Toaster } from 'react-hot-toast';
@@ -6,8 +6,10 @@ import { AuthProvider } from './contexts/AuthContext';
 import { SocketProvider } from './contexts/SocketContext';
 import { AdventureProvider } from './contexts/AdventureContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
+import { setupGlobalErrorHandling, setupPerformanceMonitoring } from './utils/logger';
 
 // Pages
 import Home from './pages/Home';
@@ -37,16 +39,23 @@ const queryClient = new QueryClient({
 });
 
 function App() {
+  useEffect(() => {
+    // Setup global error handling and performance monitoring
+    setupGlobalErrorHandling();
+    setupPerformanceMonitoring();
+  }, []);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <SocketProvider>
-          <AdventureProvider>
-            <Router>
-              <div className="min-h-screen bg-gray-50">
-                <Navbar />
-                <main className="pb-20">
-                  <Routes>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <SocketProvider>
+            <AdventureProvider>
+              <Router>
+                <div className="min-h-screen bg-gray-50">
+                  <Navbar />
+                  <main className="pb-20">
+                    <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Home />} />
                     <Route path="/login" element={<Login />} />
@@ -146,6 +155,7 @@ function App() {
         </SocketProvider>
       </AuthProvider>
     </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 
