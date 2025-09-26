@@ -3,7 +3,6 @@ const http = require('http');
 const https = require('https');
 const logger = require('../utils/logger');
 const cacheService = require('./cacheService');
-const cacheService = require('./cacheService');
 
 class ExternalApiService {
   constructor() {

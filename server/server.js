@@ -184,7 +184,7 @@ app.get('/api/health', (req, res) => {
     version: '2.0.0',
     services: {
       database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-      cache: cacheService.isConnected() ? 'connected' : 'disconnected',
+      cache: cacheService.getConnectionStatus() ? 'connected' : 'disconnected',
       ai: aiOrchestrator.isInitialized() ? 'ready' : 'initializing'
     }
   });

@@ -55,7 +55,7 @@ class CacheService {
     }
   }
 
-  isConnected() {
+  getConnectionStatus() {
     return this.isConnected;
   }
 
