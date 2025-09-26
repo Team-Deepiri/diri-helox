@@ -11456,3 +11456,2395 @@
     '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
   timestamp: '2025-09-26 02:17:09'
 }
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:10'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:10'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:11'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:11'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:12'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:12'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:13'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:13'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:14'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:14'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:15'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:15'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:16'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:16'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:17'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:17'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:18'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:18'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:19'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:19'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:20'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:20'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:21'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:21'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:22'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:22'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:23'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:23'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:24'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:24'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:25'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:25'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:26'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:26'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:27'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:27'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:28'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:28'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:29'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:29'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:30'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:30'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:31'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:31'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:32'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:32'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:33'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:33'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:34'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:34'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:35'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:35'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:36'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:36'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:37'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:37'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:38'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:38'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:39'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:39'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:40'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:40'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:41'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:41'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:42'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:42'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:43'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:43'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:44'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:44'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:45'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:45'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:46'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:46'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:47'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:48'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:48'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:49'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:49'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:50'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:50'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:51'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:51'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:52'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:52'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:53'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:53'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:54'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:54'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:55'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:55'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:56'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:56'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:57'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:57'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:58'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:58'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:59'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:17:59'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:00'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:00'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:01'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:01'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:02'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:02'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:03'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:03'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:04'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:04'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:05'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:05'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:06'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:06'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:07'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:07'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:08'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:08'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:09'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:09'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:10'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:10'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:11'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:11'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:12'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:12'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:13'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:13'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:14'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:14'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:15'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:15'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:16'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:16'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:17'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:17'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:18'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:18'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:19'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:19'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:20'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:20'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:21'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:21'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:22'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:22'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:23'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:23'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:24'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:24'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:25'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:25'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:26'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:26'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:27'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:27'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:28'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:28'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:29'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:29'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:30'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:30'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:31'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:31'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:32'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:32'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:33'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:33'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:34'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:34'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:35'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:35'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:36'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:36'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:37'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:37'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:38'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:38'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:39'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:39'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:40'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:40'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:41'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:41'
+}
+{
+  service: 'mag-2.0',
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '127.0.0.1',
+  port: 6379,
+  level: 'error',
+  message: 'Redis Client Error: connect ECONNREFUSED 127.0.0.1:6379',
+  stack: 'Error: connect ECONNREFUSED 127.0.0.1:6379\n' +
+    '    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1611:16)',
+  timestamp: '2025-09-26 02:18:42'
+}
