@@ -87882,3 +87882,360 @@
     '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
   timestamp: '2025-09-27 13:16:56'
 }
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:20:12'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:20:39'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'Token verification failed: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at /app/routes/authRoutes.js:171:25\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at next (/app/node_modules/router/lib/route.js:157:13)\n' +
+    '    at Route.dispatch (/app/node_modules/router/lib/route.js:117:3)\n' +
+    '    at handle (/app/node_modules/router/index.js:435:11)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at /app/node_modules/router/index.js:295:15\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)',
+  timestamp: '2025-09-27 13:21:16'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:29:37'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:29:40'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:29:41'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:30:02'
+}
+{
+  service: 'mag-2.0',
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '985b612f0c90f88d-IAD',
+    connection: 'keep-alive',
+    'content-length': '239',
+    'content-type': 'application/json',
+    date: 'Sat, 27 Sep 2025 13:34:38 GMT',
+    'openai-processing-ms': '1',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=.hKxP8sfgOW1dQIj6mMgOkfnIKx0pOjoOXcYcf0iAd0-1758980078-1.0.1.1-Yo2zBffEg2k7YtkbGK.xZUnqF5_P30cAfuKF5WSdh3XEvksfSVLGFz04uW86Z6uG7A0d51RwgZU3H2j53A38bNc9jYJf0VlVLwTTFeLg3Mk; path=/; expires=Sat, 27-Sep-25 14:04:38 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=gI9VQ8uhIPM6bOPWDlaLlINuAScNqBz9xsw3rNkT8SQ-1758980078018-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'www-authenticate': 'Bearer realm="OpenAI API"',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '3',
+    'x-openai-proxy-wasm': 'v0.1',
+    'x-request-id': '3c0fb4f8674365a1b7a4135d20103688'
+  },
+  request_id: '3c0fb4f8674365a1b7a4135d20103688',
+  error: {
+    message: 'Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+    type: 'invalid_request_error',
+    param: null,
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error',
+  level: 'error',
+  message: 'Failed to initialize AI Orchestrator: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+  stack: 'Error: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.\n' +
+    '    at APIError.generate (/app/node_modules/openai/error.js:48:20)\n' +
+    '    at OpenAI.makeStatusError (/app/node_modules/openai/core.js:302:33)\n' +
+    '    at OpenAI.makeRequest (/app/node_modules/openai/core.js:346:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async AIOrchestrator.initialize (/app/services/aiOrchestrator.js:26:7)',
+  timestamp: '2025-09-27 13:34:38'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at next (/app/node_modules/router/lib/route.js:157:13)\n' +
+    '    at Route.dispatch (/app/node_modules/router/lib/route.js:117:3)\n' +
+    '    at handle (/app/node_modules/router/index.js:435:11)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at /app/node_modules/router/index.js:295:15\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)',
+  timestamp: '2025-09-27 13:59:34'
+}
+{
+  service: 'mag-2.0',
+  stringValue: '"dev-user"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'dev-user',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/node_modules/bson/lib/bson.cjs:2538:23)
+      at castObjectId (/app/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:249:12)
+      at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)
+      at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)
+      at cast (/app/node_modules/mongoose/lib/cast.js:390:32)
+      at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)
+      at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)
+      at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)
+      at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80),
+  valueType: 'string',
+  level: 'error',
+  message: 'Failed to get user: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"',
+  stack: 'CastError: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"\n' +
+    '    at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:251:11)\n' +
+    '    at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)\n' +
+    '    at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)\n' +
+    '    at cast (/app/node_modules/mongoose/lib/cast.js:390:32)\n' +
+    '    at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)\n' +
+    '    at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)\n' +
+    '    at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)\n' +
+    '    at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async UserService.getUserById (/app/services/userService.js:73:20)',
+  timestamp: '2025-09-27 14:05:47'
+}
+{
+  service: 'mag-2.0',
+  level: 'error',
+  message: 'Token verification failed: Failed to get user: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"',
+  stack: 'Error: Failed to get user: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"\n' +
+    '    at UserService.getUserById (/app/services/userService.js:84:13)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /app/routes/authRoutes.js:174:18',
+  timestamp: '2025-09-27 14:05:47'
+}
+{
+  service: 'mag-2.0',
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '985bef312976b26e-PIT',
+    connection: 'keep-alive',
+    'content-length': '239',
+    'content-type': 'application/json',
+    date: 'Sat, 27 Sep 2025 15:11:35 GMT',
+    'openai-processing-ms': '4',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=JEf8dW5aVHgGPs0WMLd8UuZ89EbwOOiaHYdVsHRF35g-1758985895-1.0.1.1-cF6X6.kTlklNkmoalifKpGOo.IjPz6PzDeIsRjXx7O7On0A3iQpLtBWPXg9Ncegl4T.Tnrt1GaJizKqRYYahNL3ThziC7yfeiZp3YOmj0ms; path=/; expires=Sat, 27-Sep-25 15:41:35 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=NES2Lm20YcPcB0NFkcqRb1.fVBBo.pUMTHDKCifs26I-1758985895006-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'www-authenticate': 'Bearer realm="OpenAI API"',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '8',
+    'x-openai-proxy-wasm': 'v0.1',
+    'x-request-id': '48d693afafd21bb744434a50950ffca5'
+  },
+  request_id: '48d693afafd21bb744434a50950ffca5',
+  error: {
+    message: 'Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+    type: 'invalid_request_error',
+    param: null,
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error',
+  level: 'error',
+  message: 'Failed to initialize AI Orchestrator: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+  stack: 'Error: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.\n' +
+    '    at APIError.generate (/app/node_modules/openai/error.js:48:20)\n' +
+    '    at OpenAI.makeStatusError (/app/node_modules/openai/core.js:302:33)\n' +
+    '    at OpenAI.makeRequest (/app/node_modules/openai/core.js:346:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async AIOrchestrator.initialize (/app/services/aiOrchestrator.js:26:7)',
+  timestamp: '2025-09-27 15:11:35'
+}
+{
+  service: 'mag-2.0',
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '985c98f9f9d2c553-IAD',
+    connection: 'keep-alive',
+    'content-length': '239',
+    'content-type': 'application/json',
+    date: 'Sat, 27 Sep 2025 17:07:29 GMT',
+    'openai-processing-ms': '3',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=QsAm7vpLLBjS69hS4As5t_eP7AybiS.mHu9Mc1mT0MU-1758992849-1.0.1.1-w3UV8olf59Szhfv..ugF47JcpAbnj48cauPtyKyizi9zY92XyhVx_we1jgpq.S0OOvFnegYeGwPImTxy1Si4PUWoQH03oNkbW.kRJusG.Rc; path=/; expires=Sat, 27-Sep-25 17:37:29 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=wWAOslWckLbY1S1hfRds_mc3fmGfUW_UwTzLLGFySm8-1758992849074-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'www-authenticate': 'Bearer realm="OpenAI API"',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '6',
+    'x-openai-proxy-wasm': 'v0.1',
+    'x-request-id': '5dddc0c809ae1c2f519239ebd6c4e163'
+  },
+  request_id: '5dddc0c809ae1c2f519239ebd6c4e163',
+  error: {
+    message: 'Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+    type: 'invalid_request_error',
+    param: null,
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error',
+  level: 'error',
+  message: 'Failed to initialize AI Orchestrator: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+  stack: 'Error: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.\n' +
+    '    at APIError.generate (/app/node_modules/openai/error.js:48:20)\n' +
+    '    at OpenAI.makeStatusError (/app/node_modules/openai/core.js:302:33)\n' +
+    '    at OpenAI.makeRequest (/app/node_modules/openai/core.js:346:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async AIOrchestrator.initialize (/app/services/aiOrchestrator.js:26:7)',
+  timestamp: '2025-09-27 17:07:29'
+}
+{
+  service: 'mag-2.0',
+  stringValue: '"user"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/node_modules/bson/lib/bson.cjs:2538:23)
+      at castObjectId (/app/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:249:12)
+      at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)
+      at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)
+      at cast (/app/node_modules/mongoose/lib/cast.js:390:32)
+      at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)
+      at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)
+      at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)
+      at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80),
+  valueType: 'string',
+  level: 'error',
+  message: 'Failed to get event: Cast to ObjectId failed for value "user" (type string) at path "_id" for model "Event"',
+  stack: 'CastError: Cast to ObjectId failed for value "user" (type string) at path "_id" for model "Event"\n' +
+    '    at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:251:11)\n' +
+    '    at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)\n' +
+    '    at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)\n' +
+    '    at cast (/app/node_modules/mongoose/lib/cast.js:390:32)\n' +
+    '    at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)\n' +
+    '    at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)\n' +
+    '    at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)\n' +
+    '    at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /app/routes/eventRoutes.js:172:19',
+  timestamp: '2025-09-27 17:19:04'
+}
+{
+  service: 'mag-2.0',
+  level: 'error',
+  message: 'Token verification failed: user.getPublicProfile is not a function',
+  stack: 'TypeError: user.getPublicProfile is not a function\n' +
+    '    at /app/routes/authRoutes.js:180:20\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-27 17:19:10'
+}

@@ -83,12 +83,17 @@ class Logger {
 
   async sendToLoggingService(logEntry) {
     try {
+      const raw = localStorage.getItem('token');
+      const token = raw && raw !== 'null' && raw !== 'undefined' ? raw : null;
+      if (!token) {
+        return; // skip sending logs without auth to avoid 401 noise
+      }
       // Send to backend logging endpoint
       await fetch('/api/logs', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(logEntry)
       });

@@ -61,7 +61,7 @@ const readLogFile = (filePath, limit = 1000) => {
   }
 };
 
-// GET /api/logs - Get recent logs
+// GET /api/logs - Get recent logs (still requires auth for reading)
 router.get('/', authenticateJWT, (req, res) => {
   try {
     const { type = 'combined', limit = 100 } = req.query;
@@ -240,6 +240,12 @@ router.get('/search', authenticateJWT, (req, res) => {
       timestamp: new Date().toISOString()
     });
   }
+});
+
+// POST /api/logs - Allow unauthenticated log sink (no-op storage), to avoid client errors
+router.post('/', (req, res) => {
+  // Accept payload, but do not persist to avoid abuse. Respond 204 to indicate accepted.
+  res.status(204).end();
 });
 
 module.exports = router;

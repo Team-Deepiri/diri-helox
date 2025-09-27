@@ -16,7 +16,10 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(() => {
+    const raw = localStorage.getItem('token');
+    return raw && raw !== 'null' && raw !== 'undefined' ? raw : null;
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,7 +57,7 @@ export const AuthProvider = ({ children }) => {
         setToken(token);
         localStorage.setItem('token', token);
         toast.success('Welcome back!');
-        navigate('/dashboard');
+        navigate('/home');
         return { success: true };
       } else {
         toast.error(response.message || 'Login failed');
@@ -69,10 +72,13 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (userData) => {
+  const register = async (nameOrData, email, password) => {
     try {
       setLoading(true);
-      const response = await authApi.register(userData);
+      const payload = typeof nameOrData === 'object'
+        ? nameOrData
+        : { name: nameOrData, email, password };
+      const response = await authApi.register(payload);
       
       if (response.success) {
         const { user, token } = response.data;
@@ -80,7 +86,7 @@ export const AuthProvider = ({ children }) => {
         setToken(token);
         localStorage.setItem('token', token);
         toast.success('Account created successfully!');
-        navigate('/dashboard');
+        navigate('/home');
         return { success: true };
       } else {
         toast.error(response.message || 'Registration failed');

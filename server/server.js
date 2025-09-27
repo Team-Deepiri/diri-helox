@@ -99,7 +99,15 @@ app.use((req, res, next) => {
 
 // CORS configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
+  origin: (origin, callback) => {
+    const allowed = [
+      'http://localhost:5173',
+      'http://localhost:3000',
+      process.env.CORS_ORIGIN
+    ].filter(Boolean);
+    if (!origin || allowed.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true
 }));
 
@@ -176,7 +184,7 @@ app.use('/api/events', authenticateJWT, eventRoutes);
 app.use('/api/notifications', authenticateJWT, notificationRoutes);
 app.use('/api/external', externalRoutes);
 app.use('/api/agent', authenticateJWT, agentRoutes);
-app.use('/api/logs', authenticateJWT, logsRoutes);
+app.use('/api/logs', logsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

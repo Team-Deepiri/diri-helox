@@ -92380,3 +92380,3275 @@
   service: 'mag-2.0',
   timestamp: '2025-09-27 13:18:24'
 }
+{
+  message: 'GET /api/health 200 153 - 0.344 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:18:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.717 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:18:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.279 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:19:12'
+}
+{
+  message: 'GET /metrics 200 - - 5.066 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:19:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.470 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:19:42'
+}
+{
+  message: 'GET /metrics 200 - - 2.471 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:19:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.400 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:12'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:20:12'
+}
+{
+  message: 'POST /api/logs 401 59 - 2.490 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:13'
+}
+{
+  message: 'GET /api/logs 401 63 - 0.446 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:15'
+}
+{
+  message: 'GET /metrics 200 - - 3.621 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:24'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:20:39'
+}
+{
+  message: 'POST /api/logs 401 59 - 1.964 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:39'
+}
+{
+  message: 'GET /api/health 200 153 - 0.525 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.929 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:20:54'
+}
+{
+  message: 'User logged in: test@example.com',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:01'
+}
+{
+  message: 'POST /api/auth/login 200 994 - 434.534 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:01'
+}
+{
+  message: 'User logged in: test@example.com',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:07'
+}
+{
+  message: 'POST /api/auth/login 200 994 - 619.332 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:07'
+}
+{
+  message: 'GET /api/health 200 153 - 0.389 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:12'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'Token verification failed: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at /app/routes/authRoutes.js:171:25\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at next (/app/node_modules/router/lib/route.js:157:13)\n' +
+    '    at Route.dispatch (/app/node_modules/router/lib/route.js:117:3)\n' +
+    '    at handle (/app/node_modules/router/index.js:435:11)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at /app/node_modules/router/index.js:295:15\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)',
+  timestamp: '2025-09-27 13:21:16'
+}
+{
+  message: 'GET /api/auth/verify 401 43 - 0.983 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:16'
+}
+{
+  message: 'GET /metrics 200 - - 2.592 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.356 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:42'
+}
+{
+  message: 'GET /metrics 200 - - 2.690 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:21:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.269 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:22:12'
+}
+{
+  message: 'GET /metrics 200 - - 2.506 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:22:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.231 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:22:42'
+}
+{
+  message: 'GET /metrics 200 - - 3.563 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:22:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.370 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:23:12'
+}
+{
+  message: 'GET /metrics 200 - - 1.348 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:23:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.722 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:23:42'
+}
+{
+  message: 'GET /metrics 200 - - 3.998 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:23:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.240 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:24:13'
+}
+{
+  message: 'GET /metrics 200 - - 5.251 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:24:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.233 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:24:43'
+}
+{
+  message: 'GET /metrics 200 - - 1.284 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:24:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.266 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:25:13'
+}
+{
+  message: 'GET /metrics 200 - - 5.642 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:25:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.523 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:25:43'
+}
+{
+  message: 'GET /metrics 200 - - 1.943 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:25:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.251 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:26:13'
+}
+{
+  message: 'GET /metrics 200 - - 2.542 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:26:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.234 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:26:43'
+}
+{
+  message: 'GET /metrics 200 - - 1.236 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:26:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.233 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:27:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.939 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:27:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.264 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:27:43'
+}
+{
+  message: 'GET /metrics 200 - - 2.078 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:27:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.321 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:28:13'
+}
+{
+  message: 'GET /metrics 200 - - 3.748 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:28:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.351 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:28:43'
+}
+{
+  message: 'GET /metrics 200 - - 2.335 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:28:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.258 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.527 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:24'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:29:37'
+}
+{
+  message: 'POST /api/logs 401 59 - 2.718 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:37'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:29:40'
+}
+{
+  message: 'POST /api/logs 401 59 - 1.137 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:40'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:29:41'
+}
+{
+  message: 'POST /api/logs 401 59 - 1.405 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:41'
+}
+{
+  message: 'GET /api/health 200 153 - 0.313 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:43'
+}
+{
+  message: 'GET /metrics 200 - - 2.055 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:29:54'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)\n' +
+    '    at /app/node_modules/router/index.js:297:9\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)\n' +
+    '    at /app/server.js:168:3\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at trimPrefix (/app/node_modules/router/index.js:342:13)',
+  timestamp: '2025-09-27 13:30:02'
+}
+{
+  message: 'POST /api/logs 401 59 - 1.305 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:30:02'
+}
+{
+  message: 'GET /api/health 200 153 - 0.282 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:30:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.915 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:30:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.269 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:30:43'
+}
+{
+  message: 'GET /metrics 200 - - 2.563 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:30:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.345 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:31:13'
+}
+{
+  message: 'GET /metrics 200 - - 2.707 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:31:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.369 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:31:44'
+}
+{
+  message: 'GET /metrics 200 - - 3.309 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:31:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.305 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:32:14'
+}
+{
+  message: 'GET /metrics 200 - - 2.285 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:32:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.323 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:32:44'
+}
+{
+  message: 'GET /metrics 200 - - 1.719 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:32:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.364 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:33:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.902 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:33:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.361 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:33:44'
+}
+{
+  message: 'GET /metrics 200 - - 2.969 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:33:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.515 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.609 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:24'
+}
+{
+  message: 'Received SIGTERM, shutting down gracefully',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:26'
+}
+{
+  message: 'Received SIGTERM, shutting down gracefully',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:26'
+}
+{
+  message: 'Server closed successfully',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:29'
+}
+{
+  message: 'MAG 2.0 Server is running on port 5000',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:37'
+}
+{
+  message: 'Environment: development',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:37'
+}
+{
+  message: 'Redis client connected',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:37'
+}
+{
+  message: 'Redis client ready',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:37'
+}
+{
+  message: 'Connected to MongoDB',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:37'
+}
+{
+  service: 'mag-2.0',
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '985b612f0c90f88d-IAD',
+    connection: 'keep-alive',
+    'content-length': '239',
+    'content-type': 'application/json',
+    date: 'Sat, 27 Sep 2025 13:34:38 GMT',
+    'openai-processing-ms': '1',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=.hKxP8sfgOW1dQIj6mMgOkfnIKx0pOjoOXcYcf0iAd0-1758980078-1.0.1.1-Yo2zBffEg2k7YtkbGK.xZUnqF5_P30cAfuKF5WSdh3XEvksfSVLGFz04uW86Z6uG7A0d51RwgZU3H2j53A38bNc9jYJf0VlVLwTTFeLg3Mk; path=/; expires=Sat, 27-Sep-25 14:04:38 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=gI9VQ8uhIPM6bOPWDlaLlINuAScNqBz9xsw3rNkT8SQ-1758980078018-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'www-authenticate': 'Bearer realm="OpenAI API"',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '3',
+    'x-openai-proxy-wasm': 'v0.1',
+    'x-request-id': '3c0fb4f8674365a1b7a4135d20103688'
+  },
+  request_id: '3c0fb4f8674365a1b7a4135d20103688',
+  error: {
+    message: 'Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+    type: 'invalid_request_error',
+    param: null,
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error',
+  level: 'error',
+  message: 'Failed to initialize AI Orchestrator: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+  stack: 'Error: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.\n' +
+    '    at APIError.generate (/app/node_modules/openai/error.js:48:20)\n' +
+    '    at OpenAI.makeStatusError (/app/node_modules/openai/core.js:302:33)\n' +
+    '    at OpenAI.makeRequest (/app/node_modules/openai/core.js:346:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async AIOrchestrator.initialize (/app/services/aiOrchestrator.js:26:7)',
+  timestamp: '2025-09-27 13:34:38'
+}
+{
+  message: 'GET /api/health 200 153 - 6.957 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:41'
+}
+{
+  message: 'GET /metrics 200 - - 3.726 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:34:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.617 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:35:11'
+}
+{
+  message: 'GET /metrics 200 - - 6.815 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:35:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.299 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:35:41'
+}
+{
+  message: 'GET /metrics 200 - - 3.149 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:35:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.470 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:36:11'
+}
+{
+  message: 'GET /metrics 200 - - 1.275 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:36:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.339 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:36:41'
+}
+{
+  message: 'GET /metrics 200 - - 3.965 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:36:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.473 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:37:11'
+}
+{
+  message: 'GET /metrics 200 - - 2.845 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:37:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.416 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:37:41'
+}
+{
+  message: 'GET /metrics 200 - - 3.456 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:37:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.395 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:38:11'
+}
+{
+  message: 'GET /metrics 200 - - 3.439 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:38:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.364 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:38:41'
+}
+{
+  message: 'GET /metrics 200 - - 2.814 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:38:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.743 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:39:11'
+}
+{
+  message: 'GET /metrics 200 - - 2.562 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:39:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.429 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:39:41'
+}
+{
+  message: 'GET /metrics 200 - - 1.714 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:39:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.274 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:40:12'
+}
+{
+  message: 'GET /metrics 200 - - 1.341 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:40:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.606 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:40:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.132 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:40:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.479 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:41:12'
+}
+{
+  message: 'GET /metrics 200 - - 1.828 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:41:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.353 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:41:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.108 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:41:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.345 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:42:12'
+}
+{
+  message: 'GET /metrics 200 - - 0.993 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:42:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.369 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:42:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.183 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:42:54'
+}
+{
+  message: 'GET /api/health 200 153 - 1.186 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:43:12'
+}
+{
+  message: 'GET /metrics 200 - - 1.128 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:43:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.489 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:43:42'
+}
+{
+  message: 'GET /metrics 200 - - 3.188 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:43:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.292 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:44:12'
+}
+{
+  message: 'GET /metrics 200 - - 4.176 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:44:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.339 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:44:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.174 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:44:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.311 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:45:12'
+}
+{
+  message: 'GET /metrics 200 - - 2.504 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:45:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.295 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:45:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.749 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:45:54'
+}
+{
+  message: 'GET /api/health 200 153 - 0.453 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:46:13'
+}
+{
+  message: 'GET /metrics 200 - - 3.630 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:46:24'
+}
+{
+  message: 'GET /api/health 200 153 - 0.337 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:46:43'
+}
+{
+  message: 'GET /metrics 200 - - 4.057 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:46:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.223 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:47:13'
+}
+{
+  message: 'GET /metrics 200 - - 4.620 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:47:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.408 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:47:43'
+}
+{
+  message: 'GET /metrics 200 - - 1.678 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:47:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.261 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:48:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.380 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:48:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.428 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:48:43'
+}
+{
+  message: 'GET /metrics 200 - - 3.204 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:48:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.221 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:49:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.166 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:49:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.244 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:49:43'
+}
+{
+  message: 'GET /metrics 200 - - 1.273 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:49:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.336 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:50:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.365 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:50:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.301 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:50:43'
+}
+{
+  message: 'GET /metrics 200 - - 3.271 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:50:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.445 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:51:13'
+}
+{
+  message: 'GET /metrics 200 - - 1.931 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:51:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.284 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:51:43'
+}
+{
+  message: 'GET /metrics 200 - - 1.488 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:51:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.354 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.177 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:25'
+}
+{
+  message: 'POST /api/logs 204 - - 14.875 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:33'
+}
+{
+  message: 'POST /api/logs 204 - - 0.477 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:40'
+}
+{
+  message: 'POST /api/logs 204 - - 0.304 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:43'
+}
+{
+  message: 'POST /api/logs 204 - - 0.659 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:43'
+}
+{
+  message: 'GET /api/health 200 153 - 0.215 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:44'
+}
+{
+  message: 'POST /api/logs 204 - - 0.326 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:44'
+}
+{
+  message: 'POST /api/logs 204 - - 0.294 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:49'
+}
+{
+  message: 'GET /metrics 200 - - 5.303 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:52:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.390 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:53:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.872 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:53:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.628 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:53:37'
+}
+{
+  message: 'POST /api/logs 204 - - 0.343 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:53:38'
+}
+{
+  message: 'GET /api/health 200 153 - 0.529 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:53:44'
+}
+{
+  message: 'GET /metrics 200 - - 3.054 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:53:55'
+}
+{
+  message: 'POST /api/logs 204 - - 0.538 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:54:01'
+}
+{
+  message: 'GET /api/health 200 153 - 2.583 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:54:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.297 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:54:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.268 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:54:44'
+}
+{
+  message: 'GET /metrics 200 - - 1.825 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:54:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.281 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:55:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.221 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:55:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.306 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:55:44'
+}
+{
+  message: 'GET /metrics 200 - - 3.659 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:55:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.357 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:56:14'
+}
+{
+  message: 'GET /metrics 200 - - 1.176 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:56:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.278 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:56:44'
+}
+{
+  message: 'GET /metrics 200 - - 4.791 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:56:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.376 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:57:14'
+}
+{
+  message: 'GET /metrics 200 - - 2.593 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:57:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.788 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:57:45'
+}
+{
+  message: 'GET /metrics 200 - - 1.537 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:57:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.351 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:58:15'
+}
+{
+  message: 'GET /metrics 200 - - 1.826 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:58:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.330 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:58:45'
+}
+{
+  message: 'GET /metrics 200 - - 1.077 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:58:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.267 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:59:15'
+}
+{
+  message: 'GET /metrics 200 - - 2.688 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:59:25'
+}
+{
+  service: 'mag-2.0',
+  name: 'JsonWebTokenError',
+  message: 'JWT authentication error: jwt malformed',
+  level: 'error',
+  stack: 'JsonWebTokenError: jwt malformed\n' +
+    '    at module.exports [as verify] (/app/node_modules/jsonwebtoken/verify.js:70:17)\n' +
+    '    at authenticateJWT (/app/middleware/authenticateJWT.js:27:25)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at next (/app/node_modules/router/lib/route.js:157:13)\n' +
+    '    at Route.dispatch (/app/node_modules/router/lib/route.js:117:3)\n' +
+    '    at handle (/app/node_modules/router/index.js:435:11)\n' +
+    '    at Layer.handleRequest (/app/node_modules/router/lib/layer.js:152:17)\n' +
+    '    at /app/node_modules/router/index.js:295:15\n' +
+    '    at processParams (/app/node_modules/router/index.js:582:12)\n' +
+    '    at next (/app/node_modules/router/index.js:291:5)',
+  timestamp: '2025-09-27 13:59:34'
+}
+{
+  message: 'GET /api/logs?type=combined&limit=200 401 59 - 1.630 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:59:34'
+}
+{
+  message: 'GET /api/health 200 153 - 0.268 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:59:45'
+}
+{
+  message: 'GET /metrics 200 - - 1.794 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 13:59:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.238 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:00:15'
+}
+{
+  message: 'GET /metrics 200 - - 3.228 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:00:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.260 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:00:45'
+}
+{
+  message: 'GET /metrics 200 - - 1.654 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:00:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.266 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:01:15'
+}
+{
+  message: 'GET /metrics 200 - - 1.813 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:01:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.705 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:01:45'
+}
+{
+  message: 'GET /metrics 200 - - 4.836 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:01:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.248 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:02:15'
+}
+{
+  message: 'GET /metrics 200 - - 1.685 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:02:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.330 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:02:45'
+}
+{
+  message: 'GET /metrics 200 - - 1.696 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:02:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.348 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:03:15'
+}
+{
+  message: 'GET /metrics 200 - - 1.127 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:03:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.260 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:03:45'
+}
+{
+  message: 'GET /metrics 200 - - 1.724 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:03:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.386 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:04:15'
+}
+{
+  message: 'GET /metrics 200 - - 2.817 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:04:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.288 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:04:46'
+}
+{
+  message: 'GET /metrics 200 - - 1.169 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:04:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.284 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:05:16'
+}
+{
+  message: 'GET /metrics 200 - - 2.793 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:05:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.403 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:05:46'
+}
+{
+  service: 'mag-2.0',
+  stringValue: '"dev-user"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'dev-user',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/node_modules/bson/lib/bson.cjs:2538:23)
+      at castObjectId (/app/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:249:12)
+      at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)
+      at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)
+      at cast (/app/node_modules/mongoose/lib/cast.js:390:32)
+      at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)
+      at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)
+      at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)
+      at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80),
+  valueType: 'string',
+  level: 'error',
+  message: 'Failed to get user: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"',
+  stack: 'CastError: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"\n' +
+    '    at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:251:11)\n' +
+    '    at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)\n' +
+    '    at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)\n' +
+    '    at cast (/app/node_modules/mongoose/lib/cast.js:390:32)\n' +
+    '    at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)\n' +
+    '    at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)\n' +
+    '    at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)\n' +
+    '    at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async UserService.getUserById (/app/services/userService.js:73:20)',
+  timestamp: '2025-09-27 14:05:47'
+}
+{
+  service: 'mag-2.0',
+  level: 'error',
+  message: 'Token verification failed: Failed to get user: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"',
+  stack: 'Error: Failed to get user: Cast to ObjectId failed for value "dev-user" (type string) at path "_id" for model "User"\n' +
+    '    at UserService.getUserById (/app/services/userService.js:84:13)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /app/routes/authRoutes.js:174:18',
+  timestamp: '2025-09-27 14:05:47'
+}
+{
+  message: 'GET /api/auth/verify 401 43 - 9.466 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:05:47'
+}
+{
+  message: 'GET /metrics 200 - - 2.817 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:05:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.521 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:16'
+}
+{
+  message: 'GET /metrics 200 - - 4.534 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:25'
+}
+{
+  message: 'New user created: joe@example.com',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:41'
+}
+{
+  message: 'User registered: joe@example.com',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:41'
+}
+{
+  message: 'POST /api/auth/register 201 1021 - 306.058 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:41'
+}
+{
+  message: 'GET /api/health 200 153 - 0.286 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:46'
+}
+{
+  message: 'GET /metrics 200 - - 2.268 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:06:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.391 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:07:16'
+}
+{
+  message: 'GET /metrics 200 - - 1.119 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:07:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.443 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:07:46'
+}
+{
+  message: 'GET /metrics 200 - - 2.628 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:07:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.225 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:08:16'
+}
+{
+  message: 'GET /api/logs?type=combined&limit=200 200 6765 - 165.070 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:08:23'
+}
+{
+  message: 'GET /metrics 200 - - 1.666 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:08:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.321 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:08:46'
+}
+{
+  message: 'GET /metrics 200 - - 2.252 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:08:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.306 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:09:16'
+}
+{
+  message: 'GET /metrics 200 - - 1.102 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:09:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.291 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:09:46'
+}
+{
+  message: 'GET /metrics 200 - - 1.699 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:09:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.324 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:10:16'
+}
+{
+  message: 'GET /metrics 200 - - 1.799 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:10:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.686 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:10:43'
+}
+{
+  message: 'GET /api/health 200 153 - 0.274 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:10:47'
+}
+{
+  message: 'POST /api/logs 204 - - 0.628 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:10:48'
+}
+{
+  message: 'GET /metrics 200 - - 1.511 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:10:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.383 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:11:17'
+}
+{
+  message: 'GET /metrics 200 - - 6.242 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:11:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.281 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:11:47'
+}
+{
+  message: 'GET /metrics 200 - - 2.228 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:11:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.962 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:12:17'
+}
+{
+  message: 'GET /metrics 200 - - 3.167 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:12:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.442 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:12:47'
+}
+{
+  message: 'GET /metrics 200 - - 4.102 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:12:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.586 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:17'
+}
+{
+  message: 'GET /metrics 200 - - 3.185 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.952 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:43'
+}
+{
+  message: 'POST /api/logs 204 - - 0.899 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:44'
+}
+{
+  message: 'POST /api/logs 204 - - 0.406 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:45'
+}
+{
+  message: 'POST /api/logs 204 - - 0.624 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:45'
+}
+{
+  message: 'GET /api/health 200 153 - 0.450 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:47'
+}
+{
+  message: 'GET /metrics 200 - - 2.950 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:13:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.616 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:14:17'
+}
+{
+  message: 'GET /metrics 200 - - 2.551 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:14:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.456 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:14:32'
+}
+{
+  message: 'GET /api/health 200 153 - 1.129 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:14:47'
+}
+{
+  message: 'GET /metrics 200 - - 2.180 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:14:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.523 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:15:17'
+}
+{
+  message: 'GET /metrics 200 - - 2.576 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:15:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.549 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:15:48'
+}
+{
+  message: 'GET /metrics 200 - - 2.016 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:15:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.527 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:16:18'
+}
+{
+  message: 'GET /metrics 200 - - 2.615 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:16:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.458 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:16:48'
+}
+{
+  message: 'GET /metrics 200 - - 5.325 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:16:55'
+}
+{
+  message: 'POST /api/logs 204 - - 0.353 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:05'
+}
+{
+  message: 'POST /api/logs 204 - - 0.813 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:09'
+}
+{
+  message: 'POST /api/logs 204 - - 0.353 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:09'
+}
+{
+  message: 'POST /api/logs 204 - - 0.353 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:09'
+}
+{
+  message: 'POST /api/logs 204 - - 0.840 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:10'
+}
+{
+  message: 'POST /api/logs 204 - - 0.374 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:15'
+}
+{
+  message: 'GET /api/health 200 153 - 0.387 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:18'
+}
+{
+  message: 'POST /api/logs 204 - - 0.302 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:20'
+}
+{
+  message: 'POST /api/logs 204 - - 2.002 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:25'
+}
+{
+  message: 'GET /metrics 200 - - 82.820 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.625 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:26'
+}
+{
+  message: 'GET /api/health 200 153 - 0.315 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:48'
+}
+{
+  message: 'POST /api/logs 204 - - 0.705 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:54'
+}
+{
+  message: 'POST /api/logs 204 - - 0.433 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:54'
+}
+{
+  message: 'POST /api/logs 204 - - 0.277 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:54'
+}
+{
+  message: 'GET /metrics 200 - - 4.888 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:17:55'
+}
+{
+  message: 'POST /api/logs 204 - - 0.332 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:01'
+}
+{
+  message: 'POST /api/logs 204 - - 0.573 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:02'
+}
+{
+  message: 'GET /api/health 200 153 - 0.327 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:18'
+}
+{
+  message: 'GET /metrics 200 - - 2.633 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.561 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:44'
+}
+{
+  message: 'POST /api/logs 204 - - 0.541 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:46'
+}
+{
+  message: 'POST /api/logs 204 - - 0.522 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:48'
+}
+{
+  message: 'GET /api/health 200 153 - 0.398 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:48'
+}
+{
+  message: 'GET /metrics 200 - - 2.677 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:18:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.561 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:19:18'
+}
+{
+  message: 'GET /metrics 200 - - 1.645 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:19:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.313 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:19:48'
+}
+{
+  message: 'GET /metrics 200 - - 3.968 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:19:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.403 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:20:18'
+}
+{
+  message: 'GET /metrics 200 - - 2.738 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:20:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.445 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:20:48'
+}
+{
+  message: 'GET /metrics 200 - - 3.048 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:20:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.362 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:21:18'
+}
+{
+  message: 'GET /metrics 200 - - 2.474 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:21:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.443 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:21:49'
+}
+{
+  message: 'GET /metrics 200 - - 2.276 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:21:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.399 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:22:19'
+}
+{
+  message: 'GET /metrics 200 - - 2.429 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:22:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.437 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:22:49'
+}
+{
+  message: 'GET /metrics 200 - - 1.336 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:22:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.459 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:23:19'
+}
+{
+  message: 'GET /metrics 200 - - 1.494 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:23:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.546 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:23:49'
+}
+{
+  message: 'GET /metrics 200 - - 6.687 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:23:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.627 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:24:19'
+}
+{
+  message: 'GET /metrics 200 - - 8.716 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:24:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.283 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:24:49'
+}
+{
+  message: 'GET /metrics 200 - - 3.167 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:24:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.887 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:25:19'
+}
+{
+  message: 'GET /metrics 200 - - 1.280 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:25:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.511 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:25:39'
+}
+{
+  message: 'GET /api/health 200 153 - 0.541 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:25:49'
+}
+{
+  message: 'GET /metrics 200 - - 2.597 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:25:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.305 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:26:19'
+}
+{
+  message: 'GET /metrics 200 - - 2.336 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:26:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.471 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:26:45'
+}
+{
+  message: 'GET /api/health 200 153 - 0.339 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:26:49'
+}
+{
+  message: 'GET /metrics 200 - - 2.242 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:26:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.390 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:27:19'
+}
+{
+  message: 'GET /metrics 200 - - 3.277 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:27:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.386 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:27:50'
+}
+{
+  message: 'GET /metrics 200 - - 5.573 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:27:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.337 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:28:20'
+}
+{
+  message: 'GET /metrics 200 - - 5.725 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:28:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.548 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:28:50'
+}
+{
+  message: 'GET /metrics 200 - - 2.537 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:28:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.318 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:29:20'
+}
+{
+  message: 'GET /metrics 200 - - 3.717 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:29:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.578 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:29:50'
+}
+{
+  message: 'GET /metrics 200 - - 6.144 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:29:55'
+}
+{
+  message: 'POST /api/logs 204 - - 0.296 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:09'
+}
+{
+  message: 'POST /api/logs 204 - - 0.436 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:11'
+}
+{
+  message: 'POST /api/logs 204 - - 0.458 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:11'
+}
+{
+  message: 'POST /api/logs 204 - - 0.495 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:11'
+}
+{
+  message: 'POST /api/logs 204 - - 0.329 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:11'
+}
+{
+  message: 'GET /api/health 200 153 - 0.379 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:20'
+}
+{
+  message: 'GET /metrics 200 - - 6.327 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.664 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:50'
+}
+{
+  message: 'GET /metrics 200 - - 6.614 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:55'
+}
+{
+  message: 'POST /api/logs 204 - - 0.392 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:30:59'
+}
+{
+  message: 'GET /api/health 200 153 - 0.313 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:31:20'
+}
+{
+  message: 'GET /metrics 200 - - 3.562 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:31:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.298 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:31:50'
+}
+{
+  message: 'GET /metrics 200 - - 2.536 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:31:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.578 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:20'
+}
+{
+  message: 'GET /metrics 200 - - 2.706 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:25'
+}
+{
+  message: 'POST /api/logs 204 - - 0.605 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:32'
+}
+{
+  message: 'POST /api/logs 204 - - 0.446 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:33'
+}
+{
+  message: 'POST /api/logs 204 - - 0.334 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:33'
+}
+{
+  message: 'POST /api/logs 204 - - 0.367 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:35'
+}
+{
+  message: 'POST /api/logs 204 - - 0.298 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:35'
+}
+{
+  message: 'POST /api/logs 204 - - 0.523 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:36'
+}
+{
+  message: 'GET /api/health 200 153 - 0.419 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:50'
+}
+{
+  message: 'GET /metrics 200 - - 5.076 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:32:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.368 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:33:21'
+}
+{
+  message: 'GET /metrics 200 - - 4.874 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:33:25'
+}
+{
+  message: 'GET /api/health 200 153 - 0.334 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:33:51'
+}
+{
+  message: 'GET /metrics 200 - - 2.675 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:33:55'
+}
+{
+  message: 'GET /api/health 200 153 - 0.456 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:34:21'
+}
+{
+  message: 'GET /metrics 200 - - 4.220 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:34:25'
+}
+{
+  message: 'Received SIGTERM, shutting down gracefully',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 14:34:37'
+}
+{
+  message: 'MAG 2.0 Server is running on port 5000',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:11:34'
+}
+{
+  message: 'Environment: development',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:11:34'
+}
+{
+  message: 'Redis client connected',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:11:34'
+}
+{
+  message: 'Redis client ready',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:11:34'
+}
+{
+  message: 'Connected to MongoDB',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:11:34'
+}
+{
+  service: 'mag-2.0',
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '985bef312976b26e-PIT',
+    connection: 'keep-alive',
+    'content-length': '239',
+    'content-type': 'application/json',
+    date: 'Sat, 27 Sep 2025 15:11:35 GMT',
+    'openai-processing-ms': '4',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=JEf8dW5aVHgGPs0WMLd8UuZ89EbwOOiaHYdVsHRF35g-1758985895-1.0.1.1-cF6X6.kTlklNkmoalifKpGOo.IjPz6PzDeIsRjXx7O7On0A3iQpLtBWPXg9Ncegl4T.Tnrt1GaJizKqRYYahNL3ThziC7yfeiZp3YOmj0ms; path=/; expires=Sat, 27-Sep-25 15:41:35 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=NES2Lm20YcPcB0NFkcqRb1.fVBBo.pUMTHDKCifs26I-1758985895006-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'www-authenticate': 'Bearer realm="OpenAI API"',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '8',
+    'x-openai-proxy-wasm': 'v0.1',
+    'x-request-id': '48d693afafd21bb744434a50950ffca5'
+  },
+  request_id: '48d693afafd21bb744434a50950ffca5',
+  error: {
+    message: 'Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+    type: 'invalid_request_error',
+    param: null,
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error',
+  level: 'error',
+  message: 'Failed to initialize AI Orchestrator: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+  stack: 'Error: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.\n' +
+    '    at APIError.generate (/app/node_modules/openai/error.js:48:20)\n' +
+    '    at OpenAI.makeStatusError (/app/node_modules/openai/core.js:302:33)\n' +
+    '    at OpenAI.makeRequest (/app/node_modules/openai/core.js:346:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async AIOrchestrator.initialize (/app/services/aiOrchestrator.js:26:7)',
+  timestamp: '2025-09-27 15:11:35'
+}
+{
+  message: 'GET /metrics 200 - - 5.700 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:11:48'
+}
+{
+  message: 'GET /api/health 200 153 - 1.393 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:03'
+}
+{
+  message: 'POST /api/logs 204 - - 15.437 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:08'
+}
+{
+  message: 'POST /api/logs 204 - - 0.618 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:10'
+}
+{
+  message: 'POST /api/logs 204 - - 0.522 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:10'
+}
+{
+  message: 'POST /api/logs 204 - - 0.499 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:10'
+}
+{
+  message: 'POST /api/logs 204 - - 0.384 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:10'
+}
+{
+  message: 'POST /api/logs 204 - - 1.531 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:10'
+}
+{
+  message: 'POST /api/logs 204 - - 0.572 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:10'
+}
+{
+  message: 'POST /api/logs 204 - - 0.678 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:11'
+}
+{
+  message: 'POST /api/logs 204 - - 0.636 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:11'
+}
+{
+  message: 'POST /api/logs 204 - - 0.361 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:12'
+}
+{
+  message: 'POST /api/logs 204 - - 0.396 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:12'
+}
+{
+  message: 'POST /api/logs 204 - - 0.345 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:12'
+}
+{
+  message: 'GET /metrics 200 - - 2.125 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:18'
+}
+{
+  message: 'Received SIGTERM, shutting down gracefully',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 15:12:31'
+}
+{
+  message: 'MAG 2.0 Server is running on port 5000',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:28'
+}
+{
+  message: 'Environment: development',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:28'
+}
+{
+  message: 'Redis client connected',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:28'
+}
+{
+  message: 'Redis client ready',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:28'
+}
+{
+  message: 'Connected to MongoDB',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:28'
+}
+{
+  message: 'GET /api/health 200 153 - 6.155 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:29'
+}
+{
+  service: 'mag-2.0',
+  status: 401,
+  headers: {
+    'alt-svc': 'h3=":443"; ma=86400',
+    'cf-cache-status': 'DYNAMIC',
+    'cf-ray': '985c98f9f9d2c553-IAD',
+    connection: 'keep-alive',
+    'content-length': '239',
+    'content-type': 'application/json',
+    date: 'Sat, 27 Sep 2025 17:07:29 GMT',
+    'openai-processing-ms': '3',
+    'openai-version': '2020-10-01',
+    server: 'cloudflare',
+    'set-cookie': '__cf_bm=QsAm7vpLLBjS69hS4As5t_eP7AybiS.mHu9Mc1mT0MU-1758992849-1.0.1.1-w3UV8olf59Szhfv..ugF47JcpAbnj48cauPtyKyizi9zY92XyhVx_we1jgpq.S0OOvFnegYeGwPImTxy1Si4PUWoQH03oNkbW.kRJusG.Rc; path=/; expires=Sat, 27-Sep-25 17:37:29 GMT; domain=.api.openai.com; HttpOnly; Secure; SameSite=None, _cfuvid=wWAOslWckLbY1S1hfRds_mc3fmGfUW_UwTzLLGFySm8-1758992849074-0.0.1.1-604800000; path=/; domain=.api.openai.com; HttpOnly; Secure; SameSite=None',
+    'strict-transport-security': 'max-age=31536000; includeSubDomains; preload',
+    'www-authenticate': 'Bearer realm="OpenAI API"',
+    'x-content-type-options': 'nosniff',
+    'x-envoy-upstream-service-time': '6',
+    'x-openai-proxy-wasm': 'v0.1',
+    'x-request-id': '5dddc0c809ae1c2f519239ebd6c4e163'
+  },
+  request_id: '5dddc0c809ae1c2f519239ebd6c4e163',
+  error: {
+    message: 'Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+    type: 'invalid_request_error',
+    param: null,
+    code: 'invalid_api_key'
+  },
+  code: 'invalid_api_key',
+  param: null,
+  type: 'invalid_request_error',
+  level: 'error',
+  message: 'Failed to initialize AI Orchestrator: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.',
+  stack: 'Error: 401 Incorrect API key provided: my_api_key. You can find your API key at https://platform.openai.com/account/api-keys.\n' +
+    '    at APIError.generate (/app/node_modules/openai/error.js:48:20)\n' +
+    '    at OpenAI.makeStatusError (/app/node_modules/openai/core.js:302:33)\n' +
+    '    at OpenAI.makeRequest (/app/node_modules/openai/core.js:346:30)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async AIOrchestrator.initialize (/app/services/aiOrchestrator.js:26:7)',
+  timestamp: '2025-09-27 17:07:29'
+}
+{
+  message: 'GET /metrics 200 - - 20.067 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:40'
+}
+{
+  message: 'GET /api/health 200 153 - 1.239 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:07:59'
+}
+{
+  message: 'GET /metrics 200 - - 5.833 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:08:10'
+}
+{
+  message: 'GET /api/health 200 153 - 1.685 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:08:29'
+}
+{
+  message: 'GET /metrics 200 - - 6.311 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:08:40'
+}
+{
+  message: 'GET /api/health 200 153 - 0.903 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:08:59'
+}
+{
+  message: 'GET /metrics 200 - - 6.267 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:09:10'
+}
+{
+  message: 'GET /api/health 200 153 - 1.324 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:09:29'
+}
+{
+  message: 'GET /metrics 200 - - 8.481 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:09:40'
+}
+{
+  message: 'GET /api/health 200 153 - 0.829 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:09:59'
+}
+{
+  message: 'GET /metrics 200 - - 3.745 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:10:10'
+}
+{
+  message: 'GET /api/health 200 153 - 2.097 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:10:29'
+}
+{
+  message: 'GET /metrics 200 - - 8.074 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:10:40'
+}
+{
+  message: 'GET /api/health 200 153 - 1.599 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:10:59'
+}
+{
+  message: 'GET /metrics 200 - - 5.413 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:11:10'
+}
+{
+  message: 'GET /api/health 200 153 - 0.921 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:11:29'
+}
+{
+  message: 'GET /metrics 200 - - 7.960 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:11:40'
+}
+{
+  message: 'GET /api/health 200 153 - 2.011 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:12:00'
+}
+{
+  message: 'GET /metrics 200 - - 5.191 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:12:10'
+}
+{
+  message: 'GET /api/health 200 153 - 2.011 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:12:30'
+}
+{
+  message: 'GET /metrics 200 - - 3.851 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:12:40'
+}
+{
+  message: 'GET /api/health 200 153 - 0.665 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:13:00'
+}
+{
+  message: 'GET /metrics 200 - - 3.079 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:13:10'
+}
+{
+  message: 'GET /api/health 200 153 - 1.562 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:13:30'
+}
+{
+  message: 'GET /metrics 200 - - 3.781 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:13:40'
+}
+{
+  message: 'GET /api/health 200 153 - 0.652 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:14:00'
+}
+{
+  message: 'GET /metrics 200 - - 1.898 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:14:10'
+}
+{
+  message: 'GET /api/health 200 153 - 0.576 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:14:30'
+}
+{
+  message: 'GET /metrics 200 - - 1.960 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:14:40'
+}
+{
+  message: 'GET /api/health 200 153 - 0.903 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:15:00'
+}
+{
+  message: 'GET /metrics 200 - - 2.351 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:15:10'
+}
+{
+  message: 'GET /api/health 200 153 - 0.962 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:15:30'
+}
+{
+  message: 'GET /metrics 200 - - 3.595 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:15:40'
+}
+{
+  message: 'GET /api/health 200 153 - 0.753 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:16:00'
+}
+{
+  message: 'GET /metrics 200 - - 3.355 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:16:10'
+}
+{
+  message: 'GET /api/health 200 153 - 1.058 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:16:30'
+}
+{
+  message: 'GET /metrics 200 - - 2.260 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:16:40'
+}
+{
+  message: 'GET /api/health 200 153 - 1.332 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:17:00'
+}
+{
+  message: 'GET /metrics 200 - - 6.549 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:17:10'
+}
+{
+  message: 'GET /api/health 200 153 - 1.245 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:17:30'
+}
+{
+  message: 'GET /metrics 200 - - 1.818 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:17:40'
+}
+{
+  message: 'GET /api/health 200 153 - 1.626 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:00'
+}
+{
+  message: 'GET /metrics 200 - - 2.595 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:10'
+}
+{
+  message: 'OPTIONS /api/auth/login 204 0 - 0.563 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:15'
+}
+{
+  message: 'POST /api/auth/login 401 49 - 586.933 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:16'
+}
+{
+  message: 'GET /api/health 200 153 - 0.410 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:31'
+}
+{
+  message: 'OPTIONS /api/auth/register 204 0 - 0.206 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:37'
+}
+{
+  message: 'New user created: claire@example.com',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'User registered: claire@example.com',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'POST /api/auth/register 201 - - 399.828 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'OPTIONS /api/auth/verify 204 0 - 0.214 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'OPTIONS /api/adventures?limit=20&offset=0 204 0 - 0.387 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'GET /api/auth/verify 200 766 - 25.494 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'GET /api/adventures?limit=20&offset=0 200 26 - 24.742 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'GET /api/adventures?limit=20&offset=0 304 - - 11.389 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:38'
+}
+{
+  message: 'GET /metrics 200 - - 3.259 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:40'
+}
+{
+  message: 'OPTIONS /api/users/stats 204 0 - 0.236 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'OPTIONS /api/adventures?limit=5&offset=0 204 0 - 0.130 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'GET /api/adventures?limit=5&offset=0 200 26 - 18.558 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'GET /api/users/stats 200 331 - 36.759 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'OPTIONS /api/external/weather 204 0 - 0.132 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  service: 'mag-2.0',
+  requestId: '4ec9f799-aa73-4ef4-bec8-1e1cf507027d',
+  method: 'GET',
+  url: '/api/external/weather',
+  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36',
+  ip: '::ffff:172.19.0.1',
+  level: 'warn',
+  message: 'Route not found',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'GET /api/external/weather 404 166 - 1.934 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'OPTIONS /api/external/events/nearby?radius=5000&interests= 204 0 - 0.228 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'GET /api/external/events/nearby?radius=5000&interests= 400 65 - 2.614 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:18:50'
+}
+{
+  message: 'GET /api/health 200 153 - 1.470 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:01'
+}
+{
+  message: 'OPTIONS /api/events/user 204 0 - 0.171 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:04'
+}
+{
+  message: 'OPTIONS /api/external/events/nearby?radius=10000&interests= 204 0 - 0.132 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:04'
+}
+{
+  service: 'mag-2.0',
+  stringValue: '"user"',
+  messageFormat: undefined,
+  kind: 'ObjectId',
+  value: 'user',
+  path: '_id',
+  reason: BSONError: input must be a 24 character hex string, 12 byte Uint8Array, or an integer
+      at new ObjectId (/app/node_modules/bson/lib/bson.cjs:2538:23)
+      at castObjectId (/app/node_modules/mongoose/lib/cast/objectid.js:25:12)
+      at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:249:12)
+      at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)
+      at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)
+      at cast (/app/node_modules/mongoose/lib/cast.js:390:32)
+      at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)
+      at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)
+      at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)
+      at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80),
+  valueType: 'string',
+  level: 'error',
+  message: 'Failed to get event: Cast to ObjectId failed for value "user" (type string) at path "_id" for model "Event"',
+  stack: 'CastError: Cast to ObjectId failed for value "user" (type string) at path "_id" for model "Event"\n' +
+    '    at SchemaObjectId.cast (/app/node_modules/mongoose/lib/schema/objectId.js:251:11)\n' +
+    '    at SchemaType.applySetters (/app/node_modules/mongoose/lib/schemaType.js:1258:12)\n' +
+    '    at SchemaType.castForQuery (/app/node_modules/mongoose/lib/schemaType.js:1694:17)\n' +
+    '    at cast (/app/node_modules/mongoose/lib/cast.js:390:32)\n' +
+    '    at Query.cast (/app/node_modules/mongoose/lib/query.js:5060:12)\n' +
+    '    at Query._castConditions (/app/node_modules/mongoose/lib/query.js:2374:10)\n' +
+    '    at model.Query._findOne (/app/node_modules/mongoose/lib/query.js:2697:8)\n' +
+    '    at model.Query.exec (/app/node_modules/mongoose/lib/query.js:4627:80)\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n' +
+    '    at async /app/routes/eventRoutes.js:172:19',
+  timestamp: '2025-09-27 17:19:04'
+}
+{
+  message: 'GET /api/events/user 500 122 - 13.202 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:04'
+}
+{
+  message: 'GET /api/external/events/nearby?radius=10000&interests= 400 65 - 0.299 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:04'
+}
+{
+  message: 'OPTIONS /api/users/friends 204 0 - 0.137 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:07'
+}
+{
+  message: 'GET /api/users/friends 200 26 - 13.447 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:07'
+}
+{
+  message: 'OPTIONS /api/users/leaderboard?timeRange=all&limit=points 204 0 - 0.257 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:08'
+}
+{
+  message: 'GET /api/users/leaderboard?timeRange=all&limit=points 200 26 - 7.376 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:08'
+}
+{
+  message: 'POST /api/logs 204 - - 0.628 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:08'
+}
+{
+  message: 'OPTIONS /api/auth/verify 204 0 - 0.554 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:10'
+}
+{
+  service: 'mag-2.0',
+  level: 'error',
+  message: 'Token verification failed: user.getPublicProfile is not a function',
+  stack: 'TypeError: user.getPublicProfile is not a function\n' +
+    '    at /app/routes/authRoutes.js:180:20\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)',
+  timestamp: '2025-09-27 17:19:10'
+}
+{
+  message: 'GET /api/auth/verify 401 43 - 5.578 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:10'
+}
+{
+  message: 'GET /metrics 200 - - 2.337 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:10'
+}
+{
+  message: 'GET /api/health 200 153 - 1.307 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:31'
+}
+{
+  message: 'Received SIGTERM, shutting down gracefully',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-27 17:19:38'
+}

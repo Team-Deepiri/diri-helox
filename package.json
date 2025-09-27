@@ -14,6 +14,11 @@
   "scripts": {
     "start": "cd server && npm start",
     "build": "cd client && npm run build",
+    "build:frontend": "npm --prefix client run build",
+    "dev:frontend": "npm --prefix client run dev",
+    "preview:frontend": "npm --prefix client run preview",
+    "docker:build:frontend": "docker compose up -d --build frontend",
+    "docker:logs:frontend": "docker logs -f tripblip-frontend",
     "preview": "vite preview",
     "test": "npm run test:node && npm run test:python",
     "test:node": "cd server && npm test",
