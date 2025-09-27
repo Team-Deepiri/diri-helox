@@ -9,8 +9,21 @@ class CacheService {
 
   async initialize() {
     try {
+      // Build Redis URL from environment variables
+      const redisHost = process.env.REDIS_HOST || 'localhost';
+      const redisPort = process.env.REDIS_PORT || '6379';
+      const redisPassword = process.env.REDIS_PASSWORD;
+      
+      let redisUrl = `redis://${redisHost}:${redisPort}`;
+      if (redisPassword) {
+        redisUrl = `redis://:${redisPassword}@${redisHost}:${redisPort}`;
+      }
+      
+      // Use REDIS_URL if provided, otherwise construct from components
+      const finalRedisUrl = process.env.REDIS_URL || redisUrl;
+      
       this.client = redis.createClient({
-        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        url: finalRedisUrl,
         retry_strategy: (options) => {
           if (options.error && options.error.code === 'ECONNREFUSED') {
             logger.error('Redis server connection refused');

@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -17,225 +27,306 @@ const Navbar = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  const navVariants = {
+    hidden: { y: -100, opacity: 0 },
+    visible: { 
+      y: 0, 
+      opacity: 1,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut"
+      }
+    }
+  };
+
+  const menuVariants = {
+    hidden: { 
+      opacity: 0,
+      height: 0,
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut"
+      }
+    },
+    visible: { 
+      opacity: 1,
+      height: "auto",
+      transition: {
+        duration: 0.3,
+        ease: "easeInOut"
+      }
+    }
+  };
+
   return (
-    <nav className="bg-white shadow-lg sticky top-0 z-50">
+    <motion.nav 
+      variants={navVariants}
+      initial="hidden"
+      animate="visible"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'glass-dark backdrop-blur-xl' 
+          : 'bg-transparent'
+      }`}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <span className="text-2xl">🗺️</span>
-            <span className="text-xl font-bold text-gray-900">Trailblip MAG 2.0</span>
-          </Link>
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Link to="/" className="flex items-center space-x-3 group">
+              <motion.div
+                className="text-4xl"
+                animate={{ rotate: [0, 10, -10, 0] }}
+                transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+              >
+                🗺️
+              </motion.div>
+              <div>
+                <span className="text-2xl font-bold gradient-text">Trailblip</span>
+                <br />
+                <span className="text-sm gradient-text-secondary font-medium">MAG 2.0</span>
+              </div>
+            </Link>
+          </motion.div>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-8">
             {isAuthenticated ? (
               <>
-                <Link
-                  to="/dashboard"
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  to="/adventure/generate"
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-                >
-                  Generate Adventure
-                </Link>
-                <Link
-                  to="/events"
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-                >
-                  Events
-                </Link>
-                <Link
-                  to="/friends"
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-                >
-                  Friends
-                </Link>
-                <Link
-                  to="/leaderboard"
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
-                >
-                  Leaderboard
-                </Link>
+                {[
+                  { to: '/dashboard', label: 'Dashboard', icon: '🏠' },
+                  { to: '/adventure/generate', label: 'Generate', icon: '✨' },
+                  { to: '/events', label: 'Events', icon: '🎉' },
+                  { to: '/friends', label: 'Friends', icon: '👥' },
+                  { to: '/leaderboard', label: 'Leaderboard', icon: '🏆' }
+                ].map((item, index) => (
+                  <motion.div
+                    key={item.to}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                  >
+                    <Link
+                      to={item.to}
+                      className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-300 group"
+                    >
+                      <span className="text-lg group-hover:scale-110 transition-transform duration-300">
+                        {item.icon}
+                      </span>
+                      <span className="font-medium text-white group-hover:text-purple-300 transition-colors duration-300">
+                        {item.label}
+                      </span>
+                    </Link>
+                  </motion.div>
+                ))}
                 
                 {/* User Menu */}
-                <div className="relative group">
-                  <button className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors duration-200">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <span className="text-blue-600 font-medium text-sm">
-                        {user?.name?.charAt(0).toUpperCase() || 'U'}
-                      </span>
+                <motion.div 
+                  className="relative group"
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.6 }}
+                >
+                  <button className="flex items-center space-x-3 px-4 py-2 rounded-lg hover:bg-white/10 transition-all duration-300 group">
+                    <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg group-hover:scale-110 transition-transform duration-300">
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
-                    <span className="font-medium">{user?.name || 'User'}</span>
-                    <span className="text-gray-400">▼</span>
+                    <div className="text-left">
+                      <div className="font-medium text-white group-hover:text-purple-300 transition-colors duration-300">
+                        {user?.name || 'User'}
+                      </div>
+                      <div className="text-xs text-gray-400">Adventurer</div>
+                    </div>
+                    <motion.span 
+                      className="text-gray-400 group-hover:text-white transition-colors duration-300"
+                      animate={{ rotate: isMenuOpen ? 180 : 0 }}
+                    >
+                      ▼
+                    </motion.span>
                   </button>
                   
                   {/* Dropdown Menu */}
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="py-1">
-                      <Link
-                        to="/profile"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Profile
-                      </Link>
-                      <Link
-                        to="/notifications"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        Notifications
-                      </Link>
-                      <Link
-                        to="/adventures"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                      >
-                        My Adventures
-                      </Link>
-                      <hr className="my-1" />
+                  <motion.div 
+                    className="absolute right-0 mt-2 w-56 glass rounded-2xl border border-white/20 overflow-hidden"
+                    initial={{ opacity: 0, y: -10, scale: 0.95 }}
+                    whileHover={{ opacity: 1, y: 0, scale: 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="py-2">
+                      {[
+                        { to: '/profile', label: 'Profile', icon: '👤' },
+                        { to: '/notifications', label: 'Notifications', icon: '🔔' },
+                        { to: '/adventures', label: 'My Adventures', icon: '🗺️' },
+                        { to: '/agent', label: 'AI Assistant', icon: '🤖' }
+                      ].map((item, index) => (
+                        <Link
+                          key={item.to}
+                          to={item.to}
+                          className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-colors duration-200 group"
+                        >
+                          <span className="text-lg group-hover:scale-110 transition-transform duration-300">
+                            {item.icon}
+                          </span>
+                          <span className="text-white group-hover:text-purple-300 transition-colors duration-300">
+                            {item.label}
+                          </span>
+                        </Link>
+                      ))}
+                      <div className="border-t border-white/10 my-2" />
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        className="flex items-center space-x-3 px-4 py-3 w-full text-left hover:bg-red-500/20 transition-colors duration-200 group"
                       >
-                        Sign Out
+                        <span className="text-lg group-hover:scale-110 transition-transform duration-300">🚪</span>
+                        <span className="text-red-400 group-hover:text-red-300 transition-colors duration-300">
+                          Sign Out
+                        </span>
                       </button>
                     </div>
-                  </div>
-                </div>
+                  </motion.div>
+                </motion.div>
               </>
             ) : (
               <>
                 <Link
                   to="/login"
-                  className="text-gray-700 hover:text-blue-600 transition-colors duration-200 font-medium"
+                  className="px-6 py-2 rounded-lg hover:bg-white/10 transition-all duration-300 font-medium text-white hover:text-purple-300"
                 >
                   Sign In
                 </Link>
                 <Link
                   to="/register"
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium"
+                  className="btn-modern btn-primary px-6 py-2 glow"
                 >
-                  Sign Up
+                  <span className="text-lg mr-2">🌟</span>
+                  Get Started
                 </Link>
               </>
             )}
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <button
+          <div className="lg:hidden">
+            <motion.button
               onClick={toggleMenu}
-              className="text-gray-700 hover:text-blue-600 transition-colors duration-200"
+              className="p-2 rounded-lg hover:bg-white/10 transition-all duration-300"
+              whileTap={{ scale: 0.95 }}
             >
-              <span className="text-2xl">☰</span>
-            </button>
+              <motion.span 
+                className="text-2xl text-white"
+                animate={{ rotate: isMenuOpen ? 90 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                ☰
+              </motion.span>
+            </motion.button>
           </div>
         </div>
 
         {/* Mobile Navigation */}
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            className="md:hidden border-t border-gray-200"
-          >
-            <div className="py-4 space-y-2">
-              {isAuthenticated ? (
-                <>
-                  <Link
-                    to="/dashboard"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Dashboard
-                  </Link>
-                  <Link
-                    to="/adventure/generate"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Generate Adventure
-                  </Link>
-                  <Link
-                    to="/events"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Events
-                  </Link>
-                  <Link
-                    to="/friends"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Friends
-                  </Link>
-                  <Link
-                    to="/leaderboard"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Leaderboard
-                  </Link>
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    to="/notifications"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Notifications
-                  </Link>
-                  <Link
-                    to="/adventures"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    My Adventures
-                  </Link>
-                  <hr className="my-2" />
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsMenuOpen(false);
-                    }}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                  >
-                    Sign Out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign In
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-medium mx-4"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              variants={menuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              className="lg:hidden glass rounded-2xl mt-4 mb-4 overflow-hidden"
+            >
+              <div className="py-4">
+                {isAuthenticated ? (
+                  <>
+                    {/* User Info */}
+                    <div className="px-4 py-3 border-b border-white/10 mb-4">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                          {user?.name?.charAt(0).toUpperCase() || 'U'}
+                        </div>
+                        <div>
+                          <div className="font-medium text-white">{user?.name || 'User'}</div>
+                          <div className="text-sm text-gray-400">Adventurer</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Navigation Links */}
+                    {[
+                      { to: '/dashboard', label: 'Dashboard', icon: '🏠' },
+                      { to: '/adventure/generate', label: 'Generate Adventure', icon: '✨' },
+                      { to: '/events', label: 'Events', icon: '🎉' },
+                      { to: '/friends', label: 'Friends', icon: '👥' },
+                      { to: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
+                      { to: '/profile', label: 'Profile', icon: '👤' },
+                      { to: '/notifications', label: 'Notifications', icon: '🔔' },
+                      { to: '/adventures', label: 'My Adventures', icon: '🗺️' },
+                      { to: '/agent', label: 'AI Assistant', icon: '🤖' }
+                    ].map((item, index) => (
+                      <motion.div
+                        key={item.to}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <Link
+                          to={item.to}
+                          className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-colors duration-200 group"
+                          onClick={() => setIsMenuOpen(false)}
+                        >
+                          <span className="text-xl group-hover:scale-110 transition-transform duration-300">
+                            {item.icon}
+                          </span>
+                          <span className="text-white group-hover:text-purple-300 transition-colors duration-300">
+                            {item.label}
+                          </span>
+                        </Link>
+                      </motion.div>
+                    ))}
+                    
+                    <div className="border-t border-white/10 my-2" />
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsMenuOpen(false);
+                      }}
+                      className="flex items-center space-x-3 px-4 py-3 w-full text-left hover:bg-red-500/20 transition-colors duration-200 group"
+                    >
+                      <span className="text-xl group-hover:scale-110 transition-transform duration-300">🚪</span>
+                      <span className="text-red-400 group-hover:text-red-300 transition-colors duration-300">
+                        Sign Out
+                      </span>
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <Link
+                      to="/login"
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-colors duration-200 group"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-xl group-hover:scale-110 transition-transform duration-300">🔑</span>
+                      <span className="text-white group-hover:text-purple-300 transition-colors duration-300">
+                        Sign In
+                      </span>
+                    </Link>
+                    <Link
+                      to="/register"
+                      className="flex items-center space-x-3 px-4 py-3 hover:bg-white/10 transition-colors duration-200 group mx-4 mt-2 btn-modern btn-primary justify-center"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <span className="text-xl group-hover:scale-110 transition-transform duration-300">🌟</span>
+                      <span>Get Started</span>
+                    </Link>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 

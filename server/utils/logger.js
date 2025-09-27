@@ -1,5 +1,41 @@
 const winston = require('winston');
 const path = require('path');
+const fs = require('fs');
+
+// Determine logs directory based on environment
+const isDocker = process.env.NODE_ENV === 'production' || process.env.DOCKER === 'true' || fs.existsSync('/.dockerenv');
+const defaultLogsDir = isDocker ? '/app/logs' : path.join(process.cwd(), 'logs');
+const envLogsDir = process.env.LOG_DIR;
+let logsDir = defaultLogsDir;
+
+
+if (envLogsDir && typeof envLogsDir === 'string') {
+  if (path.isAbsolute(envLogsDir)) {
+    // In Docker, only allow absolute paths under /app
+    if (isDocker && envLogsDir.startsWith('/app/')) {
+      logsDir = envLogsDir;
+    } else if (!isDocker) {
+      // In local development, allow any absolute path
+      logsDir = envLogsDir;
+    }
+  } else {
+    // Resolve relative paths under the default directory
+    logsDir = path.join(defaultLogsDir, envLogsDir);
+  }
+}
+
+if (!fs.existsSync(logsDir)) {
+  try {
+    fs.mkdirSync(logsDir, { recursive: true });
+  } catch (error) {
+    console.error(`Failed to create logs directory: ${logsDir}`, error);
+    // Fallback to a relative path if absolute path fails
+    logsDir = path.join(process.cwd(), 'logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+  }
+}
 
 // Define log format
 const logFormat = winston.format.combine(
@@ -19,14 +55,14 @@ const logger = winston.createLogger({
   transports: [
     // Write all logs with importance level of `error` or less to `error.log`
     new winston.transports.File({
-      filename: path.join(__dirname, '../../logs/error.log'),
+      filename: path.join(logsDir, 'error.log'),
       level: 'error',
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),
     // Write all logs with importance level of `info` or less to `combined.log`
     new winston.transports.File({
-      filename: path.join(__dirname, '../../logs/combined.log'),
+      filename: path.join(logsDir, 'combined.log'),
       maxsize: 5242880, // 5MB
       maxFiles: 5,
     }),
@@ -41,13 +77,6 @@ if (process.env.NODE_ENV !== 'production') {
       winston.format.simple()
     )
   }));
-}
-
-// Create logs directory if it doesn't exist
-const fs = require('fs');
-const logsDir = path.join(__dirname, '../../logs');
-if (!fs.existsSync(logsDir)) {
-  fs.mkdirSync(logsDir, { recursive: true });
 }
 
 module.exports = logger;

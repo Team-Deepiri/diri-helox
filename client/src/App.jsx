@@ -52,9 +52,17 @@ function App() {
           <SocketProvider>
             <AdventureProvider>
               <Router>
-                <div className="min-h-screen bg-gray-50">
+                <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-violet-900 relative overflow-hidden">
+                  {/* Background Effects */}
+                  <div className="fixed inset-0 bg-[url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%239C92AC" fill-opacity="0.05"%3E%3Ccircle cx="30" cy="30" r="2"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20" />
+                  
+                  {/* Gradient Orbs */}
+                  <div className="fixed top-0 left-1/4 w-96 h-96 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" />
+                  <div className="fixed top-0 right-1/4 w-96 h-96 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '2s' }} />
+                  <div className="fixed bottom-0 left-1/2 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-pulse" style={{ animationDelay: '4s' }} />
+                  
                   <Navbar />
-                  <main className="pb-20">
+                  <main className="pt-20 pb-20 relative z-10">
                     <Routes>
                     {/* Public Routes */}
                     <Route path="/" element={<Home />} />
@@ -130,8 +138,11 @@ function App() {
                   toastOptions={{
                     duration: 4000,
                     style: {
-                      background: '#363636',
+                      background: 'rgba(0, 0, 0, 0.8)',
+                      backdropFilter: 'blur(10px)',
                       color: '#fff',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '12px',
                     },
                     success: {
                       duration: 3000,

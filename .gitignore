@@ -24,6 +24,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+.env
 *.env
 firebase-admin*.json
 config/firebase-admin.js
@@ -31,3 +32,9 @@ config/firebase-admin.js
 node_modules/
 jaxk-website-firebase-adminsdk-*.json
 __pycache__
+
+
+.husky
+.github
+.vscode
+.dockerignore

@@ -27,6 +27,7 @@ const agentRoutes = require('./routes/agentRoutes');
 const eventRoutes = require('./routes/eventRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const externalRoutes = require('./routes/externalRoutes');
+const logsRoutes = require('./routes/logsRoutes');
 
 // Import middleware
 const authenticateJWT = require('./middleware/authenticateJWT');
@@ -126,9 +127,9 @@ if (swaggerEnabled) {
 }
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/trailblip_mag', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://localhost:27017/trailblip_mag';
+mongoose.connect(mongoUri, {
+  // Removed deprecated options: useNewUrlParser and useUnifiedTopology
 })
 .then(() => {
   logger.info('Connected to MongoDB');
@@ -175,6 +176,7 @@ app.use('/api/events', authenticateJWT, eventRoutes);
 app.use('/api/notifications', authenticateJWT, notificationRoutes);
 app.use('/api/external', externalRoutes);
 app.use('/api/agent', authenticateJWT, agentRoutes);
+app.use('/api/logs', authenticateJWT, logsRoutes);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

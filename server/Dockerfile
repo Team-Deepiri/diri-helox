@@ -18,15 +18,14 @@ RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
 # Copy source code
 COPY . .
 
-# Create logs directory and set permissions
-RUN mkdir -p logs && chown -R node:node /app
-
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001
 
-# Change ownership of the app directory
-RUN chown -R nodejs:nodejs /app
+# Create logs directory and set permissions for nodejs user
+RUN mkdir -p logs && chown -R nodejs:nodejs /app
+
+# Switch to non-root user
 USER nodejs
 
 # Expose port
