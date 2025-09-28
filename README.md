@@ -1,6 +1,6 @@
-# TripBlip MAG 2.0 
+# tripblip MAG 2.0 
 
-Welcome to TripBlip MAG 2.0, your AI-powered adventure companion that creates personalized local experiences, connects you with friends, and helps you discover the best your city (or the one you're at currently) has to offer.
+Welcome to tripblip MAG 2.0, your AI-powered adventure companion that creates personalized local experiences, connects you with friends, and helps you discover the best your city (or the one you're at currently) has to offer.
 
 ## Features
 
@@ -67,7 +67,7 @@ MAG 2.0 follows a modern microservices architecture:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd TripBlip
+   cd tripblip
    ```
 
 2. **Run the setup script**
