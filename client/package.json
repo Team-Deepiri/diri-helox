@@ -6,6 +6,7 @@
   "type": "module",
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.2",
+    "@heroicons/react": "^2.2.0",
     "axios": "^1.8.4",
     "bootstrap": "^5.3.5",
     "date-fns": "^2.30.0",

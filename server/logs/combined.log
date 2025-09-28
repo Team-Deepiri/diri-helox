@@ -98356,3 +98356,69 @@
   service: 'mag-2.0',
   timestamp: '2025-09-28 05:48:12'
 }
+{
+  message: 'GET /metrics 200 - - 3.378 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:48:34'
+}
+{
+  message: 'GET /api/health 200 153 - 0.259 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:48:42'
+}
+{
+  message: 'GET /metrics 200 - - 2.094 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:49:04'
+}
+{
+  message: 'GET /api/health 200 153 - 0.288 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:49:12'
+}
+{
+  message: 'GET /metrics 200 - - 1.506 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:49:34'
+}
+{
+  message: 'GET /api/health 200 153 - 0.269 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:49:42'
+}
+{
+  message: 'GET /metrics 200 - - 1.107 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:50:04'
+}
+{
+  message: 'GET /api/health 200 153 - 0.246 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:50:12'
+}
+{
+  message: 'GET /metrics 200 - - 4.895 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:50:34'
+}
+{
+  message: 'GET /api/health 200 153 - 0.689 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:50:42'
+}
+{
+  message: 'GET /metrics 200 - - 3.944 ms -',
+  level: 'info',
+  service: 'mag-2.0',
+  timestamp: '2025-09-28 05:51:04'
+}

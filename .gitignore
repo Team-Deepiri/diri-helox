@@ -40,3 +40,7 @@ __pycache__
 .github
 .vscode
 .dockerignore
+
+*.log
+.log
+.logs
