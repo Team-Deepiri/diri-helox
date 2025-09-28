@@ -47,12 +47,64 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: process.env.CORS_ORIGIN || ["http://localhost:5173", "http://localhost:3000"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    credentials: true
+  },
+  // Enhanced Socket.IO configuration for real-time updates
+  pingTimeout: 60000,
+  pingInterval: 25000,
+  upgradeTimeout: 30000,
+  allowEIO3: true, // Allow Engine.IO v3 clients
+  // Enable compression for better performance
+  compression: true,
+  // Configure transport options
+  transports: ['websocket', 'polling'],
+  allowUpgrades: true,
+  perMessageDeflate: {
+    threshold: 1024,
+    concurrencyLimit: 10,
+    memLevel: 7
   }
 });
 
 const PORT = process.env.PORT || 5000;
+
+// CORS (handle before logging/limiting)
+const corsAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CORS_ORIGIN
+].filter(Boolean);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || corsAllowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['x-request-id']
+}));
+app.options(/.*/, cors());
+
+// CORS configuration (allow 3000 + 5173 + env)
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  process.env.CORS_ORIGIN
+].filter(Boolean);
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['x-request-id']
+}));
+app.options(/.*/, cors());
 
 // Security middleware
 app.use(helmet());
@@ -62,13 +114,14 @@ app.use(sanitize());
 app.use(rateBot());
 app.use(auditLogger());
 
-// Rate limiting
+// Rate limiting (skip preflight)
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS) || 15 * 60 * 1000, // 15 minutes
   max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS) || 100, // limit each IP to 100 requests per windowMs
   message: 'Too many requests from this IP, please try again later.',
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === 'OPTIONS'
 });
 app.use('/api/', limiter);
 
@@ -98,19 +151,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// CORS configuration
-app.use(cors({
-  origin: (origin, callback) => {
-    const allowed = [
-      'http://localhost:5173',
-      'http://localhost:3000',
-      process.env.CORS_ORIGIN
-    ].filter(Boolean);
-    if (!origin || allowed.includes(origin)) return callback(null, true);
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true
-}));
+// (CORS already configured above)
 
 // Body parsing middleware
 app.use(bodyParser.json({ limit: '10mb' }));
@@ -156,18 +197,42 @@ aiOrchestrator.initialize();
 io.on('connection', (socket) => {
   logger.info(`User connected: ${socket.id}`);
   
+  // Send immediate connection confirmation
+  socket.emit('connection_confirmed', {
+    socketId: socket.id,
+    timestamp: new Date().toISOString(),
+    serverStatus: 'connected'
+  });
+  
   socket.on('join_user_room', (userId) => {
     socket.join(`user_${userId}`);
     logger.info(`User ${userId} joined their room`);
+    socket.emit('room_joined', { room: `user_${userId}`, type: 'user' });
   });
   
   socket.on('join_adventure_room', (adventureId) => {
     socket.join(`adventure_${adventureId}`);
     logger.info(`User joined adventure room: ${adventureId}`);
+    socket.emit('room_joined', { room: `adventure_${adventureId}`, type: 'adventure' });
   });
   
-  socket.on('disconnect', () => {
-    logger.info(`User disconnected: ${socket.id}`);
+  // Development mode: Enable file change notifications
+  if (process.env.NODE_ENV !== 'production') {
+    socket.on('file_changed', (data) => {
+      socket.broadcast.emit('file_updated', data);
+    });
+    
+    socket.on('ping', () => {
+      socket.emit('pong', { timestamp: new Date().toISOString() });
+    });
+  }
+  
+  socket.on('disconnect', (reason) => {
+    logger.info(`User disconnected: ${socket.id}, reason: ${reason}`);
+  });
+  
+  socket.on('error', (error) => {
+    logger.error(`Socket.IO error for ${socket.id}:`, error);
   });
 });
 
@@ -216,7 +281,7 @@ if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/dist')));
   
   // Catch all handler: send back React's index.html file
-  app.get('*', (req, res) => {
+  app.get(/.*/, (req, res) => {
     res.sendFile(path.join(__dirname, '../client/dist/index.html'));
   });
 }

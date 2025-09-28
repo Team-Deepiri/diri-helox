@@ -1,5 +1,5 @@
 // server/config/firebaseConfig.js
-const serviceAccount = require('../config/jaxk-website-firebase-adminsdk-fbsvc-4461c645c4.json');
+const serviceAccount = require('../config/tripblip-firebase-adminsdk-fbsvc-4461c645c4.json');
 
 module.exports = {
   type: serviceAccount.type,
@@ -12,7 +12,7 @@ module.exports = {
   token_uri: serviceAccount.token_uri,
   auth_provider_x509_cert_url: serviceAccount.auth_provider_x509_cert_url,
   client_x509_cert_url: serviceAccount.client_x509_cert_url,
-  databaseURL: `https://jaxk-website-default-rtdb.firebaseio.com`
+  databaseURL: `'https://tripblip-mag-default-rtdb.firebaseio.com'`
 };
 
 
@@ -93,9 +93,9 @@ module.exports = {
 // // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 // // const firebaseConfig = {
 // //   apiKey: "AIzaSyAw95jJW9spAUFLGHkLqag3TfvcDlZ70lU",
-// //   authDomain: "jaxk-website.firebaseapp.com",
-// //   projectId: "jaxk-website",
-// //   storageBucket: "jaxk-website.firebasestorage.app",
+// //   authDomain: "tripblip.firebaseapp.com",
+// //   projectId: "tripblip",
+// //   storageBucket: "tripblip.firebasestorage.app",
 // //   messagingSenderId: "422315252031",
 // //   appId: "1:422315252031:web:01d3add03d33b59da9db8a",
 // //   measurementId: "G-Y9TYS1MV21"

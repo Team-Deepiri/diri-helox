@@ -1,11 +1,11 @@
 // server/config/firebaseAdmin.js
 const admin = require('firebase-admin');
-const serviceAccount = require('./jaxk-website-firebase-adminsdk-fbsvc-4461c645c4.json');
+const serviceAccount = require('./tripblip-mag-firebase-adminsdk-fbsvc-4461c645c4.json');
 
 if (!admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
-    databaseURL: 'https://jaxk-website-default-rtdb.firebaseio.com'
+    databaseURL: 'tripblip-mag-default-rtdb.firebaseio.com'
   });
 }
 

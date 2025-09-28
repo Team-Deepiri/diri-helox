@@ -33,7 +33,7 @@ firebase-admin*.json
 config/firebase-admin.js
 
 node_modules/
-jaxk-website-firebase-adminsdk-*.json
+trip-blip-firebase-adminsdk-*.json
 __pycache__
 
 
