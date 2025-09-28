@@ -2,6 +2,14 @@ const express = require('express');
 const Joi = require('joi');
 const userItemService = require('../services/userItemService');
 const logger = require('../utils/logger');
+const {
+  verifyItemOwnership,
+  verifySharedItemAccess,
+  verifyEditPermission,
+  validateUserId,
+  itemRateLimit,
+  auditItemOperation
+} = require('../middleware/userItemAuth');
 
 const router = express.Router();
 

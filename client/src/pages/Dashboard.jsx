@@ -6,6 +6,7 @@ import { useAdventure } from '../contexts/AdventureContext';
 import { userApi } from '../api/userApi';
 import { adventureApi } from '../api/adventureApi';
 import { externalApi } from '../api/externalApi';
+import InventoryWidget from '../components/InventoryWidget';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -270,6 +271,15 @@ const Dashboard = () => {
 
           {/* Sidebar */}
           <div className="col-lg-4 d-flex flex-column gap-4">
+            {/* Inventory Widget */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+            >
+              <InventoryWidget />
+            </motion.div>
+
             {/* Stats */}
             {stats && (
               <motion.div

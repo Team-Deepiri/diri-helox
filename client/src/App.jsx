@@ -28,6 +28,7 @@ import Leaderboard from './pages/Leaderboard';
 import Notifications from './pages/Notifications';
 import AgentChat from './pages/AgentChat';
 import PythonTools from './pages/PythonTools';
+import UserInventory from './pages/UserInventory';
 
 
 
@@ -141,6 +142,11 @@ function App() {
                     <Route path="/python-tools" element={
                       <ProtectedRoute>
                         <PythonTools />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/inventory" element={
+                      <ProtectedRoute>
+                        <UserInventory />
                       </ProtectedRoute>
                     } />
                       </Routes>

@@ -9,6 +9,8 @@ secrets.yaml
 
 # testing
 /coverage
+*/assets
+client/dist/
 
 # production
 /build

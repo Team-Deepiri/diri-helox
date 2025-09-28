@@ -99,6 +99,7 @@ const Navbar = () => {
                 {[
                   { to: '/dashboard', label: 'Dashboard', icon: '🏠' },
                   { to: '/adventure/generate', label: 'Generate', icon: '✨' },
+                  { to: '/inventory', label: 'Inventory', icon: '🎒' },
                   { to: '/events', label: 'Events', icon: '🎉' },
                   { to: '/friends', label: 'Friends', icon: '👥' },
                   { to: '/leaderboard', label: 'Leaderboard', icon: '🏆' }
@@ -256,6 +257,7 @@ const Navbar = () => {
                     {[
                       { to: '/dashboard', label: 'Dashboard', icon: '🏠' },
                       { to: '/adventure/generate', label: 'Generate Adventure', icon: '✨' },
+                      { to: '/inventory', label: 'My Inventory', icon: '🎒' },
                       { to: '/events', label: 'Events', icon: '🎉' },
                       { to: '/friends', label: 'Friends', icon: '👥' },
                       { to: '/leaderboard', label: 'Leaderboard', icon: '🏆' },
