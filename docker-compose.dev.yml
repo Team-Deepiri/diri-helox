@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MongoDB Database
   mongodb:
@@ -125,8 +123,6 @@ services:
       - backend
     networks:
       - tripblip-dev-network
-    # Enable host networking for better HMR performance (optional)
-    network_mode: "bridge"
 
 volumes:
   mongodb_dev_data:
