@@ -96,16 +96,16 @@ check_dependencies() {
 install_test_deps() {
     log_info "Installing test dependencies..."
     
-    # Install server test dependencies
-    if [ -f "server/package.json" ]; then
-        cd server
+    # Install API server test dependencies
+    if [ -f "api-server/package.json" ]; then
+        cd api-server
         npm install --silent
         cd ..
     fi
     
-    # Install client test dependencies
-    if [ -f "client/package.json" ]; then
-        cd client
+    # Install frontend test dependencies
+    if [ -f "frontend/package.json" ]; then
+        cd frontend
         npm install --silent
         cd ..
     fi
@@ -120,26 +120,26 @@ install_test_deps() {
     log_success "Test dependencies installed"
 }
 
-# Run server tests
+# Run API server tests
 test_server() {
-    log_info "Testing Node.js server..."
+    log_info "Testing Node.js API server..."
     
-    if [ -f "server/package.json" ]; then
-        run_test "Server Unit Tests" "npm test" "server"
+    if [ -f "api-server/package.json" ]; then
+        run_test "API Server Unit Tests" "npm test" "api-server"
         
-        # Run server integration tests if they exist
-        if [ -f "server/tests/integration.test.js" ]; then
-            run_test "Server Integration Tests" "npm run test:integration" "server"
+        # Run API server integration tests if they exist
+        if [ -f "api-server/tests/integration.test.js" ]; then
+            run_test "API Server Integration Tests" "npm run test:integration" "api-server"
         fi
         
-        # Run server linting
+        # Run API server linting
         if npm run lint --silent 2>/dev/null; then
-            log_success "Server linting passed"
+            log_success "API server linting passed"
         else
-            log_warning "Server linting issues found"
+            log_warning "API server linting issues found"
         fi
     else
-        log_warning "Server package.json not found, skipping server tests"
+        log_warning "API server package.json not found, skipping API server tests"
     fi
 }
 
@@ -172,28 +172,28 @@ test_python_backend() {
     fi
 }
 
-# Run client tests
+# Run frontend tests
 test_client() {
-    log_info "Testing React client..."
+    log_info "Testing React frontend..."
     
-    if [ -f "client/package.json" ]; then
-        run_test "Client Unit Tests" "npm test -- --run" "client"
+    if [ -f "frontend/package.json" ]; then
+        run_test "Frontend Unit Tests" "npm test -- --run" "frontend"
         
-        # Run client linting
+        # Run frontend linting
         if npm run lint --silent 2>/dev/null; then
-            log_success "Client linting passed"
+            log_success "Frontend linting passed"
         else
-            log_warning "Client linting issues found"
+            log_warning "Frontend linting issues found"
         fi
         
-        # Run client build test
+        # Run frontend build test
         if npm run build --silent 2>/dev/null; then
-            log_success "Client build test passed"
+            log_success "Frontend build test passed"
         else
-            log_error "Client build test failed"
+            log_error "Frontend build test failed"
         fi
     else
-        log_warning "Client package.json not found, skipping client tests"
+        log_warning "Frontend package.json not found, skipping frontend tests"
     fi
 }
 
@@ -240,8 +240,8 @@ test_security() {
     log_info "Running security tests..."
     
     # Run npm audit for Node.js projects
-    if [ -f "server/package.json" ]; then
-        cd server
+    if [ -f "api-server/package.json" ]; then
+        cd api-server
         if npm audit --audit-level=moderate; then
             log_success "Server security audit passed"
         else
@@ -250,8 +250,8 @@ test_security() {
         cd ..
     fi
     
-    if [ -f "client/package.json" ]; then
-        cd client
+    if [ -f "frontend/package.json" ]; then
+        cd frontend
         if npm audit --audit-level=moderate; then
             log_success "Client security audit passed"
         else
@@ -374,7 +374,7 @@ case "${1:-all}" in
         install_test_deps
         test_python_backend
         ;;
-    client)
+    frontend)
         check_dependencies
         install_test_deps
         test_client
@@ -392,14 +392,14 @@ case "${1:-all}" in
         main
         ;;
     help|--help|-h)
-        echo "tripblip MAG 2.0 - Test Runner"
+        echo "Deepiri - Test Runner"
         echo ""
         echo "Usage: $0 [COMMAND]"
         echo ""
         echo "Commands:"
-        echo "  server       Run server tests only"
+        echo "  server       Run API server tests only"
         echo "  python       Run Python backend tests only"
-        echo "  client       Run client tests only"
+        echo "  frontend     Run frontend tests only"
         echo "  integration  Run integration tests only"
         echo "  security     Run security tests only"
         echo "  performance  Run performance tests only"

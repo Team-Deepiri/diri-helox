@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# tripblip MAG 2.0 Setup Script
-echo "🗺️ Setting up tripblip MAG 2.0..."
+# Deepiri Setup Script
+echo "🚀 Setting up Deepiri..."
 
 # Check if Docker is installed
 if ! command -v docker &> /dev/null; then
@@ -24,17 +24,17 @@ fi
 
 # Create necessary directories
 echo "📁 Creating necessary directories..."
-mkdir -p server/logs
-mkdir -p server/config
+mkdir -p api-server/logs
+mkdir -p api-server/config
 mkdir -p nginx/ssl
 
 # Install dependencies
-echo "📦 Installing backend dependencies..."
-cd server && npm install
+echo "📦 Installing API server dependencies..."
+cd api-server && npm install
 cd ..
 
 echo "📦 Installing frontend dependencies..."
-cd client && npm install
+cd frontend && npm install
 cd ..
 
 # Generate JWT secret if not provided

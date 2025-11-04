@@ -1,5 +1,5 @@
 // MongoDB initialization script
-db = db.getSiblingDB('tripblip_mag');
+db = db.getSiblingDB('deepiri');
 
 // Create collections
 db.createCollection('users');
@@ -41,7 +41,7 @@ print('Database initialized with collections and indexes');
 // Create a sample admin user (optional)
 db.users.insertOne({
   name: "Admin User",
-  email: "admin@tripblip.com",
+  email: "admin@deepiri.com",
   passwordHash: "$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi", // password: password
   preferences: {
     nightlife: "high",

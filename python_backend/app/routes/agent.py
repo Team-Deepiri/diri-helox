@@ -62,7 +62,7 @@ async def agent_message(req: MessageRequest, request: Request):
         messages = [
             {
                 "role": "system", 
-                "content": "You are tripblip Agent, an AI assistant that helps users discover and plan local adventures. Be concise, helpful, and encouraging. Focus on outdoor activities, local events, and unique experiences."
+                "content": "You are Deepiri AI Assistant, an AI that helps users boost productivity through gamification. You convert tasks into engaging challenges, provide adaptive difficulty suggestions, and motivate users to complete their goals. Be concise, encouraging, and focused on productivity optimization."
             },
             {"role": "user", "content": req.content}
         ]
@@ -151,7 +151,7 @@ async def agent_message_stream(req: MessageRequest, request: Request):
             messages = [
                 {
                     "role": "system", 
-                    "content": "You are tripblip Agent, an AI assistant that helps users discover and plan local adventures. Be concise, helpful, and encouraging. Focus on outdoor activities, local events, and unique experiences."
+                    "content": "You are Deepiri AI Assistant, an AI that helps users boost productivity through gamification. You convert tasks into engaging challenges, provide adaptive difficulty suggestions, and motivate users to complete their goals. Be concise, encouraging, and focused on productivity optimization."
                 },
                 {"role": "user", "content": req.content}
             ]

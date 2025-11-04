@@ -9,7 +9,7 @@ const { spawn } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 
-console.log(' Starting Tripblip Development Environment with Real-time Updates...\n');
+console.log(' Starting Deepiri Development Environment with Real-time Updates...\n');
 
 // Colors for console output
 const colors = {
@@ -30,23 +30,23 @@ function log(message, color = colors.reset) {
 }
 
 // Check if required directories exist
-const clientDir = path.join(__dirname, 'client');
-const serverDir = path.join(__dirname, 'server');
+const frontendDir = path.join(__dirname, 'frontend');
+const apiServerDir = path.join(__dirname, 'api-server');
 
-if (!fs.existsSync(clientDir)) {
-  log('Client directory not found!', colors.red);
+if (!fs.existsSync(frontendDir)) {
+  log('Frontend directory not found!', colors.red);
   process.exit(1);
 }
 
-if (!fs.existsSync(serverDir)) {
-  log('Server directory not found!', colors.red);
+if (!fs.existsSync(apiServerDir)) {
+  log('API Server directory not found!', colors.red);
   process.exit(1);
 }
 
-// Start backend server
-log('Starting Backend Server...', colors.blue);
+// Start API server
+log('Starting API Server...', colors.blue);
 const serverProcess = spawn('node', ['server.js'], {
-  cwd: serverDir,
+  cwd: apiServerDir,
   stdio: 'inherit',
   shell: true,
   env: {
@@ -62,7 +62,7 @@ setTimeout(() => {
   // Start frontend with enhanced settings
   log('Starting Frontend with Hot Module Replacement...', colors.cyan);
   const clientProcess = spawn('npm', ['run', 'dev'], {
-    cwd: clientDir,
+    cwd: frontendDir,
     stdio: 'inherit',
     shell: true,
     env: {
@@ -74,7 +74,7 @@ setTimeout(() => {
     }
   });
 
-  // Handle client process events
+  // Handle frontend process events
   clientProcess.on('error', (error) => {
     log(`Frontend Error: ${error.message}`, colors.red);
   });
@@ -88,9 +88,9 @@ setTimeout(() => {
   });
 }, 2000);
 
-// Handle server process events
+// Handle API server process events
 serverProcess.on('error', (error) => {
-  log(`Backend Error: ${error.message}`, colors.red);
+  log(`API Server Error: ${error.message}`, colors.red);
 });
 
 serverProcess.on('exit', (code) => {

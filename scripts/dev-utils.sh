@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# tripblip MAG 2.0 - Development Utilities
+# Deepiri - Development Utilities
 # Various development and maintenance scripts
 
 set -e
@@ -37,15 +37,15 @@ install_deps() {
     log_info "Installing root dependencies..."
     npm install
     
-    # Server dependencies
-    log_info "Installing server dependencies..."
-    cd server
+    # API server dependencies
+    log_info "Installing API server dependencies..."
+    cd api-server
     npm install
     cd ..
     
-    # Client dependencies
-    log_info "Installing client dependencies..."
-    cd client
+    # Frontend dependencies
+    log_info "Installing frontend dependencies..."
+    cd frontend
     npm install
     cd ..
     
@@ -62,9 +62,9 @@ install_deps() {
 run_tests() {
     log_info "Running tests for all services..."
     
-    # Node.js server tests
-    log_info "Running server tests..."
-    cd server
+    # Node.js API server tests
+    log_info "Running API server tests..."
+    cd api-server
     npm test
     cd ..
     
@@ -74,9 +74,9 @@ run_tests() {
     python -m pytest tests/ -v
     cd ..
     
-    # Client tests
-    log_info "Running client tests..."
-    cd client
+    # Frontend tests
+    log_info "Running frontend tests..."
+    cd frontend
     npm test
     cd ..
     
@@ -87,15 +87,15 @@ run_tests() {
 lint_all() {
     log_info "Linting all code..."
     
-    # Server linting
-    log_info "Linting server code..."
-    cd server
+    # API server linting
+    log_info "Linting API server code..."
+    cd api-server
     npm run lint || true
     cd ..
     
-    # Client linting
-    log_info "Linting client code..."
-    cd client
+    # Frontend linting
+    log_info "Linting frontend code..."
+    cd frontend
     npm run lint || true
     cd ..
     
@@ -108,13 +108,13 @@ format_all() {
     
     # Server formatting
     log_info "Formatting server code..."
-    cd server
+    cd api-server
     npx prettier --write "**/*.{js,json}" || true
     cd ..
     
     # Client formatting
     log_info "Formatting client code..."
-    cd client
+    cd frontend
     npx prettier --write "**/*.{js,jsx,json,css}" || true
     cd ..
     
@@ -133,8 +133,8 @@ generate_docs() {
     log_info "Generating API documentation..."
     
     # Server API docs
-    log_info "Generating server API docs..."
-    cd server
+    log_info "Generating API server API docs..."
+    cd api-server
     npx swagger-jsdoc -d swaggerDef.js -o swagger.json routes/*.js || true
     cd ..
     
@@ -200,11 +200,11 @@ security_audit() {
     log_info "Auditing Node.js dependencies..."
     npm audit || true
     
-    cd server
+    cd api-server
     npm audit || true
     cd ..
     
-    cd client
+    cd frontend
     npm audit || true
     cd ..
     
@@ -223,7 +223,7 @@ performance_analysis() {
     
     # Node.js performance
     log_info "Analyzing Node.js performance..."
-    cd server
+    cd api-server
     npx clinic doctor -- node server.js &
     SERVER_PID=$!
     sleep 10
@@ -279,7 +279,7 @@ backup_config() {
     mkdir -p "$backup_dir"
     
     # Copy configuration files
-    cp -r server/config "$backup_dir/" || true
+    cp -r api-server/config "$backup_dir/" || true
     cp -r python_backend/app/settings.py "$backup_dir/" || true
     cp docker-compose.yml "$backup_dir/"
     cp .env "$backup_dir/" || true
@@ -312,7 +312,7 @@ restore_config() {
     local backup_dir=$(basename "$backup_file" .tar.gz)
     
     # Restore files
-    cp -r "$backup_dir/config" server/ || true
+    cp -r "$backup_dir/config" api-server/ || true
     cp "$backup_dir/settings.py" python_backend/app/ || true
     cp "$backup_dir/docker-compose.yml" . || true
     cp "$backup_dir/.env" . || true
@@ -329,7 +329,7 @@ dev_server() {
     
     # Start all services in development mode
     log_info "Starting backend server..."
-    cd server
+    cd api-server
     npm run dev &
     SERVER_PID=$!
     cd ..
@@ -341,7 +341,7 @@ dev_server() {
     cd ..
     
     log_info "Starting frontend..."
-    cd client
+    cd frontend
     npm run dev &
     CLIENT_PID=$!
     cd ..
@@ -362,7 +362,7 @@ prod_build() {
     
     # Build client
     log_info "Building client..."
-    cd client
+    cd frontend
     npm run build
     cd ..
     

@@ -13,7 +13,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_NAME="tripblip-mag"
+PROJECT_NAME="deepiri"
 COMPOSE_FILE="docker-compose.yml"
 ENV_FILE=".env"
 
@@ -179,7 +179,7 @@ backup_database() {
     log_info "Creating database backup: $backup_file"
     
     docker-compose -f "$COMPOSE_FILE" exec mongodb mongodump --out /backup
-    docker-compose -f "$COMPOSE_FILE" exec mongodb tar -czf "/backup/$backup_file" /backup/tripblip_mag
+    docker-compose -f "$COMPOSE_FILE" exec mongodb tar -czf "/backup/$backup_file" /backup/deepiri
     docker cp "$(docker-compose -f "$COMPOSE_FILE" ps -q mongodb):/backup/$backup_file" "./$backup_file"
     
     log_success "Database backup created: $backup_file"
@@ -202,7 +202,7 @@ restore_database() {
     
     docker cp "$backup_file" "$(docker-compose -f "$COMPOSE_FILE" ps -q mongodb):/backup/"
     docker-compose -f "$COMPOSE_FILE" exec mongodb tar -xzf "/backup/$backup_file" -C /
-    docker-compose -f "$COMPOSE_FILE" exec mongodb mongorestore /backup/tripblip_mag
+    docker-compose -f "$COMPOSE_FILE" exec mongodb mongorestore /backup/deepiri
     
     log_success "Database restored successfully!"
 }
@@ -224,11 +224,11 @@ dev_setup() {
     log_info "Installing Node.js dependencies..."
     npm install
     
-    log_info "Installing server dependencies..."
-    cd server && npm install && cd ..
+    log_info "Installing API server dependencies..."
+    cd api-server && npm install && cd ..
     
-    log_info "Installing client dependencies..."
-    cd client && npm install && cd ..
+    log_info "Installing frontend dependencies..."
+    cd frontend && npm install && cd ..
     
     log_info "Installing Python dependencies..."
     cd python_backend && pip install -r requirements.txt && cd ..

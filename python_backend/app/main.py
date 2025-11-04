@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 from .routes.agent import router as agent_router
+from .routes.challenge import router as challenge_router
 from .settings import settings
 from .logging_config import get_logger, RequestLogger, ErrorLogger
 import time
@@ -27,7 +28,7 @@ ERROR_COUNTER = Counter("pyagent_errors_total", "Total errors", ["error_type", "
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     """Application lifespan manager for startup/shutdown events."""
     # Startup
-    logger.info("Starting Python Agent API", version="0.1.0")
+    logger.info("Starting Deepiri AI Challenge Service API", version="3.0.0")
     
     # Validate required settings
     if not settings.OPENAI_API_KEY:
@@ -36,12 +37,12 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
     
     # Shutdown
-    logger.info("Shutting down Python Agent API")
+    logger.info("Shutting down Deepiri AI Challenge Service API")
 
 
 app = FastAPI(
-    title="tripblip Python Agent API", 
-    version="0.1.0",
+    title="Deepiri AI Challenge Service API", 
+    version="3.0.0",
     lifespan=lifespan
 )
 
@@ -119,7 +120,7 @@ def health():
     """Health check endpoint with detailed status information."""
     health_status = {
         "status": "healthy",
-        "version": "0.1.0",
+        "version": "3.0.0",
         "timestamp": time.time(),
         "services": {
             "ai": "ready" if settings.OPENAI_API_KEY else "disabled",
@@ -148,8 +149,8 @@ def metrics():
 def root():
     """Root endpoint with API information."""
     return {
-        "message": "tripblip Python Agent API",
-        "version": "0.1.0",
+        "message": "Deepiri AI Challenge Service API",
+        "version": "3.0.0",
         "docs": "/docs",
         "health": "/health",
         "metrics": "/metrics"
@@ -158,6 +159,7 @@ def root():
 
 # Include routers
 app.include_router(agent_router, prefix="/agent", tags=["agent"])
+app.include_router(challenge_router, prefix="/agent", tags=["challenge"])
 
 
 if __name__ == "__main__":

@@ -1,25 +1,27 @@
+name: deepiri-dev
+
 services:
   # MongoDB Database
   mongodb:
     image: mongo:7.0
-    container_name: tripblip-mongodb-dev
+    container_name: deepiri-mongodb-dev
     restart: unless-stopped
     ports:
       - "27017:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
-      MONGO_INITDB_DATABASE: ${MONGO_DB:-tripblip_mag}
+      MONGO_INITDB_DATABASE: ${MONGO_DB:-deepiri}
     volumes:
       - mongodb_dev_data:/data/db
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
-      - tripblip-dev-network
+      - deepiri-dev-network
 
   # Mongo Express - Database Admin UI
   mongo-express:
     image: mongo-express:1.0.2
-    container_name: tripblip-mongo-express-dev
+    container_name: deepiri-mongo-express-dev
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -33,12 +35,12 @@ services:
     depends_on:
       - mongodb
     networks:
-      - tripblip-dev-network
+      - deepiri-dev-network
 
   # Redis Cache
   redis:
     image: redis:7.2-alpine
-    container_name: tripblip-redis-dev
+    container_name: deepiri-redis-dev
     restart: unless-stopped
     ports:
       - "6379:6379"
@@ -46,14 +48,14 @@ services:
     volumes:
       - redis_dev_data:/data
     networks:
-      - tripblip-dev-network
+      - deepiri-dev-network
 
   # Backend API
   backend:
     build:
-      context: ./server
+      context: ./api-server
       dockerfile: Dockerfile
-    container_name: tripblip-backend-dev
+    container_name: deepiri-backend-dev
     restart: unless-stopped
     ports:
       - "5000:5000"
@@ -62,8 +64,8 @@ services:
       PORT: 5000
       
       # Database
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-tripblip_mag}?authSource=admin
-      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-tripblip_mag}?authSource=admin
+      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      MONGODB_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
       
       # Redis
       REDIS_HOST: redis
@@ -89,22 +91,22 @@ services:
       CLIENT_URL: http://localhost:5173
     
     volumes:
-      - ./server:/app
+      - ./api-server:/app
       - /app/node_modules
-      - ./server/config:/app/config:ro
-      - ./server/logs:/app/logs
+      - ./api-server/config:/app/config:ro
+      - ./api-server/logs:/app/logs
     depends_on:
       - mongodb
       - redis
     networks:
-      - tripblip-dev-network
+      - deepiri-dev-network
 
   # Python Agent API
   pyagent:
     build:
       context: ./python_backend
       dockerfile: Dockerfile
-    container_name: tripblip-pyagent-dev
+    container_name: deepiri-pyagent-dev
     restart: unless-stopped
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
@@ -117,14 +119,14 @@ services:
     depends_on:
       - backend
     networks:
-      - tripblip-dev-network
+      - deepiri-dev-network
 
   # Frontend with Vite HMR
   frontend-dev:
     build:
-      context: ./client
+      context: ./frontend
       dockerfile: Dockerfile.dev
-    container_name: tripblip-frontend-dev
+    container_name: deepiri-frontend-dev
     restart: unless-stopped
     ports:
       - "5173:5173"  # Vite dev server port
@@ -136,12 +138,12 @@ services:
       WATCHPACK_POLLING: true    # Additional polling for better file watching
     volumes:
       # Mount source code for real-time updates
-      - ./client:/app
+      - ./frontend:/app
       - /app/node_modules  # Prevent node_modules from being overwritten
     depends_on:
       - backend
     networks:
-      - tripblip-dev-network
+      - deepiri-dev-network
 
 volumes:
   mongodb_dev_data:
@@ -150,5 +152,5 @@ volumes:
     driver: local
 
 networks:
-  tripblip-dev-network:
+  deepiri-dev-network:
     driver: bridge

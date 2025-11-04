@@ -1,61 +1,75 @@
-# tripblip MAG 2.0 
+# Deepiri - AI-Powered Digital Productivity Playground
 
-Welcome to tripblip MAG 2.0, your AI-powered adventure companion that creates personalized local experiences, connects you with friends, and helps you discover the best your city (or the one you're at currently) has to offer.
+Welcome to Deepiri, your AI-powered digital productivity playground that gamifies your tasks, study material, coding projects, and creative work into engaging mini-games, challenges, and interactive experiences.
 
-## Features
+## Core Concept
 
-###  AI-Powered Adventure Generation
-- **Personalized Recommendations**: AI creates custom adventures based on your interests, location, and preferences
-- **Real-time Weather Integration**: Adventures adapt to current weather conditions
-- **Smart Scheduling**: Optimal timing based on venue hours and travel time
-- **Multi-step Itineraries**: Seamless flow between different locations and activities
+Gamify your productivity by turning tasks, study material, coding projects, or creative work into mini-games, challenges, and interactive experiences. Rewards, progress tracking, and adaptive difficulty make boring tasks fun. AI adapts challenges to your workflow and style, with optional multiplayer/competitive features.
 
-###  Social Features
-- **Friend Connections**: Connect with friends and adventure together
-- **Event Hosting**: Create and host your own events
-- **RSVP System**: Join events and manage attendance
-- **Adventure Sharing**: Share your experiences and get recommendations
+## Target Users
 
-###  Gamification
-- **Points & Badges**: Earn rewards for completing adventures
-- **Leaderboards**: Compete with friends and the community
-- **Streaks**: Maintain adventure streaks for bonus points
-- **Achievement System**: Unlock badges for different types of adventures
+- Students, knowledge workers, creatives, developers
+- Anyone looking to increase productivity in a fun, engaging way
+- Users who enjoy gamification, streaks, badges, and challenges
 
-###  Real-time Features
-- **Live Notifications**: Get updates about your adventures and events
-- **WebSocket Integration**: Real-time chat and updates
-- **Progress Tracking**: Track your adventure progress in real-time
+## Key Features
 
-##  Architecture
+### Task Gamification
+- Input tasks manually, via integrations (Trello, Notion, GitHub, Google Docs), or via AI scan of documents/code
+- Convert tasks into mini-games (e.g., puzzle, quiz, coding challenge, timed completion challenge)
 
-MAG 2.0 follows a modern microservices architecture:
+### Adaptive AI Challenges
+- AI analyzes user behavior, performance, and preferences
+- Generates adaptive challenges, e.g., "You typically code slowly in the morning — here's a short 15-min coding sprint."
 
-### Backend (Node.js + Express) and Python Agent (FastAPI)
-- **AI Orchestrator**: LangChain-powered adventure generation
-- **User Service**: Authentication and profile management
-- **Adventure Service**: Adventure creation and management
-- **Event Service**: Event management and RSVP system
-- **Notification Service**: Real-time notifications
-- **External API Service**: Integration with maps, weather, and events
-  
+### Rewards & Progression
+- Points, badges, streaks, leaderboards
+- Optional peer/competitor comparison
+
+### Content/Task Integration
+- Supports different media types: text documents, spreadsheets, PDFs, code repos, notes
+- Can ingest multiple task types at once and turn them into daily "missions."
+
+### Analytics & Insights
+- Tracks efficiency, time management, and improvement trends
+- Suggests optimized schedules or break timing
+
+### Optional Multiplayer
+- Challenges friends or coworkers to productivity duels
+- Shared missions and collaborative mini-games
+
+## Architecture
+
+Deepiri follows a modern microservices architecture:
+
+### Backend Services
+
+- **User Service**: Authentication, profiles, progress, preferences
+- **Task Service**: CRUD tasks, fetch tasks from integrations, store metadata
+- **AI Challenge Service**: Generates challenges from tasks using NLP + RL models
+- **Gamification Service**: Points, badges, leaderboards, streaks
+- **Analytics Service**: Tracks performance, creates insights, suggests optimizations
+- **Notification Service**: Sends reminders, daily missions, streak updates
+- **Integration Service**: Connects to Notion, Trello, Google Docs, GitHub for task ingestion
+
 ### Python Agent (FastAPI)
-- **Agent Chat Endpoint**: Lightweight chat interface to OpenAI
-- **Training Prep**: Script to convert dataset to JSONL for fine-tune jobs
+- **AI Challenge Generation**: NLP models for task parsing and challenge creation
+- **Reinforcement Learning**: Adaptive difficulty optimization
+- **Task Understanding**: Classifies and categorizes tasks
 
 ### Frontend (React + Vite)
 - **Modern React 18**: Hooks, Context API, and modern patterns
 - **Responsive Design**: Mobile-first design with Tailwind CSS
-- **Real-time Updates**: Socket.IO integration
+- **Real-time Updates**: Socket.IO integration for live progress
 - **Progressive Web App**: Offline support and mobile optimization
 
 ### Database & Infrastructure
 - **MongoDB**: Primary database for all application data
-- **Redis**: Caching layer for improved performance
+- **Redis**: Caching layer and leaderboard storage
 - **Docker**: Containerized deployment
 - **NGINX**: Load balancing and reverse proxy
 
-##  Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker and Docker Compose
@@ -67,7 +81,7 @@ MAG 2.0 follows a modern microservices architecture:
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd tripblip
+   cd deepiri
    ```
 
 2. **Run the setup script**
@@ -117,18 +131,13 @@ Copy `.env.example` to `.env` and configure the following:
 
 #### Required API Keys
 ```bash
-# OpenAI for AI-powered adventure generation
+# OpenAI for AI-powered challenge generation
 OPENAI_API_KEY=your_openai_api_key
 
-# Google Maps for location services
-GOOGLE_MAPS_API_KEY=your_google_maps_api_key
-
-# Weather data
-OPENWEATHER_API_KEY=your_openweather_api_key
-
-# Event data (optional)
-EVENTBRITE_API_KEY=your_eventbrite_api_key
-YELP_API_KEY=your_yelp_api_key
+# Integration APIs (optional for Phase 1)
+NOTION_API_KEY=your_notion_api_key
+TRELLO_API_KEY=your_trello_api_key
+GITHUB_TOKEN=your_github_token
 ```
 
 #### Firebase Configuration
@@ -145,6 +154,7 @@ VITE_FIREBASE_PROJECT_ID=your-project-id
 # MongoDB
 MONGO_ROOT_USER=admin
 MONGO_ROOT_PASSWORD=your_secure_password
+MONGO_DB=deepiri
 
 # Redis
 REDIS_PASSWORD=your_redis_password
@@ -153,7 +163,7 @@ REDIS_PASSWORD=your_redis_password
 JWT_SECRET=your_jwt_secret_key
 ```
 
-##  API Documentation
+## API Documentation
 
 The API is fully documented with Swagger/OpenAPI. Once the application is running, visit:
 - **Swagger UI**: http://localhost:5000/api-docs
@@ -164,45 +174,45 @@ The API is fully documented with Swagger/OpenAPI. Once the application is runnin
 - `POST /api/auth/register` - Register new user
 - `POST /api/auth/login` - Login user
 
-#### Adventures
-- `POST /api/adventures/generate` - Generate new adventure
-- `GET /api/adventures/user` - Get user's adventures
-- `GET /api/adventures/:id` - Get adventure details
-- `PATCH /api/adventures/:id/status` - Update adventure status
+#### Tasks
+- `POST /api/tasks` - Create new task
+- `GET /api/tasks` - Get user's tasks
+- `GET /api/tasks/:id` - Get task details
+- `PATCH /api/tasks/:id` - Update task
+- `DELETE /api/tasks/:id` - Delete task
 
-#### Events
-- `POST /api/events` - Create new event
-- `GET /api/events/nearby` - Get nearby events
-- `POST /api/events/:id/rsvp` - RSVP to event
+#### Challenges
+- `POST /api/challenges/generate` - Generate challenge from task
+- `GET /api/challenges` - Get user's challenges
+- `POST /api/challenges/:id/complete` - Complete challenge
 
-#### Users
-- `GET /api/users/profile` - Get user profile
-- `PATCH /api/users/profile` - Update user profile
-- `POST /api/users/friends/add` - Add friend
+#### Gamification
+- `GET /api/gamification/profile` - Get user progress
+- `GET /api/gamification/leaderboard` - Get leaderboard
+- `GET /api/gamification/badges` - Get user badges
 
-##  Testing
+#### Integrations
+- `POST /api/integrations/connect` - Connect external service
+- `GET /api/integrations/sync` - Sync tasks from integration
+
+## Testing
 
 ### Backend Tests (Node)
 ```bash
-cd server
+cd api-server
 npm test
 ```
+
 ### Python Agent Tests
 ```bash
 cd python_backend
 pytest -q
 ```
 
-
 ### Frontend Tests
 ```bash
-cd client
+cd frontend
 npm test
-```
-
-### Integration Tests
-```bash
-npm run test:integration
 ```
 
 ## Deployment
@@ -234,21 +244,21 @@ The application is designed to be cloud-native and can be deployed on:
 - **Azure**: AKS or Container Instances
 - **DigitalOcean**: App Platform or Kubernetes
 
-##  Development
+## Development
 
 ### Adding New Features
 
 1. **Backend Feature**
-   - Add model in `server/models/`
-   - Create service in `server/services/`
-   - Add routes in `server/routes/`
-   - Update controllers in `server/controllers/`
+   - Add model in `api-server/models/`
+   - Create service in `api-server/services/`
+   - Add routes in `api-server/routes/`
+   - Update controllers in `api-server/controllers/`
 
 2. **Frontend Feature**
-   - Create components in `client/src/components/`
-   - Add pages in `client/src/pages/`
-   - Update API layer in `client/src/api/`
-   - Add routing to `client/src/App.jsx`
+   - Create components in `frontend/src/components/`
+   - Add pages in `frontend/src/pages/`
+   - Update API layer in `frontend/src/api/`
+   - Add routing to `frontend/src/App.jsx`
 
 ### Code Style
 
@@ -256,7 +266,7 @@ The application is designed to be cloud-native and can be deployed on:
 - **Frontend**: ESLint + Prettier
 - **Git Hooks**: Husky for pre-commit checks
 
-##  Contributing
+## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
@@ -266,11 +276,11 @@ The application is designed to be cloud-native and can be deployed on:
 6. Push to the branch: `git push origin feature-name`
 7. Submit a pull request
 
-##  License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-##  Support
+## Support
 
 ### Common Issues
 
@@ -289,17 +299,10 @@ docker-compose down
 - Ensure MongoDB is running: `docker-compose up -d mongodb`
 - Check database credentials in `.env`
 
-##  Acknowledgments
+## Acknowledgments
 
 - OpenAI for GPT-4 integration
 - React and Node.js communities
+- Hugging Face for transformer models
 
 ---
-
-
-
-
-
-
-
-

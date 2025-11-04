@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Tripblip Development Docker Environment
+# Deepiri Development Docker Environment
 # This script manages the Docker development environment with HMR
 
 set -e
@@ -47,7 +47,7 @@ cleanup() {
 
 # Build and start development environment
 build_dev() {
-    print_status "Starting Tripblip Development Environment..."
+    print_status "Starting Deepiri Development Environment..."
     
     # Kill any existing processes on port 5173
     print_status "Freeing up port 5173..."
@@ -71,7 +71,7 @@ build_dev() {
 
 # Start development environment
 start_dev() {
-    print_status "Starting Tripblip Development Environment..."
+    print_status "Starting Deepiri Development Environment..."
     
     # Kill any existing processes on port 5173
     print_status "Freeing up port 5173..."
