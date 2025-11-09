@@ -1,0 +1,27 @@
+{
+  "name": "deepiri-api-gateway",
+  "version": "1.0.0",
+  "description": "API Gateway - Request Routing and Authentication",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "http-proxy-middleware": "^3.0.3",
+    "jsonwebtoken": "^9.0.2",
+    "express-rate-limit": "^7.1.5",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "winston": "^3.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3"
+  }
+}
+

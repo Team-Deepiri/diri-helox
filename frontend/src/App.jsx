@@ -35,6 +35,7 @@ import AgentChat from './pages/AgentChat';
 import ProductivityChat from './pages/ProductivityChat';
 import PythonTools from './pages/PythonTools';
 import UserInventory from './pages/UserInventory';
+import ImmersiveWorkspace from './pages/ImmersiveWorkspace';
 
 
 
@@ -178,6 +179,11 @@ function App() {
                     <Route path="/inventory" element={
                       <ProtectedRoute>
                         <UserInventory />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/workspace" element={
+                      <ProtectedRoute>
+                        <ImmersiveWorkspace />
                       </ProtectedRoute>
                     } />
                       </Routes>

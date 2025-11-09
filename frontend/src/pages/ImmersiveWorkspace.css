@@ -1,0 +1,106 @@
+.immersive-workspace {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #0a0a0a;
+  color: #fff;
+}
+
+.workspace-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.workspace-header h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #fff;
+}
+
+.workspace-controls {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.environment-select,
+.mode-select {
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #fff;
+  cursor: pointer;
+}
+
+.create-room-btn {
+  padding: 8px 16px;
+  background: #6366f1;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.create-room-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+}
+
+.workspace-content {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  padding: 20px;
+  overflow: hidden;
+}
+
+.environment-section {
+  height: 100%;
+  min-height: 500px;
+}
+
+.main-environment {
+  width: 100%;
+  height: 100%;
+}
+
+.collaboration-section {
+  height: 100%;
+  min-height: 500px;
+  overflow-y: auto;
+}
+
+.no-room-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: #666;
+}
+
+.no-room-message p {
+  margin-bottom: 20px;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 1024px) {
+  .workspace-content {
+    grid-template-columns: 1fr;
+  }
+  
+  .collaboration-section {
+    min-height: 300px;
+  }
+}
+

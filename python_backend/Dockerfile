@@ -13,6 +13,9 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     curl \
+    gcc \
+    g++ \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -22,7 +25,14 @@ RUN groupadd -r appuser && useradd -r -g appuser appuser
 COPY requirements.txt /app/requirements.txt
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r /app/requirements.txt
+# Install base dependencies first
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r /app/requirements.txt
+
+# Note: Some dependencies may require additional setup:
+# - bitsandbytes requires CUDA (optional, for GPU)
+# - pinecone-client and weaviate-client are optional
+# - kubernetes requires kubectl (optional, for deployment)
 
 # Copy application code
 COPY app /app/app

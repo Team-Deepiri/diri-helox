@@ -1,0 +1,99 @@
+.virtual-environment-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.environment-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: #666;
+  font-size: 1.2rem;
+}
+
+.environment-controls {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  padding: 15px;
+  color: white;
+  z-index: 10;
+}
+
+.environment-info h3 {
+  margin: 0 0 5px 0;
+  color: var(--theme-primary, #6366f1);
+  font-size: 1.2rem;
+}
+
+.environment-info p {
+  margin: 0;
+  color: #ccc;
+  font-size: 0.9rem;
+}
+
+.environment-selector {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.environment-card {
+  padding: 10px 15px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.environment-card:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: var(--theme-primary, #6366f1);
+  transform: translateY(-2px);
+}
+
+.environment-card.active {
+  border-color: var(--theme-primary, #6366f1);
+  background: rgba(99, 102, 241, 0.2);
+}
+
+.weather-controls,
+.time-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.weather-btn,
+.time-btn {
+  padding: 5px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.weather-btn:hover,
+.time-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.weather-btn.active,
+.time-btn.active {
+  background: var(--theme-primary, #6366f1);
+  border-color: var(--theme-primary, #6366f1);
+}
+

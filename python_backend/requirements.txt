@@ -26,3 +26,25 @@ scikit-learn>=1.3.0
 numpy>=1.24.0
 pandas>=2.0.0
 
+# New AI Service Dependencies
+peft>=0.7.0  # For LoRA adapters
+bitsandbytes>=0.41.0  # For quantization
+gymnasium>=0.29.0  # For RL environment
+stable-baselines3>=2.2.0  # For RL algorithms (optional)
+
+# Vector Database Dependencies
+pinecone-client>=3.0.0  # For Pinecone (optional)
+weaviate-client>=4.0.0  # For Weaviate (optional)
+
+# Time-Series Analytics
+influxdb-client>=1.38.0  # For InfluxDB
+
+# MLOps Dependencies
+kubernetes>=28.1.0  # For Kubernetes deployment
+prometheus-client>=0.20.0  # Already included above
+
+# Additional ML Libraries
+optuna>=3.5.0  # For hyperparameter optimization (optional)
+hyperopt>=0.2.7  # For hyperparameter optimization (optional)
+tensorboard>=2.15.0  # For visualization (optional)
+

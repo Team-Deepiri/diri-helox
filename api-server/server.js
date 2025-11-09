@@ -226,6 +226,124 @@ io.on('connection', (socket) => {
     logger.info(`User joined adventure room: ${adventureId}`);
     socket.emit('room_joined', { room: `adventure_${adventureId}`, type: 'adventure' });
   });
+
+  // Multiplayer Collaboration Handlers
+  socket.on('collaboration:join', (data) => {
+    const { roomId, userId, userInfo } = data;
+    socket.join(`collaboration_${roomId}`);
+    socket.to(`collaboration_${roomId}`).emit('collaborator:joined', {
+      userId,
+      ...userInfo,
+      socketId: socket.id,
+      joinedAt: new Date().toISOString()
+    });
+    logger.info(`User ${userId} joined collaboration room ${roomId}`);
+  });
+
+  socket.on('collaboration:leave', (data) => {
+    const { roomId } = data;
+    socket.to(`collaboration_${roomId}`).emit('collaborator:left', {
+      socketId: socket.id,
+      leftAt: new Date().toISOString()
+    });
+    socket.leave(`collaboration_${roomId}`);
+  });
+
+  socket.on('collaboration:update', (data) => {
+    const { roomId, update } = data;
+    socket.to(`collaboration_${roomId}`).emit('collaboration:state', update);
+  });
+
+  // Duel Handlers
+  socket.on('duel:challenge', (data) => {
+    const { targetUserId, challengeConfig } = data;
+    socket.to(`user_${targetUserId}`).emit('duel:invite', {
+      id: `duel_${Date.now()}_${socket.id}`,
+      fromUserId: socket.userId || socket.id,
+      fromUserName: data.fromUserName || 'Unknown',
+      challengeConfig,
+      timestamp: Date.now()
+    });
+    logger.info(`Duel challenge sent from ${socket.id} to ${targetUserId}`);
+  });
+
+  socket.on('duel:accept', (data) => {
+    const { duelId } = data;
+    // Create duel session
+    const duelState = {
+      id: duelId,
+      participants: [
+        { userId: socket.userId || socket.id, progress: 0 },
+        { userId: data.opponentUserId, progress: 0 }
+      ],
+      challengeName: data.challengeConfig?.challengeType || 'Duel',
+      startTime: Date.now(),
+      endTime: Date.now() + (data.challengeConfig?.duration || 15 * 60 * 1000)
+    };
+    
+    socket.emit('duel:start', duelState);
+    socket.to(`user_${data.opponentUserId}`).emit('duel:start', duelState);
+    logger.info(`Duel ${duelId} started`);
+  });
+
+  socket.on('duel:reject', (data) => {
+    const { duelId } = data;
+    socket.to(`user_${data.fromUserId}`).emit('duel:rejected', { duelId });
+  });
+
+  socket.on('duel:progress', (data) => {
+    const { duelId, progress } = data;
+    socket.to(`duel_${duelId}`).emit('duel:update', {
+      duelId,
+      userId: socket.userId || socket.id,
+      progress
+    });
+  });
+
+  // Team/Guild Handlers
+  socket.on('team:join', (data) => {
+    const { teamId, userId } = data;
+    socket.join(`team_${teamId}`);
+    socket.to(`team_${teamId}`).emit('team:member:joined', {
+      userId,
+      teamId,
+      joinedAt: new Date().toISOString()
+    });
+    logger.info(`User ${userId} joined team ${teamId}`);
+  });
+
+  socket.on('team:leave', (data) => {
+    const { teamId } = data;
+    socket.to(`team_${teamId}`).emit('team:member:left', {
+      userId: socket.userId || socket.id,
+      teamId
+    });
+    socket.leave(`team_${teamId}`);
+  });
+
+  socket.on('team:mission:start', (data) => {
+    const { teamId, missionConfig } = data;
+    const mission = {
+      id: `mission_${Date.now()}`,
+      name: missionConfig.name || 'Team Mission',
+      teamId,
+      startTime: Date.now(),
+      endTime: Date.now() + (missionConfig.duration || 60 * 60 * 1000),
+      overallProgress: 0,
+      contributions: []
+    };
+    io.to(`team_${teamId}`).emit('team:mission:started', mission);
+  });
+
+  socket.on('team:mission:progress', (data) => {
+    const { teamId, missionId, progress } = data;
+    io.to(`team_${teamId}`).emit('team:mission:update', {
+      missionId,
+      userId: socket.userId || socket.id,
+      progress,
+      timestamp: Date.now()
+    });
+  });
   
   // Development mode: Enable file change notifications
   if (process.env.NODE_ENV !== 'production') {

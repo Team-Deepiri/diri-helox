@@ -1,0 +1,334 @@
+.multiplayer-collaboration {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 6px;
+  color: #ffc107;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #4caf50;
+  animation: pulse 2s infinite;
+}
+
+.status-indicator.disconnected {
+  background: #f44336;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.collaboration-panel,
+.duel-panel,
+.team-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.panel-header h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  color: #fff;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.collaborators-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.collaborator-avatar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  min-width: 80px;
+}
+
+.collaborator-avatar.current-user {
+  border: 2px solid #6366f1;
+}
+
+.avatar-circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+.avatar-name {
+  font-size: 0.85rem;
+  color: #ccc;
+  text-align: center;
+}
+
+.avatar-status {
+  font-size: 0.7rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.no-collaborators {
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
+
+.duel-progress {
+  width: 100%;
+}
+
+.duel-participants {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+
+.participant {
+  flex: 1;
+}
+
+.participant-name {
+  font-weight: bold;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+  transition: width 0.3s;
+}
+
+.progress-fill.opponent {
+  background: linear-gradient(90deg, #ec4899, #f43f5e);
+}
+
+.progress-text {
+  font-size: 0.9rem;
+  color: #ccc;
+}
+
+.vs-divider {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #6366f1;
+}
+
+.duel-timer {
+  text-align: center;
+  padding: 10px;
+  background: rgba(255, 193, 7, 0.1);
+  border-radius: 6px;
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.duel-setup,
+.team-setup {
+  text-align: center;
+  padding: 20px;
+}
+
+.duel-setup h3,
+.team-setup h3 {
+  margin: 0 0 10px 0;
+  color: #fff;
+}
+
+.duel-setup p,
+.team-setup p {
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.challenge-btn,
+.join-team-btn {
+  padding: 10px 20px;
+  background: #6366f1;
+  border: none;
+  border-radius: 6px;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.challenge-btn:hover,
+.join-team-btn:hover {
+  background: #4f46e5;
+  transform: translateY(-2px);
+}
+
+.team-mission {
+  width: 100%;
+}
+
+.team-members {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 15px 0;
+}
+
+.team-member {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.member-name {
+  color: #fff;
+  font-weight: 500;
+}
+
+.member-contribution {
+  color: #4caf50;
+  font-weight: bold;
+}
+
+.your-contribution {
+  text-align: center;
+  padding: 10px;
+  background: rgba(99, 102, 241, 0.2);
+  border-radius: 6px;
+  color: #6366f1;
+  font-weight: bold;
+  margin-top: 10px;
+}
+
+.invitations-panel {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px;
+  padding: 15px;
+}
+
+.invitations-panel h4 {
+  margin: 0 0 15px 0;
+  color: #ffc107;
+}
+
+.invitation-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+.invitation-info {
+  flex: 1;
+  color: #fff;
+}
+
+.invitation-info strong {
+  display: block;
+  margin-bottom: 5px;
+  color: #ffc107;
+}
+
+.invitation-details {
+  font-size: 0.85rem;
+  color: #ccc;
+  margin-top: 5px;
+}
+
+.invitation-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.accept-btn,
+.reject-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.accept-btn {
+  background: #4caf50;
+  color: white;
+}
+
+.accept-btn:hover {
+  background: #45a049;
+}
+
+.reject-btn {
+  background: #f44336;
+  color: white;
+}
+
+.reject-btn:hover {
+  background: #da190b;
+}
+
