@@ -3,7 +3,7 @@
  * Implements ELO-like ranking system for competitive features
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const ELORatingSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, index: true },

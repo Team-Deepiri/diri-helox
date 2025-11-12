@@ -3,7 +3,7 @@
  * Manages user connections and social features for multiplayer
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const SocialConnectionSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },

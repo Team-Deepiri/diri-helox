@@ -3,7 +3,7 @@
  * Manages 500+ unique badges with dynamic conditions
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const BadgeSchema = new mongoose.Schema({
   badgeId: { type: String, required: true, unique: true, index: true },

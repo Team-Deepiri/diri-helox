@@ -92,21 +92,92 @@ docker run -d --name influxdb -p 8086:8086 \
 # Ubuntu: wget https://dl.influxdata.com/influxdb/releases/influxdb2-2.7.0-linux-amd64.tar.gz
 ```
 
-### 4. Backend API Setup
+### 4. Microservices Setup (Backend Team)
+
+**Backend team needs ALL microservices for development and testing:**
 
 ```bash
-cd api-server
+# Start all microservices and infrastructure
+docker-compose -f docker-compose.dev.yml up -d \
+  mongodb \
+  redis \
+  influxdb \
+  mongo-express \
+  api-gateway \
+  user-service \
+  task-service \
+  gamification-service \
+  analytics-service \
+  notification-service \
+  integration-service \
+  challenge-service \
+  websocket-service \
+  pyagent \
+  mlflow
 
-# Install dependencies
-npm install
+# Check service status
+docker-compose -f docker-compose.dev.yml ps
 
-# Start development server
-npm run dev
+# View logs for specific service
+docker-compose -f docker-compose.dev.yml logs -f user-service
+docker-compose -f docker-compose.dev.yml logs -f task-service
+# ... etc for any service
+
+# View all logs
+docker-compose -f docker-compose.dev.yml logs -f
 ```
 
-Backend runs on http://localhost:5000
+**All Backend Services:**
+- **Databases:** mongodb, redis, influxdb
+- **Admin Tools:** mongo-express
+- **API Gateway:** api-gateway (port 5000)
+- **Core Services:** user-service (5001), task-service (5002), gamification-service (5003)
+- **Analytics:** analytics-service (5004)
+- **Communication:** notification-service (5005), websocket-service (5008)
+- **Integrations:** integration-service (5006)
+- **AI:** challenge-service (5007), pyagent (8000)
+- **MLOps:** mlflow (5500)
 
-### 5. Python AI Service Setup (for AI Integration)
+**Services NOT typically needed:**
+- `frontend-dev` (unless testing full stack)
+- `jupyter` (AI team only)
+
+**Individual Service Development:**
+```bash
+# API Gateway (routes all requests)
+cd services/api-gateway
+npm install
+npm start  # Port 5000
+
+# User Service
+cd services/user-service
+npm install
+npm start  # Port 5001
+
+# Task Service
+cd services/task-service
+npm install
+npm start  # Port 5002
+
+# ... etc for each service
+```
+
+**All requests go through API Gateway at http://localhost:5000**
+
+### 5. Stop Services (When Done)
+
+```bash
+# Stop all services
+docker-compose -f docker-compose.dev.yml stop
+
+# Or stop specific services
+docker-compose -f docker-compose.dev.yml stop user-service task-service
+
+# Remove containers and volumes
+docker-compose -f docker-compose.dev.yml down -v
+```
+
+### 6. Python AI Service Setup (for AI Integration)
 
 ```bash
 cd python_backend
@@ -149,16 +220,17 @@ cat MICROSERVICES_ARCHITECTURE.md
 ```
 
 **First Tasks:**
-1. Review `MICROSERVICES_ARCHITECTURE.md`
-2. Review all services in `services/`
-3. Review `api-server/` structure
-4. Coordinate with AI Systems Lead
-5. Plan service extraction strategy
+1. Review `docs/MICROSERVICES_SETUP.md` - Complete microservices guide
+2. Review `docker-compose.dev.yml` - Service configuration
+3. Review all services in `services/` directory
+4. Test API Gateway routing
+5. Coordinate with AI Systems Lead for Python service integration
 
 **Key Files:**
-- `MICROSERVICES_ARCHITECTURE.md`
-- `services/README.md`
-- `api-server/server.js`
+- `docs/MICROSERVICES_SETUP.md` - Microservices architecture
+- `services/api-gateway/server.js` - API Gateway routing
+- `services/*/server.js` - Individual service servers
+- `docker-compose.dev.yml` - Service orchestration
 
 ---
 
@@ -173,16 +245,18 @@ npm install crypto  # For webhook signature verification
 ```
 
 **First Tasks:**
-1. Review `services/integration-service/src/webhookService.js` - NEW: Webhook service
-2. Review OAuth flows for each provider
-3. Set up webhook endpoints
-4. Implement OAuth 2.0 flows
-5. Test integration connections
+1. Review `services/integration-service/server.js` - Service entry point
+2. Review `services/integration-service/src/webhookService.js` - Webhook processing
+3. Review `services/integration-service/src/index.js` - Route handlers
+4. Set up OAuth flows for each provider (GitHub, Notion, Trello)
+5. Test webhook endpoints
+6. Verify service runs on port 5006
 
 **Key Files:**
-- `services/integration-service/src/webhookService.js` - NEW: Webhook processing
-- `services/integration-service/src/` - Integration service
-- `api-server/services/integrationService.js` - Existing integration service
+- `services/integration-service/server.js` - Service server
+- `services/integration-service/src/webhookService.js` - Webhook processing
+- `services/integration-service/src/index.js` - Route handlers
+- `services/integration-service/Dockerfile` - Container definition
 
 **OAuth Setup:**
 ```bash
@@ -259,18 +333,19 @@ npm install redis  # For pub/sub
 ```
 
 **First Tasks:**
-1. Review `services/notification-service/src/websocketService.js` - NEW: WebSocket service
-2. Review `services/websocket-service/README.md`
-3. Set up Socket.IO server
-4. Implement challenge update broadcasting
-5. Create multiplayer session management
-6. Set up presence tracking
-7. Integrate with notification service
+1. Review `services/websocket-service/server.js` - WebSocket service server
+2. Review `services/notification-service/server.js` - Notification service with WebSocket
+3. Review `services/websocket-service/README.md`
+4. Test WebSocket connections on port 5008
+5. Implement challenge update broadcasting
+6. Create multiplayer session management
+7. Set up presence tracking
 
 **Key Files:**
-- `services/notification-service/src/websocketService.js` - NEW: WebSocket service
-- `services/websocket-service/` - WebSocket service
-- `api-server/services/notificationService.js` - Notification service
+- `services/websocket-service/server.js` - WebSocket service (port 5008)
+- `services/notification-service/server.js` - Notification service (port 5005)
+- `services/notification-service/src/websocketService.js` - WebSocket handler
+- `docker-compose.dev.yml` - Service configuration
 
 **WebSocket Setup:**
 ```javascript
@@ -337,22 +412,20 @@ pip install -r requirements.txt
 ```
 
 **First Tasks:**
-1. Review `python_backend/app/routes/challenge.py`
-2. Review `python_backend/app/services/` - NEW: All new AI services
-3. Review `python_backend/app/services/rl_environment.py` - NEW: RL environment
-4. Review `python_backend/app/services/ppo_agent.py` - NEW: PPO agent
-5. Review `python_backend/app/services/multi_agent_system.py` - NEW: Multi-agent
-6. Create challenge state management
-7. Implement gamification rule engine
-8. Set up AI response validation
+1. Review `services/challenge-service/server.js` - Challenge service (port 5007)
+2. Review `python_backend/app/routes/challenge.py` - Python AI routes
+3. Review `python_backend/app/services/` - All AI services
+4. Test challenge service → Python AI service communication
+5. Implement challenge state management
+6. Set up AI response validation
 
 **Key Files:**
-- `python_backend/app/routes/challenge.py` - Challenge routes
+- `services/challenge-service/server.js` - Challenge service (port 5007)
+- `services/challenge-service/src/index.js` - Route handlers
+- `python_backend/app/routes/challenge.py` - Python AI routes
 - `python_backend/app/services/challenge_generator.py` - Challenge generation
-- `python_backend/app/services/rl_environment.py` - NEW: RL environment
-- `python_backend/app/services/ppo_agent.py` - NEW: PPO agent
-- `python_backend/app/services/multi_agent_system.py` - NEW: Multi-agent
-- `services/challenge-service/` - Challenge service
+- `python_backend/app/services/rl_environment.py` - RL environment
+- `python_backend/app/services/ppo_agent.py` - PPO agent
 
 **Integration Example:**
 ```javascript
@@ -868,7 +941,8 @@ docker-compose up service-name
 - **Backend Team README:** `README_BACKEND_TEAM.md`
 - **Microservices Architecture:** `MICROSERVICES_ARCHITECTURE.md`
 - **FIND_YOUR_TASKS:** `FIND_YOUR_TASKS.md`
-- **Environment Setup:** `ENVIRONMENT_SETUP.md`
+- **Getting Started:** `GETTING_STARTED.md`
+- **Environment Variables:** `ENVIRONMENT_VARIABLES.md`
 
 ### Important Directories
 

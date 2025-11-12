@@ -24,17 +24,74 @@ pip install -r requirements.txt
 pip install mlflow kubernetes prometheus-client
 ```
 
-### 2. Start Services
+### 2. Start Required Microservices (MLOps Team)
+
+**MLOps team only needs these services:**
+- MLflow (for model tracking and registry)
+- Python Agent (for model deployment testing)
+- MongoDB (for model registry data)
+- InfluxDB (for monitoring metrics)
+- Jupyter (for experimentation, optional)
 
 ```bash
-# Start MLflow
+# Start only the services needed for MLOps
+docker-compose -f docker-compose.dev.yml up -d \
+  mongodb \
+  influxdb \
+  mlflow \
+  pyagent \
+  jupyter
+
+# Check service status
+docker-compose -f docker-compose.dev.yml ps
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f mlflow
+docker-compose -f docker-compose.dev.yml logs -f pyagent
+```
+
+**MLOps Team Services:**
+- **MLflow:** mlflow (port 5500) - Model tracking and registry
+- **Python Agent:** pyagent (port 8000) - For model deployment testing
+- **Jupyter:** jupyter (port 8888) - For experimentation (optional)
+- **Databases:** mongodb, influxdb
+
+**Services NOT needed for MLOps:**
+- `api-gateway` (unless testing full integration)
+- `frontend-dev` (frontend team)
+- `user-service`, `task-service`, etc. (backend team)
+- `redis` (unless needed for caching)
+- `mongo-express` (optional)
+
+**Access Points:**
+- MLflow UI: http://localhost:5500
+- Python Agent: http://localhost:8000
+- Jupyter: http://localhost:8888
+
+### 3. Start Services (Alternative - Manual)
+
+```bash
+# Start MLflow manually (if not using Docker)
 mlflow server --host 0.0.0.0 --port 5000
 
-# Start monitoring stack (Docker)
+# Start monitoring stack (if using separate docker-compose)
 docker-compose -f docker/docker-compose.mlops.yml up -d
 
 # Access MLflow UI: http://localhost:5000
 # Access Grafana: http://localhost:3000 (admin/admin)
+```
+
+### 4. Stop Services (When Done)
+
+```bash
+# Stop all MLOps-related services
+docker-compose -f docker-compose.dev.yml stop \
+  mlflow \
+  pyagent \
+  jupyter
+
+# Or stop everything
+docker-compose -f docker-compose.dev.yml down
 ```
 
 ## Core Responsibilities

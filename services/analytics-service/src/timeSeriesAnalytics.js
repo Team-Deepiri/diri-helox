@@ -3,7 +3,7 @@
  * Uses InfluxDB for time-series data collection
  */
 const { InfluxDB, Point } = require('@influxdata/influxdb-client');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 class TimeSeriesAnalyticsService {
   constructor() {

@@ -3,7 +3,7 @@
  * Manages 20+ productivity skills with progression tracking
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const SkillTreeSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true },

@@ -56,7 +56,7 @@ frontend/
 ```bash
 cd frontend
 npm install
-cp env.example.client .env
+cp env.example.frontend .env.local
 # Configure environment variables
 ```
 

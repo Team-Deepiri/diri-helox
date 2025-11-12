@@ -3,7 +3,7 @@
  * Receives and processes webhooks from external services
  */
 const crypto = require('crypto');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 class WebhookService {
   constructor() {

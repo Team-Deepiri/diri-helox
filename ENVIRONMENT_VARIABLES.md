@@ -1,0 +1,420 @@
+# Environment Variables Reference
+
+Complete reference for all environment variables used in Deepiri. This guide covers local development, Docker, and Kubernetes deployments.
+
+## Table of Contents
+
+1. [Quick Reference](#quick-reference)
+2. [Environment Files Structure](#environment-files-structure)
+3. [Local Development Variables](#local-development-variables)
+4. [Kubernetes Configuration](#kubernetes-configuration)
+5. [Variable Categories](#variable-categories)
+6. [Local vs Cloud Variables](#local-vs-cloud-variables)
+
+---
+
+## Quick Reference
+
+### Essential Variables for Local Dev
+
+```bash
+# Root .env (Docker Compose)
+AI_PROVIDER=localai
+LOCALAI_API_BASE=http://localhost:8080/v1
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+REDIS_URL=redis://localhost:6379
+DEV_CLIENT_URL=http://localhost:5173
+DEV_API_URL=http://localhost:5000/api
+DEV_PYAGENT_URL=http://localhost:8000
+
+# api-server/.env
+NODE_ENV=development
+PORT=5000
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+REDIS_URL=redis://localhost:6379
+AI_PROVIDER=localai
+LOCALAI_API_BASE=http://localhost:8080/v1
+PYAGENT_URL=http://localhost:8000
+DEV_CLIENT_URL=http://localhost:5173
+CORS_ORIGIN=http://localhost:5173
+
+# python_backend/.env
+AI_PROVIDER=localai
+LOCALAI_API_BASE=http://localhost:8080/v1
+NODE_BACKEND_URL=http://localhost:5000
+VECTOR_STORE=chromadb
+CHROMADB_PATH=./chroma_db
+
+# frontend/.env.local
+VITE_API_URL=http://localhost:5000/api
+VITE_PYAGENT_URL=http://localhost:8000
+```
+
+---
+
+## Environment Files Structure
+
+```
+deepiri/
+├── .env                          # Root env (for Docker Compose)
+├── env.example                   # Root env template
+├── api-server/
+│   ├── .env                      # Backend env
+│   └── env.example.api-server    # Backend env template
+├── python_backend/
+│   ├── .env                      # Python Agent env
+│   └── env.example.python_backend # Python Agent env template
+└── frontend/
+    ├── .env.local                # Frontend env
+    └── env.example.frontend      # Frontend env template
+```
+
+---
+
+## Local Development Variables
+
+### Root `.env` (Docker Compose)
+
+**Server Configuration:**
+```bash
+NODE_ENV=development
+PORT=5000
+HOST=0.0.0.0
+```
+
+**Database Configuration:**
+```bash
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+MONGO_ROOT_USER=admin
+MONGO_ROOT_PASSWORD=password
+MONGO_DB=deepiri
+
+REDIS_URL=redis://localhost:6379
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=redispassword
+```
+
+**AI Configuration:**
+```bash
+AI_PROVIDER=localai  # localai | openai | deepinfra
+LOCALAI_API_BASE=http://localhost:8080/v1
+LOCALAI_MODEL=gpt-4o-mini
+```
+
+**Development URLs:**
+```bash
+DEV_CLIENT_URL=http://localhost:5173
+DEV_API_URL=http://localhost:5000/api
+DEV_PYAGENT_URL=http://localhost:8000
+```
+
+### `api-server/.env`
+
+**Server Configuration:**
+```bash
+NODE_ENV=development
+PORT=5000
+HOST=0.0.0.0
+```
+
+**Database:**
+```bash
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+REDIS_URL=redis://localhost:6379
+```
+
+**Authentication:**
+```bash
+JWT_SECRET=your-super-secret-jwt-key-minimum-32-characters-long
+JWT_EXPIRES_IN=7d
+SESSION_SECRET=your-session-secret-key-here
+```
+
+**AI Configuration:**
+```bash
+AI_PROVIDER=localai
+LOCALAI_API_BASE=http://localhost:8080/v1
+PYAGENT_URL=http://localhost:8000
+```
+
+**CORS:**
+```bash
+CORS_ORIGIN=http://localhost:5173
+CLIENT_URL=http://localhost:5173
+```
+
+### `python_backend/.env`
+
+**Server Configuration:**
+```bash
+PORT=8000
+HOST=0.0.0.0
+ENVIRONMENT=development
+DEBUG=true
+```
+
+**AI Configuration:**
+```bash
+AI_PROVIDER=localai
+LOCALAI_API_BASE=http://localhost:8080/v1
+LOCALAI_MODEL=gpt-4o-mini
+```
+
+**Backend Communication:**
+```bash
+NODE_BACKEND_URL=http://localhost:5000
+PYAGENT_API_KEY=change-me
+```
+
+**RAG / Embeddings:**
+```bash
+VECTOR_STORE=chromadb
+CHROMADB_PATH=./chroma_db
+CHROMADB_COLLECTION=deepiri_embeddings
+EMBEDDING_MODEL=all-minilm-l6-v2
+```
+
+### `frontend/.env.local`
+
+```bash
+VITE_API_URL=http://localhost:5000/api
+VITE_PYAGENT_URL=http://localhost:8000
+```
+
+---
+
+## Kubernetes Configuration
+
+### ConfigMap vs Secrets
+
+**ConfigMap** (`ops/k8s/configmap.yaml`):
+- Non-sensitive configuration
+- Ports, feature flags, URLs
+- Service names (e.g., `mongodb-service:27017`)
+
+**Secrets** (`ops/k8s/secrets/secrets.yaml`):
+- Sensitive data (passwords, API keys)
+- JWT secrets, database passwords
+- API keys
+
+### Kubernetes Service Names
+
+In Kubernetes, services communicate using service names:
+- `mongodb-service:27017` (not `localhost:27017`)
+- `redis-service:6379` (not `localhost:6379`)
+- `backend-service:5000` (not `localhost:5000`)
+- `pyagent-service:8000` (not `localhost:8000`)
+- `localai-service:8080` (not `localhost:8080`)
+
+---
+
+## Variable Categories
+
+### Required Variables
+
+**For Local Development:**
+- `MONGODB_URI` - MongoDB connection string
+- `REDIS_URL` - Redis connection string
+- `JWT_SECRET` - JWT signing secret
+- `AI_PROVIDER` - AI provider (localai/openai/deepinfra)
+- `DEV_CLIENT_URL` - Frontend URL
+- `DEV_API_URL` - Backend API URL
+- `DEV_PYAGENT_URL` - Python Agent URL
+
+**For Kubernetes:**
+- ConfigMap with service names
+- Secrets with passwords and API keys
+
+### Optional Variables
+
+**AI Providers:**
+- `OPENAI_API_KEY` - Only if using OpenAI
+- `DEEPINFRA_API_KEY` - Only if using DeepInfra
+- `LOCALAI_API_KEY` - Only if LocalAI requires it
+
+**External Services:**
+- `FIREBASE_PROJECT_ID` - Optional, can skip for local dev
+- `GOOGLE_MAPS_API_KEY` - Optional
+- `FCM_SERVER_KEY` - Optional
+- `TWILIO_ACCOUNT_SID` - Optional
+
+**Monitoring:**
+- `ENABLE_METRICS` - Optional
+- `PROMETHEUS_ENABLED` - Optional
+
+---
+
+## Local vs Cloud Variables
+
+### ⚠️ Critical: PROD_* Variables
+
+**PROD_* variables are ONLY for reference when creating cloud Kubernetes Secrets.**
+
+- ❌ **DO NOT** use `PROD_*` variables in local `.env` files
+- ❌ **DO NOT** set production values locally
+- ✅ **ONLY** use `PROD_*` as reference when creating cloud K8s Secrets
+
+### Local Development
+
+**Use:**
+- `DEV_*` variables (e.g., `DEV_CLIENT_URL`, `DEV_API_URL`)
+- `localhost` URLs for all services
+- `AI_PROVIDER=localai` for free local AI
+- `.env` files for configuration
+
+**Example:**
+```bash
+DEV_CLIENT_URL=http://localhost:5173
+DEV_API_URL=http://localhost:5000/api
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+```
+
+### Cloud/Production
+
+**Use:**
+- ConfigMaps for non-sensitive config
+- Secrets for sensitive data
+- Production URLs (e.g., `https://api.deepiri.com`)
+- Service names in Kubernetes
+
+**Example (Kubernetes Secret):**
+```yaml
+# In cloud K8s Secret (not .env file)
+MONGODB_URI: mongodb+srv://user:pass@cluster.mongodb.net/deepiri_prod
+CLIENT_URL: https://deepiri.com
+API_URL: https://api.deepiri.com
+```
+
+---
+
+## Environment Variable Reference
+
+### Server Configuration
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `NODE_ENV` | Environment mode | `development` | Yes |
+| `PORT` | Server port | `5000` | Yes |
+| `HOST` | Server host | `0.0.0.0` | Yes |
+
+### Database Configuration
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `MONGODB_URI` | MongoDB connection string | `mongodb://admin:password@localhost:27017/deepiri?authSource=admin` | Yes |
+| `MONGO_ROOT_USER` | MongoDB admin user | `admin` | Yes |
+| `MONGO_ROOT_PASSWORD` | MongoDB admin password | `password` | Yes |
+| `REDIS_URL` | Redis connection string | `redis://localhost:6379` | Yes |
+| `REDIS_PASSWORD` | Redis password | `redispassword` | Optional |
+
+### AI Configuration
+
+| Variable | Description | Options | Required |
+|----------|-------------|---------|----------|
+| `AI_PROVIDER` | AI provider | `localai` \| `openai` \| `deepinfra` | Yes |
+| `LOCALAI_API_BASE` | LocalAI API base URL | `http://localhost:8080/v1` | If using LocalAI |
+| `OPENAI_API_KEY` | OpenAI API key | `sk-...` | If using OpenAI |
+| `OPENAI_API_BASE` | OpenAI API base URL | `https://api.openai.com/v1` | If using OpenAI |
+| `OPENAI_MODEL` | OpenAI model name | `gpt-4o-mini` | If using OpenAI |
+
+### Development URLs
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `DEV_CLIENT_URL` | Frontend URL (local) | `http://localhost:5173` | Yes |
+| `DEV_API_URL` | Backend API URL (local) | `http://localhost:5000/api` | Yes |
+| `DEV_PYAGENT_URL` | Python Agent URL (local) | `http://localhost:8000` | Yes |
+
+### Authentication
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `JWT_SECRET` | JWT signing secret | `your-secret-key-32-chars-min` | Yes |
+| `JWT_EXPIRES_IN` | JWT expiration | `7d` | Yes |
+| `SESSION_SECRET` | Session secret | `your-session-secret` | Yes |
+
+### RAG / Embeddings
+
+| Variable | Description | Example | Required |
+|----------|-------------|---------|----------|
+| `VECTOR_STORE` | Vector store type | `chromadb` | Yes |
+| `CHROMADB_PATH` | ChromaDB storage path | `./chroma_db` | If using ChromaDB |
+| `EMBEDDING_MODEL` | Embedding model | `all-minilm-l6-v2` | Yes |
+
+---
+
+## Common Configuration Patterns
+
+### Local Development with LocalAI
+
+```bash
+# Root .env
+AI_PROVIDER=localai
+LOCALAI_API_BASE=http://localhost:8080/v1
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+REDIS_URL=redis://localhost:6379
+DEV_CLIENT_URL=http://localhost:5173
+DEV_API_URL=http://localhost:5000/api
+DEV_PYAGENT_URL=http://localhost:8000
+```
+
+### Local Development with OpenAI
+
+```bash
+# Root .env
+AI_PROVIDER=openai
+OPENAI_API_KEY=sk-your-key-here
+OPENAI_API_BASE=https://api.openai.com/v1
+OPENAI_MODEL=gpt-4o-mini
+MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
+REDIS_URL=redis://localhost:6379
+DEV_CLIENT_URL=http://localhost:5173
+DEV_API_URL=http://localhost:5000/api
+DEV_PYAGENT_URL=http://localhost:8000
+```
+
+### Kubernetes Local Dev
+
+**ConfigMap:**
+```yaml
+AI_PROVIDER: "localai"
+LOCALAI_API_BASE: "http://localai-service:8080/v1"
+MONGODB_URI: "mongodb://admin:password@mongodb-service:27017/deepiri?authSource=admin"
+REDIS_URL: "redis://:password@redis-service:6379"
+```
+
+**Secrets:**
+```yaml
+JWT_SECRET: "your-secret-key"
+MONGO_ROOT_PASSWORD: "password"
+REDIS_PASSWORD: "redispassword"
+```
+
+---
+
+## Troubleshooting
+
+### Variable Not Found
+
+- Check `.env` file exists in correct location
+- Verify variable name spelling
+- Restart service after changing `.env` files
+
+### Wrong Service URLs
+
+- Local dev: Use `localhost` URLs
+- Docker: Use service names (e.g., `mongodb:27017`)
+- Kubernetes: Use service names (e.g., `mongodb-service:27017`)
+
+### PROD_* Variables in Local Dev
+
+- ❌ Remove `PROD_*` variables from local `.env` files
+- ✅ Only use `DEV_*` variables locally
+- ✅ `PROD_*` are only for cloud K8s reference
+
+---
+
+**Last Updated:** 2024  
+**Maintained by:** Platform Team
+

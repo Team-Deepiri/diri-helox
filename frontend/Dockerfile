@@ -7,8 +7,10 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm install --legacy-peer-deps
+# Install dependencies and clean up in one layer
+RUN npm install --legacy-peer-deps && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/tmp/*
 
 # Copy source code
 COPY . .
@@ -33,8 +35,10 @@ ENV VITE_FIREBASE_MESSAGING_SENDER_ID=$VITE_FIREBASE_MESSAGING_SENDER_ID
 ENV VITE_FIREBASE_APP_ID=$VITE_FIREBASE_APP_ID
 ENV VITE_FIREBASE_MEASUREMENT_ID=$VITE_FIREBASE_MEASUREMENT_ID
 
-# Build the application
-RUN npm run build
+# Build the application and clean up build artifacts
+RUN npm run build && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/tmp/* /root/.npm
 
 # Production stage
 FROM nginx:alpine

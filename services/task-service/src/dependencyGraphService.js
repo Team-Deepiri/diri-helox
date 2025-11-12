@@ -3,7 +3,7 @@
  * Manages task dependencies and dependency graphs
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const TaskDependencySchema = new mongoose.Schema({
   taskId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },

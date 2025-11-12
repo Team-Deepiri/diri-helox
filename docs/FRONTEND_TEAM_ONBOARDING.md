@@ -53,30 +53,108 @@ cd frontend
 npm install
 
 # Copy environment file
-cp env.example.client .env
+cp env.example.frontend .env.local
 
 # Edit .env with your configuration
-# VITE_API_URL=http://localhost:5000
-# VITE_AI_SERVICE_URL=http://localhost:8000
+# IMPORTANT: Point to API Gateway (not individual services)
+# VITE_API_URL=http://localhost:5000/api
+# VITE_PYAGENT_URL=http://localhost:8000
 # VITE_FIREBASE_API_KEY=your-key
 ```
 
-### 3. Start Development Server
+### 3. Start Required Microservices (Frontend Team)
+
+**Frontend team only needs these services:**
+- Frontend (for development)
+- API Gateway (to route requests)
+- Core services: User, Task, Gamification, Analytics
+- WebSocket (for real-time updates)
+- Python Agent (for AI features)
+- Databases: MongoDB, Redis
 
 ```bash
+# Start only the services needed for frontend development
+docker-compose -f docker-compose.dev.yml up -d \
+  mongodb \
+  redis \
+  api-gateway \
+  user-service \
+  task-service \
+  gamification-service \
+  analytics-service \
+  websocket-service \
+  pyagent \
+  frontend-dev
+
+# Check service status
+docker-compose -f docker-compose.dev.yml ps
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f frontend-dev
+```
+
+**Services NOT needed for frontend:**
+- `influxdb` (unless working on analytics dashboards)
+- `mlflow` (MLOps only)
+- `jupyter` (AI team only)
+- `notification-service` (unless testing notifications)
+- `integration-service` (unless testing integrations)
+- `challenge-service` (unless testing challenges)
+- `mongo-express` (optional, for database admin)
+
+### 4. Start Development Server
+
+```bash
+# If using Docker (recommended)
+# Frontend is already running via docker-compose above
+
+# Or run locally (if not using Docker)
+cd frontend
 npm run dev
 ```
 
-Frontend runs on http://localhost:3000
+Frontend runs on http://localhost:5173
 
-### 4. Verify Setup
+**Important:** Frontend connects to API Gateway (port 5000), which routes to all microservices.
+
+### 5. Verify Setup
 
 ```bash
-# Check if server is running
-curl http://localhost:3000
+# Check if frontend is running
+curl http://localhost:5173
 
-# Check backend connection
-# Open browser to http://localhost:3000
+# Check API Gateway connection
+curl http://localhost:5000/health
+
+# Check required services
+curl http://localhost:5001/health  # User Service
+curl http://localhost:5002/health  # Task Service
+curl http://localhost:5003/health  # Gamification Service
+curl http://localhost:5004/health  # Analytics Service
+curl http://localhost:5008/health  # WebSocket Service
+curl http://localhost:8000/health  # Python Agent
+
+# Open browser to http://localhost:5173
+```
+
+**Note:** All API calls should go through the API Gateway at `http://localhost:5000/api/*`
+
+### 6. Stop Services (When Done)
+
+```bash
+# Stop all frontend-related services
+docker-compose -f docker-compose.dev.yml stop \
+  frontend-dev \
+  api-gateway \
+  user-service \
+  task-service \
+  gamification-service \
+  analytics-service \
+  websocket-service \
+  pyagent
+
+# Or stop everything
+docker-compose -f docker-compose.dev.yml down
 ```
 
 ## Role-Specific Setup
@@ -246,23 +324,25 @@ npm install lottie-react  # for Lottie animations
 ```
 
 **First Tasks:**
-1. Review `services/gamification-service/src/multiCurrencyService.js` - NEW: Multi-currency
-2. Review `services/gamification-service/src/eloLeaderboardService.js` - NEW: ELO ranking
-3. Review `services/gamification-service/src/badgeSystemService.js` - NEW: Badge system (500+ badges)
-4. Review gamification components
-5. Create badge components with animations (support 500+ badges)
-6. Create progress bar components
-7. Create avatar components
-8. Implement achievement animations
-9. Create multi-currency display components
-10. Create ELO leaderboard UI
+1. Review `services/gamification-service/server.js` - Gamification service (port 5003)
+2. Review `services/gamification-service/src/multiCurrencyService.js` - Multi-currency
+3. Review `services/gamification-service/src/eloLeaderboardService.js` - ELO ranking
+4. Review `services/gamification-service/src/badgeSystemService.js` - Badge system (500+ badges)
+5. Test API calls through API Gateway: `http://localhost:5000/api/gamification/*`
+6. Create badge components with animations (support 500+ badges)
+7. Create progress bar components
+8. Create avatar components
+9. Implement achievement animations
+10. Create multi-currency display components
+11. Create ELO leaderboard UI
 
 **Key Files:**
-- `services/gamification-service/src/multiCurrencyService.js` - NEW: Multi-currency
-- `services/gamification-service/src/eloLeaderboardService.js` - NEW: ELO leaderboard
-- `services/gamification-service/src/badgeSystemService.js` - NEW: Badge system
-- `frontend/src/components/gamification/` (create)
-- `api-server/services/gamificationService.js` (review)
+- `services/gamification-service/server.js` - Service server (port 5003)
+- `services/gamification-service/src/index.js` - Route handlers
+- `services/gamification-service/src/multiCurrencyService.js` - Multi-currency
+- `services/gamification-service/src/eloLeaderboardService.js` - ELO leaderboard
+- `services/gamification-service/src/badgeSystemService.js` - Badge system
+- `frontend/src/components/gamification/` - Frontend components
 
 **Animation Example:**
 ```jsx
@@ -423,7 +503,8 @@ npm run build
 
 - **Frontend Team README:** `README_FRONTEND_TEAM.md`
 - **FIND_YOUR_TASKS:** `FIND_YOUR_TASKS.md`
-- **Environment Setup:** `ENVIRONMENT_SETUP.md`
+- **Getting Started:** `GETTING_STARTED.md`
+- **Environment Variables:** `ENVIRONMENT_VARIABLES.md`
 
 ### Important Directories
 

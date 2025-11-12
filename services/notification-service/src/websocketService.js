@@ -3,7 +3,7 @@
  * Real-time notifications via WebSocket
  */
 const { Server } = require('socket.io');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 class WebSocketService {
   constructor() {

@@ -3,7 +3,7 @@
  * Manages multiple currency types (XP, coins, gems, etc.)
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const CurrencyBalanceSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, required: true, unique: true, index: true },

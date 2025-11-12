@@ -3,7 +3,7 @@ Hybrid AI Service Tests
 Test local/API model switching
 """
 import pytest
-from app.services.hybrid_ai_service import get_hybrid_service
+from app.services.hybrid_ai_service import get_hybrid_ai_service
 from app.services.model_selector import ModelType
 
 
@@ -12,7 +12,7 @@ class TestHybridAIService:
     
     @pytest.fixture
     def service(self):
-        return get_hybrid_service()
+        return get_hybrid_ai_service()
     
     @pytest.mark.asyncio
     async def test_classify_with_hybrid(self, service):

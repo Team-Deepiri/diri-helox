@@ -2,7 +2,7 @@
  * Predictive Modeling Service
  * Prophet + LSTM networks for forecasting
  */
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 class PredictiveModelingService {
   constructor() {

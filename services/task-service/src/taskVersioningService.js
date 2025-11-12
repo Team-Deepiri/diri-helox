@@ -3,7 +3,7 @@
  * Manages task history and versioning
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 const TaskVersionSchema = new mongoose.Schema({
   taskId: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },

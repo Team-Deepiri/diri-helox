@@ -6,7 +6,7 @@ import pytest
 import asyncio
 from app.services.task_classifier import get_task_classifier
 from app.services.challenge_generator import get_challenge_generator
-from app.services.hybrid_ai_service import get_hybrid_service
+from app.services.hybrid_ai_service import get_hybrid_ai_service
 from app.services.bandit_service import get_bandit_service
 
 
@@ -39,7 +39,7 @@ class TestFullPipeline:
     @pytest.mark.asyncio
     async def test_hybrid_pipeline(self):
         """Test hybrid AI pipeline."""
-        service = get_hybrid_service()
+        service = get_hybrid_ai_service()
         
         task_text = "Study machine learning"
         classification = await service.classify_task_hybrid(task_text)

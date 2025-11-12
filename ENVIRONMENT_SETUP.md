@@ -1,522 +1,315 @@
-# Deepiri Environment Setup Guide
+# Environment Setup Guide
 
-Complete guide for setting up the Deepiri development environment.
-
-## Table of Contents
-
-1. [Prerequisites](#prerequisites)
-2. [Quick Start](#quick-start)
-3. [Detailed Setup](#detailed-setup)
-4. [Service-Specific Setup](#service-specific-setup)
-5. [Development Tools](#development-tools)
-6. [Troubleshooting](#troubleshooting)
+Complete setup guide for new team members joining the Deepiri project.
 
 ## Prerequisites
 
-### Required Software
+- **Docker** (version 20.10+)
+- **Docker Compose** (version 2.0+)
+- **Node.js** (version 18+) - for local development
+- **Python** (version 3.11+) - for local development
+- **Git** (version 2.30+)
 
-- **Node.js** 18.x or higher
-- **Python** 3.10 or higher
-- **Docker** and **Docker Compose**
-- **Git**
-- **MongoDB** 6.0+ (or use Docker)
-- **Redis** 7.0+ (or use Docker)
-
-### Optional but Recommended
-
-- **CUDA-capable GPU** (for AI training)
-- **VS Code** or your preferred IDE
-- **Postman** or **Insomnia** (for API testing)
-- **MongoDB Compass** (for database management)
-
-### System Requirements
-
-- **RAM:** Minimum 8GB, Recommended 16GB+
-- **Storage:** Minimum 20GB free space
-- **OS:** Windows 10+, macOS 10.15+, or Linux (Ubuntu 20.04+)
-
-## Quick Start
-
-### Option 1: Docker Compose (Recommended)
+### Verify Prerequisites
 
 ```bash
-# Clone the repository
+docker --version
+docker-compose --version
+node --version
+python --version
+git --version
+```
+
+## Initial Setup
+
+### 1. Clone the Repository
+
+```bash
 git clone <repository-url>
 cd Deepiri/deepiri
+```
 
-# Copy environment files
-cp env.example .env
-cp env.example.docker docker-compose.env
+### 2. Set Up Environment Variables
 
-# Edit .env with your configuration
-# Add API keys: OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.
+```bash
+# Copy example environment files
+cp api-server/env.example.api-server .env.api-server
+cp python_backend/env.example.python_backend .env.python_backend
 
+# Edit .env files with your configuration
+# At minimum, set:
+# - OPENAI_API_KEY
+# - MONGO_ROOT_PASSWORD
+# - REDIS_PASSWORD
+```
+
+**For detailed environment variable reference, see [ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md)**
+
+### 3. Install Dependencies
+
+#### Option A: Automated Script (Recommended)
+
+```bash
+# Make script executable (Linux/Mac)
+chmod +x scripts/fix-dependencies.sh
+
+# Run the script
+bash scripts/fix-dependencies.sh
+```
+
+This will:
+- ✅ Install all Node.js dependencies for all services
+- ✅ Install Python dependencies
+- ✅ Verify logger utilities exist
+- ✅ Ensure all required packages are available
+
+#### Option B: Manual Installation
+
+**Node.js Services:**
+```bash
+# Install dependencies for all services
+for service in services/*; do
+  if [ -f "$service/package.json" ]; then
+    echo "Installing $service..."
+    cd "$service" && npm install && cd ../..
+  fi
+done
+
+# Install API server dependencies
+cd api-server && npm install && cd ..
+
+# Install frontend dependencies
+cd frontend && npm install && cd ..
+```
+
+**Python Backend:**
+```bash
+cd python_backend
+pip install -r requirements.txt
+```
+
+### 4. Verify Setup
+
+```bash
+# Check that logger utilities exist
+find services -name "logger.js" -type f
+
+# Check that dependencies are installed
+ls services/user-service/node_modules/axios
+python -c "import numpy; print('numpy OK')"
+```
+
+## Running Services
+
+### Development Mode (Recommended)
+
+```bash
 # Start all services
 docker-compose -f docker-compose.dev.yml up -d
 
-# Check service status
-docker-compose ps
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f
+
+# Stop all services
+docker-compose -f docker-compose.dev.yml down
+```
+
+### Production Mode
+
+```bash
+# Build and start
+docker-compose up -d --build
 
 # View logs
 docker-compose logs -f
 ```
 
-Services will be available at:
-- Frontend: http://localhost:3000
-- Backend API: http://localhost:5000
-- Python AI Service: http://localhost:8000
-- MongoDB: localhost:27017
-- Redis: localhost:6379
-- Mongo Express: http://localhost:8081
+## Service Architecture
 
-### Option 2: Local Development
+### Microservices
 
-See [Detailed Setup](#detailed-setup) section below.
+| Service | Port | Description |
+|---------|------|-------------|
+| api-gateway | 5000 | Main API gateway |
+| user-service | 5001 | User management, OAuth |
+| task-service | 5002 | Task management |
+| gamification-service | 5003 | Gamification features |
+| analytics-service | 5004 | Analytics and metrics |
+| notification-service | 5005 | Notifications |
+| integration-service | 5006 | External integrations |
+| challenge-service | 5007 | Challenge generation |
+| websocket-service | 5008 | WebSocket connections |
+| pyagent | 8000 | AI/ML service |
+| frontend-dev | 5173 | Frontend (dev) |
 
-## Detailed Setup
+### Infrastructure Services
 
-### 1. Clone Repository
+| Service | Port | Description |
+|---------|------|-------------|
+| mongodb | 27017 | MongoDB database |
+| redis | 6379 | Redis cache |
+| influxdb | 8086 | InfluxDB time-series |
+| mongo-express | 8081 | MongoDB admin UI |
+| mlflow | 5500 | ML experiment tracking |
+| jupyter | 8888 | Jupyter notebooks |
 
-```bash
-git clone <repository-url>
-cd Deepiri/deepiri
+## Project Structure
+
+```
+deepiri/
+├── services/              # Microservices
+│   ├── user-service/
+│   │   ├── src/          # Source code
+│   │   ├── utils/        # Utilities (logger, etc.)
+│   │   ├── package.json  # Dependencies
+│   │   └── Dockerfile    # Service Dockerfile
+│   ├── task-service/
+│   ├── ...
+│   └── shared-utils/     # Shared utilities package
+├── api-server/           # Main API server
+├── frontend/             # React frontend
+├── python_backend/       # Python AI/ML backend
+│   ├── app/             # Application code
+│   ├── requirements.txt # Python dependencies
+│   └── Dockerfile       # Python Dockerfile
+├── scripts/             # Utility scripts
+├── docs/                # Documentation
+└── docker-compose.dev.yml  # Development compose file
 ```
 
-### 2. Environment Configuration
+## Common Tasks
 
+### Adding a New Dependency
+
+**Node.js Service:**
 ```bash
-# Copy environment templates
-cp env.example .env
-cp env.example.server api-server/.env
-cp env.example.client frontend/.env
-cp env.example.python python_backend/.env
-
-# Edit each .env file with your configuration
+cd services/user-service
+npm install <package-name> --save
 ```
 
-#### Required Environment Variables
-
-**Root `.env`:**
-```bash
-NODE_ENV=development
-API_URL=http://localhost:5000
-AI_SERVICE_URL=http://localhost:8000
-MONGODB_URI=mongodb://localhost:27017/deepiri
-REDIS_URL=redis://localhost:6379
-```
-
-**`api-server/.env`:**
-```bash
-PORT=5000
-MONGODB_URI=mongodb://localhost:27017/deepiri
-REDIS_URL=redis://localhost:6379
-JWT_SECRET=your-secret-key-here
-FIREBASE_PROJECT_ID=your-firebase-project
-```
-
-**`frontend/.env`:**
-```bash
-VITE_API_URL=http://localhost:5000
-VITE_AI_SERVICE_URL=http://localhost:8000
-VITE_FIREBASE_API_KEY=your-firebase-key
-```
-
-**`python_backend/.env`:**
-```bash
-OPENAI_API_KEY=your-openai-key
-ANTHROPIC_API_KEY=your-anthropic-key
-HUGGINGFACE_API_KEY=your-huggingface-key
-LOCAL_MODEL_PATH=/path/to/local/model
-PREFERRED_MODEL_TYPE=openai
-```
-
-### 3. Database Setup
-
-#### MongoDB
-
-**Using Docker:**
-```bash
-docker run -d \
-  --name mongodb \
-  -p 27017:27017 \
-  -v mongodb_data:/data/db \
-  mongo:6.0
-```
-
-**Using Local Installation:**
-```bash
-# macOS
-brew install mongodb-community
-brew services start mongodb-community
-
-# Ubuntu
-sudo apt-get install mongodb
-sudo systemctl start mongodb
-
-# Windows
-# Download and install from mongodb.com
-```
-
-#### Redis
-
-**Using Docker:**
-```bash
-docker run -d \
-  --name redis \
-  -p 6379:6379 \
-  redis:7-alpine
-```
-
-**Using Local Installation:**
-```bash
-# macOS
-brew install redis
-brew services start redis
-
-# Ubuntu
-sudo apt-get install redis-server
-sudo systemctl start redis-server
-
-# Windows
-# Download and install from redis.io
-```
-
-### 4. Backend Setup
-
-```bash
-cd api-server
-
-# Install dependencies
-npm install
-
-# Run database migrations (if any)
-npm run migrate
-
-# Start development server
-npm run dev
-```
-
-Backend will run on http://localhost:5000
-
-### 5. Python AI Service Setup
-
+**Python Backend:**
 ```bash
 cd python_backend
-
-# Create virtual environment
-python -m venv venv
-
-# Activate virtual environment
-# Windows
-venv\Scripts\activate
-# macOS/Linux
-source venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install additional AI dependencies
-pip install torch transformers accelerate bitsandbytes
-
-# Start FastAPI server
-uvicorn app.main:app --reload --port 8000
+pip install <package-name>
+echo "<package-name>==<version>" >> requirements.txt
 ```
 
-Python service will run on http://localhost:8000
+### Adding a New Service
 
-**For GPU Support (Training):**
-```bash
-# Install CUDA-enabled PyTorch
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+1. Create service directory: `services/new-service/`
+2. Add `package.json` with dependencies
+3. Create `Dockerfile`
+4. Add service to `docker-compose.dev.yml`
+5. Create `utils/logger.js` in the service
 
-# Verify GPU
-python -c "import torch; print(torch.cuda.is_available())"
-```
-
-### 6. Frontend Setup
+### Debugging a Service
 
 ```bash
-cd frontend
+# View logs
+docker logs deepiri-user-service-dev -f
 
-# Install dependencies
-npm install
+# Execute command in container
+docker exec -it deepiri-user-service-dev sh
 
-# Start development server
-npm run dev
+# Check service health
+curl http://localhost:5001/health
 ```
 
-Frontend will run on http://localhost:3000
-
-### 7. Desktop IDE Setup
+### Rebuilding a Service
 
 ```bash
-cd ../desktop-ide-deepiri
+# Rebuild specific service
+docker-compose -f docker-compose.dev.yml build --no-cache user-service
+docker-compose -f docker-compose.dev.yml up -d user-service
 
-# Install Rust (if not installed)
-# Visit rustup.rs for installation
-
-# Install Tauri CLI
-cargo install tauri-cli
-
-# Install frontend dependencies
-npm install
-
-# Build and run
-npm run tauri dev
+# Rebuild all services
+docker-compose -f docker-compose.dev.yml build --no-cache
+docker-compose -f docker-compose.dev.yml up -d
 ```
-
-## Service-Specific Setup
-
-### Microservices Architecture
-
-Each microservice in `services/` can be run independently:
-
-```bash
-# Example: Integration Service
-cd services/integration-service
-npm install
-npm run dev
-```
-
-### AI Training Environment
-
-```bash
-cd python_backend
-
-# Setup training directories
-mkdir -p train/models train/data train/experiments train/notebooks
-
-# Initialize MLflow
-mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns
-
-# Run training pipeline
-python train/pipelines/ml_training_pipeline.py --config train/configs/ml_training_config.json
-```
-
-### MLOps Setup
-
-```bash
-cd python_backend/mlops
-
-# Setup monitoring
-# Prometheus and Grafana configs are in infrastructure/monitoring/
-
-# Setup CI/CD
-# GitHub Actions workflows are in .github/workflows/
-```
-
-## Development Tools
-
-### VS Code Extensions (Recommended)
-
-- Python
-- Pylance
-- ESLint
-- Prettier
-- Docker
-- MongoDB
-- Rust Analyzer
-- Tauri
-
-### VS Code Settings
-
-Create `.vscode/settings.json`:
-```json
-{
-  "python.defaultInterpreterPath": "${workspaceFolder}/python_backend/venv/bin/python",
-  "python.linting.enabled": true,
-  "python.formatting.provider": "black",
-  "editor.formatOnSave": true,
-  "files.exclude": {
-    "**/__pycache__": true,
-    "**/*.pyc": true
-  }
-}
-```
-
-### Git Hooks
-
-```bash
-# Install pre-commit hooks
-npm install --save-dev husky
-npx husky install
-
-# Add pre-commit hook
-npx husky add .husky/pre-commit "npm run lint"
-```
-
-### Database Tools
-
-- **MongoDB Compass:** GUI for MongoDB
-- **Redis Insight:** GUI for Redis
-- **DBeaver:** Universal database tool
-
-### API Testing
-
-- **Postman:** Import collection from `docs/postman/`
-- **Insomnia:** Import workspace from `docs/insomnia/`
-- **Thunder Client:** VS Code extension
 
 ## Development Workflow
 
-### Starting Development
-
-1. Start databases (MongoDB, Redis)
-2. Start backend services (API server, Python AI service)
-3. Start frontend
-4. Start desktop IDE (if working on it)
-
-### Running Tests
+### 1. Starting Development
 
 ```bash
-# Backend tests
-cd api-server
-npm test
+# Start all services
+docker-compose -f docker-compose.dev.yml up -d
 
-# Python tests
-cd python_backend
-pytest
-
-# Frontend tests
-cd frontend
-npm test
-
-# Integration tests
-cd python_backend
-pytest tests/integration/
+# Check service status
+docker-compose -f docker-compose.dev.yml ps
 ```
 
-### Code Quality
+### 2. Making Changes
+
+- **Node.js Services**: Changes are hot-reloaded via volume mounts
+- **Python Backend**: May require container restart
+- **Frontend**: Vite HMR enabled for instant updates
+
+### 3. Testing Changes
 
 ```bash
-# Lint backend
-cd api-server
-npm run lint
+# Run service tests
+cd services/user-service
+npm test
 
-# Format Python
-cd python_backend
-black .
-isort .
+# Check service health
+curl http://localhost:5001/health
+```
 
-# Lint frontend
-cd frontend
-npm run lint
+### 4. Committing Changes
+
+```bash
+# Ensure all dependencies are committed
+git add package.json package-lock.json requirements.txt
+
+# Commit changes
+git commit -m "Description of changes"
 ```
 
 ## Troubleshooting
 
-### Common Issues
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for common issues and solutions.
 
-#### Port Already in Use
-
-```bash
-# Find process using port
-# Windows
-netstat -ano | findstr :5000
-# macOS/Linux
-lsof -i :5000
-
-# Kill process
-# Windows
-taskkill /PID <pid> /F
-# macOS/Linux
-kill -9 <pid>
-```
-
-#### MongoDB Connection Issues
+### Quick Fixes
 
 ```bash
-# Check MongoDB is running
-# Windows
-net start MongoDB
-# macOS
-brew services list
-# Linux
-sudo systemctl status mongodb
+# Fix all dependencies
+bash scripts/fix-dependencies.sh
 
-# Test connection
-mongosh mongodb://localhost:27017
+# Restart all services
+docker-compose -f docker-compose.dev.yml restart
+
+# Clean and rebuild
+docker-compose -f docker-compose.dev.yml down
+docker-compose -f docker-compose.dev.yml build --no-cache
+docker-compose -f docker-compose.dev.yml up -d
 ```
 
-#### Python Virtual Environment Issues
+## Best Practices
 
-```bash
-# Recreate virtual environment
-cd python_backend
-rm -rf venv
-python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
-pip install -r requirements.txt
-```
+1. **Always use Docker Compose** for consistency
+2. **Run dependency fix script** after pulling changes
+3. **Check service health** before starting work
+4. **Review logs** when issues occur
+5. **Keep dependencies updated** regularly
+6. **Document new services** and dependencies
 
-#### Docker Issues
+## Related Documentation
 
-```bash
-# Reset Docker containers
-docker-compose down -v
-docker-compose up -d
-
-# View logs
-docker-compose logs -f <service-name>
-
-# Rebuild images
-docker-compose build --no-cache
-```
-
-#### Node Modules Issues
-
-```bash
-# Clear node_modules and reinstall
-rm -rf node_modules package-lock.json
-npm install
-```
-
-#### GPU Not Detected (Python)
-
-```bash
-# Check CUDA installation
-nvidia-smi
-
-# Reinstall PyTorch with CUDA
-pip uninstall torch
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
-```
-
-### Environment Variable Issues
-
-- Ensure all `.env` files are in correct locations
-- Check for typos in variable names
-- Verify API keys are valid
-- Restart services after changing `.env` files
-
-### Database Migration Issues
-
-```bash
-# Reset database (WARNING: Deletes all data)
-cd api-server
-npm run db:reset
-
-# Run migrations manually
-npm run migrate
-```
-
-## Additional Resources
-
-- **Architecture Documentation:** `MICROSERVICES_ARCHITECTURE.md`
-- **Team READMEs:** `README_AI_TEAM.md`, `README_BACKEND_TEAM.md`, etc.
-- **Contributing Guide:** `CONTRIBUTING.md`
-- **API Documentation:** `api-server/docs/`
+- **[ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md)** - Complete environment variable reference
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Troubleshooting guide
+- **[START_EVERYTHING.md](START_EVERYTHING.md)** - Complete testing guide
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Local development setup
+- **[docs/SHARED_UTILS_ARCHITECTURE.md](docs/SHARED_UTILS_ARCHITECTURE.md)** - Architecture documentation
 
 ## Getting Help
 
-1. Check team-specific README files
-2. Review `FIND_YOUR_TASKS.md` for your role
-3. Ask in team channels (Discord/Slack)
-4. Check existing issues on GitHub
-5. Contact your team lead
+- Check [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) first
+- Review service logs: `docker logs <container-name>`
+- Check service health endpoints
+- Review the relevant architecture documentation
 
 ---
 
-**Last Updated:** 2024
-**Maintained by:** Platform Team
+**Welcome to the Deepiri team!** 🚀
 

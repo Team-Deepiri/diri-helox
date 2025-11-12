@@ -2,7 +2,7 @@
  * Behavioral Clustering Service
  * K-means + DBSCAN for user behavior clustering
  */
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 class BehavioralClusteringService {
   constructor() {

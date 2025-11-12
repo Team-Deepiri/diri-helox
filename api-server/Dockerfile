@@ -4,26 +4,28 @@ FROM node:18-alpine
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apk add --no-cache \
+# Install system dependencies and clean up in one layer
+RUN apk add --no-cache --virtual .build-deps \
     curl \
-    dumb-init
+    dumb-init \
+    && rm -rf /var/cache/apk/* \
+    && apk del .build-deps 2>/dev/null || true
 
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --only=production --legacy-peer-deps && npm cache clean --force
+# Install dependencies and clean up in one layer
+RUN npm ci --only=production --legacy-peer-deps && \
+    npm cache clean --force && \
+    rm -rf /tmp/* /var/tmp/*
 
 # Copy source code
 COPY . .
 
-# Create non-root user
+# Create non-root user and set up directories in one layer
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
-
-# Create logs directory and set permissions for nodejs user
-RUN mkdir -p logs && chown -R nodejs:nodejs /app
+    adduser -S nodejs -u 1001 && \
+    mkdir -p logs && chown -R nodejs:nodejs /app
 
 # Switch to non-root user
 USER nodejs

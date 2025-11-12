@@ -109,7 +109,7 @@ class HybridAIService:
 
 _hybrid_service = None
 
-def get_hybrid_service() -> HybridAIService:
+def get_hybrid_ai_service() -> HybridAIService:
     """Get singleton hybrid AI service."""
     global _hybrid_service
     if _hybrid_service is None:

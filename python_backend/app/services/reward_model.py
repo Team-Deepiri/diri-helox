@@ -4,7 +4,7 @@ RLHF-style reward model for challenge quality scoring
 """
 import torch
 import torch.nn as nn
-from typing import Dict, List
+from typing import Dict, List, Optional
 import numpy as np
 from ..logging_config import get_logger
 
@@ -72,4 +72,15 @@ class RewardModelService:
         )
         
         return [{"challenge": c, "reward_score": s} for c, s in ranked]
+
+
+# Singleton instance
+_reward_model_service = None
+
+def get_reward_model() -> RewardModelService:
+    """Get singleton RewardModelService instance."""
+    global _reward_model_service
+    if _reward_model_service is None:
+        _reward_model_service = RewardModelService()
+    return _reward_model_service
 

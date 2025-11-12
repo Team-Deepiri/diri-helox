@@ -8,6 +8,11 @@ services:
     image: mongo:7.0
     container_name: deepiri-mongodb
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "27017:27017"
     environment:
@@ -25,6 +30,11 @@ services:
     image: mongo-express:1.0.2
     container_name: deepiri-mongo-express
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "8081:8081"
     environment:
@@ -42,6 +52,11 @@ services:
     image: redis:7.2-alpine
     container_name: deepiri-redis
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "6379:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword}
@@ -57,6 +72,11 @@ services:
       dockerfile: Dockerfile
     container_name: deepiri-backend
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "5000:5000"
     environment:
@@ -141,6 +161,11 @@ services:
       dockerfile: Dockerfile
     container_name: deepiri-pyagent
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
@@ -205,6 +230,11 @@ services:
         VITE_FIREBASE_MEASUREMENT_ID: ${VITE_FIREBASE_MEASUREMENT_ID}
     container_name: deepiri-frontend
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "3000:80"
     depends_on:
@@ -216,6 +246,11 @@ services:
     image: prom/prometheus:latest
     container_name: deepiri-prometheus
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "9090:9090"
     volumes:
@@ -230,6 +265,11 @@ services:
     image: grafana/grafana:latest
     container_name: deepiri-grafana
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "3001:3000"
     environment:
@@ -244,6 +284,11 @@ services:
     image: influxdb:2.7
     container_name: deepiri-influxdb
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "8086:8086"
     environment:
@@ -263,6 +308,11 @@ services:
     image: ghcr.io/mlflow/mlflow:v2.8.1
     container_name: deepiri-mlflow
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "5001:5000"
     environment:
@@ -282,6 +332,11 @@ services:
       dockerfile: Dockerfile
     container_name: deepiri-jupyter
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password=''
     ports:
       - "8888:8888"
@@ -300,6 +355,11 @@ services:
     image: nginx:alpine
     container_name: deepiri-nginx
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     ports:
       - "80:80"
       - "443:443"

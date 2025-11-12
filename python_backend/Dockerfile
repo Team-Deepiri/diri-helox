@@ -10,24 +10,29 @@ ENV PYTHONUNBUFFERED=1 \
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
+# Install system dependencies and clean up in one layer
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     gcc \
     g++ \
     build-essential \
-    && rm -rf /var/lib/apt/lists/*
-
-# Create non-root user
-RUN groupadd -r appuser && useradd -r -g appuser appuser
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
 # Copy requirements first for better caching
 COPY requirements.txt /app/requirements.txt
 
-# Install Python dependencies
-# Install base dependencies first
+# Install Python dependencies and verify in one layer, then clean up
 RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    pip install --no-cache-dir -r /app/requirements.txt
+    pip install --no-cache-dir -r /app/requirements.txt && \
+    python -c "import numpy; print('✓ numpy version:', numpy.__version__)" && \
+    python -c "import sentence_transformers; print('✓ sentence-transformers installed')" || \
+    (echo "ERROR: Failed to verify numpy or sentence-transformers" && pip list | grep -E "(numpy|sentence)" && exit 1) && \
+    pip cache purge || true
+
+# Create non-root user and set up directories
+RUN groupadd -r appuser && useradd -r -g appuser appuser && \
+    mkdir -p /app/logs && chown -R appuser:appuser /app
 
 # Note: Some dependencies may require additional setup:
 # - bitsandbytes requires CUDA (optional, for GPU)
@@ -36,9 +41,6 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 
 # Copy application code
 COPY app /app/app
-
-# Create logs directory
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app
 
 # Switch to non-root user
 USER appuser

@@ -128,11 +128,75 @@ mkdir -p adapters  # For LoRA adapters
 mkdir -p model_registry models/staging models/production
 ```
 
-### 6. Start MLflow UI
+### 6. Start Required Microservices (AI Team)
+
+**AI team only needs these services:**
+- Python Agent (main AI service)
+- Jupyter (for experimentation)
+- MLflow (for experiment tracking)
+- MongoDB (for data storage)
+- InfluxDB (for time-series analytics)
+- Challenge Service (for AI integration testing)
+- Redis (for caching, optional)
 
 ```bash
+# Start only the services needed for AI development
+docker-compose -f docker-compose.dev.yml up -d \
+  mongodb \
+  redis \
+  influxdb \
+  pyagent \
+  jupyter \
+  mlflow \
+  challenge-service
+
+# Check service status
+docker-compose -f docker-compose.dev.yml ps
+
+# View logs
+docker-compose -f docker-compose.dev.yml logs -f pyagent
+docker-compose -f docker-compose.dev.yml logs -f jupyter
+docker-compose -f docker-compose.dev.yml logs -f mlflow
+```
+
+**AI Team Services:**
+- **Python Agent:** pyagent (port 8000) - Main AI service
+- **Jupyter:** jupyter (port 8888) - For experimentation
+- **MLflow:** mlflow (port 5500) - Experiment tracking
+- **Databases:** mongodb, influxdb, redis
+- **Challenge Service:** challenge-service (port 5007) - For AI integration testing
+
+**Services NOT needed for AI team:**
+- `api-gateway` (unless testing full integration)
+- `frontend-dev` (frontend team)
+- `user-service`, `task-service`, etc. (backend team)
+- `mongo-express` (optional, for database admin)
+
+### 7. Start MLflow UI
+
+```bash
+# MLflow is already running via docker-compose above
+# Access at http://localhost:5500
+
+# Or start manually (if not using Docker)
 mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlruns
-# Access at http://localhost:5000
+# Access at http://localhost:5000 (if not using Docker)
+```
+
+**Note:** MLflow runs on port 5500 in Docker to avoid conflict with user-service (port 5001) and API Gateway (port 5000)
+
+### 8. Stop Services (When Done)
+
+```bash
+# Stop all AI-related services
+docker-compose -f docker-compose.dev.yml stop \
+  pyagent \
+  jupyter \
+  mlflow \
+  challenge-service
+
+# Or stop everything
+docker-compose -f docker-compose.dev.yml down
 ```
 
 ## Role-Specific Setup
@@ -153,18 +217,22 @@ mlflow ui
 
 **First Tasks:**
 1. Review `python_backend/train/README.md`
-2. Review existing experiments in `train/experiments/`
-3. Set up experiment tracking dashboard
-4. Review model performance metrics
-5. Coordinate with research scientists on priorities
+2. Review `docs/MICROSERVICES_SETUP.md` - Understand service architecture
+3. Review Python AI Service integration with microservices
+4. Review existing experiments in `train/experiments/`
+5. Set up experiment tracking dashboard (MLflow)
+6. Review model performance metrics
+7. Coordinate with research scientists on priorities
+8. Test Python AI Service → Challenge Service communication
 
 **Key Files:**
 - `python_backend/train/infrastructure/experiment_tracker.py`
 - `python_backend/train/experiments/research_experiment_template.py`
-- `python_backend/mlops/monitoring/model_monitor.py` - NEW: Model monitoring
-- `python_backend/mlops/registry/model_registry.py` - NEW: Model registry
-- `python_backend/mlops/ci/model_ci_pipeline.py` - NEW: CI/CD pipeline
-- `python_backend/mlops/deployment/deployment_automation.py` - NEW: Deployment automation
+- `python_backend/mlops/monitoring/model_monitor.py` - Model monitoring
+- `python_backend/mlops/registry/model_registry.py` - Model registry
+- `python_backend/mlops/ci/model_ci_pipeline.py` - CI/CD pipeline
+- `python_backend/mlops/deployment/deployment_automation.py` - Deployment automation
+- `services/challenge-service/server.js` - Challenge service (calls Python AI)
 
 ---
 

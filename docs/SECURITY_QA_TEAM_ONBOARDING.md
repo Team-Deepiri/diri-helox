@@ -43,15 +43,71 @@ git clone <repository-url>
 cd Deepiri/deepiri
 ```
 
-### 2. Environment Setup
+### 2. Environment Setup (Security & QA Team)
+
+**Security & QA team needs ALL services for comprehensive testing:**
 
 ```bash
 # Copy environment files
 cp env.example .env
 
-# Set up test databases
-docker-compose -f docker-compose.dev.yml up -d mongodb redis
+# Start ALL services for comprehensive testing
+docker-compose -f docker-compose.dev.yml up -d
+
+# Or start specific services if testing individual components
+docker-compose -f docker-compose.dev.yml up -d \
+  mongodb \
+  redis \
+  influxdb \
+  mongo-express \
+  api-gateway \
+  user-service \
+  task-service \
+  gamification-service \
+  analytics-service \
+  notification-service \
+  integration-service \
+  challenge-service \
+  websocket-service \
+  pyagent \
+  mlflow \
+  jupyter \
+  frontend-dev
+
+# Verify all services are running
+docker-compose -f docker-compose.dev.yml ps
+
+# Test each service health endpoint
+curl http://localhost:5000/health  # API Gateway
+curl http://localhost:5001/health  # User Service
+curl http://localhost:5002/health  # Task Service
+curl http://localhost:5003/health  # Gamification Service
+curl http://localhost:5004/health  # Analytics Service
+curl http://localhost:5005/health  # Notification Service
+curl http://localhost:5006/health  # Integration Service
+curl http://localhost:5007/health  # Challenge Service
+curl http://localhost:5008/health  # WebSocket Service
+curl http://localhost:8000/health   # Python Agent
+curl http://localhost:5500        # MLflow
+curl http://localhost:8888        # Jupyter
+curl http://localhost:5173        # Frontend
+
+# View logs for security/QA testing
+docker-compose -f docker-compose.dev.yml logs -f
 ```
+
+**All Security & QA Services:**
+- **All microservices** - For comprehensive security and QA testing
+- **All databases** - For data security testing
+- **Frontend** - For UI/UX testing
+- **AI services** - For AI security testing
+
+**Note:** Security & QA team needs all services to perform:
+- End-to-end testing
+- Security audits across all services
+- Integration testing
+- Performance testing
+- Load testing
 
 ### 3. Install Testing Tools
 
@@ -69,7 +125,20 @@ cd python_backend
 pip install pytest pytest-cov
 ```
 
-### 4. Install Security Tools
+### 4. Stop Services (When Done)
+
+```bash
+# Stop all services
+docker-compose -f docker-compose.dev.yml stop
+
+# Or stop specific services for targeted testing
+docker-compose -f docker-compose.dev.yml stop user-service task-service
+
+# Remove containers and volumes (cleanup)
+docker-compose -f docker-compose.dev.yml down -v
+```
+
+### 5. Install Security Tools
 
 ```bash
 # Install security scanning tools
@@ -91,13 +160,17 @@ npm install -g npm-audit-resolver
 ```
 
 **First Tasks:**
-1. Review security architecture
-2. Review `services/user-service/src/oauthService.js` - NEW: OAuth 2.0 implementation
-3. Review `services/integration-service/src/webhookService.js` - NEW: Webhook security
-4. Review `services/notification-service/src/pushNotificationService.js` - NEW: Push notification security
-5. Set up network defense
-6. Review cloud security configs
-7. Audit microservices security
+1. Review `docs/MICROSERVICES_SETUP.md` - Microservices architecture
+2. Review security architecture for all microservices
+3. Review `services/user-service/server.js` - OAuth 2.0 service (port 5001)
+4. Review `services/integration-service/server.js` - Webhook service (port 5006)
+5. Review `services/notification-service/server.js` - Push notification service (port 5005)
+6. Test OAuth flows across services
+7. Test webhook security
+8. Audit API Gateway security
+9. Set up network defense for microservices
+10. Review cloud security configs
+11. Audit each microservice security
 8. Test OAuth flows for security
 9. Test webhook signature verification
 10. Plan security improvements
@@ -373,7 +446,8 @@ pytest tests/integration/
 
 - **Security & QA Team README:** `README_SECURITY_QA_TEAM.md`
 - **FIND_YOUR_TASKS:** `FIND_YOUR_TASKS.md`
-- **Environment Setup:** `ENVIRONMENT_SETUP.md`
+- **Getting Started:** `GETTING_STARTED.md`
+- **Environment Variables:** `ENVIRONMENT_VARIABLES.md`
 
 ### Important Directories
 

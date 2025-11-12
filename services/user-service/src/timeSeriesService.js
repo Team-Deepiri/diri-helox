@@ -3,7 +3,7 @@
  * Tracks user progress over time using time-series database
  */
 const mongoose = require('mongoose');
-const logger = require('../../utils/logger');
+const logger = require('../utils/logger');
 
 // Time-series schema for progress tracking
 const ProgressPointSchema = new mongoose.Schema({
