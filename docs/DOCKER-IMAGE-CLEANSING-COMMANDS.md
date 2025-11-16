@@ -68,7 +68,7 @@ make rebuild-service SERVICE=pyagent  # Rebuild one service
 make clean          # Clean everything
 ```
 
-See `MAKEFILE-EXPLANATION.md` for details on the Makefile.
+See [MAKEFILE-EXPLANATION.md](MAKEFILE-EXPLANATION.md) for details on the Makefile.
 
 ## What `--rmi local` Does
 

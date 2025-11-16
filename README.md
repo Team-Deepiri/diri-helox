@@ -2,55 +2,158 @@
 
 Welcome to Deepiri, your AI-powered digital productivity playground that gamifies your tasks, study material, coding projects, and creative work into engaging mini-games, challenges, and interactive experiences.
 
-## Core Concept
+## 🚀 Quick Start
+
+**New to Deepiri? Start here!**
+
+1. **Prerequisites**
+   - Docker and Docker Compose installed
+   - Git
+
+2. **Clone and Setup**
+   ```bash
+   git clone <repository-url>
+   cd deepiri
+   cp env.example .env
+   # Edit .env with your API keys
+   ```
+
+3. **Start Everything**
+   ```bash
+   # Normal start (uses existing images - fast!)
+   docker compose -f docker-compose.dev.yml up -d
+   
+   # First time or after code changes? Rebuild:
+   ./rebuild.sh        # Linux/Mac
+   .\rebuild.ps1       # Windows PowerShell
+   ```
+
+4. **Access Services**
+   - Frontend: http://localhost:5173
+   - Backend API: http://localhost:5000
+   - Python Agent: http://localhost:8000
+   - MLflow: http://localhost:5500
+   - API Docs: http://localhost:5000/api-docs
+
+**That's it!** See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup.
+
+---
+
+## 📚 Documentation
+
+### Essential Guides
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete setup guide for new developers
+- **[START_EVERYTHING.md](START_EVERYTHING.md)** - Detailed service startup instructions
+- **[FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)** - Find tasks and responsibilities by role
+- **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+
+### Team-Specific Guides
+- **AI Team** → [docs/AI_TEAM_ONBOARDING.md](docs/AI_TEAM_ONBOARDING.md)
+- **Backend Team** → [docs/BACKEND_TEAM_ONBOARDING.md](docs/BACKEND_TEAM_ONBOARDING.md)
+- **Frontend Team** → [docs/FRONTEND_TEAM_ONBOARDING.md](docs/FRONTEND_TEAM_ONBOARDING.md)
+- **ML Team** → [docs/ML_ENGINEER_COMPLETE_GUIDE.md](docs/ML_ENGINEER_COMPLETE_GUIDE.md)
+- **ML Ops** → [docs/MLOPS_TEAM_ONBOARDING.md](docs/MLOPS_TEAM_ONBOARDING.md)
+- **Platform Team** → [docs/PLATFORM_TEAM_ONBOARDING.md](docs/PLATFORM_TEAM_ONBOARDING.md)
+- **QA Team** → [docs/SECURITY_QA_TEAM_ONBOARDING.md](docs/SECURITY_QA_TEAM_ONBOARDING.md)
+
+### Docker & Scripts
+- **[scripts/README.md](scripts/README.md)** - All available scripts explained
+- **[docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md](docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md)** - Docker cleanup guide
+- **[docs/MAKEFILE-EXPLANATION.md](docs/MAKEFILE-EXPLANATION.md)** - Makefile usage (optional)
+
+### Architecture & System
+- **[docs/SYSTEM_ARCHITECTURE.md](docs/SYSTEM_ARCHITECTURE.md)** - System design overview
+- **[docs/MICROSERVICES_ARCHITECTURE.md](docs/MICROSERVICES_ARCHITECTURE.md)** - Microservices details
+- **[DOCUMENTATION-INDEX.md](DOCUMENTATION-INDEX.md)** - Complete index of all 63+ docs
+
+---
+
+## 🛠️ Common Tasks
+
+### Starting Services
+```bash
+# Normal start (no rebuild)
+docker compose -f docker-compose.dev.yml up -d
+
+# Rebuild and start (after code changes)
+./rebuild.sh        # Linux/Mac
+.\rebuild.ps1       # Windows
+```
+
+### Stopping Services
+```bash
+docker compose -f docker-compose.dev.yml down
+```
+
+### Viewing Logs
+```bash
+# All services
+docker compose -f docker-compose.dev.yml logs -f
+
+# Specific service
+docker compose -f docker-compose.dev.yml logs -f pyagent
+```
+
+### Rebuilding (Only When Needed)
+```bash
+# Full clean rebuild
+./rebuild.sh        # Linux/Mac
+.\rebuild.ps1       # Windows
+
+# Rebuild specific service
+docker compose -f docker-compose.dev.yml build --no-cache pyagent
+docker compose -f docker-compose.dev.yml up -d pyagent
+```
+
+**Note:** Normal `docker compose up` does NOT rebuild - it uses existing images. Only rebuild when code changes!
+
+---
+
+## 📁 Project Structure
+
+```
+deepiri/
+├── README.md                    # You are here! Start here.
+├── GETTING_STARTED.md           # Detailed setup guide
+├── START_EVERYTHING.md          # Service startup guide
+├── rebuild.sh / rebuild.ps1     # Main rebuild scripts (root for easy access)
+├── Makefile                     # Optional make commands
+│
+├── scripts/                     # All utility scripts
+│   ├── README.md                # Script documentation
+│   ├── cleanup-*.sh/ps1        # Cleanup scripts
+│   └── archive/                 # Old/legacy scripts
+│
+├── docs/                        # All documentation
+│   ├── *_TEAM_ONBOARDING.md    # Team guides
+│   ├── TROUBLESHOOTING.md      # Common issues
+│   └── DOCKER-*.md             # Docker guides
+│
+├── frontend/                    # React frontend
+├── api-server/                  # Node.js backend
+├── python_backend/              # Python AI agent
+├── services/                    # Microservices
+└── docker-compose.dev.yml       # Docker configuration
+```
+
+---
+
+## 🎯 Core Concept
 
 Gamify your productivity by turning tasks, study material, coding projects, or creative work into mini-games, challenges, and interactive experiences. Rewards, progress tracking, and adaptive difficulty make boring tasks fun. AI adapts challenges to your workflow and style, with optional multiplayer/competitive features.
 
-## Target Users
-
-- Students, knowledge workers, creatives, developers
-- Anyone looking to increase productivity in a fun, engaging way
-- Users who enjoy gamification, streaks, badges, and challenges
-
-## Key Features
-
-### Task Gamification
-- Input tasks manually, via integrations (Trello, Notion, GitHub, Google Docs), or via AI scan of documents/code
-- Convert tasks into mini-games (e.g., puzzle, quiz, coding challenge, timed completion challenge)
-
-### Adaptive AI Challenges
-- AI analyzes user behavior, performance, and preferences
-- Generates adaptive challenges, e.g., "You typically code slowly in the morning — here's a short 15-min coding sprint."
-
-### Rewards & Progression
-- Points, badges, streaks, leaderboards
-- Optional peer/competitor comparison
-
-### Content/Task Integration
-- Supports different media types: text documents, spreadsheets, PDFs, code repos, notes
-- Can ingest multiple task types at once and turn them into daily "missions."
-
-### Analytics & Insights
-- Tracks efficiency, time management, and improvement trends
-- Suggests optimized schedules or break timing
-
-### Optional Multiplayer
-- Challenges friends or coworkers to productivity duels
-- Shared missions and collaborative mini-games
-
-## Architecture
+## 🏗️ Architecture
 
 Deepiri follows a modern microservices architecture:
 
 ### Backend Services
-
 - **User Service**: Authentication, profiles, progress, preferences
 - **Task Service**: CRUD tasks, fetch tasks from integrations, store metadata
 - **AI Challenge Service**: Generates challenges from tasks using NLP + RL models
 - **Gamification Service**: Points, badges, leaderboards, streaks
 - **Analytics Service**: Tracks performance, creates insights, suggests optimizations
 - **Notification Service**: Sends reminders, daily missions, streak updates
-- **Integration Service**: Connects to Notion, Trello, Google Docs, GitHub for task ingestion
+- **Integration Service**: Connects to Notion, Trello, Google Docs, GitHub
 
 ### Python Agent (FastAPI)
 - **AI Challenge Generation**: NLP models for task parsing and challenge creation
@@ -69,306 +172,129 @@ Deepiri follows a modern microservices architecture:
 - **Docker**: Containerized deployment
 - **NGINX**: Load balancing and reverse proxy
 
-## Quick Start
+---
 
-### Prerequisites
-- Docker and Docker Compose
-- Node.js 18+ (for local development)
-- Git
-
-### Using Docker (Recommended)
-
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd deepiri
-   ```
-
-2. **Run the setup script**
-   ```bash
-   ./scripts/setup.sh
-   ```
-
-3. **Configure environment variables**
-   ```bash
-   cp env.example .env
-   # Edit .env with your API keys and configuration
-   ```
-
-4. **Start the application**
-   ```bash
-   # Normal start (uses existing images, no rebuild)
-   docker compose -f docker-compose.dev.yml up -d
-   
-   # To rebuild (only when needed - removes old images, rebuilds fresh)
-   ./rebuild.sh  # Linux/Mac
-   .\rebuild.ps1 # Windows PowerShell
-   ```
-
-5. **Access the application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:5000
-   - Python Agent: http://localhost:8000
-   - MLflow: http://localhost:5500
-   - API Documentation: http://localhost:5000/api-docs
-
-### Rebuilding Containers (Only When Needed)
-
-**Normal operation:** `docker compose up` uses existing images - no rebuild.
-
-**When to rebuild:** Only when code changes or you want fresh images:
-
-```bash
-# Use the clean rebuild scripts (removes old images first)
-./rebuild.sh              # Linux/Mac
-.\rebuild.ps1             # Windows PowerShell
-
-# Or manually rebuild specific service
-docker compose -f docker-compose.dev.yml build --no-cache pyagent
-docker compose -f docker-compose.dev.yml up -d pyagent
-
-# Or rebuild all (manual)
-docker compose -f docker-compose.dev.yml down --rmi local
-docker builder prune -af
-docker compose -f docker-compose.dev.yml build --no-cache
-docker compose -f docker-compose.dev.yml up -d
-```
-
-**Why use rebuild scripts?** They prevent Docker from accumulating 50GB+ of old images. See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for details.
-
-### Local Development
-
-1. **Install dependencies**
-   ```bash
-   npm run setup
-   ```
-
-2. **Start MongoDB and Redis**
-   ```bash
-   docker-compose up -d mongodb redis
-   ```
-
-3. **Start the development servers**
-   ```bash
-   npm run dev
-   ```
-
-## Configuration
+## ⚙️ Configuration
 
 ### Environment Variables
 
-Copy `.env.example` to `.env` and configure the following:
+Copy `env.example` to `.env` and configure:
 
-#### Required API Keys
 ```bash
-# OpenAI for AI-powered challenge generation
+# Required API Keys
 OPENAI_API_KEY=your_openai_api_key
 
-# Integration APIs (optional for Phase 1)
-NOTION_API_KEY=your_notion_api_key
-TRELLO_API_KEY=your_trello_api_key
-GITHUB_TOKEN=your_github_token
-```
-
-#### Firebase Configuration
-```bash
-# Firebase for authentication and notifications
-VITE_FIREBASE_API_KEY=your_firebase_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your-project-id
-# ... other Firebase config
-```
-
-#### Database Configuration
-```bash
-# MongoDB
+# Database
 MONGO_ROOT_USER=admin
 MONGO_ROOT_PASSWORD=your_secure_password
 MONGO_DB=deepiri
-
-# Redis
 REDIS_PASSWORD=your_redis_password
 
 # JWT Secret
 JWT_SECRET=your_jwt_secret_key
 ```
 
-## API Documentation
+See [ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md) for complete list.
 
-The API is fully documented with Swagger/OpenAPI. Once the application is running, visit:
-- **Swagger UI**: http://localhost:5000/api-docs
+---
 
-### Main API Endpoints
+## 🧪 Testing
 
-#### Authentication
-- `POST /api/auth/register` - Register new user
-- `POST /api/auth/login` - Login user
-
-#### Tasks
-- `POST /api/tasks` - Create new task
-- `GET /api/tasks` - Get user's tasks
-- `GET /api/tasks/:id` - Get task details
-- `PATCH /api/tasks/:id` - Update task
-- `DELETE /api/tasks/:id` - Delete task
-
-#### Challenges
-- `POST /api/challenges/generate` - Generate challenge from task
-- `GET /api/challenges` - Get user's challenges
-- `POST /api/challenges/:id/complete` - Complete challenge
-
-#### Gamification
-- `GET /api/gamification/profile` - Get user progress
-- `GET /api/gamification/leaderboard` - Get leaderboard
-- `GET /api/gamification/badges` - Get user badges
-
-#### Integrations
-- `POST /api/integrations/connect` - Connect external service
-- `GET /api/integrations/sync` - Sync tasks from integration
-
-## Testing
-
-### Backend Tests (Node)
 ```bash
-cd api-server
-npm test
+# Backend tests
+cd api-server && npm test
+
+# Python agent tests
+cd python_backend && pytest -q
+
+# Frontend tests
+cd frontend && npm test
 ```
 
-### Python Agent Tests
+---
+
+## 🚢 Deployment
+
+### Production with Docker
 ```bash
-cd python_backend
-pytest -q
+export NODE_ENV=production
+docker compose --profile production up -d
 ```
-
-### Frontend Tests
-```bash
-cd frontend
-npm test
-```
-
-## Deployment
-
-### Production Deployment with Docker
-
-1. **Set production environment**
-   ```bash
-   export NODE_ENV=production
-   ```
-
-2. **Build and start with production profile**
-   ```bash
-   docker-compose --profile production up -d
-   ```
-
-3. **Enable NGINX reverse proxy**
-   The production setup includes NGINX for:
-   - SSL termination
-   - Load balancing
-   - Static file serving
-   - API proxying
 
 ### Cloud Deployment
-
-The application is designed to be cloud-native and can be deployed on:
-- **AWS**: ECS, EKS, or EC2 with Docker
+Designed for cloud-native deployment on:
+- **AWS**: ECS, EKS, or EC2
 - **Google Cloud**: GKE or Cloud Run
 - **Azure**: AKS or Container Instances
 - **DigitalOcean**: App Platform or Kubernetes
 
-## Development
+---
 
-### Adding New Features
-
-1. **Backend Feature**
-   - Add model in `api-server/models/`
-   - Create service in `api-server/services/`
-   - Add routes in `api-server/routes/`
-   - Update controllers in `api-server/controllers/`
-
-2. **Frontend Feature**
-   - Create components in `frontend/src/components/`
-   - Add pages in `frontend/src/pages/`
-   - Update API layer in `frontend/src/api/`
-   - Add routing to `frontend/src/App.jsx`
-
-### Code Style
-
-- **Backend**: ESLint + Prettier
-- **Frontend**: ESLint + Prettier
-- **Git Hooks**: Husky for pre-commit checks
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
 3. Make your changes
 4. Run tests: `npm test`
-5. Commit your changes: `git commit -m "Add feature"`
-6. Push to the branch: `git push origin feature-name`
+5. Commit: `git commit -m "Add feature"`
+6. Push: `git push origin feature-name`
 7. Submit a pull request
 
-## License
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
 
-## Documentation
+## 📖 API Documentation
 
-### Complete Documentation Index
-See **[DOCUMENTATION-INDEX.md](DOCUMENTATION-INDEX.md)** for a complete guide to all 63+ markdown files in this project, organized by category.
+Once running, visit:
+- **Swagger UI**: http://localhost:5000/api-docs
 
-### Quick Navigation
-- **New to project?** → `GETTING_STARTED.md`
-- **Setting up?** → `START_EVERYTHING.md`
-- **Team member?** → `FIND_YOUR_TASKS.md`
-- **Rebuilding?** → `rebuild.sh` / `rebuild.ps1` or `DOCKER-IMAGE-CLEANSING-COMMANDS.md`
-- **Having issues?** → `docs/TROUBLESHOOTING.md`
-- **Architecture?** → `docs/SYSTEM_ARCHITECTURE.md`
-- **Contributing?** → `CONTRIBUTING.md`
+### Main Endpoints
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `POST /api/tasks` - Create new task
+- `GET /api/tasks` - Get user's tasks
+- `POST /api/challenges/generate` - Generate challenge from task
+- `GET /api/gamification/profile` - Get user progress
 
-### Team-Specific Guides
-- **AI Team** → `docs/AI_TEAM_ONBOARDING.md`
-- **Backend Team** → `docs/BACKEND_TEAM_ONBOARDING.md`
-- **Frontend Team** → `docs/FRONTEND_TEAM_ONBOARDING.md`
-- **ML Team** → `docs/ML_ENGINEER_COMPLETE_GUIDE.md`
-- **ML Ops** → `docs/MLOPS_TEAM_ONBOARDING.md`
-- **Platform Team** → `docs/PLATFORM_TEAM_ONBOARDING.md`
-- **QA Team** → `docs/SECURITY_QA_TEAM_ONBOARDING.md`
+---
 
-## Support
+## 🆘 Support
 
 ### Common Issues
 
 **Port already in use**
 ```bash
-# Stop existing containers
-docker-compose -f docker-compose.dev.yml down
-# Or change ports in docker-compose.dev.yml
+docker compose -f docker-compose.dev.yml down
 ```
-
-**API key errors**
-- Ensure all required API keys are set in `.env`
-- Check API key permissions and quotas
-
-**Database connection issues**
-- Ensure MongoDB is running: `docker-compose -f docker-compose.dev.yml up -d mongodb`
-- Check database credentials in `.env`
 
 **Docker storage bloat (50GB+ images)**
 ```bash
-# Use clean rebuild script
-./rebuild.sh  # Linux/Mac
-.\rebuild.ps1 # Windows
-
-# Or manually clean
-docker-compose -f docker-compose.dev.yml down --rmi local
-docker builder prune -af
+./rebuild.sh        # Linux/Mac
+.\rebuild.ps1       # Windows
 ```
 
-See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for complete cleanup guide.
+**Database connection issues**
+```bash
+docker compose -f docker-compose.dev.yml up -d mongodb
+```
 
-## Acknowledgments
+See [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md) for more solutions.
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
 
 - OpenAI for GPT-4 integration
 - React and Node.js communities
 - Hugging Face for transformer models
 
 ---
+
+**Need help?** Check [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md) or [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)

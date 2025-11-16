@@ -79,7 +79,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 
 ## 🐳 Docker & Infrastructure
 
-### `DOCKER-IMAGE-CLEANSING-COMMANDS.md`
+### `docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md`
 **Docker cleanup and rebuild commands**
 - Clean rebuild process
 - Using `--rmi local` flag
@@ -87,14 +87,14 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 - Disk usage monitoring
 - Why explicit image tags matter
 
-### `README-REBUILD.md`
+### `docs/README-REBUILD.md` (Archived)
 **Guide to rebuilding Docker containers**
 - Problem: Storage bloat from old images
 - Solution: Clean rebuild scripts
 - Manual cleanup commands
 - Best practices for rebuilds
 
-### `README-CLEANUP.md`
+### `docs/README-CLEANUP.md` (Archived)
 **Docker cleanup strategies and scripts**
 - Automated cleanup scripts
 - Manual cleanup procedures
@@ -538,7 +538,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 2. **Setting up for first time?** Follow `START_EVERYTHING.md`
 3. **Team member?** Check `FIND_YOUR_TASKS.md` for your role
 4. **Having issues?** See `docs/TROUBLESHOOTING.md`
-5. **Rebuilding containers?** Use `rebuild.sh` or see `DOCKER-IMAGE-CLEANSING-COMMANDS.md`
+5. **Rebuilding containers?** Use `rebuild.sh` or see `docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md`
 6. **Need architecture info?** Check `docs/SYSTEM_ARCHITECTURE.md`
 7. **Contributing?** Read `CONTRIBUTING.md`
 
@@ -550,7 +550,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 - `README.md`, `GETTING_STARTED.md`, `CONTRIBUTING.md`, `LICENSE.md`
 - `START_EVERYTHING.md`, `FIND_YOUR_TASKS.md`
 - `ENVIRONMENT_SETUP.md`, `ENVIRONMENT_VARIABLES.md`
-- `DOCKER-IMAGE-CLEANSING-COMMANDS.md`, `README-REBUILD.md`, `README-CLEANUP.md`
+- `docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md`, `docs/README-REBUILD.md`, `docs/README-CLEANUP.md`
 
 ### Team Onboarding (`docs/`)
 - `AI_TEAM_ONBOARDING.md`, `BACKEND_TEAM_ONBOARDING.md`, `FRONTEND_TEAM_ONBOARDING.md`

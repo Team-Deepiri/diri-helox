@@ -97,7 +97,7 @@ docker compose -f docker-compose.dev.yml logs -f jupyter
 # 5. Starts all services
 ```
 
-**💡 Tip:** Only use `rebuild.sh` / `rebuild.ps1` when you need to rebuild. Normal `docker compose up` is faster and doesn't rebuild. See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for details.
+**💡 Tip:** Only use `rebuild.sh` / `rebuild.ps1` when you need to rebuild. Normal `docker compose up` is faster and doesn't rebuild. See [docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md](docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md) for details.
 
 ### Common Issues and Fixes
 
@@ -133,7 +133,7 @@ docker compose -f docker-compose.dev.yml build --no-cache
 docker compose -f docker-compose.dev.yml up -d
 ```
 
-See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for complete rebuild guide.
+See [docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md](docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md) for complete rebuild guide.
 
 ## Step 3: Verify Services Are Running
 

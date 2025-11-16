@@ -95,6 +95,7 @@ services:
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-api-gateway-dev
     restart: unless-stopped
     logging:
@@ -135,6 +136,7 @@ services:
     build:
       context: ./services/user-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-user-service-dev
     restart: unless-stopped
     logging:
@@ -169,6 +171,7 @@ services:
     build:
       context: ./services/task-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-task-service-dev
     restart: unless-stopped
     logging:
@@ -196,6 +199,7 @@ services:
     build:
       context: ./services/gamification-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-gamification-service-dev
     restart: unless-stopped
     logging:
@@ -227,6 +231,7 @@ services:
     build:
       context: ./services/analytics-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-analytics-service-dev
     restart: unless-stopped
     logging:
@@ -259,6 +264,7 @@ services:
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-notification-service-dev
     restart: unless-stopped
     logging:
@@ -289,6 +295,7 @@ services:
     build:
       context: ./services/integration-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-integration-service-dev
     restart: unless-stopped
     logging:
@@ -325,6 +332,7 @@ services:
     build:
       context: ./services/challenge-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-challenge-service-dev
     restart: unless-stopped
     logging:
@@ -354,6 +362,7 @@ services:
     build:
       context: ./services/websocket-service
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-websocket-service-dev
     restart: unless-stopped
     logging:
@@ -378,6 +387,7 @@ services:
     build:
       context: ./python_backend
       dockerfile: Dockerfile
+    pull_policy: build
     container_name: deepiri-pyagent-dev
     restart: unless-stopped
     logging:
@@ -446,6 +456,7 @@ services:
     build:
       context: ./python_backend
       dockerfile: Dockerfile.jupyter
+    pull_policy: build
     container_name: deepiri-jupyter-dev
     restart: unless-stopped
     logging:
@@ -471,6 +482,7 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
+    pull_policy: build
     container_name: deepiri-frontend-dev
     restart: unless-stopped
     logging:
