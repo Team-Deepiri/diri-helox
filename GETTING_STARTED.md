@@ -28,12 +28,18 @@ cp env.example .env
 # Edit .env - Set AI_PROVIDER=localai for free local AI
 # For LocalAI, you can leave OPENAI_API_KEY empty
 
-# Start all services
-docker-compose -f docker-compose.dev.yml up -d
+# Normal start (uses existing images - no rebuild)
+docker compose -f docker-compose.dev.yml up -d
+
+# To rebuild (only when code changes or you want fresh images)
+./rebuild.sh              # Linux/Mac (removes old images, rebuilds fresh)
+.\rebuild.ps1             # Windows PowerShell
 
 # Check services
-docker-compose -f docker-compose.dev.yml ps
+docker compose -f docker-compose.dev.yml ps
 ```
+
+**💡 Normal `docker compose up` does NOT rebuild** - it uses existing images. Only use `rebuild.sh` / `rebuild.ps1` when you need to rebuild after code changes.
 
 **Services Available:**
 - Frontend: http://localhost:5173

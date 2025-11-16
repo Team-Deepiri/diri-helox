@@ -60,21 +60,44 @@ cp env.example .env
 
 **This is the EASIEST way to start everything:**
 
+### Normal Start (Uses Existing Images - No Rebuild)
+
 ```bash
-# Start all services (databases + microservices)
-docker-compose -f docker-compose.dev.yml up -d
+# Start all services (uses existing images - fast!)
+docker compose -f docker-compose.dev.yml up -d
 
 # Check all services are running
-docker-compose -f docker-compose.dev.yml ps
+docker compose -f docker-compose.dev.yml ps
 
 # View logs for all services
-docker-compose -f docker-compose.dev.yml logs -f
+docker compose -f docker-compose.dev.yml logs -f
 
 # View logs for specific service
-docker-compose -f docker-compose.dev.yml logs -f api-gateway
-docker-compose -f docker-compose.dev.yml logs -f pyagent
-docker-compose -f docker-compose.dev.yml logs -f jupyter
+docker compose -f docker-compose.dev.yml logs -f api-gateway
+docker compose -f docker-compose.dev.yml logs -f pyagent
+docker compose -f docker-compose.dev.yml logs -f jupyter
 ```
+
+**Note:** Normal `docker compose up` does NOT rebuild images - it uses existing ones. This is fast and efficient for daily use.
+
+### Rebuilding (Only When Needed)
+
+**When to rebuild:** After code changes, or when you want fresh images:
+
+```bash
+# Use the rebuild script (removes old images, rebuilds fresh)
+./rebuild.sh              # Linux/Mac
+.\rebuild.ps1             # Windows PowerShell
+
+# This automatically:
+# 1. Stops containers
+# 2. Removes old images (prevents storage bloat!)
+# 3. Cleans build cache
+# 4. Rebuilds everything fresh
+# 5. Starts all services
+```
+
+**💡 Tip:** Only use `rebuild.sh` / `rebuild.ps1` when you need to rebuild. Normal `docker compose up` is faster and doesn't rebuild. See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for details.
 
 ### Common Issues and Fixes
 
@@ -84,8 +107,33 @@ If services fail to start, check:
 2. **Permission Issues**: See [TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
 3. **Port Conflicts**: Check if ports are already in use
 4. **Environment Variables**: Ensure `.env` files are configured
+5. **Docker Storage Full**: Run `./rebuild.sh` or `.\rebuild.ps1` to clean old images
 
 For detailed troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
+
+### Rebuilding Services (Only When Needed)
+
+**Normal operation:** `docker compose up` uses existing images - no rebuild needed.
+
+**When to rebuild:** After code changes, dependency updates, or when you want fresh images:
+
+```bash
+# Clean rebuild (removes old images first)
+./rebuild.sh              # Linux/Mac
+.\rebuild.ps1             # Windows PowerShell
+
+# Or rebuild specific service only
+docker compose -f docker-compose.dev.yml build --no-cache pyagent
+docker compose -f docker-compose.dev.yml up -d pyagent
+
+# Or manual full rebuild
+docker compose -f docker-compose.dev.yml down --rmi local
+docker builder prune -af
+docker compose -f docker-compose.dev.yml build --no-cache
+docker compose -f docker-compose.dev.yml up -d
+```
+
+See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for complete rebuild guide.
 
 ## Step 3: Verify Services Are Running
 

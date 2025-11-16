@@ -91,6 +91,7 @@ services:
 
   # API Gateway - Routes requests to all microservices
   api-gateway:
+    image: deepiri-dev-api-gateway:latest
     build:
       context: ./services/api-gateway
       dockerfile: Dockerfile
@@ -130,6 +131,7 @@ services:
 
   # User Service
   user-service:
+    image: deepiri-dev-user-service:latest
     build:
       context: ./services/user-service
       dockerfile: Dockerfile
@@ -163,6 +165,7 @@ services:
 
   # Task Service
   task-service:
+    image: deepiri-dev-task-service:latest
     build:
       context: ./services/task-service
       dockerfile: Dockerfile
@@ -189,6 +192,7 @@ services:
 
   # Gamification Service
   gamification-service:
+    image: deepiri-dev-gamification-service:latest
     build:
       context: ./services/gamification-service
       dockerfile: Dockerfile
@@ -219,6 +223,7 @@ services:
 
   # Analytics Service
   analytics-service:
+    image: deepiri-dev-analytics-service:latest
     build:
       context: ./services/analytics-service
       dockerfile: Dockerfile
@@ -250,6 +255,7 @@ services:
 
   # Notification Service
   notification-service:
+    image: deepiri-dev-notification-service:latest
     build:
       context: ./services/notification-service
       dockerfile: Dockerfile
@@ -279,6 +285,7 @@ services:
 
   # Integration Service
   integration-service:
+    image: deepiri-dev-integration-service:latest
     build:
       context: ./services/integration-service
       dockerfile: Dockerfile
@@ -314,6 +321,7 @@ services:
 
   # Challenge Service
   challenge-service:
+    image: deepiri-dev-challenge-service:latest
     build:
       context: ./services/challenge-service
       dockerfile: Dockerfile
@@ -342,6 +350,7 @@ services:
 
   # WebSocket Service
   websocket-service:
+    image: deepiri-dev-websocket-service:latest
     build:
       context: ./services/websocket-service
       dockerfile: Dockerfile
@@ -365,6 +374,7 @@ services:
 
   # Python Agent API (AI Service)
   pyagent:
+    image: deepiri-dev-pyagent:latest
     build:
       context: ./python_backend
       dockerfile: Dockerfile
@@ -432,6 +442,7 @@ services:
 
   # Jupyter Notebook for AI Research
   jupyter:
+    image: deepiri-dev-jupyter:latest
     build:
       context: ./python_backend
       dockerfile: Dockerfile.jupyter
@@ -456,6 +467,7 @@ services:
 
   # Frontend with Vite HMR
   frontend-dev:
+    image: deepiri-dev-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev

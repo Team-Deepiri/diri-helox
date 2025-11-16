@@ -91,20 +91,50 @@ Deepiri follows a modern microservices architecture:
 
 3. **Configure environment variables**
    ```bash
-   cp .env.example .env
+   cp env.example .env
    # Edit .env with your API keys and configuration
    ```
 
 4. **Start the application**
    ```bash
-   docker-compose up -d
+   # Normal start (uses existing images, no rebuild)
+   docker compose -f docker-compose.dev.yml up -d
+   
+   # To rebuild (only when needed - removes old images, rebuilds fresh)
+   ./rebuild.sh  # Linux/Mac
+   .\rebuild.ps1 # Windows PowerShell
    ```
 
 5. **Access the application**
-   - Frontend: http://localhost:3000
+   - Frontend: http://localhost:5173
    - Backend API: http://localhost:5000
    - Python Agent: http://localhost:8000
+   - MLflow: http://localhost:5500
    - API Documentation: http://localhost:5000/api-docs
+
+### Rebuilding Containers (Only When Needed)
+
+**Normal operation:** `docker compose up` uses existing images - no rebuild.
+
+**When to rebuild:** Only when code changes or you want fresh images:
+
+```bash
+# Use the clean rebuild scripts (removes old images first)
+./rebuild.sh              # Linux/Mac
+.\rebuild.ps1             # Windows PowerShell
+
+# Or manually rebuild specific service
+docker compose -f docker-compose.dev.yml build --no-cache pyagent
+docker compose -f docker-compose.dev.yml up -d pyagent
+
+# Or rebuild all (manual)
+docker compose -f docker-compose.dev.yml down --rmi local
+docker builder prune -af
+docker compose -f docker-compose.dev.yml build --no-cache
+docker compose -f docker-compose.dev.yml up -d
+```
+
+**Why use rebuild scripts?** They prevent Docker from accumulating 50GB+ of old images. See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for details.
 
 ### Local Development
 
@@ -280,6 +310,29 @@ The application is designed to be cloud-native and can be deployed on:
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+## Documentation
+
+### Complete Documentation Index
+See **[DOCUMENTATION-INDEX.md](DOCUMENTATION-INDEX.md)** for a complete guide to all 63+ markdown files in this project, organized by category.
+
+### Quick Navigation
+- **New to project?** → `GETTING_STARTED.md`
+- **Setting up?** → `START_EVERYTHING.md`
+- **Team member?** → `FIND_YOUR_TASKS.md`
+- **Rebuilding?** → `rebuild.sh` / `rebuild.ps1` or `DOCKER-IMAGE-CLEANSING-COMMANDS.md`
+- **Having issues?** → `docs/TROUBLESHOOTING.md`
+- **Architecture?** → `docs/SYSTEM_ARCHITECTURE.md`
+- **Contributing?** → `CONTRIBUTING.md`
+
+### Team-Specific Guides
+- **AI Team** → `docs/AI_TEAM_ONBOARDING.md`
+- **Backend Team** → `docs/BACKEND_TEAM_ONBOARDING.md`
+- **Frontend Team** → `docs/FRONTEND_TEAM_ONBOARDING.md`
+- **ML Team** → `docs/ML_ENGINEER_COMPLETE_GUIDE.md`
+- **ML Ops** → `docs/MLOPS_TEAM_ONBOARDING.md`
+- **Platform Team** → `docs/PLATFORM_TEAM_ONBOARDING.md`
+- **QA Team** → `docs/SECURITY_QA_TEAM_ONBOARDING.md`
+
 ## Support
 
 ### Common Issues
@@ -287,8 +340,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 **Port already in use**
 ```bash
 # Stop existing containers
-docker-compose down
-# Or change ports in docker-compose.yml
+docker-compose -f docker-compose.dev.yml down
+# Or change ports in docker-compose.dev.yml
 ```
 
 **API key errors**
@@ -296,8 +349,21 @@ docker-compose down
 - Check API key permissions and quotas
 
 **Database connection issues**
-- Ensure MongoDB is running: `docker-compose up -d mongodb`
+- Ensure MongoDB is running: `docker-compose -f docker-compose.dev.yml up -d mongodb`
 - Check database credentials in `.env`
+
+**Docker storage bloat (50GB+ images)**
+```bash
+# Use clean rebuild script
+./rebuild.sh  # Linux/Mac
+.\rebuild.ps1 # Windows
+
+# Or manually clean
+docker-compose -f docker-compose.dev.yml down --rmi local
+docker builder prune -af
+```
+
+See `DOCKER-IMAGE-CLEANSING-COMMANDS.md` for complete cleanup guide.
 
 ## Acknowledgments
 
