@@ -23,10 +23,10 @@ Welcome to the Deepiri Frontend Team! This guide will help you get set up and st
   - React snippets
   - Tailwind CSS IntelliSense
 
-### Required Accounts
+### Accounts you may need
 
-- **Firebase Account** (for authentication)
-- **GitHub Account** (for repository access)
+- **Firebase Account** (for authentication, we may utilize this)
+- **GitHub  want** (for repository access)
 - **Figma Access** (for design files, if available)
 
 ### System Requirements
@@ -58,7 +58,7 @@ cp env.example.frontend .env.local
 # Edit .env with your configuration
 # IMPORTANT: Point to API Gateway (not individual services)
 # VITE_API_URL=http://localhost:5000/api
-# VITE_PYAGENT_URL=http://localhost:8000
+# VITE_CYREX_URL=http://localhost:8000
 # VITE_FIREBASE_API_KEY=your-key
 ```
 
@@ -83,7 +83,7 @@ docker-compose -f docker-compose.dev.yml up -d \
   gamification-service \
   analytics-service \
   websocket-service \
-  pyagent \
+  cyrex \
   frontend-dev
 
 # Check service status
@@ -151,7 +151,7 @@ docker-compose -f docker-compose.dev.yml stop \
   gamification-service \
   analytics-service \
   websocket-service \
-  pyagent
+  cyrex
 
 # Or stop everything
 docker-compose -f docker-compose.dev.yml down

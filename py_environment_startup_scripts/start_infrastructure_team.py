@@ -139,7 +139,7 @@ def main():
                 "INTEGRATION_SERVICE_URL": "http://integration-service:5006",
                 "CHALLENGE_SERVICE_URL": "http://challenge-service:5007",
                 "WEBSOCKET_SERVICE_URL": "http://websocket-service:5008",
-                "PYAGENT_URL": "http://pyagent:8000",
+                "CYREX_URL": "http://cyrex:8000",
             },
             "volumes": {
                 str(project_root / "services" / "api-gateway"): "/app",
@@ -278,13 +278,13 @@ def main():
                 "NODE_ENV": env.get("NODE_ENV", "production"),
                 "PORT": "5007",
                 "MONGO_URI": mongo_uri,
-                "PYAGENT_URL": "http://pyagent:8000",
+                "CYREX_URL": "http://cyrex:8000",
             },
             "volumes": {
                 str(project_root / "services" / "challenge-service"): "/app",
                 "/app/node_modules": {},
             },
-            "depends_on": [("mongodb", 5), ("pyagent", 5)],
+            "depends_on": [("mongodb", 5), ("cyrex", 5)],
         },
         {
             "image": None,
@@ -309,16 +309,16 @@ def main():
         # AI Service
         {
             "image": None,
-            "name": "deepiri-pyagent-infra",
+            "name": "deepiri-cyrex-infra",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"8000/tcp": 8000},
             "environment": {
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "OPENAI_MODEL": env.get("OPENAI_MODEL", "gpt-4o-mini"),
-                "PYAGENT_API_KEY": env.get("PYAGENT_API_KEY", "change-me"),
+                "CYREX_API_KEY": env.get("CYREX_API_KEY", "change-me"),
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
                 "MONGO_URI": mongo_uri,
                 "REDIS_URL": redis_url,
@@ -328,8 +328,8 @@ def main():
                 "INFLUXDB_BUCKET": env.get("INFLUXDB_BUCKET", "analytics"),
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "models"): "/app/train/models",
-                str(project_root / "python_backend" / "train" / "data"): "/app/train/data",
+                str(project_root / "diri-cyrex" / "train" / "models"): "/app/train/models",
+                str(project_root / "diri-cyrex" / "train" / "data"): "/app/train/data",
             },
             "depends_on": [("mongodb", 5), ("redis", 2), ("mlflow", 3), ("influxdb", 5)],
         },
@@ -345,7 +345,7 @@ def main():
             "environment": {
                 "NODE_ENV": "production",
                 "VITE_API_URL": "http://localhost:5000/api",
-                "VITE_PYAGENT_URL": "http://localhost:8000",
+                "VITE_CYREX_URL": "http://localhost:8000",
             },
             "volumes": {
                 str(project_root / "frontend"): "/app",
@@ -375,7 +375,7 @@ def main():
         print("\nApplication Services (for monitoring):")
         print("  • Frontend: http://localhost:5173")
         print("  • API Gateway: http://localhost:5000")
-        print("  • PyAgent (AI): http://localhost:8000")
+        print("  • Cyrex (AI): http://localhost:8000")
         print("  • All Microservices: ports 5001-5008")
         print("\nInfrastructure Management:")
         print("  • View metrics in Grafana dashboards")

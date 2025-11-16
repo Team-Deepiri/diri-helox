@@ -17,7 +17,7 @@ docker compose -f docker-compose.yml logs backend
 
 **Python AI Service Logs:**
 ```bash
-docker compose -f docker-compose.dev.yml logs pyagent
+docker compose -f docker-compose.dev.yml logs cyrex
 ```
 
 **Frontend Logs:**
@@ -46,7 +46,7 @@ docker compose -f docker-compose.dev.yml logs mongo-express
 ```bash
 # For docker-compose.dev.yml:
 docker logs deepiri-api-gateway-dev
-docker logs deepiri-pyagent-dev
+docker logs deepiri-cyrex-dev
 docker logs deepiri-frontend-dev
 docker logs deepiri-mongodb-dev
 docker logs deepiri-redis-dev
@@ -54,7 +54,7 @@ docker logs deepiri-mongo-express-dev
 
 # For docker-compose.yml:
 docker logs deepiri-backend
-docker logs deepiri-pyagent-dev
+docker logs deepiri-cyrex-dev
 ```
 
 #### 3. Useful Options
@@ -126,11 +126,11 @@ docker compose -f docker-compose.yml logs -f --tail=50 -t backend
 **View logs for multiple services:**
 ```bash
 # For docker-compose.dev.yml:
-docker compose -f docker-compose.dev.yml logs api-gateway pyagent
+docker compose -f docker-compose.dev.yml logs api-gateway cyrex
 docker compose -f docker-compose.dev.yml logs api-gateway frontend-dev mongodb
 
 # For docker-compose.yml:
-docker compose -f docker-compose.yml logs backend pyagent
+docker compose -f docker-compose.yml logs backend cyrex
 ```
 
 **View all services:**
@@ -256,7 +256,7 @@ docker compose -f docker-compose.yml logs -f backend | grep "GET\|POST\|PUT\|DEL
 ### Check Challenge Generation
 ```bash
 # Monitor Python AI service for challenge generation
-docker compose -f docker-compose.dev.yml logs -f pyagent | grep -i challenge
+docker compose -f docker-compose.dev.yml logs -f cyrex | grep -i challenge
 ```
 
 ### View Database Operations
@@ -274,10 +274,10 @@ docker compose -f docker-compose.dev.yml logs -f redis
 docker compose -f docker-compose.dev.yml logs -f
 
 # View specific services together (docker-compose.dev.yml):
-docker compose -f docker-compose.dev.yml logs -f api-gateway pyagent frontend-dev
+docker compose -f docker-compose.dev.yml logs -f api-gateway cyrex frontend-dev
 
 # For docker-compose.yml:
-docker compose -f docker-compose.yml logs -f backend pyagent
+docker compose -f docker-compose.yml logs -f backend cyrex
 ```
 
 ### Check Container Health
@@ -388,7 +388,7 @@ docker compose -f docker-compose.dev.yml logs -f -t api-gateway
 docker compose -f docker-compose.dev.yml logs api-gateway | grep -i error
 
 # Multiple services
-docker compose -f docker-compose.dev.yml logs -f api-gateway pyagent
+docker compose -f docker-compose.dev.yml logs -f api-gateway cyrex
 
 # Save to file
 docker compose -f docker-compose.dev.yml logs api-gateway > api-gateway.log

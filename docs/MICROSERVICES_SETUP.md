@@ -25,7 +25,7 @@ Deepiri is now fully architected as a microservices system. All services run ind
 └───────┘ └──────┘ └───────────┘
     │
 ┌───▼────┐
-│PyAgent │  Port 8000 (AI Service)
+│Cyrex │  Port 8000 (AI Service)
 │(Python)│
 └────────┘
 ```
@@ -86,7 +86,7 @@ Deepiri is now fully architected as a microservices system. All services run ind
 - **Protocol**: WebSocket (Socket.IO)
 
 ### 10. Python AI Service (Port 8000)
-- **Location**: `python_backend/`
+- **Location**: `diri-cyrex/`
 - **Features**: AI/ML inference, Challenge generation, Task understanding
 - **Endpoints**: `/agent/*`
 
@@ -158,7 +158,7 @@ Each service requires specific environment variables. See `.env.example` files i
 - **Analytics Service**: `INFLUXDB_URL`, `INFLUXDB_TOKEN`
 - **Notification Service**: `FCM_SERVER_KEY`, `APNS_KEY_ID`
 - **Integration Service**: `GITHUB_CLIENT_ID`, `NOTION_CLIENT_ID`, etc.
-- **Challenge Service**: `PYAGENT_URL`
+- **Challenge Service**: `CYREX_URL`
 - **Python AI Service**: `OPENAI_API_KEY`, `MLFLOW_TRACKING_URI`, etc.
 
 ## Health Checks
@@ -216,7 +216,7 @@ The API Gateway uses `http-proxy-middleware` to route requests:
 /api/notifications/* → http://notification-service:5005/*
 /api/integrations/* → http://integration-service:5006/*
 /api/challenges/* → http://challenge-service:5007/*
-/api/agent/* → http://pyagent:8000/agent/*
+/api/agent/* → http://cyrex:8000/agent/*
 ```
 
 ## Development Workflow

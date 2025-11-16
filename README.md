@@ -91,7 +91,7 @@ docker compose -f docker-compose.dev.yml down
 docker compose -f docker-compose.dev.yml logs -f
 
 # Specific service
-docker compose -f docker-compose.dev.yml logs -f pyagent
+docker compose -f docker-compose.dev.yml logs -f cyrex
 ```
 
 ### Rebuilding (Only When Needed)
@@ -100,12 +100,21 @@ docker compose -f docker-compose.dev.yml logs -f pyagent
 ./rebuild.sh        # Linux/Mac
 .\rebuild.ps1       # Windows
 
-# Rebuild specific service
-docker compose -f docker-compose.dev.yml build --no-cache pyagent
-docker compose -f docker-compose.dev.yml up -d pyagent
+# Rebuild cyrex with auto GPU detection (recommended)
+# Windows
+.\scripts\build-cyrex-auto.ps1
+
+# Linux/Mac
+./scripts/build-cyrex-auto.sh
+
+# Manual rebuild specific service
+docker compose -f docker-compose.dev.yml build --no-cache cyrex
+docker compose -f docker-compose.dev.yml up -d cyrex
 ```
 
 **Note:** Normal `docker compose up` does NOT rebuild - it uses existing images. Only rebuild when code changes!
+
+**GPU Detection:** The build system automatically detects your GPU and chooses the best base image (CUDA if GPU ≥4GB, CPU otherwise). This prevents build freezing from large CUDA downloads. See `diri-cyrex/README_BUILD.md` for details.
 
 ---
 
@@ -131,7 +140,7 @@ deepiri/
 │
 ├── frontend/                    # React frontend
 ├── api-server/                  # Node.js backend
-├── python_backend/              # Python AI agent
+├── diri-cyrex/              # Python AI agent
 ├── services/                    # Microservices
 └── docker-compose.dev.yml       # Docker configuration
 ```
@@ -205,7 +214,7 @@ See [ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md) for complete list.
 cd api-server && npm test
 
 # Python agent tests
-cd python_backend && pytest -q
+cd diri-cyrex && pytest -q
 
 # Frontend tests
 cd frontend && npm test

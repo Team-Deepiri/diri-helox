@@ -74,7 +74,7 @@ docker compose -f docker-compose.dev.yml logs -f
 
 # View logs for specific service
 docker compose -f docker-compose.dev.yml logs -f api-gateway
-docker compose -f docker-compose.dev.yml logs -f pyagent
+docker compose -f docker-compose.dev.yml logs -f cyrex
 docker compose -f docker-compose.dev.yml logs -f jupyter
 ```
 
@@ -122,9 +122,16 @@ For detailed troubleshooting, see [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING
 ./rebuild.sh              # Linux/Mac
 .\rebuild.ps1             # Windows PowerShell
 
+# Rebuild cyrex with auto GPU detection (recommended)
+# Windows
+.\scripts\build-cyrex-auto.ps1
+
+# Linux/Mac
+./scripts/build-cyrex-auto.sh
+
 # Or rebuild specific service only
-docker compose -f docker-compose.dev.yml build --no-cache pyagent
-docker compose -f docker-compose.dev.yml up -d pyagent
+docker compose -f docker-compose.dev.yml build --no-cache cyrex
+docker compose -f docker-compose.dev.yml up -d cyrex
 
 # Or manual full rebuild
 docker compose -f docker-compose.dev.yml down --rmi local
@@ -132,6 +139,8 @@ docker builder prune -af
 docker compose -f docker-compose.dev.yml build --no-cache
 docker compose -f docker-compose.dev.yml up -d
 ```
+
+**GPU Detection:** The build system automatically detects your GPU and chooses the best base image (CUDA if GPU ≥4GB, CPU otherwise). This prevents build freezing from large CUDA downloads. See `diri-cyrex/README_BUILD.md` for details.
 
 See [docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md](docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md) for complete rebuild guide.
 
@@ -173,7 +182,7 @@ cp env.example.frontend .env.local
 
 # Edit .env - IMPORTANT: Point to API Gateway
 # VITE_API_URL=http://localhost:5000/api
-# VITE_PYAGENT_URL=http://localhost:8000
+# VITE_CYREX_URL=http://localhost:8000
 
 # Start frontend dev server
 npm run dev
@@ -242,7 +251,7 @@ docker-compose -f docker-compose.dev.yml logs -f
 
 # Specific service
 docker-compose -f docker-compose.dev.yml logs -f api-gateway
-docker-compose -f docker-compose.dev.yml logs -f pyagent
+docker-compose -f docker-compose.dev.yml logs -f cyrex
 docker-compose -f docker-compose.dev.yml logs -f user-service
 ```
 
@@ -284,7 +293,7 @@ docker-compose -f docker-compose.dev.yml restart
 ### Restart Specific Service
 ```bash
 docker-compose -f docker-compose.dev.yml restart api-gateway
-docker-compose -f docker-compose.dev.yml restart pyagent
+docker-compose -f docker-compose.dev.yml restart cyrex
 ```
 
 ### Rebuild Services (after code changes)
@@ -349,13 +358,13 @@ docker-compose -f docker-compose.dev.yml logs mongodb
 
 ```bash
 # Check Python service logs
-docker-compose -f docker-compose.dev.yml logs pyagent
+docker-compose -f docker-compose.dev.yml logs cyrex
 
 # Restart Python service
-docker-compose -f docker-compose.dev.yml restart pyagent
+docker-compose -f docker-compose.dev.yml restart cyrex
 
 # Check if API keys are set
-docker-compose -f docker-compose.dev.yml exec pyagent env | grep API_KEY
+docker-compose -f docker-compose.dev.yml exec cyrex env | grep API_KEY
 ```
 
 ## Testing Checklist

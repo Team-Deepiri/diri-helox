@@ -50,7 +50,7 @@ const challengeService = {
 
   async callAIChallengeService(task) {
     try {
-      const pythonAgentUrl = process.env.PYAGENT_URL || 'http://localhost:8000';
+      const pythonAgentUrl = process.env.CYREX_URL || 'http://localhost:8000';
       const response = await axios.post(`${pythonAgentUrl}/agent/challenge/generate`, {
         task: {
           title: task.title,
@@ -60,7 +60,7 @@ const challengeService = {
         }
       }, {
         headers: {
-          'x-api-key': process.env.PYAGENT_API_KEY || ''
+          'x-api-key': process.env.CYREX_API_KEY || ''
         },
         timeout: 30000
       });

@@ -92,7 +92,7 @@ def main():
             "environment": {
                 "NODE_ENV": "development",
                 "VITE_API_URL": "http://localhost:5000/api",
-                "VITE_PYAGENT_URL": "http://localhost:8000",
+                "VITE_CYREX_URL": "http://localhost:8000",
                 "CHOKIDAR_USEPOLLING": "true",
                 "WATCHPACK_POLLING": "true",
             },

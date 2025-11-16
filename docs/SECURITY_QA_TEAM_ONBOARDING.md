@@ -69,7 +69,7 @@ docker-compose -f docker-compose.dev.yml up -d \
   integration-service \
   challenge-service \
   websocket-service \
-  pyagent \
+  cyrex \
   mlflow \
   jupyter \
   frontend-dev
@@ -121,7 +121,7 @@ cd frontend
 npm install --save-dev @testing-library/react @testing-library/jest-dom
 
 # Python testing
-cd python_backend
+cd diri-cyrex
 pip install pytest pytest-cov
 ```
 
@@ -285,7 +285,7 @@ safety check
 pip-audit
 
 # Scan code
-bandit -r python_backend/
+bandit -r diri-cyrex/
 ```
 
 ---
@@ -418,7 +418,7 @@ cd scripts/security
 ```bash
 # Run all tests
 cd api-server && npm test
-cd python_backend && pytest
+cd diri-cyrex && pytest
 cd frontend && npm test
 
 # Run integration tests

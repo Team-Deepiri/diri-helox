@@ -112,7 +112,7 @@ docker-compose -f docker-compose.dev.yml up -d \
   integration-service \
   challenge-service \
   websocket-service \
-  pyagent \
+  cyrex \
   mlflow
 
 # Check service status
@@ -135,7 +135,7 @@ docker-compose -f docker-compose.dev.yml logs -f
 - **Analytics:** analytics-service (5004)
 - **Communication:** notification-service (5005), websocket-service (5008)
 - **Integrations:** integration-service (5006)
-- **AI:** challenge-service (5007), pyagent (8000)
+- **AI:** challenge-service (5007), cyrex (8000)
 - **MLOps:** mlflow (5500)
 
 **Services NOT typically needed:**
@@ -180,7 +180,7 @@ docker-compose -f docker-compose.dev.yml down -v
 ### 6. Python AI Service Setup (for AI Integration)
 
 ```bash
-cd python_backend
+cd diri-cyrex
 
 # Create virtual environment
 python -m venv venv
@@ -407,14 +407,14 @@ npm install axios
 npm install node-fetch
 
 # Python setup (if needed)
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 ```
 
 **First Tasks:**
 1. Review `services/challenge-service/server.js` - Challenge service (port 5007)
-2. Review `python_backend/app/routes/challenge.py` - Python AI routes
-3. Review `python_backend/app/services/` - All AI services
+2. Review `diri-cyrex/app/routes/challenge.py` - Python AI routes
+3. Review `diri-cyrex/app/services/` - All AI services
 4. Test challenge service → Python AI service communication
 5. Implement challenge state management
 6. Set up AI response validation
@@ -422,10 +422,10 @@ pip install -r requirements.txt
 **Key Files:**
 - `services/challenge-service/server.js` - Challenge service (port 5007)
 - `services/challenge-service/src/index.js` - Route handlers
-- `python_backend/app/routes/challenge.py` - Python AI routes
-- `python_backend/app/services/challenge_generator.py` - Challenge generation
-- `python_backend/app/services/rl_environment.py` - RL environment
-- `python_backend/app/services/ppo_agent.py` - PPO agent
+- `diri-cyrex/app/routes/challenge.py` - Python AI routes
+- `diri-cyrex/app/services/challenge_generator.py` - Challenge generation
+- `diri-cyrex/app/services/rl_environment.py` - RL environment
+- `diri-cyrex/app/services/ppo_agent.py` - PPO agent
 
 **Integration Example:**
 ```javascript
@@ -452,20 +452,20 @@ npm install axios
 npm install node-fetch
 
 # Python setup (if needed)
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 ```
 
 **First Tasks:**
-1. Review `python_backend/app/routes/challenge.py`
-2. Review `python_backend/app/services/`
+1. Review `diri-cyrex/app/routes/challenge.py`
+2. Review `diri-cyrex/app/services/`
 3. Create challenge state management
 4. Implement gamification rule engine
 5. Set up AI response validation
 
 **Key Files:**
-- `python_backend/app/routes/challenge.py`
-- `python_backend/app/services/challenge_generator.py`
+- `diri-cyrex/app/routes/challenge.py`
+- `diri-cyrex/app/services/challenge_generator.py`
 - `services/challenge-service/` (create)
 
 **Integration Example:**
@@ -501,8 +501,8 @@ npm install @influxdata/influxdb-client  # For time-series analytics
 
 **Key Files:**
 - `api-server/models/` - Database models
-- `python_backend/app/database/models.py` - Python models
-- `python_backend/app/utils/cache.py` - Caching utilities
+- `diri-cyrex/app/database/models.py` - Python models
+- `diri-cyrex/app/utils/cache.py` - Caching utilities
 - `services/user-service/src/timeSeriesService.js` - NEW: Time-series tracking
 - `services/analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
 
@@ -536,8 +536,8 @@ npm install mongodb
 
 **Key Files:**
 - `api-server/models/`
-- `python_backend/app/database/models.py`
-- `python_backend/app/utils/cache.py`
+- `diri-cyrex/app/database/models.py`
+- `diri-cyrex/app/utils/cache.py`
 
 **Performance Testing:**
 ```bash
@@ -948,7 +948,7 @@ docker-compose up service-name
 
 - `api-server/` - Main backend API
 - `services/` - Microservices
-- `python_backend/` - AI service integration
+- `diri-cyrex/` - AI service integration
 - `ops/` - Deployment configs
 
 ### Communication

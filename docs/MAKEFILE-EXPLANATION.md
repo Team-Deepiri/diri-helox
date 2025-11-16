@@ -69,7 +69,7 @@ make df                   # Show Docker disk usage
 
 # Rebuilding (ONLY use when code changes)
 make rebuild              # Full clean rebuild (removes old images, rebuilds, starts)
-make rebuild-service SERVICE=pyagent  # Rebuild one service
+make rebuild-service SERVICE=cyrex  # Rebuild one service
 make build                # Normal build (with cache, only if needed)
 
 # Cleanup

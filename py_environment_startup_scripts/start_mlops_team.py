@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Startup script for ML Ops Team
-Starts: mlflow, prometheus, grafana, mlops-service, pyagent
+Starts: mlflow, prometheus, grafana, mlops-service, cyrex
 """
 import sys
 from pathlib import Path
@@ -65,8 +65,8 @@ def main():
             "image": None,
             "name": "deepiri-mlops-service",
             "build": {
-                "context": str(project_root / "python_backend"),
-                "dockerfile": str(project_root / "python_backend" / "mlops" / "docker" / "Dockerfile.mlops"),
+                "context": str(project_root / "diri-cyrex"),
+                "dockerfile": str(project_root / "diri-cyrex" / "mlops" / "docker" / "Dockerfile.mlops"),
             },
             "ports": {"8000/tcp": 8001},
             "environment": {
@@ -83,24 +83,24 @@ def main():
             },
             "depends_on": [("mlflow", 5), ("prometheus", 3)],
         },
-        # PyAgent - For model inference testing
+        # Cyrex - For model inference testing
         {
             "image": None,
-            "name": "deepiri-pyagent-mlops",
+            "name": "deepiri-cyrex-mlops",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"8000/tcp": 8000},
             "environment": {
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "OPENAI_MODEL": env.get("OPENAI_MODEL", "gpt-4o-mini"),
-                "PYAGENT_API_KEY": env.get("PYAGENT_API_KEY", "change-me"),
+                "CYREX_API_KEY": env.get("CYREX_API_KEY", "change-me"),
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
                 "MODEL_REGISTRY_PATH": "/app/model_registry",
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "models"): "/app/train/models",
+                str(project_root / "diri-cyrex" / "train" / "models"): "/app/train/models",
                 "model_registry_mlops": "/app/model_registry",
             },
             "depends_on": [("mlflow", 5)],
@@ -122,7 +122,7 @@ def main():
         print("  • Prometheus: http://localhost:9090")
         print("  • Grafana: http://localhost:3001 (admin/admin)")
         print("  • ML Ops Service: http://localhost:8001")
-        print("  • PyAgent: http://localhost:8000")
+        print("  • Cyrex: http://localhost:8000")
         print("\nTo stop services, use: python stop_mlops_team.py")
         
     except KeyboardInterrupt:

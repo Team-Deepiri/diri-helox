@@ -30,12 +30,12 @@ spec:
               value: "redis://:$(REDIS_PASSWORD)@redis-service:6379"
             - name: REDIS_HOST
               value: "redis-service"
-            - name: PYAGENT_URL
-              value: "http://pyagent-service:8000"
+            - name: CYREX_URL
+              value: "http://cyrex-service:8000"
             - name: INTERNAL_BACKEND_URL
               value: "http://backend-service:5000"
-            - name: INTERNAL_PYAGENT_URL
-              value: "http://pyagent-service:8000"
+            - name: INTERNAL_CYREX_URL
+              value: "http://cyrex-service:8000"
             - name: INTERNAL_LOCALAI_URL
               value: "http://localai-service:8080/v1"
           resources:

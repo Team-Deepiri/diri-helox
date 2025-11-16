@@ -59,7 +59,7 @@ The AI Team is responsible for implementing NLP task understanding, challenge ge
 ## Current Infrastructure
 
 ### Python AI Service
-**Location**: `python_backend/`
+**Location**: `diri-cyrex/`
 - FastAPI application
 - OpenAI integration
 - Challenge generation endpoints
@@ -67,10 +67,10 @@ The AI Team is responsible for implementing NLP task understanding, challenge ge
 - Advanced AI services with RL and multimodal understanding
 
 ### Key Files
-- `python_backend/app/main.py` - FastAPI application entry point
-- `python_backend/app/routes/` - API routes
-- `python_backend/app/services/` - AI service implementations
-- `python_backend/train/` - Training scripts and data
+- `diri-cyrex/app/main.py` - FastAPI application entry point
+- `diri-cyrex/app/routes/` - API routes
+- `diri-cyrex/app/services/` - AI service implementations
+- `diri-cyrex/train/` - Training scripts and data
 
 ### Advanced AI Services
 
@@ -110,7 +110,7 @@ The AI Team is responsible for implementing NLP task understanding, challenge ge
 
 ### Setup
 ```bash
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 cp env.example.python .env
 # Add your OPENAI_API_KEY to .env
@@ -122,7 +122,7 @@ cp env.example.python .env
 uvicorn app.main:app --reload --port 8000
 
 # Docker
-docker-compose up pyagent
+docker-compose up cyrex
 ```
 
 ### API Endpoints
@@ -138,7 +138,7 @@ docker-compose up pyagent
 
 ### Directory Structure Needed
 ```
-python_backend/
+diri-cyrex/
 ├── train/
 │   ├── models/          # Saved model checkpoints
 │   ├── data/            # Training datasets
@@ -224,6 +224,6 @@ python_backend/
 
 For detailed information on all AI services, see:
 - **AI Services Overview:** `docs/AI_SERVICES_OVERVIEW.md` - Complete guide to all services
-- **Service Code:** `python_backend/app/services/` - Implementation details
+- **Service Code:** `diri-cyrex/app/services/` - Implementation details
 - **API Documentation:** Check FastAPI docs at `/docs` endpoint when server is running
 

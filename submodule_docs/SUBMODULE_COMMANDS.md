@@ -17,8 +17,8 @@ git checkout main
 git pull origin main
 git status
 
-# Extract python_backend using subtree
-git subtree push --prefix=python_backend origin extract-ai-submodule
+# Extract diri-cyrex using subtree
+git subtree push --prefix=diri-cyrex origin extract-ai-submodule
 
 # Create temporary directory for new repo
 cd ..
@@ -45,20 +45,20 @@ cd deepiri
 ### Step 3: Remove AI Code from Main Repository
 
 ```bash
-# Remove python_backend from main repo
+# Remove diri-cyrex from main repo
 git checkout main
-git rm -r --cached python_backend
-git commit -m "refactor: extract python_backend to separate repository"
+git rm -r --cached diri-cyrex
+git commit -m "refactor: extract diri-cyrex to separate repository"
 ```
 
 ### Step 4: Add as Git Submodule
 
 ```bash
 # Add the AI repository as a submodule
-git submodule add https://github.com/Deepiri/deepiri-ai.git python_backend
+git submodule add https://github.com/Deepiri/deepiri-ai.git diri-cyrex
 
 # Commit the submodule addition
-git commit -m "feat: add python_backend as git submodule"
+git commit -m "feat: add diri-cyrex as git submodule"
 
 # Push to main repository
 git push origin main
@@ -75,7 +75,7 @@ cd ..
 mkdir test-clone && cd test-clone
 git clone --recursive https://github.com/Deepiri/deepiri.git test-deepiri
 cd test-deepiri
-ls python_backend
+ls diri-cyrex
 cd ../..
 rm -rf test-clone
 cd deepiri
@@ -99,21 +99,21 @@ git clone --recursive https://github.com/Deepiri/deepiri.git
 
 ### Make Changes to AI Code
 ```bash
-cd python_backend
+cd diri-cyrex
 # Make changes
 git add .
 git commit -m "feat: your change"
 git push origin main
 cd ..
-git add python_backend
+git add diri-cyrex
 git commit -m "chore: update AI submodule"
 git push origin main
 ```
 
 ### Update to Latest AI Code
 ```bash
-git submodule update --remote python_backend
-git add python_backend
+git submodule update --remote diri-cyrex
+git add diri-cyrex
 git commit -m "chore: update AI submodule"
 git push origin main
 ```
@@ -127,7 +127,7 @@ git push origin main
 cd deepiri
 git checkout main
 git pull origin main
-git subtree push --prefix=python_backend origin extract-ai-submodule
+git subtree push --prefix=diri-cyrex origin extract-ai-submodule
 
 # ============================================
 # STEP 2: Create New AI Repository
@@ -145,14 +145,14 @@ cd ../.. && rm -rf deepiri-ai-temp
 # ============================================
 cd deepiri
 git checkout main
-git rm -r --cached python_backend
-git commit -m "refactor: extract python_backend to separate repository"
+git rm -r --cached diri-cyrex
+git commit -m "refactor: extract diri-cyrex to separate repository"
 
 # ============================================
 # STEP 4: Add as Submodule
 # ============================================
-git submodule add https://github.com/Deepiri/deepiri-ai.git python_backend
-git commit -m "feat: add python_backend as git submodule"
+git submodule add https://github.com/Deepiri/deepiri-ai.git diri-cyrex
+git commit -m "feat: add diri-cyrex as git submodule"
 git push origin main
 
 # ============================================

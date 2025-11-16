@@ -111,8 +111,8 @@ install_test_deps() {
     fi
     
     # Install Python test dependencies
-    if [ -f "python_backend/requirements.txt" ]; then
-        cd python_backend
+    if [ -f "diri-cyrex/requirements.txt" ]; then
+        cd diri-cyrex
         pip install -r requirements.txt --quiet
         cd ..
     fi
@@ -144,11 +144,11 @@ test_server() {
 }
 
 # Run Python backend tests
-test_python_backend() {
+test_diri-cyrex() {
     log_info "Testing Python backend..."
     
-    if [ -f "python_backend/requirements.txt" ]; then
-        run_test "Python Unit Tests" "python -m pytest tests/ -v" "python_backend"
+    if [ -f "diri-cyrex/requirements.txt" ]; then
+        run_test "Python Unit Tests" "python -m pytest tests/ -v" "diri-cyrex"
         
         # Run Python linting
         if command -v flake8 &> /dev/null; then
@@ -336,7 +336,7 @@ main() {
     
     # Run tests
     test_server
-    test_python_backend
+    test_diri-cyrex
     test_client
     test_integration
     test_security
@@ -372,7 +372,7 @@ case "${1:-all}" in
     python)
         check_dependencies
         install_test_deps
-        test_python_backend
+        test_diri-cyrex
         ;;
     frontend)
         check_dependencies

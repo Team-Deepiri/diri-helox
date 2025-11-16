@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Startup script for AI Team
-Starts: pyagent, mlflow, jupyter, challenge-service, mongodb, redis
+Starts: cyrex, mlflow, jupyter, challenge-service, mongodb, redis
 """
 import sys
 from pathlib import Path
@@ -60,12 +60,12 @@ def main():
             "wait_url": "http://mlflow:5000/health",
             "depends_on": [],
         },
-        # Python AI Service (PyAgent)
+        # Python AI Service (Cyrex)
         {
             "image": None,  # Will build from Dockerfile
-            "name": "deepiri-pyagent-ai",
+            "name": "deepiri-cyrex-ai",
             "build": {
-                "context": str(Path(__file__).parent.parent / "python_backend"),
+                "context": str(Path(__file__).parent.parent / "diri-cyrex"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"8000/tcp": 8000},
@@ -73,15 +73,15 @@ def main():
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "OPENAI_MODEL": env.get("OPENAI_MODEL", "gpt-4o-mini"),
                 "CORS_ORIGIN": env.get("CORS_ORIGIN", "http://localhost:5173"),
-                "PYAGENT_API_KEY": env.get("PYAGENT_API_KEY", "change-me"),
+                "CYREX_API_KEY": env.get("CYREX_API_KEY", "change-me"),
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
                 "WANDB_API_KEY": env.get("WANDB_API_KEY", ""),
                 "MONGO_URI": f"mongodb://{env.get('MONGO_ROOT_USER', 'admin')}:{env.get('MONGO_ROOT_PASSWORD', 'password')}@mongodb:27017/{env.get('MONGO_DB', 'deepiri')}?authSource=admin",
                 "REDIS_URL": f"redis://:{env.get('REDIS_PASSWORD', 'redispassword')}@redis:6379",
             },
             "volumes": {
-                str(Path(__file__).parent.parent / "python_backend" / "train" / "models"): "/app/train/models",
-                str(Path(__file__).parent.parent / "python_backend" / "train" / "data"): "/app/train/data",
+                str(Path(__file__).parent.parent / "diri-cyrex" / "train" / "models"): "/app/train/models",
+                str(Path(__file__).parent.parent / "diri-cyrex" / "train" / "data"): "/app/train/data",
             },
             "wait_url": "http://localhost:8000/health",
             "depends_on": [("mongodb", 5), ("redis", 2), ("mlflow", 3)],
@@ -91,7 +91,7 @@ def main():
             "image": None,  # Will build from Dockerfile
             "name": "deepiri-jupyter-ai",
             "build": {
-                "context": str(Path(__file__).parent.parent / "python_backend"),
+                "context": str(Path(__file__).parent.parent / "diri-cyrex"),
                 "dockerfile": "Dockerfile.jupyter",
             },
             "ports": {"8888/tcp": 8888},
@@ -100,11 +100,11 @@ def main():
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
             },
             "volumes": {
-                str(Path(__file__).parent.parent / "python_backend" / "train" / "notebooks"): "/app/notebooks",
-                str(Path(__file__).parent.parent / "python_backend" / "train" / "data"): "/app/data",
+                str(Path(__file__).parent.parent / "diri-cyrex" / "train" / "notebooks"): "/app/notebooks",
+                str(Path(__file__).parent.parent / "diri-cyrex" / "train" / "data"): "/app/data",
             },
             "wait_url": None,
-            "depends_on": [("pyagent", 3)],
+            "depends_on": [("cyrex", 3)],
         },
         # Challenge Service - Needs AI service
         {
@@ -119,14 +119,14 @@ def main():
                 "NODE_ENV": "development",
                 "PORT": "5007",
                 "MONGO_URI": f"mongodb://{env.get('MONGO_ROOT_USER', 'admin')}:{env.get('MONGO_ROOT_PASSWORD', 'password')}@mongodb:27017/{env.get('MONGO_DB', 'deepiri')}?authSource=admin",
-                "PYAGENT_URL": "http://pyagent:8000",
+                "CYREX_URL": "http://cyrex:8000",
             },
             "volumes": {
                 str(Path(__file__).parent.parent / "services" / "challenge-service"): "/app",
                 "/app/node_modules": {},
             },
             "wait_url": None,
-            "depends_on": [("mongodb", 5), ("pyagent", 5)],
+            "depends_on": [("mongodb", 5), ("cyrex", 5)],
         },
     ]
     
@@ -141,7 +141,7 @@ def main():
         for name in started:
             print(f"  ✓ {name}")
         print("\nAccess points:")
-        print("  • PyAgent (AI Service): http://localhost:8000")
+        print("  • Cyrex (AI Service): http://localhost:8000")
         print("  • MLflow: http://localhost:5001")
         print("  • Jupyter: http://localhost:8888")
         print("  • Challenge Service: http://localhost:5007")

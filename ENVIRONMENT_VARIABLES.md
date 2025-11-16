@@ -25,7 +25,7 @@ MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
 REDIS_URL=redis://localhost:6379
 DEV_CLIENT_URL=http://localhost:5173
 DEV_API_URL=http://localhost:5000/api
-DEV_PYAGENT_URL=http://localhost:8000
+DEV_CYREX_URL=http://localhost:8000
 
 # api-server/.env
 NODE_ENV=development
@@ -34,11 +34,11 @@ MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
 REDIS_URL=redis://localhost:6379
 AI_PROVIDER=localai
 LOCALAI_API_BASE=http://localhost:8080/v1
-PYAGENT_URL=http://localhost:8000
+CYREX_URL=http://localhost:8000
 DEV_CLIENT_URL=http://localhost:5173
 CORS_ORIGIN=http://localhost:5173
 
-# python_backend/.env
+# diri-cyrex/.env
 AI_PROVIDER=localai
 LOCALAI_API_BASE=http://localhost:8080/v1
 NODE_BACKEND_URL=http://localhost:5000
@@ -47,7 +47,7 @@ CHROMADB_PATH=./chroma_db
 
 # frontend/.env.local
 VITE_API_URL=http://localhost:5000/api
-VITE_PYAGENT_URL=http://localhost:8000
+VITE_CYREX_URL=http://localhost:8000
 ```
 
 ---
@@ -61,9 +61,9 @@ deepiri/
 ├── api-server/
 │   ├── .env                      # Backend env
 │   └── env.example.api-server    # Backend env template
-├── python_backend/
+├── diri-cyrex/
 │   ├── .env                      # Python Agent env
-│   └── env.example.python_backend # Python Agent env template
+│   └── env.example.diri-cyrex # Python Agent env template
 └── frontend/
     ├── .env.local                # Frontend env
     └── env.example.frontend      # Frontend env template
@@ -106,7 +106,7 @@ LOCALAI_MODEL=gpt-4o-mini
 ```bash
 DEV_CLIENT_URL=http://localhost:5173
 DEV_API_URL=http://localhost:5000/api
-DEV_PYAGENT_URL=http://localhost:8000
+DEV_CYREX_URL=http://localhost:8000
 ```
 
 ### `api-server/.env`
@@ -135,7 +135,7 @@ SESSION_SECRET=your-session-secret-key-here
 ```bash
 AI_PROVIDER=localai
 LOCALAI_API_BASE=http://localhost:8080/v1
-PYAGENT_URL=http://localhost:8000
+CYREX_URL=http://localhost:8000
 ```
 
 **CORS:**
@@ -144,7 +144,7 @@ CORS_ORIGIN=http://localhost:5173
 CLIENT_URL=http://localhost:5173
 ```
 
-### `python_backend/.env`
+### `diri-cyrex/.env`
 
 **Server Configuration:**
 ```bash
@@ -164,7 +164,7 @@ LOCALAI_MODEL=gpt-4o-mini
 **Backend Communication:**
 ```bash
 NODE_BACKEND_URL=http://localhost:5000
-PYAGENT_API_KEY=change-me
+CYREX_API_KEY=change-me
 ```
 
 **RAG / Embeddings:**
@@ -179,7 +179,7 @@ EMBEDDING_MODEL=all-minilm-l6-v2
 
 ```bash
 VITE_API_URL=http://localhost:5000/api
-VITE_PYAGENT_URL=http://localhost:8000
+VITE_CYREX_URL=http://localhost:8000
 ```
 
 ---
@@ -204,7 +204,7 @@ In Kubernetes, services communicate using service names:
 - `mongodb-service:27017` (not `localhost:27017`)
 - `redis-service:6379` (not `localhost:6379`)
 - `backend-service:5000` (not `localhost:5000`)
-- `pyagent-service:8000` (not `localhost:8000`)
+- `cyrex-service:8000` (not `localhost:8000`)
 - `localai-service:8080` (not `localhost:8080`)
 
 ---
@@ -220,7 +220,7 @@ In Kubernetes, services communicate using service names:
 - `AI_PROVIDER` - AI provider (localai/openai/deepinfra)
 - `DEV_CLIENT_URL` - Frontend URL
 - `DEV_API_URL` - Backend API URL
-- `DEV_PYAGENT_URL` - Python Agent URL
+- `DEV_CYREX_URL` - Python Agent URL
 
 **For Kubernetes:**
 - ConfigMap with service names
@@ -323,7 +323,7 @@ API_URL: https://api.deepiri.com
 |----------|-------------|---------|----------|
 | `DEV_CLIENT_URL` | Frontend URL (local) | `http://localhost:5173` | Yes |
 | `DEV_API_URL` | Backend API URL (local) | `http://localhost:5000/api` | Yes |
-| `DEV_PYAGENT_URL` | Python Agent URL (local) | `http://localhost:8000` | Yes |
+| `DEV_CYREX_URL` | Python Agent URL (local) | `http://localhost:8000` | Yes |
 
 ### Authentication
 
@@ -355,7 +355,7 @@ MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
 REDIS_URL=redis://localhost:6379
 DEV_CLIENT_URL=http://localhost:5173
 DEV_API_URL=http://localhost:5000/api
-DEV_PYAGENT_URL=http://localhost:8000
+DEV_CYREX_URL=http://localhost:8000
 ```
 
 ### Local Development with OpenAI
@@ -370,7 +370,7 @@ MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
 REDIS_URL=redis://localhost:6379
 DEV_CLIENT_URL=http://localhost:5173
 DEV_API_URL=http://localhost:5000/api
-DEV_PYAGENT_URL=http://localhost:8000
+DEV_CYREX_URL=http://localhost:8000
 ```
 
 ### Kubernetes Local Dev

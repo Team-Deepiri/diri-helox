@@ -241,7 +241,7 @@ challenge = await generator.generate_challenge(
 
 ```bash
 # Run AI service tests
-cd python_backend
+cd diri-cyrex
 pytest tests/ai/test_advanced_task_parser.py
 pytest tests/ai/test_adaptive_challenge_generator.py
 ```
@@ -250,8 +250,8 @@ pytest tests/ai/test_adaptive_challenge_generator.py
 
 ## Documentation
 
-- **Service Code**: `python_backend/app/services/`
-- **API Routes**: `python_backend/app/routes/`
-- **Tests**: `python_backend/tests/ai/`
-- **Training**: `python_backend/train/`
+- **Service Code**: `diri-cyrex/app/services/`
+- **API Routes**: `diri-cyrex/app/routes/`
+- **Tests**: `diri-cyrex/tests/ai/`
+- **Training**: `diri-cyrex/train/`
 

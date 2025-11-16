@@ -26,7 +26,7 @@ rebuild:
 # Clean rebuild specific service (ONLY use when rebuilding needed)
 rebuild-service:
 	@if [ -z "$(SERVICE)" ]; then \
-		echo "Usage: make rebuild-service SERVICE=pyagent"; \
+		echo "Usage: make rebuild-service SERVICE=cyrex"; \
 		exit 1; \
 	fi
 	@echo "🧹 Cleaning old image for $(SERVICE)..."

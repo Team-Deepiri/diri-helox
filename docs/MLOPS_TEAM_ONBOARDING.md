@@ -10,7 +10,7 @@ This guide will help MLOps engineers get started with the Deepiri MLOps infrastr
 
 ```bash
 # Navigate to MLOps directory
-cd deepiri/python_backend/mlops
+cd deepiri/diri-cyrex/mlops
 
 # Run setup script (Linux/Mac)
 bash scripts/setup_mlops_environment.sh
@@ -24,14 +24,33 @@ pip install -r requirements.txt
 pip install mlflow kubernetes prometheus-client
 ```
 
-### 2. Start Required Microservices (MLOps Team)
+### 2. Build and Start Required Microservices (MLOps Team)
 
 **MLOps team only needs these services:**
 - MLflow (for model tracking and registry)
-- Python Agent (for model deployment testing)
+- Python Agent (for model deployment testing) - **cyrex**
 - MongoDB (for model registry data)
 - InfluxDB (for monitoring metrics)
 - Jupyter (for experimentation, optional)
+
+**Important: Build cyrex with GPU Detection (Recommended)**
+
+```bash
+# Auto-detect GPU and build cyrex/jupyter (recommended)
+# Windows
+.\scripts\build-cyrex-auto.ps1
+
+# Linux/Mac
+./scripts/build-cyrex-auto.sh
+
+# This automatically:
+# - Detects if you have a GPU (≥4GB VRAM)
+# - Uses CUDA image if GPU is good enough
+# - Falls back to CPU image if no GPU (faster, no freezing!)
+# - Prevents build freezing from large CUDA downloads
+```
+
+**Then start services:**
 
 ```bash
 # Start only the services needed for MLOps
@@ -39,7 +58,7 @@ docker-compose -f docker-compose.dev.yml up -d \
   mongodb \
   influxdb \
   mlflow \
-  pyagent \
+  cyrex \
   jupyter
 
 # Check service status
@@ -47,12 +66,14 @@ docker-compose -f docker-compose.dev.yml ps
 
 # View logs
 docker-compose -f docker-compose.dev.yml logs -f mlflow
-docker-compose -f docker-compose.dev.yml logs -f pyagent
+docker-compose -f docker-compose.dev.yml logs -f cyrex
 ```
+
+**Note:** If you encounter build freezing at step 113/120, the auto-build script will use CPU fallback automatically. See `diri-cyrex/README_BUILD.md` for troubleshooting.
 
 **MLOps Team Services:**
 - **MLflow:** mlflow (port 5500) - Model tracking and registry
-- **Python Agent:** pyagent (port 8000) - For model deployment testing
+- **Python Agent:** cyrex (port 8000) - For model deployment testing
 - **Jupyter:** jupyter (port 8888) - For experimentation (optional)
 - **Databases:** mongodb, influxdb
 
@@ -87,7 +108,7 @@ docker-compose -f docker/docker-compose.mlops.yml up -d
 # Stop all MLOps-related services
 docker-compose -f docker-compose.dev.yml stop \
   mlflow \
-  pyagent \
+  cyrex \
   jupyter
 
 # Or stop everything
@@ -102,7 +123,7 @@ docker-compose -f docker-compose.dev.yml down
 
 **Key Tasks**:
 1. **Model CI/CD Pipeline**
-   - Location: `python_backend/mlops/ci/model_ci_pipeline.py`
+   - Location: `diri-cyrex/mlops/ci/model_ci_pipeline.py`
    - Automates: Testing → Validation → Registration → Staging → Production
    - Usage:
      ```python
@@ -138,7 +159,7 @@ docker-compose -f docker-compose.dev.yml down
 
 **Key Tasks**:
 1. **Model Monitoring**
-   - Location: `python_backend/mlops/monitoring/model_monitor.py`
+   - Location: `diri-cyrex/mlops/monitoring/model_monitor.py`
    - Monitors: Performance, drift, data quality
    - Usage:
      ```python
@@ -169,7 +190,7 @@ docker-compose -f docker-compose.dev.yml down
 
 ### Model Registry Service
 
-**Location**: `python_backend/mlops/registry/model_registry.py`
+**Location**: `diri-cyrex/mlops/registry/model_registry.py`
 
 **Usage**:
 ```python
@@ -469,18 +490,18 @@ deployment.rollback("model_name", target_version="1.0.0")
 
 ## Resources
 
-- **MLOps README**: `python_backend/mlops/README.md`
-- **CI/CD Pipeline**: `python_backend/mlops/ci/model_ci_pipeline.py`
-- **Model Registry**: `python_backend/mlops/registry/model_registry.py`
-- **Monitoring**: `python_backend/mlops/monitoring/model_monitor.py`
-- **Deployment**: `python_backend/mlops/deployment/deployment_automation.py`
+- **MLOps README**: `diri-cyrex/mlops/README.md`
+- **CI/CD Pipeline**: `diri-cyrex/mlops/ci/model_ci_pipeline.py`
+- **Model Registry**: `diri-cyrex/mlops/registry/model_registry.py`
+- **Monitoring**: `diri-cyrex/mlops/monitoring/model_monitor.py`
+- **Deployment**: `diri-cyrex/mlops/deployment/deployment_automation.py`
 
 ## Getting Help
 
 - Check logs: `logs/mlops.log`
 - Review documentation: `docs/MLOPS_TEAM_ONBOARDING.md`
 - Ask team: MLOps channel in Slack
-- Review code: `python_backend/mlops/`
+- Review code: `diri-cyrex/mlops/`
 
 ---
 

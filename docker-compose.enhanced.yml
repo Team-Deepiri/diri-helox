@@ -130,20 +130,20 @@ services:
       start_period: 40s
 
   # Python Agent API
-  pyagent:
+  cyrex:
     build:
-      context: ./python_backend
+      context: ./diri-cyrex
       dockerfile: Dockerfile
       args:
         PYTHON_ENV: ${NODE_ENV:-development}
-    container_name: deepiri-pyagent
+    container_name: deepiri-cyrex
     restart: unless-stopped
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       NODE_BACKEND_URL: http://backend:5000
-      PYAGENT_API_KEY: ${PYAGENT_API_KEY:-change-me}
+      CYREX_API_KEY: ${CYREX_API_KEY:-change-me}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
       - "8000:8000"
@@ -218,7 +218,7 @@ services:
       - deepiri-network
     depends_on:
       - backend
-      - pyagent
+      - cyrex
     deploy:
       resources:
         limits:
@@ -275,7 +275,7 @@ services:
       - deepiri-network
     depends_on:
       - backend
-      - pyagent
+      - cyrex
     deploy:
       resources:
         limits:

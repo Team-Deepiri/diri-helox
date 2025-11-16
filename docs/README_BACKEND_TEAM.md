@@ -175,7 +175,7 @@ Each microservice should be independently deployable with:
 ### Communication Pattern
 ```javascript
 // Example: Challenge generation
-const response = await axios.post('http://pyagent:8000/generate-challenge', {
+const response = await axios.post('http://cyrex:8000/generate-challenge', {
   task: taskData,
   userPreferences: userPrefs
 });

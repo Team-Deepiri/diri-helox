@@ -279,21 +279,21 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 - Error handling
 - Performance optimization
 
-### `python_backend/app/train/README.md`
+### `diri-cyrex/app/train/README.md`
 **ML training pipeline documentation**
 - Training workflows
 - Model architectures
 - Data preparation
 - Experiment tracking
 
-### `python_backend/mlops/README.md`
+### `diri-cyrex/mlops/README.md`
 **ML Ops infrastructure documentation**
 - Model deployment
 - Model registry
 - Monitoring ML models
 - CI/CD for ML
 
-### `python_backend/inference/README.md`
+### `diri-cyrex/inference/README.md`
 **Model inference service documentation**
 - Inference API
 - Model loading
@@ -445,7 +445,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 
 ## 🐍 Python Backend Documentation
 
-### `python_backend/app/train/infrastructure/README.md`
+### `diri-cyrex/app/train/infrastructure/README.md`
 **Training infrastructure documentation**
 - LoRA/QLoRA training
 - Experiment tracking
@@ -522,7 +522,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 
 ### Makefile (Optional)
 - **`make rebuild`**: Full clean rebuild
-- **`make rebuild-service SERVICE=pyagent`**: Rebuild one service
+- **`make rebuild-service SERVICE=cyrex`**: Rebuild one service
 - **`make clean`**: Clean everything
 - **`make build`**: Normal build with cache
 - **`make up`**: Start services
@@ -564,7 +564,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 ### Service Docs (`services/*/README.md`)
 - Individual service documentation in each service directory
 
-### Python Backend (`python_backend/`)
+### Python Backend (`diri-cyrex/`)
 - `app/train/README.md`, `mlops/README.md`, `inference/README.md`
 
 ### Frontend (`frontend/`)

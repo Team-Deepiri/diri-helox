@@ -155,11 +155,11 @@ services:
       retries: 3
 
   # Python Agent API (AI Service)
-  pyagent:
+  cyrex:
     build:
-      context: ./python_backend
+      context: ./diri-cyrex
       dockerfile: Dockerfile
-    container_name: deepiri-pyagent
+    container_name: deepiri-cyrex
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -171,7 +171,7 @@ services:
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       NODE_BACKEND_URL: http://backend:5000
-      PYAGENT_API_KEY: ${PYAGENT_API_KEY:-change-me}
+      CYREX_API_KEY: ${CYREX_API_KEY:-change-me}
       # AI Training Configuration
       MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-http://mlflow:5000}
       WANDB_API_KEY: ${WANDB_API_KEY}
@@ -193,9 +193,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./python_backend/train/models:/app/train/models
-      - ./python_backend/train/data:/app/train/data
-      - ./python_backend/inference/models:/app/inference/models
+      - ./diri-cyrex/train/models:/app/train/models
+      - ./diri-cyrex/train/data:/app/train/data
+      - ./diri-cyrex/inference/models:/app/inference/models
     depends_on:
       - backend
     networks:
@@ -259,7 +259,7 @@ services:
       - deepiri-network
     depends_on:
       - backend
-      - pyagent
+      - cyrex
 
   grafana:
     image: grafana/grafana:latest
@@ -328,7 +328,7 @@ services:
   # Jupyter Notebook for AI Research (Optional)
   jupyter:
     build:
-      context: ./python_backend
+      context: ./diri-cyrex
       dockerfile: Dockerfile
     container_name: deepiri-jupyter
     restart: unless-stopped
@@ -341,8 +341,8 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./python_backend/train/notebooks:/app/notebooks
-      - ./python_backend/train/data:/app/data
+      - ./diri-cyrex/train/notebooks:/app/notebooks
+      - ./diri-cyrex/train/data:/app/data
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
     networks:

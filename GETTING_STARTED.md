@@ -69,11 +69,11 @@ sudo systemctl start redis-server
 docker run -d --name local-ai -p 8080:8080 localai/localai:latest
 
 # 4. Start Python Agent
-cd python_backend
+cd diri-cyrex
 python -m venv venv
 source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-cp env.example.python_backend .env
+cp env.example.diri-cyrex .env
 # Edit .env: Set AI_PROVIDER=localai, LOCALAI_API_BASE=http://localhost:8080/v1
 uvicorn app.main:app --reload --port 8000
 
@@ -118,7 +118,7 @@ kubectl apply -f secrets/secrets.yaml
 kubectl apply -f mongodb-deployment.yaml
 kubectl apply -f redis-deployment.yaml
 kubectl apply -f localai-deployment.yaml
-kubectl apply -f pyagent-deployment.yaml
+kubectl apply -f cyrex-deployment.yaml
 kubectl apply -f backend-deployment.yaml
 
 # 3. Check services
@@ -127,7 +127,7 @@ kubectl get services
 
 # 4. Port forward to access services locally
 kubectl port-forward svc/backend-service 5000:5000
-kubectl port-forward svc/pyagent-service 8000:8000
+kubectl port-forward svc/cyrex-service 8000:8000
 ```
 
 **Note:** For local Kubernetes, you don't need `.env` files. Everything is configured via ConfigMaps and Secrets.
@@ -206,11 +206,11 @@ kubectl port-forward svc/pyagent-service 8000:8000
 |---------|-----------|----------------|-------------|-----------|
 | **Frontend** | http://localhost:5173 | N/A | Port-forward | ✅ Yes |
 | **Backend** | http://localhost:5000 | backend:5000 | backend-service:5000 | ✅ Yes |
-| **Python Agent** | http://localhost:8000 | pyagent:8000 | pyagent-service:8000 | ✅ Yes |
+| **Python Agent** | http://localhost:8000 | cyrex:8000 | cyrex-service:8000 | ✅ Yes |
 | **MongoDB** | localhost:27017 | mongodb:27017 | mongodb-service:27017 | ✅ Yes |
 | **Redis** | localhost:6379 | redis:6379 | redis-service:6379 | ✅ Yes |
 | **LocalAI/Ollama** | http://localhost:8080 | localai:8080 | localai-service:8080 | ✅ Yes (for free AI) |
-| **ChromaDB** | Embedded in PyAgent | Embedded | Embedded | ✅ Yes (for RAG) |
+| **ChromaDB** | Embedded in Cyrex | Embedded | Embedded | ✅ Yes (for RAG) |
 | **Firebase Auth** | N/A | N/A | N/A | ⚠️ Optional (can skip) |
 | **Prometheus/Grafana** | localhost:9090/3001 | prometheus:9090 | Optional | ⚠️ Optional |
 
@@ -275,10 +275,31 @@ docker run -d --name redis -p 6379:6379 redis:7-alpine
 # Windows: Download from redis.io
 ```
 
-### 3. Python Agent
+### 3. Python Agent (Cyrex)
+
+**Option A: Docker Build (Recommended - Auto GPU Detection)**
 
 ```bash
-cd python_backend
+cd deepiri
+
+# Auto-detect GPU and build (recommended)
+# Windows
+.\scripts\build-cyrex-auto.ps1
+
+# Linux/Mac
+./scripts/build-cyrex-auto.sh
+
+# This automatically:
+# - Detects if you have a GPU (≥4GB VRAM)
+# - Uses CUDA image if GPU is good enough
+# - Falls back to CPU image if no GPU (faster, no freezing!)
+# - Builds with prebuilt PyTorch images (no 1.5GB downloads)
+```
+
+**Option B: Manual Local Setup**
+
+```bash
+cd diri-cyrex
 
 # Create virtual environment
 python -m venv venv
@@ -288,12 +309,14 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # Copy and configure env
-cp env.example.python_backend .env
+cp env.example.diri-cyrex .env
 # Edit .env: Set AI_PROVIDER=localai
 
 # Start server
 uvicorn app.main:app --reload --port 8000
 ```
+
+**Note:** For Docker builds, see `diri-cyrex/README_BUILD.md` for detailed GPU detection and CPU fallback information.
 
 ### 4. Node.js Backend
 
@@ -369,7 +392,7 @@ kubectl apply -f ops/k8s/secrets/secrets.yaml
 kubectl apply -f ops/k8s/mongodb-deployment.yaml
 kubectl apply -f ops/k8s/redis-deployment.yaml
 kubectl apply -f ops/k8s/localai-deployment.yaml
-kubectl apply -f ops/k8s/pyagent-deployment.yaml
+kubectl apply -f ops/k8s/cyrex-deployment.yaml
 kubectl apply -f ops/k8s/backend-deployment.yaml
 
 # 5. Check status
@@ -378,7 +401,7 @@ kubectl get services
 
 # 6. Port forward to access locally
 kubectl port-forward svc/backend-service 5000:5000 &
-kubectl port-forward svc/pyagent-service 8000:8000 &
+kubectl port-forward svc/cyrex-service 8000:8000 &
 kubectl port-forward svc/localai-service 8080:8080 &
 ```
 
@@ -388,7 +411,7 @@ In Kubernetes, services communicate using service names:
 - `mongodb-service:27017` (not `localhost:27017`)
 - `redis-service:6379` (not `localhost:6379`)
 - `backend-service:5000` (not `localhost:5000`)
-- `pyagent-service:8000` (not `localhost:8000`)
+- `cyrex-service:8000` (not `localhost:8000`)
 - `localai-service:8080` (not `localhost:8080`)
 
 The ConfigMap and Deployments are already configured with these service names.

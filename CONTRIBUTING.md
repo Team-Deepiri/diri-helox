@@ -95,7 +95,7 @@ npm run dev
 #### Python AI Service Setup
 
 ```bash
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 cp ../.env.example .env
 # Edit .env with your configuration
@@ -135,7 +135,7 @@ deepiri/
 │   │   └── utils/      # Utility functions
 │   └── public/         # Static assets
 │
-├── python_backend/     # Python AI service (FastAPI)
+├── diri-cyrex/     # Python AI service (FastAPI)
 │   ├── app/
 │   │   ├── routes/     # API routes
 │   │   └── settings.py # Configuration
@@ -195,7 +195,7 @@ cd frontend
 npm test
 
 # Run Python tests
-cd python_backend
+cd diri-cyrex
 pytest
 
 # Run all tests from root
@@ -381,7 +381,7 @@ describe('TaskCard', () => {
 ### Python Tests (Pytest)
 
 ```python
-# python_backend/tests/test_challenge.py
+# diri-cyrex/tests/test_challenge.py
 import pytest
 from app.routes.challenge import generate_challenge
 
@@ -402,7 +402,7 @@ cd api-server && npm test
 cd frontend && npm test
 
 # Python
-cd python_backend && pytest
+cd diri-cyrex && pytest
 
 # All tests
 npm test

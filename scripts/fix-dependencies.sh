@@ -65,8 +65,8 @@ fi
 # Fix Python backend
 echo ""
 echo "🐍 Installing Python backend dependencies..."
-if [ -f "python_backend/requirements.txt" ]; then
-  cd "python_backend"
+if [ -f "diri-cyrex/requirements.txt" ]; then
+  cd "diri-cyrex"
   if command -v pip3 &> /dev/null; then
     pip3 install -r requirements.txt || echo "⚠️  pip3 install failed, trying pip..."
     pip install -r requirements.txt || echo "⚠️  pip install failed"

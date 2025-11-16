@@ -95,7 +95,7 @@ def main():
                 "INTEGRATION_SERVICE_URL": "http://integration-service:5006",
                 "CHALLENGE_SERVICE_URL": "http://challenge-service:5007",
                 "WEBSOCKET_SERVICE_URL": "http://websocket-service:5008",
-                "PYAGENT_URL": "http://pyagent:8000",
+                "CYREX_URL": "http://cyrex:8000",
             },
             "volumes": {
                 str(project_root / "services" / "api-gateway"): "/app",
@@ -239,13 +239,13 @@ def main():
                 "NODE_ENV": env.get("NODE_ENV", "test"),
                 "PORT": "5007",
                 "MONGO_URI": mongo_uri,
-                "PYAGENT_URL": "http://pyagent:8000",
+                "CYREX_URL": "http://cyrex:8000",
             },
             "volumes": {
                 str(project_root / "services" / "challenge-service"): "/app",
                 "/app/node_modules": {},
             },
-            "depends_on": [("mongodb", 5), ("pyagent", 5)],
+            "depends_on": [("mongodb", 5), ("cyrex", 5)],
         },
         {
             "image": None,
@@ -270,9 +270,9 @@ def main():
         # AI Services
         {
             "image": None,
-            "name": "deepiri-pyagent-qa",
+            "name": "deepiri-cyrex-qa",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"8000/tcp": 8000},
@@ -280,7 +280,7 @@ def main():
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "OPENAI_MODEL": env.get("OPENAI_MODEL", "gpt-4o-mini"),
                 "CORS_ORIGIN": env.get("CORS_ORIGIN", "http://localhost:5173"),
-                "PYAGENT_API_KEY": env.get("PYAGENT_API_KEY", "change-me"),
+                "CYREX_API_KEY": env.get("CYREX_API_KEY", "change-me"),
                 "MONGO_URI": mongo_uri,
                 "REDIS_URL": redis_url,
                 "INFLUXDB_URL": "http://influxdb:8086",
@@ -289,8 +289,8 @@ def main():
                 "INFLUXDB_BUCKET": env.get("INFLUXDB_BUCKET", "analytics"),
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "models"): "/app/train/models",
-                str(project_root / "python_backend" / "train" / "data"): "/app/train/data",
+                str(project_root / "diri-cyrex" / "train" / "models"): "/app/train/models",
+                str(project_root / "diri-cyrex" / "train" / "data"): "/app/train/data",
             },
             "depends_on": [("mongodb", 5), ("redis", 2), ("influxdb", 5)],
         },
@@ -306,7 +306,7 @@ def main():
             "environment": {
                 "NODE_ENV": "test",
                 "VITE_API_URL": "http://localhost:5000/api",
-                "VITE_PYAGENT_URL": "http://localhost:8000",
+                "VITE_CYREX_URL": "http://localhost:8000",
                 "CHOKIDAR_USEPOLLING": "true",
                 "WATCHPACK_POLLING": "true",
             },
@@ -332,7 +332,7 @@ def main():
         print("\nAccess points for testing:")
         print("  • Frontend: http://localhost:5173")
         print("  • API Gateway: http://localhost:5000")
-        print("  • PyAgent (AI): http://localhost:8000")
+        print("  • Cyrex (AI): http://localhost:8000")
         print("  • User Service: http://localhost:5001")
         print("  • Task Service: http://localhost:5002")
         print("  • Gamification Service: http://localhost:5003")

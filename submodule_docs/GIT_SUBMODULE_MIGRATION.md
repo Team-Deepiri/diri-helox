@@ -1,6 +1,6 @@
 # Git Submodule Migration Guide - AI Code Separation
 
-This guide provides exact commands to separate the AI-related code (`python_backend/`) into its own repository and add it back as a git submodule.
+This guide provides exact commands to separate the AI-related code (`diri-cyrex/`) into its own repository and add it back as a git submodule.
 
 ## Prerequisites
 
@@ -40,11 +40,11 @@ git status  # Ensure working directory is clean
 git checkout -b extract-ai-submodule
 ```
 
-### 2.3: Extract python_backend using git subtree
+### 2.3: Extract diri-cyrex using git subtree
 
 ```bash
-# Extract python_backend directory to a new branch
-git subtree push --prefix=python_backend origin extract-ai-submodule
+# Extract diri-cyrex directory to a new branch
+git subtree push --prefix=diri-cyrex origin extract-ai-submodule
 ```
 
 **Note:** If you get an error about the branch not existing, create it first:
@@ -82,17 +82,17 @@ cd deepiri
 
 ## Step 3: Remove AI Code from Main Repository
 
-### 3.1: Remove python_backend from main repository
+### 3.1: Remove diri-cyrex from main repository
 
 ```bash
 cd deepiri
 git checkout main
 
 # Remove the directory from git (but keep it locally temporarily)
-git rm -r --cached python_backend
+git rm -r --cached diri-cyrex
 
 # Commit the removal
-git commit -m "refactor: extract python_backend to separate repository for submodule migration"
+git commit -m "refactor: extract diri-cyrex to separate repository for submodule migration"
 ```
 
 ### 3.2: (Optional) Remove AI-specific documentation if you want to move it too
@@ -113,18 +113,18 @@ For now, we'll keep the docs in the main repo for reference.
 
 ```bash
 cd deepiri
-git submodule add https://github.com/Deepiri/deepiri-ai.git python_backend
+git submodule add https://github.com/Deepiri/deepiri-ai.git diri-cyrex
 ```
 
 This will:
-- Clone the AI repository into `python_backend/`
+- Clone the AI repository into `diri-cyrex/`
 - Create a `.gitmodules` file
 - Stage the submodule addition
 
 ### 4.2: Commit the submodule addition
 
 ```bash
-git commit -m "feat: add python_backend as git submodule"
+git commit -m "feat: add diri-cyrex as git submodule"
 ```
 
 ### 4.3: Push changes to main repository
@@ -135,14 +135,14 @@ git push origin main
 
 ## Step 5: Update .gitignore (if needed)
 
-The `python_backend/` directory is now a submodule, so ensure your `.gitignore` doesn't accidentally ignore it:
+The `diri-cyrex/` directory is now a submodule, so ensure your `.gitignore` doesn't accidentally ignore it:
 
 ```bash
-# Check if python_backend is in .gitignore
-grep -n "python_backend" .gitignore
+# Check if diri-cyrex is in .gitignore
+grep -n "diri-cyrex" .gitignore
 
 # If it's there and you want to remove it:
-# Edit .gitignore and remove any lines that ignore python_backend/
+# Edit .gitignore and remove any lines that ignore diri-cyrex/
 ```
 
 ## Step 6: Verify the Setup
@@ -155,7 +155,7 @@ git submodule status
 
 You should see:
 ```
-<commit-hash> python_backend (heads/main)
+<commit-hash> diri-cyrex (heads/main)
 ```
 
 ### 6.2: Test cloning the main repository with submodule
@@ -167,7 +167,7 @@ mkdir test-clone
 cd test-clone
 git clone --recursive https://github.com/Deepiri/deepiri.git test-deepiri
 cd test-deepiri
-ls python_backend  # Should show the AI code
+ls diri-cyrex  # Should show the AI code
 cd ../..
 rm -rf test-clone
 ```
@@ -205,7 +205,7 @@ git submodule update --init --recursive
 ### 8.1: Making changes to AI code
 
 ```bash
-cd python_backend
+cd diri-cyrex
 # Make your changes
 git add .
 git commit -m "feat: add new AI feature"
@@ -213,7 +213,7 @@ git push origin main
 
 # Go back to main repo
 cd ..
-git add python_backend
+git add diri-cyrex
 git commit -m "chore: update AI submodule"
 git push origin main
 ```
@@ -221,10 +221,10 @@ git push origin main
 ### 8.2: Updating to latest AI code in main repo
 
 ```bash
-cd python_backend
+cd diri-cyrex
 git pull origin main
 cd ..
-git add python_backend
+git add diri-cyrex
 git commit -m "chore: update AI submodule to latest"
 git push origin main
 ```
@@ -232,8 +232,8 @@ git push origin main
 ### 8.3: Updating AI submodule from main repo
 
 ```bash
-git submodule update --remote python_backend
-git add python_backend
+git submodule update --remote diri-cyrex
+git add diri-cyrex
 git commit -m "chore: update AI submodule to latest"
 ```
 
@@ -247,8 +247,8 @@ cd ..
 git clone https://github.com/Deepiri/deepiri.git deepiri-ai-extract
 cd deepiri-ai-extract
 
-# Extract only python_backend history
-git filter-branch --prune-empty --subdirectory-filter python_backend main
+# Extract only diri-cyrex history
+git filter-branch --prune-empty --subdirectory-filter diri-cyrex main
 
 # Add new remote
 git remote remove origin
@@ -279,7 +279,7 @@ git submodule update --init --recursive
 ```bash
 # Ensure you have write access to the AI repository
 # Check remote URL
-cd python_backend
+cd diri-cyrex
 git remote -v
 ```
 
@@ -305,7 +305,7 @@ git submodule update --init --recursive
 # 1. Extract AI code
 cd deepiri
 git checkout -b extract-ai-submodule
-git subtree push --prefix=python_backend origin extract-ai-submodule
+git subtree push --prefix=diri-cyrex origin extract-ai-submodule
 
 # 2. Create new AI repo (do this on GitHub/GitLab first)
 # Then:
@@ -320,12 +320,12 @@ cd ../.. && rm -rf deepiri-ai-temp
 # 3. Remove from main repo
 cd deepiri
 git checkout main
-git rm -r --cached python_backend
-git commit -m "refactor: extract python_backend to separate repository"
+git rm -r --cached diri-cyrex
+git commit -m "refactor: extract diri-cyrex to separate repository"
 
 # 4. Add as submodule
-git submodule add https://github.com/Deepiri/deepiri-ai.git python_backend
-git commit -m "feat: add python_backend as git submodule"
+git submodule add https://github.com/Deepiri/deepiri-ai.git diri-cyrex
+git commit -m "feat: add diri-cyrex as git submodule"
 git push origin main
 
 # 5. For team members
@@ -338,7 +338,7 @@ git submodule update --init --recursive
 1. Update CI/CD pipelines to handle submodules
 2. Update documentation to mention the submodule structure
 3. Set up access controls on the AI repository
-4. Update Docker Compose files if they reference python_backend paths
+4. Update Docker Compose files if they reference diri-cyrex paths
 5. Consider moving AI-specific documentation to the AI repository
 
 ## Notes

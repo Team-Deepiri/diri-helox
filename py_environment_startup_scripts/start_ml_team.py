@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Startup script for ML Team
-Starts: pyagent, mlflow, jupyter, mongodb, redis, influxdb
+Starts: cyrex, mlflow, jupyter, mongodb, redis, influxdb
 """
 import sys
 from pathlib import Path
@@ -75,19 +75,19 @@ def main():
             "command": "mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:/mlflow --default-artifact-root file:/mlflow/artifacts",
             "depends_on": [],
         },
-        # Python AI Service (PyAgent) - For model inference
+        # Python AI Service (Cyrex) - For model inference
         {
             "image": None,
-            "name": "deepiri-pyagent-ml",
+            "name": "deepiri-cyrex-ml",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"8000/tcp": 8000},
             "environment": {
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "OPENAI_MODEL": env.get("OPENAI_MODEL", "gpt-4o-mini"),
-                "PYAGENT_API_KEY": env.get("PYAGENT_API_KEY", "change-me"),
+                "CYREX_API_KEY": env.get("CYREX_API_KEY", "change-me"),
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
                 "WANDB_API_KEY": env.get("WANDB_API_KEY", ""),
                 "MONGO_URI": f"mongodb://{env.get('MONGO_ROOT_USER', 'admin')}:{env.get('MONGO_ROOT_PASSWORD', 'password')}@mongodb:27017/{env.get('MONGO_DB', 'deepiri')}?authSource=admin",
@@ -98,9 +98,9 @@ def main():
                 "INFLUXDB_BUCKET": env.get("INFLUXDB_BUCKET", "analytics"),
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "models"): "/app/train/models",
-                str(project_root / "python_backend" / "train" / "data"): "/app/train/data",
-                str(project_root / "python_backend" / "inference" / "models"): "/app/inference/models",
+                str(project_root / "diri-cyrex" / "train" / "models"): "/app/train/models",
+                str(project_root / "diri-cyrex" / "train" / "data"): "/app/train/data",
+                str(project_root / "diri-cyrex" / "inference" / "models"): "/app/inference/models",
             },
             "depends_on": [("mongodb", 5), ("redis", 2), ("mlflow", 3), ("influxdb", 5)],
         },
@@ -109,7 +109,7 @@ def main():
             "image": None,
             "name": "deepiri-jupyter-ml",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile.jupyter",
             },
             "ports": {"8888/tcp": 8888},
@@ -119,10 +119,10 @@ def main():
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "notebooks"): "/app/notebooks",
-                str(project_root / "python_backend" / "train" / "data"): "/app/data",
+                str(project_root / "diri-cyrex" / "train" / "notebooks"): "/app/notebooks",
+                str(project_root / "diri-cyrex" / "train" / "data"): "/app/data",
             },
-            "depends_on": [("mlflow", 3), ("pyagent", 3)],
+            "depends_on": [("mlflow", 3), ("cyrex", 3)],
         },
     ]
     
@@ -137,7 +137,7 @@ def main():
         for name in started:
             print(f"  ✓ {name}")
         print("\nAccess points:")
-        print("  • PyAgent (AI Service): http://localhost:8000")
+        print("  • Cyrex (AI Service): http://localhost:8000")
         print("  • MLflow: http://localhost:5001")
         print("  • Jupyter: http://localhost:8888")
         print("  • InfluxDB: http://localhost:8086")

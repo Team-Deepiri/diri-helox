@@ -30,7 +30,7 @@ const SERVICES = {
   integration: process.env.INTEGRATION_SERVICE_URL || 'http://integration-service:5006',
   challenge: process.env.CHALLENGE_SERVICE_URL || 'http://challenge-service:5007',
   websocket: process.env.WEBSOCKET_SERVICE_URL || 'http://websocket-service:5008',
-  pyagent: process.env.PYAGENT_URL || 'http://pyagent:8000'
+  cyrex: process.env.CYREX_URL || 'http://cyrex:8000'
 };
 
 // Health check
@@ -115,7 +115,7 @@ app.use('/api/challenges', createProxyMiddleware({
 }));
 
 app.use('/api/agent', createProxyMiddleware({
-  target: SERVICES.pyagent,
+  target: SERVICES.cyrex,
   changeOrigin: true,
   pathRewrite: { '^/api/agent': '/agent' },
   onError: (err, req, res) => {

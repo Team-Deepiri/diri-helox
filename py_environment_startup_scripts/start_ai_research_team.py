@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Startup script for AI Research Team
-Starts: jupyter, mlflow, pyagent, mongodb (for data access)
+Starts: jupyter, mlflow, cyrex, mongodb (for data access)
 """
 import sys
 from pathlib import Path
@@ -47,26 +47,26 @@ def main():
             },
             "command": "mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:/mlflow --default-artifact-root file:/mlflow/artifacts",
         },
-        # Python AI Service (PyAgent) - For model testing
+        # Python AI Service (Cyrex) - For model testing
         {
             "image": None,
-            "name": "deepiri-pyagent-research",
+            "name": "deepiri-cyrex-research",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"8000/tcp": 8000},
             "environment": {
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "OPENAI_MODEL": env.get("OPENAI_MODEL", "gpt-4o-mini"),
-                "PYAGENT_API_KEY": env.get("PYAGENT_API_KEY", "change-me"),
+                "CYREX_API_KEY": env.get("CYREX_API_KEY", "change-me"),
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
                 "WANDB_API_KEY": env.get("WANDB_API_KEY", ""),
                 "MONGO_URI": f"mongodb://{env.get('MONGO_ROOT_USER', 'admin')}:{env.get('MONGO_ROOT_PASSWORD', 'password')}@mongodb:27017/{env.get('MONGO_DB', 'deepiri')}?authSource=admin",
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "models"): "/app/train/models",
-                str(project_root / "python_backend" / "train" / "data"): "/app/train/data",
+                str(project_root / "diri-cyrex" / "train" / "models"): "/app/train/models",
+                str(project_root / "diri-cyrex" / "train" / "data"): "/app/train/data",
             },
             "depends_on": [("mongodb", 5), ("mlflow", 3)],
         },
@@ -75,7 +75,7 @@ def main():
             "image": None,
             "name": "deepiri-jupyter-research",
             "build": {
-                "context": str(project_root / "python_backend"),
+                "context": str(project_root / "diri-cyrex"),
                 "dockerfile": "Dockerfile.jupyter",
             },
             "ports": {"8888/tcp": 8888},
@@ -83,14 +83,14 @@ def main():
             "environment": {
                 "OPENAI_API_KEY": env.get("OPENAI_API_KEY", ""),
                 "MLFLOW_TRACKING_URI": "http://mlflow:5000",
-                "PYAGENT_URL": "http://pyagent:8000",
+                "CYREX_URL": "http://cyrex:8000",
             },
             "volumes": {
-                str(project_root / "python_backend" / "train" / "notebooks"): "/app/notebooks",
-                str(project_root / "python_backend" / "train" / "data"): "/app/data",
-                str(project_root / "python_backend" / "train" / "experiments"): "/app/experiments",
+                str(project_root / "diri-cyrex" / "train" / "notebooks"): "/app/notebooks",
+                str(project_root / "diri-cyrex" / "train" / "data"): "/app/data",
+                str(project_root / "diri-cyrex" / "train" / "experiments"): "/app/experiments",
             },
-            "depends_on": [("mlflow", 3), ("pyagent", 5)],
+            "depends_on": [("mlflow", 3), ("cyrex", 5)],
         },
     ]
     
@@ -107,7 +107,7 @@ def main():
         print("\nAccess points:")
         print("  • Jupyter Notebook: http://localhost:8888")
         print("  • MLflow: http://localhost:5001")
-        print("  • PyAgent (AI Service): http://localhost:8000")
+        print("  • Cyrex (AI Service): http://localhost:8000")
         print("  • MongoDB: localhost:27017")
         print("\nTo stop services, use: python stop_ai_research_team.py")
         

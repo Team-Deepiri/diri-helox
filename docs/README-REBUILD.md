@@ -30,7 +30,7 @@ When rebuilding Docker containers, old images aren't automatically removed, caus
 
 ### Rebuild specific service
 ```powershell
-.\rebuild-clean.ps1 -Service pyagent
+.\rebuild-clean.ps1 -Service cyrex
 ```
 
 ### Rebuild with cache (faster but may keep old layers)

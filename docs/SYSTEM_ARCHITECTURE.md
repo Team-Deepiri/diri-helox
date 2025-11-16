@@ -125,13 +125,13 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
   - File change notifications (dev mode)
 
 #### Python AI Service
-- ✅ **FastAPI Application** (`python_backend/app/main.py`)
+- ✅ **FastAPI Application** (`diri-cyrex/app/main.py`)
   - Health check endpoints
   - Prometheus metrics
   - Request logging
   - Error handling
 
-- ✅ **Challenge Generation** (`python_backend/app/routes/challenge.py`)
+- ✅ **Challenge Generation** (`diri-cyrex/app/routes/challenge.py`)
   - AI-powered challenge generation
   - OpenAI GPT-4 integration
   - Task understanding and classification
@@ -483,8 +483,8 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 8. Python AI Service
-**Location**: `python_backend/app/main.py`  
-**Routes**: `python_backend/app/routes/challenge.py`, `agent.py`
+**Location**: `diri-cyrex/app/main.py`  
+**Routes**: `diri-cyrex/app/routes/challenge.py`, `agent.py`
 
 **Responsibilities**:
 - AI-powered challenge generation
@@ -924,7 +924,7 @@ npm install
 npm run dev
 
 # Python Service
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 ```
@@ -936,7 +936,7 @@ cd api-server
 npm test
 
 # Python tests
-cd python_backend
+cd diri-cyrex
 pytest
 
 # Frontend tests
@@ -963,9 +963,9 @@ npm test
 - `frontend/src/contexts/` - React contexts
 
 ### Python Service
-- `python_backend/app/main.py` - FastAPI application
-- `python_backend/app/routes/` - API routes
-- `python_backend/app/settings.py` - Configuration
+- `diri-cyrex/app/main.py` - FastAPI application
+- `diri-cyrex/app/routes/` - API routes
+- `diri-cyrex/app/settings.py` - Configuration
 
 ### Infrastructure
 - `docker-compose.dev.yml` - Development Docker setup

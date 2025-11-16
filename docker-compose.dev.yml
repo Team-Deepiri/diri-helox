@@ -116,7 +116,7 @@ services:
       INTEGRATION_SERVICE_URL: http://integration-service:5006
       CHALLENGE_SERVICE_URL: http://challenge-service:5007
       WEBSOCKET_SERVICE_URL: http://websocket-service:5008
-      PYAGENT_URL: http://pyagent:8000
+      CYREX_URL: http://cyrex:8000
     depends_on:
       - user-service
       - task-service
@@ -126,7 +126,7 @@ services:
       - integration-service
       - challenge-service
       - websocket-service
-      - pyagent
+      - cyrex
     networks:
       - deepiri-dev-network
 
@@ -346,13 +346,13 @@ services:
       NODE_ENV: development
       PORT: 5007
       MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
-      PYAGENT_URL: http://pyagent:8000
+      CYREX_URL: http://cyrex:8000
     volumes:
       - ./services/challenge-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
-      - pyagent
+      - cyrex
     networks:
       - deepiri-dev-network
 
@@ -382,13 +382,20 @@ services:
       - deepiri-dev-network
 
   # Python Agent API (AI Service)
-  pyagent:
-    image: deepiri-dev-pyagent:latest
+  cyrex:
+    image: deepiri-dev-cyrex:latest
     build:
-      context: ./python_backend
+      context: ./diri-cyrex
       dockerfile: Dockerfile
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        BUILD_TYPE: ${BUILD_TYPE:-prebuilt}
+        BASE_IMAGE: ${BASE_IMAGE:-pytorch/pytorch:2.0.0-cpu}
+        PYTORCH_VERSION: ${PYTORCH_VERSION:-2.0.0}
+        CUDA_VERSION: ${CUDA_VERSION:-12.1}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
     pull_policy: build
-    container_name: deepiri-pyagent-dev
+    container_name: deepiri-cyrex-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -399,7 +406,7 @@ services:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       CORS_ORIGIN: http://localhost:5173
-      PYAGENT_API_KEY: ${PYAGENT_API_KEY:-change-me}
+      CYREX_API_KEY: ${CYREX_API_KEY:-change-me}
       MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-http://mlflow:5000}
       WANDB_API_KEY: ${WANDB_API_KEY}
       MODEL_REGISTRY_PATH: /app/model_registry
@@ -419,11 +426,11 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      - ./python_backend/app:/app/app
-      - ./python_backend/train/models:/app/train/models
-      - ./python_backend/train/data:/app/train/data
-      - ./python_backend/inference/models:/app/inference/models
-      - pyagent_cache:/app/.cache
+      - ./diri-cyrex/app:/app/app
+      - ./diri-cyrex/train/models:/app/train/models
+      - ./diri-cyrex/train/data:/app/train/data
+      - ./diri-cyrex/inference/models:/app/inference/models
+      - cyrex_cache:/app/.cache
     depends_on:
       - influxdb
     networks:
@@ -454,8 +461,15 @@ services:
   jupyter:
     image: deepiri-dev-jupyter:latest
     build:
-      context: ./python_backend
+      context: ./diri-cyrex
       dockerfile: Dockerfile.jupyter
+      args:
+        BUILDKIT_INLINE_CACHE: 1
+        BUILD_TYPE: ${BUILD_TYPE:-prebuilt}
+        BASE_IMAGE: ${BASE_IMAGE:-pytorch/pytorch:2.0.0-cpu}
+        PYTORCH_VERSION: ${PYTORCH_VERSION:-2.0.0}
+        CUDA_VERSION: ${CUDA_VERSION:-12.1}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
     pull_policy: build
     container_name: deepiri-jupyter-dev
     restart: unless-stopped
@@ -468,8 +482,8 @@ services:
     ports:
       - "8888:8888"
     volumes:
-      - ./python_backend/train/notebooks:/app/notebooks
-      - ./python_backend/train/data:/app/data
+      - ./diri-cyrex/train/notebooks:/app/notebooks
+      - ./diri-cyrex/train/data:/app/data
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       JUPYTER_RUNTIME_DIR: /tmp/jupyter_runtime
@@ -495,7 +509,7 @@ services:
     environment:
       NODE_ENV: development
       VITE_API_URL: http://localhost:5000/api
-      VITE_PYAGENT_URL: http://localhost:8000
+      VITE_CYREX_URL: http://localhost:8000
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
     volumes:
@@ -515,7 +529,7 @@ volumes:
     driver: local
   influxdb_dev_data:
     driver: local
-  pyagent_cache:
+  cyrex_cache:
     driver: local
 
 networks:

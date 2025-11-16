@@ -20,7 +20,7 @@ pip install -r requirements.txt
 
 #### 1. AI Team (`start_ai_team.py`)
 Starts services needed by the AI team:
-- **PyAgent** (AI Service) - Port 8000
+- **Cyrex** (AI Service) - Port 8000
 - **MLflow** - Port 5001
 - **Jupyter Notebook** - Port 8888
 - **Challenge Service** - Port 5007
@@ -67,7 +67,7 @@ python start_backend_team.py
 
 #### 4. ML Team (`start_ml_team.py`)
 Starts services for ML engineers:
-- **PyAgent** (AI Service) - Port 8000
+- **Cyrex** (AI Service) - Port 8000
 - **MLflow** - Port 5001
 - **Jupyter Notebook** - Port 8888
 - **MongoDB** - Port 27017
@@ -83,7 +83,7 @@ python start_ml_team.py
 Starts services for AI researchers:
 - **Jupyter Notebook** - Port 8888
 - **MLflow** - Port 5001
-- **PyAgent** (AI Service) - Port 8000
+- **Cyrex** (AI Service) - Port 8000
 - **MongoDB** - Port 27017
 
 **Usage:**
@@ -97,7 +97,7 @@ Starts services for ML Ops engineers:
 - **Prometheus** - Port 9090
 - **Grafana** - Port 3001
 - **ML Ops Service** - Port 8001
-- **PyAgent** - Port 8000
+- **Cyrex** - Port 8000
 
 **Usage:**
 ```bash
@@ -109,7 +109,7 @@ Starts all services needed for QA testing:
 - **Frontend** - Port 5173
 - **API Gateway** - Port 5000
 - **All Microservices** - Ports 5001-5008
-- **PyAgent** (AI Service) - Port 8000
+- **Cyrex** (AI Service) - Port 8000
 - **MongoDB** - Port 27017
 - **Mongo Express** - Port 8081
 - **Redis** - Port 6379
@@ -176,7 +176,7 @@ REDIS_PASSWORD=redispassword
 # AI Services
 OPENAI_API_KEY=your_key_here
 OPENAI_MODEL=gpt-4o-mini
-PYAGENT_API_KEY=change-me
+CYREX_API_KEY=change-me
 WANDB_API_KEY=your_key_here
 
 # InfluxDB

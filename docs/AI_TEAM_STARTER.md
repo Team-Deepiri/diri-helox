@@ -3,7 +3,7 @@
 ## What's Been Implemented
 
 ### 1. Task Classification Service
-**Location**: `python_backend/app/services/task_classifier.py`
+**Location**: `diri-cyrex/app/services/task_classifier.py`
 
 **Features**:
 - NLP-based task classification
@@ -26,7 +26,7 @@ result = await classifier.classify_task(
 **API Endpoint**: `POST /agent/task/classify`
 
 ### 2. Challenge Generation Service
-**Location**: `python_backend/app/services/challenge_generator.py`
+**Location**: `diri-cyrex/app/services/challenge_generator.py`
 
 **Features**:
 - Converts tasks into gamified challenges
@@ -50,7 +50,7 @@ challenge = await generator.generate_challenge(
 **API Endpoint**: `POST /agent/challenge/generate`
 
 ### 3. Training Script Templates
-**Location**: `python_backend/train/scripts/`
+**Location**: `diri-cyrex/train/scripts/`
 
 - `train_task_classifier.py` - Task classification model training
 - `train_challenge_generator.py` - Challenge generation model training

@@ -46,7 +46,7 @@ cd Deepiri/deepiri
 ### 2. Python Environment Setup
 
 ```bash
-cd python_backend
+cd diri-cyrex
 
 # Create virtual environment
 python -m venv venv
@@ -128,10 +128,10 @@ mkdir -p adapters  # For LoRA adapters
 mkdir -p model_registry models/staging models/production
 ```
 
-### 6. Start Required Microservices (AI Team)
+### 6. Build and Start Required Microservices (AI Team)
 
 **AI team only needs these services:**
-- Python Agent (main AI service)
+- Python Agent (main AI service) - **cyrex**
 - Jupyter (for experimentation)
 - MLflow (for experiment tracking)
 - MongoDB (for data storage)
@@ -139,13 +139,32 @@ mkdir -p model_registry models/staging models/production
 - Challenge Service (for AI integration testing)
 - Redis (for caching, optional)
 
+**Important: Build cyrex with GPU Detection (Recommended)**
+
+```bash
+# Auto-detect GPU and build cyrex/jupyter (recommended)
+# Windows
+.\scripts\build-cyrex-auto.ps1
+
+# Linux/Mac
+./scripts/build-cyrex-auto.sh
+
+# This automatically:
+# - Detects if you have a GPU (≥4GB VRAM)
+# - Uses CUDA image if GPU is good enough
+# - Falls back to CPU image if no GPU (faster, no freezing!)
+# - Prevents build freezing from large CUDA downloads
+```
+
+**Then start services:**
+
 ```bash
 # Start only the services needed for AI development
 docker-compose -f docker-compose.dev.yml up -d \
   mongodb \
   redis \
   influxdb \
-  pyagent \
+  cyrex \
   jupyter \
   mlflow \
   challenge-service
@@ -154,13 +173,15 @@ docker-compose -f docker-compose.dev.yml up -d \
 docker-compose -f docker-compose.dev.yml ps
 
 # View logs
-docker-compose -f docker-compose.dev.yml logs -f pyagent
+docker-compose -f docker-compose.dev.yml logs -f cyrex
 docker-compose -f docker-compose.dev.yml logs -f jupyter
 docker-compose -f docker-compose.dev.yml logs -f mlflow
 ```
 
+**Note:** If you encounter build freezing at step 113/120, the auto-build script will use CPU fallback automatically. See `diri-cyrex/README_BUILD.md` for troubleshooting.
+
 **AI Team Services:**
-- **Python Agent:** pyagent (port 8000) - Main AI service
+- **Python Agent:** cyrex (port 8000) - Main AI service
 - **Jupyter:** jupyter (port 8888) - For experimentation
 - **MLflow:** mlflow (port 5500) - Experiment tracking
 - **Databases:** mongodb, influxdb, redis
@@ -190,7 +211,7 @@ mlflow ui --backend-store-uri sqlite:///mlflow.db --default-artifact-root ./mlru
 ```bash
 # Stop all AI-related services
 docker-compose -f docker-compose.dev.yml stop \
-  pyagent \
+  cyrex \
   jupyter \
   mlflow \
   challenge-service
@@ -216,7 +237,7 @@ mlflow ui
 ```
 
 **First Tasks:**
-1. Review `python_backend/train/README.md`
+1. Review `diri-cyrex/train/README.md`
 2. Review `docs/MICROSERVICES_SETUP.md` - Understand service architecture
 3. Review Python AI Service integration with microservices
 4. Review existing experiments in `train/experiments/`
@@ -226,12 +247,12 @@ mlflow ui
 8. Test Python AI Service → Challenge Service communication
 
 **Key Files:**
-- `python_backend/train/infrastructure/experiment_tracker.py`
-- `python_backend/train/experiments/research_experiment_template.py`
-- `python_backend/mlops/monitoring/model_monitor.py` - Model monitoring
-- `python_backend/mlops/registry/model_registry.py` - Model registry
-- `python_backend/mlops/ci/model_ci_pipeline.py` - CI/CD pipeline
-- `python_backend/mlops/deployment/deployment_automation.py` - Deployment automation
+- `diri-cyrex/train/infrastructure/experiment_tracker.py`
+- `diri-cyrex/train/experiments/research_experiment_template.py`
+- `diri-cyrex/mlops/monitoring/model_monitor.py` - Model monitoring
+- `diri-cyrex/mlops/registry/model_registry.py` - Model registry
+- `diri-cyrex/mlops/ci/model_ci_pipeline.py` - CI/CD pipeline
+- `diri-cyrex/mlops/deployment/deployment_automation.py` - Deployment automation
 - `services/challenge-service/server.js` - Challenge service (calls Python AI)
 
 ---
@@ -251,16 +272,16 @@ pip install lion-pytorch
 ```
 
 **First Tasks:**
-1. Review `python_backend/train/experiments/research_experiment_template.py`
+1. Review `diri-cyrex/train/experiments/research_experiment_template.py`
 2. Create experiment for Mamba architecture: `train/experiments/mamba_architecture.py`
 3. Create MoE experiment: `train/experiments/moe_gamification.py`
 4. Explore neuro-symbolic AI: `app/services/neuro_symbolic_challenge.py`
 5. Set up Jupyter notebook for experimentation
 
 **Key Files:**
-- `python_backend/train/experiments/research_experiment_template.py`
-- `python_backend/train/notebooks/` (create your notebooks here)
-- `python_backend/app/services/neuro_symbolic_challenge.py`
+- `diri-cyrex/train/experiments/research_experiment_template.py`
+- `diri-cyrex/train/notebooks/` (create your notebooks here)
+- `diri-cyrex/app/services/neuro_symbolic_challenge.py`
 
 **Experiment Template:**
 ```python
@@ -293,8 +314,8 @@ pip install networkx  # for graph neural networks
 4. Explore reasoning frameworks
 
 **Key Files:**
-- `python_backend/app/services/multimodal_understanding.py`
-- `python_backend/train/experiments/multimodal/` (create directory)
+- `diri-cyrex/app/services/multimodal_understanding.py`
+- `diri-cyrex/train/experiments/multimodal/` (create directory)
 
 ---
 
@@ -317,8 +338,8 @@ pip install peft  # for LoRA/PEFT
 4. Test model compression techniques
 
 **Key Files:**
-- `python_backend/train/infrastructure/lora_training.py`
-- `python_backend/train/experiments/compression/` (create directory)
+- `diri-cyrex/train/infrastructure/lora_training.py`
+- `diri-cyrex/train/experiments/compression/` (create directory)
 
 ---
 
@@ -333,17 +354,17 @@ pip install fastapi uvicorn
 ```
 
 **First Tasks:**
-1. Review `python_backend/app/main.py`
+1. Review `diri-cyrex/app/main.py`
 2. Review all services in `app/services/`
 3. Review training pipelines in `train/pipelines/`
 4. Set up deployment infrastructure
 5. Coordinate with AI Systems Engineers
 
 **Key Files:**
-- `python_backend/app/main.py`
-- `python_backend/app/services/`
-- `python_backend/train/pipelines/`
-- `python_backend/mlops/`
+- `diri-cyrex/app/main.py`
+- `diri-cyrex/app/services/`
+- `diri-cyrex/train/pipelines/`
+- `diri-cyrex/mlops/`
 
 ---
 
@@ -376,20 +397,20 @@ pip install numpy  # For advanced calculations
 15. Optimize prompt engineering for new services
 
 **Key Files:**
-- `python_backend/app/services/advanced_task_parser.py` - Advanced parsing
-- `python_backend/app/services/adaptive_challenge_generator.py` - Adaptive generation
-- `python_backend/app/services/rl_environment.py` - NEW: RL environment
-- `python_backend/app/services/ppo_agent.py` - NEW: PPO agent
-- `python_backend/app/services/dynamic_lora_service.py` - NEW: Dynamic LoRA
-- `python_backend/app/services/multi_agent_system.py` - NEW: Multi-agent
-- `python_backend/app/services/cognitive_state_monitor.py` - NEW: Cognitive monitoring
-- `python_backend/app/services/enhanced_rag_service.py` - NEW: Enhanced RAG
-- `python_backend/app/services/procedural_content_generator.py` - NEW: Procedural content
-- `python_backend/app/services/motivational_ai.py` - NEW: Motivational AI
-- `python_backend/app/services/challenge_generator.py` - Standard generation
-- `python_backend/app/services/task_classifier.py` - Basic classification
-- `python_backend/app/services/hybrid_ai_service.py` - Hybrid AI
-- `python_backend/app/routes/challenge.py` - API routes
+- `diri-cyrex/app/services/advanced_task_parser.py` - Advanced parsing
+- `diri-cyrex/app/services/adaptive_challenge_generator.py` - Adaptive generation
+- `diri-cyrex/app/services/rl_environment.py` - NEW: RL environment
+- `diri-cyrex/app/services/ppo_agent.py` - NEW: PPO agent
+- `diri-cyrex/app/services/dynamic_lora_service.py` - NEW: Dynamic LoRA
+- `diri-cyrex/app/services/multi_agent_system.py` - NEW: Multi-agent
+- `diri-cyrex/app/services/cognitive_state_monitor.py` - NEW: Cognitive monitoring
+- `diri-cyrex/app/services/enhanced_rag_service.py` - NEW: Enhanced RAG
+- `diri-cyrex/app/services/procedural_content_generator.py` - NEW: Procedural content
+- `diri-cyrex/app/services/motivational_ai.py` - NEW: Motivational AI
+- `diri-cyrex/app/services/challenge_generator.py` - Standard generation
+- `diri-cyrex/app/services/task_classifier.py` - Basic classification
+- `diri-cyrex/app/services/hybrid_ai_service.py` - Hybrid AI
+- `diri-cyrex/app/routes/challenge.py` - API routes
 
 **Testing API:**
 ```bash
@@ -416,9 +437,9 @@ Same as AI Systems Engineer 1
 4. Optimize response streaming
 
 **Key Files:**
-- `python_backend/app/services/context_aware_adaptation.py`
-- `python_backend/app/services/personalization_service.py` (create if needed)
-- `python_backend/app/routes/personalization.py`
+- `diri-cyrex/app/services/context_aware_adaptation.py`
+- `diri-cyrex/app/services/personalization_service.py` (create if needed)
+- `diri-cyrex/app/routes/personalization.py`
 
 ---
 
@@ -439,9 +460,9 @@ pip install accelerate
 4. Configure training job scheduling
 
 **Key Files:**
-- `python_backend/train/pipelines/full_training_pipeline.py`
-- `python_backend/train/pipelines/distributed_training.py`
-- `python_backend/mlops/ci/training_pipeline.yml`
+- `diri-cyrex/train/pipelines/full_training_pipeline.py`
+- `diri-cyrex/train/pipelines/distributed_training.py`
+- `diri-cyrex/mlops/ci/training_pipeline.yml`
 
 **Test Training:**
 ```bash
@@ -467,8 +488,8 @@ pip install boto3  # for S3 model storage
 4. Create deployment pipelines
 
 **Key Files:**
-- `python_backend/mlops/registry/` (create)
-- `python_backend/mlops/ci/model_testing.yml` (create)
+- `diri-cyrex/mlops/registry/` (create)
+- `diri-cyrex/mlops/ci/model_testing.yml` (create)
 
 ---
 
@@ -489,9 +510,9 @@ pip install rllib
 4. Create actor-critic training script
 
 **Key Files:**
-- `python_backend/train/pipelines/bandit_training.py`
-- `python_backend/train/scripts/train_policy_network.py` (create)
-- `python_backend/app/services/bandit_service.py` (create)
+- `diri-cyrex/train/pipelines/bandit_training.py`
+- `diri-cyrex/train/scripts/train_policy_network.py` (create)
+- `diri-cyrex/app/services/bandit_service.py` (create)
 
 **Training Example:**
 ```bash
@@ -520,9 +541,9 @@ pip install evaluate
 4. Test quantization methods
 
 **Key Files:**
-- `python_backend/train/scripts/train_task_classifier.py`
-- `python_backend/train/infrastructure/lora_training.py`
-- `python_backend/train/scripts/train_transformer_classifier.py`
+- `diri-cyrex/train/scripts/train_task_classifier.py`
+- `diri-cyrex/train/infrastructure/lora_training.py`
+- `diri-cyrex/train/scripts/train_transformer_classifier.py`
 
 **Training Example:**
 ```bash
@@ -551,8 +572,8 @@ pip install onnxruntime
 4. Create ensemble training pipeline
 
 **Key Files:**
-- `python_backend/train/scripts/train_challenge_generator.py`
-- `python_backend/train/scripts/train_lightweight_challenge_generator.py` (create)
+- `diri-cyrex/train/scripts/train_challenge_generator.py`
+- `diri-cyrex/train/scripts/train_lightweight_challenge_generator.py` (create)
 
 ---
 
@@ -572,7 +593,7 @@ pip install docker
 4. Set up GPU cloud management
 
 **Key Files:**
-- `python_backend/mlops/ci/training_pipeline.yml`
+- `diri-cyrex/mlops/ci/training_pipeline.yml`
 - `.github/workflows/` (create workflows)
 
 ---
@@ -593,8 +614,8 @@ pip install grafana-api
 4. Implement drift detection
 
 **Key Files:**
-- `python_backend/mlops/monitoring/model_monitor.py`
-- `python_backend/mlops/monitoring/drift_detection.py` (create)
+- `diri-cyrex/mlops/monitoring/model_monitor.py`
+- `diri-cyrex/mlops/monitoring/drift_detection.py` (create)
 
 ---
 
@@ -615,8 +636,8 @@ pip install pandas numpy
 4. Create real-time feature engineering
 
 **Key Files:**
-- `python_backend/train/pipelines/data_collection_pipeline.py`
-- `python_backend/train/data/prepare_dataset.py`
+- `diri-cyrex/train/pipelines/data_collection_pipeline.py`
+- `diri-cyrex/train/data/prepare_dataset.py`
 
 ---
 
@@ -637,8 +658,8 @@ pip install great-expectations
 4. Create privacy anonymization pipeline
 
 **Key Files:**
-- `python_backend/train/data/prepare_dataset.py`
-- `python_backend/train/data/privacy_anonymization.py` (create)
+- `diri-cyrex/train/data/prepare_dataset.py`
+- `diri-cyrex/train/data/privacy_anonymization.py` (create)
 
 ---
 
@@ -702,19 +723,19 @@ git push origin feature/your-feature-name
 
 - **AI Team README:** `docs/README_AI_TEAM.md`
 - **AI Services Overview:** `docs/AI_SERVICES_OVERVIEW.md` - NEW: Complete service guide
-- **Training Guide:** `python_backend/train/README.md`
-- **MLOps Guide:** `python_backend/mlops/README.md`
+- **Training Guide:** `diri-cyrex/train/README.md`
+- **MLOps Guide:** `diri-cyrex/mlops/README.md`
 - **FIND_YOUR_TASKS:** `docs/FIND_YOUR_TASKS.md`
 
 ### New Advanced Services
 
-- **Advanced Task Parser:** `python_backend/app/services/advanced_task_parser.py`
+- **Advanced Task Parser:** `diri-cyrex/app/services/advanced_task_parser.py`
   - Multimodal task understanding
   - Context-aware analysis
   - Temporal reasoning
   - Task decomposition
 
-- **Adaptive Challenge Generator:** `python_backend/app/services/adaptive_challenge_generator.py`
+- **Adaptive Challenge Generator:** `diri-cyrex/app/services/adaptive_challenge_generator.py`
   - RL-based challenge generation
   - Engagement prediction
   - Creative challenge design
@@ -722,10 +743,10 @@ git push origin feature/your-feature-name
 
 ### Important Directories
 
-- `python_backend/app/services/` - AI services
-- `python_backend/train/` - Training infrastructure
-- `python_backend/mlops/` - MLOps infrastructure
-- `python_backend/tests/ai/` - AI tests
+- `diri-cyrex/app/services/` - AI services
+- `diri-cyrex/train/` - Training infrastructure
+- `diri-cyrex/mlops/` - MLOps infrastructure
+- `diri-cyrex/tests/ai/` - AI tests
 
 ### Communication
 

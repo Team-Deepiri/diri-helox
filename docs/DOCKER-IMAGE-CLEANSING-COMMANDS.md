@@ -64,7 +64,7 @@ docker compose -f docker-compose.dev.yml up -d
 ### Using Make (Optional - if you have `make` installed)
 ```bash
 make rebuild        # Full clean rebuild
-make rebuild-service SERVICE=pyagent  # Rebuild one service
+make rebuild-service SERVICE=cyrex  # Rebuild one service
 make clean          # Clean everything
 ```
 
@@ -90,7 +90,7 @@ docker compose -f docker-compose.dev.yml down --rmi local
 docker builder prune -af
 
 # Rebuild specific service
-docker compose -f docker-compose.dev.yml build --no-cache pyagent
+docker compose -f docker-compose.dev.yml build --no-cache cyrex
 
 # Rebuild all
 docker compose -f docker-compose.dev.yml build --no-cache

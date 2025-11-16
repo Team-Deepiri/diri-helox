@@ -86,7 +86,7 @@ logout();
    ```bash
    # Create .env.local file in client directory
    VITE_API_URL=http://localhost:5000/api
-   VITE_PYAGENT_URL=http://localhost:8000
+   VITE_CYREX_URL=http://localhost:8000
    ```
 
 2. **Verify backend is running:**

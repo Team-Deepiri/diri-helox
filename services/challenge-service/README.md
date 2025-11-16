@@ -18,7 +18,7 @@ Manages challenge generation and completion.
 See `api-server/services/challengeService.js` and `api-server/routes/challengeRoutes.js`
 
 ## AI Integration
-Communicates with Python AI service at `http://pyagent:8000`
+Communicates with Python AI service at `http://cyrex:8000`
 
 ## Migration
 Extract from `api-server/` to this independent service.

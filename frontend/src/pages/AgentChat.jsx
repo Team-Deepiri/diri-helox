@@ -16,7 +16,7 @@ export default function AgentChat() {
     setLoading(true);
     try {
       if (stream) {
-        const base = import.meta.env.VITE_PYAGENT_URL || 'http://localhost:8000';
+        const base = import.meta.env.VITE_CYREX_URL || 'http://localhost:8000';
         const res = await fetch(`${base}/agent/message/stream`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -37,7 +37,7 @@ export default function AgentChat() {
           });
         }
       } else {
-        const res = await externalApi.pyAgentMessage(userMsg.content);
+        const res = await externalApi.cyrexMessage(userMsg.content);
         const assistant = { role: 'assistant', content: res?.data?.message || 'No response' };
         setMessages((m) => [...m, assistant]);
       }

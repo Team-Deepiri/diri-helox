@@ -120,10 +120,10 @@ services:
       NODE_ENV: ${NODE_ENV:-development}
       PORT: 5003
       MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
-      AI_SERVICE_URL: http://pyagent:8000
+      AI_SERVICE_URL: http://cyrex:8000
     depends_on:
       - mongodb
-      - pyagent
+      - cyrex
     networks:
       - deepiri-network
     profiles:
@@ -234,17 +234,17 @@ services:
       - microservices
 
   # Python AI Service
-  pyagent:
+  cyrex:
     build:
-      context: ./python_backend
+      context: ./diri-cyrex
       dockerfile: Dockerfile
-    container_name: deepiri-pyagent
+    container_name: deepiri-cyrex
     restart: unless-stopped
     environment:
       OPENAI_API_KEY: ${OPENAI_API_KEY}
       OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
       NODE_BACKEND_URL: http://api-gateway:5000
-      PYAGENT_API_KEY: ${PYAGENT_API_KEY:-change-me}
+      CYREX_API_KEY: ${CYREX_API_KEY:-change-me}
     ports:
       - "8000:8000"
     networks:

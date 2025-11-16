@@ -26,7 +26,7 @@ mongoose.connect(MONGO_URI)
   .then(() => logger.info('Challenge Service: Connected to MongoDB'))
   .catch(err => logger.error('Challenge Service: MongoDB connection error', err));
 
-const PYAGENT_URL = process.env.PYAGENT_URL || 'http://pyagent:8000';
+const CYREX_URL = process.env.CYREX_URL || 'http://cyrex:8000';
 
 app.get('/health', (req, res) => {
   res.json({ status: 'healthy', service: 'challenge-service', timestamp: new Date().toISOString() });
@@ -35,7 +35,7 @@ app.get('/health', (req, res) => {
 // Challenge generation (calls AI service)
 app.post('/generate', async (req, res) => {
   try {
-    const response = await axios.post(`${PYAGENT_URL}/agent/challenge/generate`, req.body);
+    const response = await axios.post(`${CYREX_URL}/agent/challenge/generate`, req.body);
     res.json(response.data);
   } catch (error) {
     logger.error('Challenge generation error:', error);

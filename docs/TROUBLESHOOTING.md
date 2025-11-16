@@ -128,7 +128,7 @@ No module named 'torch'
 
 ### Solution
 
-All Python dependencies are listed in `python_backend/requirements.txt`. To install:
+All Python dependencies are listed in `diri-cyrex/requirements.txt`. To install:
 
 #### Option 1: Use the Fix Script
 
@@ -139,14 +139,14 @@ bash scripts/fix-dependencies.sh
 #### Option 2: Manual Installation
 
 ```bash
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 ```
 
 #### Option 3: Docker Rebuild
 
 ```bash
-docker-compose -f docker-compose.dev.yml build --no-cache pyagent
+docker-compose -f docker-compose.dev.yml build --no-cache cyrex
 ```
 
 ### Key Dependencies
@@ -161,10 +161,10 @@ docker-compose -f docker-compose.dev.yml build --no-cache pyagent
 
 ```bash
 # Check if numpy is installed
-docker exec deepiri-pyagent-dev python -c "import numpy; print(numpy.__version__)"
+docker exec deepiri-cyrex-dev python -c "import numpy; print(numpy.__version__)"
 
 # Or check requirements
-cat python_backend/requirements.txt | grep numpy
+cat diri-cyrex/requirements.txt | grep numpy
 ```
 
 ---
@@ -236,16 +236,52 @@ docker-compose -f docker-compose.dev.yml build --no-cache user-service
 
 ## Docker Build Issues
 
-### Problem
-```
-npm ci can only install with an existing package-lock.json
+### Problem: Build Freezing at Step 113/120 (Cyrex Service)
+
+**Symptoms:**
+- Build freezes at step 113/120
+- WiFi disconnects during build
+- Large CUDA package downloads (1.5GB+)
+
+**Solution: Use Auto GPU Detection with CPU Fallback**
+
+The build system now automatically detects your GPU and uses CPU fallback if needed:
+
+```bash
+# Auto-detect GPU and build (recommended)
+# Windows
+.\scripts\build-cyrex-auto.ps1
+
+# Linux/Mac
+./scripts/build-cyrex-auto.sh
 ```
 
-### Solution
+This will:
+- ✅ Detect if you have a GPU (≥4GB VRAM)
+- ✅ Use CUDA image if GPU is good enough
+- ✅ Fall back to CPU image if no GPU (faster, no freezing!)
+- ✅ Use prebuilt PyTorch images (no 1.5GB downloads)
+
+**Force CPU Build (if auto-detection doesn't work):**
+
+```bash
+# Windows PowerShell
+$env:BASE_IMAGE = "pytorch/pytorch:2.0.0-cpu"
+docker compose -f docker-compose.dev.yml build cyrex
+
+# Linux/Mac
+BASE_IMAGE=pytorch/pytorch:2.0.0-cpu docker compose -f docker-compose.dev.yml build cyrex
+```
+
+**See:** `diri-cyrex/README_BUILD.md` for detailed GPU detection guide.
+
+### Problem: npm ci can only install with an existing package-lock.json
+
+**Solution:**
 
 The Dockerfiles have been updated to use `npm install` instead of `npm ci` when `package-lock.json` is missing.
 
-### Current Dockerfile Pattern
+**Current Dockerfile Pattern:**
 
 ```dockerfile
 COPY package*.json ./
@@ -329,11 +365,11 @@ docker-compose -f docker-compose.dev.yml logs
 curl http://localhost:5001/health  # user-service
 curl http://localhost:5002/health  # task-service
 curl http://localhost:5000/health  # api-gateway
-curl http://localhost:8000/health  # pyagent
+curl http://localhost:8000/health  # cyrex
 
 # Check dependencies
 cd services/user-service && npm list --depth=0
-cd python_backend && pip list | grep numpy
+cd diri-cyrex && pip list | grep numpy
 
 # Rebuild everything
 docker-compose -f docker-compose.dev.yml down
@@ -374,7 +410,7 @@ To avoid these issues in the future:
    npm update --workspace=services/*
    
    # Update Python dependencies
-   pip install --upgrade -r python_backend/requirements.txt
+   pip install --upgrade -r diri-cyrex/requirements.txt
    ```
 
 4. **Generate package-lock.json files** for reproducible builds:

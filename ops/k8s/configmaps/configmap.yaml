@@ -15,7 +15,7 @@ data:
   # Note: These are for external access. Internal service communication uses service names (e.g., backend-service:5000)
   DEV_CLIENT_URL: "http://localhost:5173"
   DEV_API_URL: "http://localhost:5000/api"
-  DEV_PYAGENT_URL: "http://localhost:8000"
+  DEV_CYREX_URL: "http://localhost:8000"
   
   # CORS Configuration
   CORS_ORIGIN: "http://localhost:5173"
@@ -41,8 +41,8 @@ data:
   AGENT_TOP_P: "0.9"
   
   # Python Agent Configuration
-  PYAGENT_PORT: "8000"
-  PYAGENT_HOST: "0.0.0.0"
+  CYREX_PORT: "8000"
+  CYREX_HOST: "0.0.0.0"
   NODE_BACKEND_URL: "http://backend-service:5000"
   
   # RAG / Embeddings Configuration

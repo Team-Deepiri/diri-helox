@@ -34,7 +34,7 @@ cd Deepiri/deepiri
 ```bash
 # Copy example environment files
 cp api-server/env.example.api-server .env.api-server
-cp python_backend/env.example.python_backend .env.python_backend
+cp diri-cyrex/env.example.diri-cyrex .env.diri-cyrex
 
 # Edit .env files with your configuration
 # At minimum, set:
@@ -84,7 +84,7 @@ cd frontend && npm install && cd ..
 
 **Python Backend:**
 ```bash
-cd python_backend
+cd diri-cyrex
 pip install -r requirements.txt
 ```
 
@@ -139,7 +139,7 @@ docker-compose logs -f
 | integration-service | 5006 | External integrations |
 | challenge-service | 5007 | Challenge generation |
 | websocket-service | 5008 | WebSocket connections |
-| pyagent | 8000 | AI/ML service |
+| cyrex | 8000 | AI/ML service |
 | frontend-dev | 5173 | Frontend (dev) |
 
 ### Infrastructure Services
@@ -168,7 +168,7 @@ deepiri/
 │   └── shared-utils/     # Shared utilities package
 ├── api-server/           # Main API server
 ├── frontend/             # React frontend
-├── python_backend/       # Python AI/ML backend
+├── diri-cyrex/       # Python AI/ML backend
 │   ├── app/             # Application code
 │   ├── requirements.txt # Python dependencies
 │   └── Dockerfile       # Python Dockerfile
@@ -189,7 +189,7 @@ npm install <package-name> --save
 
 **Python Backend:**
 ```bash
-cd python_backend
+cd diri-cyrex
 pip install <package-name>
 echo "<package-name>==<version>" >> requirements.txt
 ```

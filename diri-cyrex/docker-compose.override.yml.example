@@ -1,0 +1,17 @@
+# Example docker-compose override for CPU-only builds
+# Copy this to docker-compose.override.yml to force CPU builds
+# Or set environment variable: DOCKER_BUILDKIT=1 BASE_IMAGE_CPU=1 docker compose build
+
+version: '3.8'
+
+services:
+  cyrex:
+    build:
+      args:
+        BASE_IMAGE: pytorch/pytorch:2.0.0-cpu  # Force CPU build
+  
+  jupyter:
+    build:
+      args:
+        BASE_IMAGE: pytorch/pytorch:2.0.0-cpu  # Force CPU build
+

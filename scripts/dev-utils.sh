@@ -51,7 +51,7 @@ install_deps() {
     
     # Python dependencies
     log_info "Installing Python dependencies..."
-    cd python_backend
+    cd diri-cyrex
     pip install -r requirements.txt
     cd ..
     
@@ -70,7 +70,7 @@ run_tests() {
     
     # Python backend tests
     log_info "Running Python backend tests..."
-    cd python_backend
+    cd diri-cyrex
     python -m pytest tests/ -v
     cd ..
     
@@ -120,7 +120,7 @@ format_all() {
     
     # Python formatting
     log_info "Formatting Python code..."
-    cd python_backend
+    cd diri-cyrex
     python -m black . || true
     python -m isort . || true
     cd ..
@@ -140,7 +140,7 @@ generate_docs() {
     
     # Python API docs
     log_info "Generating Python API docs..."
-    cd python_backend
+    cd diri-cyrex
     python -m pydoc -w app || true
     cd ..
     
@@ -183,8 +183,8 @@ clean_build() {
     rm -rf server/dist
     
     # Remove Python cache
-    find python_backend -name "__pycache__" -type d -exec rm -rf {} + || true
-    find python_backend -name "*.pyc" -type f -delete || true
+    find diri-cyrex -name "__pycache__" -type d -exec rm -rf {} + || true
+    find diri-cyrex -name "*.pyc" -type f -delete || true
     
     # Remove logs
     rm -rf logs/*
@@ -210,7 +210,7 @@ security_audit() {
     
     # Python security audit
     log_info "Auditing Python dependencies..."
-    cd python_backend
+    cd diri-cyrex
     pip-audit || true
     cd ..
     
@@ -232,7 +232,7 @@ performance_analysis() {
     
     # Python performance
     log_info "Analyzing Python performance..."
-    cd python_backend
+    cd diri-cyrex
     python -m cProfile -o profile.prof app/main.py || true
     cd ..
     
@@ -280,7 +280,7 @@ backup_config() {
     
     # Copy configuration files
     cp -r api-server/config "$backup_dir/" || true
-    cp -r python_backend/app/settings.py "$backup_dir/" || true
+    cp -r diri-cyrex/app/settings.py "$backup_dir/" || true
     cp docker-compose.yml "$backup_dir/"
     cp .env "$backup_dir/" || true
     cp env.example "$backup_dir/" || true
@@ -313,7 +313,7 @@ restore_config() {
     
     # Restore files
     cp -r "$backup_dir/config" api-server/ || true
-    cp "$backup_dir/settings.py" python_backend/app/ || true
+    cp "$backup_dir/settings.py" diri-cyrex/app/ || true
     cp "$backup_dir/docker-compose.yml" . || true
     cp "$backup_dir/.env" . || true
     
@@ -335,7 +335,7 @@ dev_server() {
     cd ..
     
     log_info "Starting Python agent..."
-    cd python_backend
+    cd diri-cyrex
     python -m uvicorn app.main:app --reload --port 8000 &
     PYTHON_PID=$!
     cd ..

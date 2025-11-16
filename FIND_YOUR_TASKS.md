@@ -13,7 +13,7 @@
 **Start Here:**
 - Architecture docs: `deepiri/docs/SYSTEM_ARCHITECTURE.md`
 - Microservices: `deepiri/docs/MICROSERVICES_SETUP.md`
-- AI research: `deepiri/python_backend/train/`
+- AI research: `deepiri/diri-cyrex/train/`
 **Your Tasks:**
 - Technical vision
 - Platform architecture
@@ -44,19 +44,19 @@
 
 ### AI Research Lead (AI Scientist 0)
 **Reports to:** Founder
-**Location:** `deepiri/python_backend/train/`
+**Location:** `deepiri/diri-cyrex/train/`
 **Stack:** Python, PyTorch, Transformers, MLflow, W&B, Jupyter
 **Start Here:**
-- Review: `deepiri/python_backend/train/README.md`
-- Experiment tracking: `deepiri/python_backend/train/infrastructure/experiment_tracker.py`
-- Research templates: `deepiri/python_backend/train/experiments/research_experiment_template.py`
+- Review: `deepiri/diri-cyrex/train/README.md`
+- Experiment tracking: `deepiri/diri-cyrex/train/infrastructure/experiment_tracker.py`
+- Research templates: `deepiri/diri-cyrex/train/experiments/research_experiment_template.py`
 **Unique Mission:** Design conceptual models that define Deepiri's cognitive engine and gamification logic. Lead theoretical development of Deepiri's cognition model.
 **Your Tasks:**
 - Define personalization frameworks for adaptive challenge generation
 - Design challenge generation theory that maps tasks → gamified challenges
 - Explore model architectures conceptually (paper-level research)
 - Provide research direction to engineering teams
-- Maintain AI design blueprint document (`python_backend/train/README.md`)
+- Maintain AI design blueprint document (`diri-cyrex/train/README.md`)
 - Oversee LLM development and model orchestration
 - Coordinate cutting-edge AI integration (RAG, RL, multi-agent systems)
 - Guide fine-tuning strategies for task classification and challenge generation
@@ -67,14 +67,14 @@
 
 ### AI Research Scientist 1 - Cognitive Task Structuring
 **Reports to:** AI Research Lead & AI Systems Lead
-**Location:** `deepiri/python_backend/train/experiments/`
+**Location:** `deepiri/diri-cyrex/train/experiments/`
 **Stack:** Python, PyTorch, Transformers, Novel Architectures (Mamba, MoE), Custom Training Loops, Graph Neural Networks
 **Start Here:**
-1. **Research Template**: Start with `deepiri/python_backend/train/experiments/research_experiment_template.py` to understand experiment structure
-2. **Jupyter Notebooks**: Explore `deepiri/python_backend/train/notebooks/` for existing research work
-3. **Cognitive Models**: Review `deepiri/python_backend/app/services/neuro_symbolic_challenge.py` for current neuro-symbolic approaches
-4. **Task Classification**: Study `deepiri/python_backend/app/services/task_classifier.py` to understand current task understanding
-5. **Challenge Generation**: Review `deepiri/python_backend/app/services/challenge_generator.py` (if exists) for gamification logic
+1. **Research Template**: Start with `deepiri/diri-cyrex/train/experiments/research_experiment_template.py` to understand experiment structure
+2. **Jupyter Notebooks**: Explore `deepiri/diri-cyrex/train/notebooks/` for existing research work
+3. **Cognitive Models**: Review `deepiri/diri-cyrex/app/services/neuro_symbolic_challenge.py` for current neuro-symbolic approaches
+4. **Task Classification**: Study `deepiri/diri-cyrex/app/services/task_classifier.py` to understand current task understanding
+5. **Challenge Generation**: Review `deepiri/diri-cyrex/app/services/challenge_generator.py` (if exists) for gamification logic
 **Unique Mission:** Theorize how tasks become "challenges" in the single-player gamified system. Build theoretical frameworks for task-to-challenge conversion. Research cognitive load balancing. Study decision-making frameworks for daily planning. Explore non-transformer cognitive models (Mamba, MoE, GNN-level theory). Create mathematical models for difficulty scaling. Support → ML Engineers (not Systems).
 **Your Tasks:**
 - Research cognitive load balancing algorithms for challenge difficulty
@@ -91,11 +91,11 @@
 
 ### AI Research Scientist 2 - Multimodal Understanding Theory
 **Reports to:** AI Research Lead & AI Systems Lead
-**Location:** `deepiri/python_backend/train/experiments/multimodal/`
+**Location:** `deepiri/diri-cyrex/train/experiments/multimodal/`
 **Stack:** Python, PyTorch, Multimodal Models (CLIP, BLIP), Vision Transformers, Audio Processing, Semantic Graphs, Symbolic AI
 **Start Here:**
-- Multimodal service: `deepiri/python_backend/app/services/multimodal_understanding.py`
-- Graph neural networks: `deepiri/python_backend/train/experiments/gnn_task_relationships.py`
+- Multimodal service: `deepiri/diri-cyrex/app/services/multimodal_understanding.py`
+- Graph neural networks: `deepiri/diri-cyrex/train/experiments/gnn_task_relationships.py`
 **Unique Mission:** Theorize how text → visuals → actions → code → audio fuse into a unified representation for task understanding and challenge generation.
 **Your Tasks:**
 - Research theoretical multimodal fusion for task parsing (`multimodal_understanding.py`)
@@ -111,12 +111,12 @@
 
 ### AI Research Scientist 3 - Efficiency & Model Compression Theory
 **Reports to:** AI Research Lead & AI Systems Lead
-**Location:** `deepiri/python_backend/train/experiments/compression/`
+**Location:** `deepiri/diri-cyrex/train/experiments/compression/`
 **Stack:** Python, PyTorch, Quantization (GPTQ, QLoRA), Pruning, Distillation, ONNX, TensorRT, Federated Learning
 **Start Here:**
-- LoRA training: `deepiri/python_backend/train/infrastructure/lora_training.py`
+- LoRA training: `deepiri/diri-cyrex/train/infrastructure/lora_training.py`
 - Model compression experiments
-- Federated learning: `deepiri/python_backend/train/experiments/federated_learning.py`
+- Federated learning: `deepiri/diri-cyrex/train/experiments/federated_learning.py`
 **Unique Mission:** Design efficient model architectures for on-device inference and cloud optimization.
 **Your Tasks:**
 - Study optimal quantization strategies (4-bit/8-bit with bitsandbytes)
@@ -132,13 +132,13 @@
 
 ### AI Systems Lead
 **Reports to:** N/A
-**Location:** `deepiri/python_backend/app/services/` & `deepiri/python_backend/train/pipelines/`
+**Location:** `deepiri/diri-cyrex/app/services/` & `deepiri/diri-cyrex/train/pipelines/`
 **Stack:** Python, FastAPI, Docker, Kubernetes, MLflow, Model Deployment
 **Start Here:**
-1. **Review AI Systems Architecture**: Read `deepiri/python_backend/app/services/` to understand current service structure
-2. **Training Infrastructure**: Study `deepiri/python_backend/train/pipelines/` for model training workflows
-3. **Main Application**: Review `deepiri/python_backend/app/main.py` to understand API structure
-4. **Model Deployment**: Check `deepiri/python_backend/mlops/deployment/` for deployment automation
+1. **Review AI Systems Architecture**: Read `deepiri/diri-cyrex/app/services/` to understand current service structure
+2. **Training Infrastructure**: Study `deepiri/diri-cyrex/train/pipelines/` for model training workflows
+3. **Main Application**: Review `deepiri/diri-cyrex/app/main.py` to understand API structure
+4. **Model Deployment**: Check `deepiri/diri-cyrex/mlops/deployment/` for deployment automation
 5. **Team Coordination**: Review code review workflows and merge processes with ML Team Lead
 **Unique Mission:** Model deployment infrastructure, inference optimization, training pipeline management. Code review and merging for AI Systems team.
 **Your Tasks:**
@@ -156,15 +156,15 @@
 
 ### AI Systems Engineer 1 - Model Inference Routing
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/app/services/` & `deepiri/python_backend/app/routes/`
+**Location:** `deepiri/diri-cyrex/app/services/` & `deepiri/diri-cyrex/app/routes/`
 **Stack:** Python, FastAPI, OpenAI API, Anthropic API, AsyncIO, WebSockets, Model Orchestration, Routing Logic
 **Start Here:**
-1. **Inference Service**: Review `deepiri/python_backend/app/services/inference_service.py` for current inference routing
-2. **Hybrid AI Service**: Study `deepiri/python_backend/app/services/hybrid_ai_service.py` for hybrid model selection
-3. **Challenge Routes**: Check `deepiri/python_backend/app/routes/challenge.py` for challenge generation API
-4. **Task Routes**: Review `deepiri/python_backend/app/routes/task.py` for task processing endpoints
-5. **Agent Routes**: Study `deepiri/python_backend/app/routes/agent.py` for agent interaction endpoints
-6. **Model Selector**: Check `deepiri/python_backend/app/services/model_selector.py` for model selection logic
+1. **Inference Service**: Review `deepiri/diri-cyrex/app/services/inference_service.py` for current inference routing
+2. **Hybrid AI Service**: Study `deepiri/diri-cyrex/app/services/hybrid_ai_service.py` for hybrid model selection
+3. **Challenge Routes**: Check `deepiri/diri-cyrex/app/routes/challenge.py` for challenge generation API
+4. **Task Routes**: Review `deepiri/diri-cyrex/app/routes/task.py` for task processing endpoints
+5. **Agent Routes**: Study `deepiri/diri-cyrex/app/routes/agent.py` for agent interaction endpoints
+6. **Model Selector**: Check `deepiri/diri-cyrex/app/services/model_selector.py` for model selection logic
 7. **Caching Strategy**: Review caching implementation for repeated queries
 **Unique Mission:** Develop inference-routing logic for both web and native app platforms. Build orchestration logic for model selection (`model_selector.py`). Optimize prompt processing pipelines for FastAPI endpoints. Route requests between task-agent ↔ plan-agent ↔ code-agent. Reduce latency in challenge generation API (`/api/challenges/generate`). Design fallback models for weak connectivity scenarios. Implement caching strategies for repeated queries. Optimize batch processing for concurrent requests. Monitor inference performance and latency metrics.
 **Your Tasks:**
@@ -177,25 +177,25 @@
 - Optimize batch processing for concurrent requests
 - Monitor inference performance and latency metrics
 **Files to Work On:**
-- `deepiri/python_backend/app/services/inference_service.py` - Inference routing
-- `deepiri/python_backend/app/services/model_selector.py` - Model selection logic
-- `deepiri/python_backend/app/services/agent_routing.py` - Agent routing
-- `deepiri/python_backend/app/routes/challenge.py` - API routes
-- `deepiri/python_backend/app/routes/task.py` - Task routes
-- `deepiri/python_backend/app/routes/agent.py` - Agent routes
+- `deepiri/diri-cyrex/app/services/inference_service.py` - Inference routing
+- `deepiri/diri-cyrex/app/services/model_selector.py` - Model selection logic
+- `deepiri/diri-cyrex/app/services/agent_routing.py` - Agent routing
+- `deepiri/diri-cyrex/app/routes/challenge.py` - API routes
+- `deepiri/diri-cyrex/app/routes/task.py` - Task routes
+- `deepiri/diri-cyrex/app/routes/agent.py` - Agent routes
 
 ---
 
 ### AI Systems Engineer 2 - Agent Interaction Framework
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/app/services/`
+**Location:** `deepiri/diri-cyrex/app/services/`
 **Stack:** Python, FastAPI, AsyncIO, Message Queues, Multi-Agent Systems, Safety Frameworks
 **Start Here:**
-1. **Multi-Agent System**: Review `deepiri/python_backend/app/services/multi_agent_system.py` to understand current agent architecture
-2. **Context Adaptation**: Study `deepiri/python_backend/app/services/context_aware_adaptation.py` for context handling
-3. **RL Agent**: Check `deepiri/python_backend/app/services/ppo_agent.py` for reinforcement learning integration
-4. **Message Routing**: Review existing service communication patterns in `deepiri/python_backend/app/services/`
-5. **Safety Frameworks**: Look for existing guardrails in `deepiri/python_backend/app/middleware/` or `deepiri/python_backend/app/services/`
+1. **Multi-Agent System**: Review `deepiri/diri-cyrex/app/services/multi_agent_system.py` to understand current agent architecture
+2. **Context Adaptation**: Study `deepiri/diri-cyrex/app/services/context_aware_adaptation.py` for context handling
+3. **RL Agent**: Check `deepiri/diri-cyrex/app/services/ppo_agent.py` for reinforcement learning integration
+4. **Message Routing**: Review existing service communication patterns in `deepiri/diri-cyrex/app/services/`
+5. **Safety Frameworks**: Look for existing guardrails in `deepiri/diri-cyrex/app/middleware/` or `deepiri/diri-cyrex/app/services/`
 **Unique Mission:** Build and maintain internal messaging framework for multi-agent reasoning. Architect agent → agent communication layers (`multi_agent_system.py`). Build reasoning loop frameworks for collaborative AI agents. Add safety + guardrails + alignment mechanisms. Support model orchestration during complex tasks. Implement agent coordination protocols. Design error handling and recovery for agent failures. Build agent state management and context sharing. Ensure agent outputs align with challenge generation requirements.
 **Your Tasks:**
 - Architect agent → agent communication layers (`multi_agent_system.py`)
@@ -207,20 +207,20 @@
 - Build agent state management and context sharing
 - Ensure agent outputs align with challenge generation requirements
 **Files to Work On:**
-- `deepiri/python_backend/app/services/multi_agent_system.py` - Multi-agent coordination
-- `deepiri/python_backend/app/services/context_aware_adaptation.py` - Context adaptation
-- `deepiri/python_backend/app/services/ppo_agent.py` - PPO agent
+- `deepiri/diri-cyrex/app/services/multi_agent_system.py` - Multi-agent coordination
+- `deepiri/diri-cyrex/app/services/context_aware_adaptation.py` - Context adaptation
+- `deepiri/diri-cyrex/app/services/ppo_agent.py` - PPO agent
 
 ---
 
 ### AI Systems Engineer 3 - Distributed Training Infrastructure
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/train/pipelines/` & `deepiri/python_backend/mlops/`
+**Location:** `deepiri/diri-cyrex/train/pipelines/` & `deepiri/diri-cyrex/mlops/`
 **Stack:** Python, PyTorch, Distributed Training (DeepSpeed, Ray, Slurm), Kubernetes, MLflow, GPU Clusters
 **Start Here:**
-- Training pipeline: `deepiri/python_backend/train/pipelines/full_training_pipeline.py`
-- Distributed training: `deepiri/python_backend/train/pipelines/distributed_training.py`
-- MLOps: `deepiri/python_backend/mlops/`
+- Training pipeline: `deepiri/diri-cyrex/train/pipelines/full_training_pipeline.py`
+- Distributed training: `deepiri/diri-cyrex/train/pipelines/distributed_training.py`
+- MLOps: `deepiri/diri-cyrex/mlops/`
 **Unique Mission:** Own cloud-side scaling + distributed model training.
 **Your Tasks:**
 - Build Ray/K8s/Slurm-style distributed training infrastructure
@@ -232,20 +232,20 @@
 - Optimize training data loading and preprocessing
 - Coordinate with MLOps Engineers on training automation
 **Files to Work On:**
-- `deepiri/python_backend/train/pipelines/distributed_training.py`
-- `deepiri/python_backend/mlops/ci/training_pipeline.yml`
-- `deepiri/python_backend/mlops/deployment/model_deployment.py`
+- `deepiri/diri-cyrex/train/pipelines/distributed_training.py`
+- `deepiri/diri-cyrex/mlops/ci/training_pipeline.yml`
+- `deepiri/diri-cyrex/mlops/deployment/model_deployment.py`
 
 ---
 
 ### AI Systems Engineer 4 - Production-Grade Model Serving
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/mlops/deployment/` & `deepiri/python_backend/app/services/`
+**Location:** `deepiri/diri-cyrex/mlops/deployment/` & `deepiri/diri-cyrex/app/services/`
 **Stack:** Python, FastAPI, Model Serving (Triton, vLLM), Kubernetes, Batching, Concurrency, Versioning
 **Start Here:**
-- Inference service: `deepiri/python_backend/app/services/inference_service.py`
-- MLOps deployment: `deepiri/python_backend/mlops/deployment/deployment_automation.py`
-- Model registry: `deepiri/python_backend/mlops/registry/model_registry.py`
+- Inference service: `deepiri/diri-cyrex/app/services/inference_service.py`
+- MLOps deployment: `deepiri/diri-cyrex/mlops/deployment/deployment_automation.py`
+- Model registry: `deepiri/diri-cyrex/mlops/registry/model_registry.py`
 **Unique Mission:** Build resilient serving infrastructure for both web and desktop IDE platforms.
 **Your Tasks:**
 - Production inference servers (FastAPI + Uvicorn)
@@ -257,20 +257,20 @@
 - Optimize GPU memory usage for concurrent requests
 - Work closely with MLOps Engineers on deployment pipelines
 **Files to Work On:**
-- `deepiri/python_backend/app/services/inference_service.py` - Inference serving
-- `deepiri/python_backend/mlops/deployment/deployment_automation.py` - Deployment
-- `deepiri/python_backend/mlops/registry/model_registry.py` - Model registry
+- `deepiri/diri-cyrex/app/services/inference_service.py` - Inference serving
+- `deepiri/diri-cyrex/mlops/deployment/deployment_automation.py` - Deployment
+- `deepiri/diri-cyrex/mlops/registry/model_registry.py` - Model registry
 
 ---
 
 ### ML Engineer 0 (ML Team Lead)
 **Reports to:** Founder
-**Location:** `deepiri/python_backend/train/` & `deepiri/python_backend/mlops/`
+**Location:** `deepiri/diri-cyrex/train/` & `deepiri/diri-cyrex/mlops/`
 **Stack:** Python, PyTorch, ML Strategy, Model Architecture, Cross-team Coordination
 **Start Here:**
-- Training README: `deepiri/python_backend/train/README.md`
-- ML config: `deepiri/python_backend/app/train/configs/ml_training_config.json`
-- MLOps README: `deepiri/python_backend/mlops/README.md`
+- Training README: `deepiri/diri-cyrex/train/README.md`
+- ML config: `deepiri/diri-cyrex/app/train/configs/ml_training_config.json`
+- MLOps README: `deepiri/diri-cyrex/mlops/README.md`
 **Unique Mission:** Orchestrate ML strategy, technical direction, and cross-team alignment. Does NOT merge code (AI Systems Lead reviews and merges).
 **Your Tasks:**
 - Technical architecture and model strategy for Deepiri's AI systems
@@ -287,15 +287,15 @@
 
 ### ML Engineer 1 — Gamification & Reinforcement Learning
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/train/scripts/` & `deepiri/python_backend/app/services/`
+**Location:** `deepiri/diri-cyrex/train/scripts/` & `deepiri/diri-cyrex/app/services/`
 **Stack:** Python, PyTorch, Reinforcement Learning (RLlib, Stable-Baselines3), Multi-Armed Bandits, Actor-Critic
 **Start Here:**
-1. **Bandit Training Pipeline**: Review `deepiri/python_backend/train/pipelines/bandit_training.py` for recommendation algorithms
-2. **Bandit Service**: Study `deepiri/python_backend/app/services/bandit_service.py` for challenge recommendation logic
-3. **PPO Agent**: Check `deepiri/python_backend/app/services/ppo_agent.py` for actor-critic optimization
-4. **RL Environment**: Review `deepiri/python_backend/app/services/rl_environment.py` for challenge generation environment
-5. **Reward Model**: Examine `deepiri/python_backend/app/services/reward_model.py` for reward function design
-6. **RL Training Scripts**: Look in `deepiri/python_backend/train/scripts/` for existing RL training code
+1. **Bandit Training Pipeline**: Review `deepiri/diri-cyrex/train/pipelines/bandit_training.py` for recommendation algorithms
+2. **Bandit Service**: Study `deepiri/diri-cyrex/app/services/bandit_service.py` for challenge recommendation logic
+3. **PPO Agent**: Check `deepiri/diri-cyrex/app/services/ppo_agent.py` for actor-critic optimization
+4. **RL Environment**: Review `deepiri/diri-cyrex/app/services/rl_environment.py` for challenge generation environment
+5. **Reward Model**: Examine `deepiri/diri-cyrex/app/services/reward_model.py` for reward function design
+6. **RL Training Scripts**: Look in `deepiri/diri-cyrex/train/scripts/` for existing RL training code
 **Unique Mission:** Turn tasks → challenges using RL frameworks and reward modeling. Train reward models (`reward_model.py`) for challenge generation. Build challenge selection policies using RL algorithms. Actor-critic optimization for adaptive difficulty (`ppo_agent.py`). Personalized difficulty engines based on user performance. Implement RL environment for challenge generation (`rl_environment.py`). Train bandit algorithms for challenge recommendation (`bandit_service.py`). Optimize reward functions for user engagement. Integrate RL models with challenge generation pipeline.
 **Your Tasks:**
 - Train reward models (`reward_model.py`) for challenge generation
@@ -311,14 +311,14 @@
 
 ### ML Engineer 2 - Transformers, Distillation, Task Understanding
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/train/scripts/` & `deepiri/python_backend/app/services/`
+**Location:** `deepiri/diri-cyrex/train/scripts/` & `deepiri/diri-cyrex/app/services/`
 **Stack:** Python, PyTorch, Transformers, PEFT/LoRA, Quantization (bitsandbytes, GPTQ), Knowledge Distillation
 **Start Here:**
-- Task classifier training: `deepiri/python_backend/train/scripts/train_task_classifier.py`
-- Transformer training: `deepiri/python_backend/train/scripts/train_transformer_classifier.py`
-- LoRA training: `deepiri/python_backend/train/infrastructure/lora_training.py`
-- Task classifier service: `deepiri/python_backend/app/services/task_classifier.py`
-- Advanced task parser: `deepiri/python_backend/app/services/advanced_task_parser.py`
+- Task classifier training: `deepiri/diri-cyrex/train/scripts/train_task_classifier.py`
+- Transformer training: `deepiri/diri-cyrex/train/scripts/train_transformer_classifier.py`
+- LoRA training: `deepiri/diri-cyrex/train/infrastructure/lora_training.py`
+- Task classifier service: `deepiri/diri-cyrex/app/services/task_classifier.py`
+- Advanced task parser: `deepiri/diri-cyrex/app/services/advanced_task_parser.py`
 **Unique Mission:** Train and optimize transformer models for task understanding and classification.
 **Your Tasks:**
 - Train task classification transformers (`task_classifier.py`)
@@ -330,24 +330,24 @@
 - Implement knowledge distillation pipelines
 - Train models for task parsing and understanding
 **Files to Work On:**
-- `deepiri/python_backend/train/scripts/train_task_classifier.py`
-- `deepiri/python_backend/train/scripts/train_transformer_classifier.py`
-- `deepiri/python_backend/train/scripts/train_teacher_student.py`
-- `deepiri/python_backend/train/scripts/train_quantized_model.py`
+- `deepiri/diri-cyrex/train/scripts/train_task_classifier.py`
+- `deepiri/diri-cyrex/train/scripts/train_transformer_classifier.py`
+- `deepiri/diri-cyrex/train/scripts/train_teacher_student.py`
+- `deepiri/diri-cyrex/train/scripts/train_quantized_model.py`
 
 ---
 
 ### ML Engineer 3 - Behavior & Temporal Learning
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/train/scripts/` & `deepiri/python_backend/app/services/`
+**Location:** `deepiri/diri-cyrex/train/scripts/` & `deepiri/diri-cyrex/app/services/`
 **Stack:** Python, PyTorch, Lightweight Models (MobileNet, EfficientNet), Temporal Models (LSTM, GRU, Transformers), Ensemble Methods
 **Start Here:**
-1. **Challenge Generator Training**: Review `deepiri/python_backend/train/scripts/train_challenge_generator.py` for challenge generation models
-2. **Personalization Training**: Study `deepiri/python_backend/train/scripts/train_personalization_model.py` for user personalization
-3. **Session Analysis**: Check `deepiri/python_backend/app/services/session_analyzer.py` for user behavior analysis
+1. **Challenge Generator Training**: Review `deepiri/diri-cyrex/train/scripts/train_challenge_generator.py` for challenge generation models
+2. **Personalization Training**: Study `deepiri/diri-cyrex/train/scripts/train_personalization_model.py` for user personalization
+3. **Session Analysis**: Check `deepiri/diri-cyrex/app/services/session_analyzer.py` for user behavior analysis
 4. **Time-Series Data**: Review `deepiri/services/analytics-service/` for user activity data
-5. **Temporal Models**: Look for existing LSTM/GRU implementations in `deepiri/python_backend/train/scripts/`
-6. **Behavior Data**: Check `deepiri/python_backend/train/data/` for user behavior datasets
+5. **Temporal Models**: Look for existing LSTM/GRU implementations in `deepiri/diri-cyrex/train/scripts/`
+6. **Behavior Data**: Check `deepiri/diri-cyrex/train/data/` for user behavior datasets
 **Unique Mission:** Model user habits and predict behavior patterns for personalization. Train temporal sequence models for user behavior prediction. Build habit-prediction networks for challenge timing. Train ensemble scoring models for user performance. Local recommendation models for challenge suggestions. Implement time-series analysis for productivity patterns. Build user behavior clustering models. Predict optimal challenge timing based on user history. Integrate behavior models with gamification service.
 **Your Tasks:**
 - Train temporal sequence models for user behavior prediction
@@ -363,15 +363,15 @@
 
 ### MLOps Engineer 1 - CI/CD for Models
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/mlops/ci/` & `deepiri/python_backend/mlops/deployment/`
+**Location:** `deepiri/diri-cyrex/mlops/ci/` & `deepiri/diri-cyrex/mlops/deployment/`
 **Stack:** Python, CI/CD (GitHub Actions, GitLab CI), Kubernetes, MLflow, Docker, Prometheus, GPU Management
 **Start Here:**
 - **Onboarding Guide**: `deepiri/docs/MLOPS_TEAM_ONBOARDING.md` (READ THIS FIRST!)
-- **CI/CD Pipeline**: `deepiri/python_backend/mlops/ci/model_ci_pipeline.py`
-- **Deployment**: `deepiri/python_backend/mlops/deployment/deployment_automation.py`
-- **Model Registry**: `deepiri/python_backend/mlops/registry/model_registry.py`
-- **MLOps README**: `deepiri/python_backend/mlops/README.md`
-- **Setup Script**: `deepiri/python_backend/mlops/scripts/setup_mlops_environment.sh`
+- **CI/CD Pipeline**: `deepiri/diri-cyrex/mlops/ci/model_ci_pipeline.py`
+- **Deployment**: `deepiri/diri-cyrex/mlops/deployment/deployment_automation.py`
+- **Model Registry**: `deepiri/diri-cyrex/mlops/registry/model_registry.py`
+- **MLOps README**: `deepiri/diri-cyrex/mlops/README.md`
+- **Setup Script**: `deepiri/diri-cyrex/mlops/scripts/setup_mlops_environment.sh`
 **Unique Mission:** Automate model build → test → deploy pipelines.
 **Your Tasks:**
 - Model versioning with MLflow model registry
@@ -383,25 +383,25 @@
 - Model artifact management and storage
 - Integration with Kubernetes for training jobs
 **Files to Work On:**
-- `deepiri/python_backend/mlops/ci/model_ci_pipeline.py` - Main CI/CD pipeline
-- `deepiri/python_backend/mlops/deployment/deployment_automation.py` - Deployment strategies
-- `deepiri/python_backend/mlops/registry/model_registry.py` - Model registry
-- `deepiri/python_backend/mlops/scripts/run_ci_pipeline.sh` - CI/CD automation
-- `deepiri/python_backend/mlops/scripts/deploy_model.sh` - Deployment script
+- `deepiri/diri-cyrex/mlops/ci/model_ci_pipeline.py` - Main CI/CD pipeline
+- `deepiri/diri-cyrex/mlops/deployment/deployment_automation.py` - Deployment strategies
+- `deepiri/diri-cyrex/mlops/registry/model_registry.py` - Model registry
+- `deepiri/diri-cyrex/mlops/scripts/run_ci_pipeline.sh` - CI/CD automation
+- `deepiri/diri-cyrex/mlops/scripts/deploy_model.sh` - Deployment script
 
 ---
 
 ### MLOps Engineer 2 - Monitoring & Optimization
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/mlops/monitoring/` & `deepiri/python_backend/mlops/optimization/`
+**Location:** `deepiri/diri-cyrex/mlops/monitoring/` & `deepiri/diri-cyrex/mlops/optimization/`
 **Stack:** Python, Prometheus, Grafana, MLflow, Performance Profiling, Alerting, Cost Optimization
 **Start Here:**
 1. **Onboarding Guide**: Read `deepiri/docs/MLOPS_TEAM_ONBOARDING.md` FIRST for team context
-2. **Model Monitoring Service**: Review `deepiri/python_backend/mlops/monitoring/model_monitor.py` for current monitoring setup
-3. **Docker Infrastructure**: Check `deepiri/python_backend/mlops/docker/docker-compose.mlops.yml` for monitoring stack
-4. **MLOps Documentation**: Read `deepiri/python_backend/mlops/README.md` for overall MLOps architecture
+2. **Model Monitoring Service**: Review `deepiri/diri-cyrex/mlops/monitoring/model_monitor.py` for current monitoring setup
+3. **Docker Infrastructure**: Check `deepiri/diri-cyrex/mlops/docker/docker-compose.mlops.yml` for monitoring stack
+4. **MLOps Documentation**: Read `deepiri/diri-cyrex/mlops/README.md` for overall MLOps architecture
 5. **Prometheus Config**: Check `deepiri/ops/prometheus/prometheus.yml` for metrics collection
-6. **Grafana Dashboards**: Look for existing dashboards in `deepiri/python_backend/mlops/monitoring/dashboards/` (if exists)
+6. **Grafana Dashboards**: Look for existing dashboards in `deepiri/diri-cyrex/mlops/monitoring/dashboards/` (if exists)
 7. **Cost Tracking**: Review infrastructure costs and GPU usage patterns
 **Unique Mission:** Create monitoring + performance insights for AI systems. Monitor model drift and performance degradation. Track infrastructure LATENCY for inference endpoints. Create alerting dashboards for model health. Optimize AI costs (GPU usage, API calls, inference time). Performance monitoring for challenge generation API. Model A/B testing infrastructure. Resource utilization tracking and optimization. Integration with Prometheus and Grafana for metrics.
 **Your Tasks:**
@@ -414,23 +414,23 @@
 - Resource utilization tracking and optimization
 - Integration with Prometheus and Grafana for metrics
 **Files to Work On:**
-- `deepiri/python_backend/mlops/monitoring/model_monitor.py` - Main monitoring service
-- `deepiri/python_backend/mlops/scripts/monitor_model.sh` - Monitoring script
-- `deepiri/python_backend/mlops/docker/docker-compose.mlops.yml` - Monitoring stack
+- `deepiri/diri-cyrex/mlops/monitoring/model_monitor.py` - Main monitoring service
+- `deepiri/diri-cyrex/mlops/scripts/monitor_model.sh` - Monitoring script
+- `deepiri/diri-cyrex/mlops/docker/docker-compose.mlops.yml` - Monitoring stack
 
 ---
 
 ### Data Engineer 1 - Real-Time User Behavior Pipelines
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/train/data/` & `deepiri/python_backend/app/services/analytics/`
+**Location:** `deepiri/diri-cyrex/train/data/` & `deepiri/diri-cyrex/app/services/analytics/`
 **Stack:** Python, Pandas, NumPy, Apache Kafka, NATS, Real-time Processing, Feature Engineering, Event Streaming
 **Start Here:**
-1. **Data Collection Pipeline**: Review `deepiri/python_backend/train/pipelines/data_collection_pipeline.py` for current data ingestion
-2. **Dataset Preparation**: Study `deepiri/python_backend/train/data/prepare_dataset.py` for data preprocessing workflows
+1. **Data Collection Pipeline**: Review `deepiri/diri-cyrex/train/pipelines/data_collection_pipeline.py` for current data ingestion
+2. **Dataset Preparation**: Study `deepiri/diri-cyrex/train/data/prepare_dataset.py` for data preprocessing workflows
 3. **Analytics Service**: Check `deepiri/services/analytics-service/` for time-series data handling
 4. **Event Streaming**: Review existing streaming infrastructure (Kafka/NATS/Redis Streams) in `deepiri/services/`
 5. **InfluxDB Integration**: Check `deepiri/services/analytics-service/src/timeSeriesAnalytics.js` for time-series storage
-6. **Real-Time Features**: Look for feature generation code in `deepiri/python_backend/app/services/analytics/`
+6. **Real-Time Features**: Look for feature generation code in `deepiri/diri-cyrex/app/services/analytics/`
 **Unique Mission:** Create real-time event pipelines to feed ML and Gamification services. Stream user activity via Kafka/NATS (or Redis Streams). Build challenge analytics pipelines. Generate real-time features for ML models. Integrate with Analytics Service for time-series data. Real-time event processing for gamification triggers. Data pipeline for user behavior tracking. Event streaming for challenge completion events. Integration with InfluxDB for time-series storage.
 **Your Tasks:**
 - Stream user activity via Kafka/NATS (or Redis Streams)
@@ -446,12 +446,12 @@
 
 ### Data Engineer 2 - Quality, Privacy, Compliance
 **Reports to:** ML Team Lead
-**Location:** `deepiri/python_backend/train/data/` (Data Quality & Privacy)
+**Location:** `deepiri/diri-cyrex/train/data/` (Data Quality & Privacy)
 **Stack:** Python, Pandas, Data Validation, Privacy Tools (Differential Privacy, PII Detection), GDPR Compliance
 **Start Here:**
-1. **Dataset Preparation**: Review `deepiri/python_backend/train/data/prepare_dataset.py` for current data processing
-2. **Data Collection**: Study `deepiri/python_backend/train/pipelines/data_collection_pipeline.py` for data sources
-3. **Privacy Tools**: Check for existing PII detection and anonymization code in `deepiri/python_backend/train/data/`
+1. **Dataset Preparation**: Review `deepiri/diri-cyrex/train/data/prepare_dataset.py` for current data processing
+2. **Data Collection**: Study `deepiri/diri-cyrex/train/pipelines/data_collection_pipeline.py` for data sources
+3. **Privacy Tools**: Check for existing PII detection and anonymization code in `deepiri/diri-cyrex/train/data/`
 4. **Data Validation**: Look for validation schemas and quality checks
 5. **GDPR Compliance**: Review data retention policies and user consent mechanisms
 6. **Label Validation**: Check training dataset labeling processes
@@ -470,14 +470,14 @@
 
 ### AI Systems Intern 1
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/train/scripts/` & `deepiri/python_backend/docs/`
+**Location:** `deepiri/diri-cyrex/train/scripts/` & `deepiri/diri-cyrex/docs/`
 **Stack:** Python, PyTorch, Documentation Tools, Testing Frameworks
 **Start Here:**
-1. **Test Suite**: Review `deepiri/python_backend/tests/ai/` to understand testing patterns
-2. **Training Scripts**: Study `deepiri/python_backend/train/scripts/` for training workflows
+1. **Test Suite**: Review `deepiri/diri-cyrex/tests/ai/` to understand testing patterns
+2. **Training Scripts**: Study `deepiri/diri-cyrex/train/scripts/` for training workflows
 3. **Documentation**: Check `deepiri/docs/` for existing documentation structure
-4. **AI Services**: Review `deepiri/python_backend/app/services/` to understand system architecture
-5. **Training Infrastructure**: Check `deepiri/python_backend/train/infrastructure/` for training setup
+4. **AI Services**: Review `deepiri/diri-cyrex/app/services/` to understand system architecture
+5. **Training Infrastructure**: Check `deepiri/diri-cyrex/train/infrastructure/` for training setup
 **Unique Mission:** High-level documentation + assisting live training jobs. Document AI system architecture and workflows. Assist with monitoring live training jobs. Create documentation for model deployment processes. Help maintain training infrastructure documentation. Support AI Systems Engineers with documentation tasks.
 **Your Tasks:**
 - Support model training
@@ -487,9 +487,9 @@
 - High-level documentation
 - Assist with live training jobs
 **Files to Work On:**
-- `deepiri/python_backend/tests/ai/test_task_classifier.py`
-- `deepiri/python_backend/tests/ai/test_challenge_generator.py`
-- `deepiri/python_backend/train/scripts/README.md`
+- `deepiri/diri-cyrex/tests/ai/test_task_classifier.py`
+- `deepiri/diri-cyrex/tests/ai/test_challenge_generator.py`
+- `deepiri/diri-cyrex/train/scripts/README.md`
 - `deepiri/docs/ai_training_guide.md`
 
 ---
@@ -521,12 +521,12 @@
 
 ### AI Systems Intern 3 (ML Engineer Intern)
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/train/data/` & `deepiri/python_backend/train/scripts/`
+**Location:** `deepiri/diri-cyrex/train/data/` & `deepiri/diri-cyrex/train/scripts/`
 **Stack:** Python, Pandas, Data Processing, ETL Pipelines, Synthetic Data Generation, Automation
 **Start Here:**
-1. **Dataset Preparation**: Review `deepiri/python_backend/train/data/prepare_dataset.py` for data processing
-2. **Data Collection**: Study `deepiri/python_backend/train/pipelines/data_collection_pipeline.py` for data ingestion
-3. **Training Scripts**: Check `deepiri/python_backend/train/scripts/` for training workflows
+1. **Dataset Preparation**: Review `deepiri/diri-cyrex/train/data/prepare_dataset.py` for data processing
+2. **Data Collection**: Study `deepiri/diri-cyrex/train/pipelines/data_collection_pipeline.py` for data ingestion
+3. **Training Scripts**: Check `deepiri/diri-cyrex/train/scripts/` for training workflows
 4. **Synthetic Data**: Look for existing synthetic data generation code
 5. **ETL Pipelines**: Review data transformation pipelines
 6. **Automation**: Understand training automation workflows
@@ -538,19 +538,19 @@
 - Generate synthetic challenges for training
 - Automate dataset preparation workflows
 **Files to Work On:**
-- `deepiri/python_backend/train/data/prepare_dataset.py`
-- `deepiri/python_backend/train/data/data_cleaning.py`
-- `deepiri/python_backend/train/data/etl_pipeline.py`
+- `deepiri/diri-cyrex/train/data/prepare_dataset.py`
+- `deepiri/diri-cyrex/train/data/data_cleaning.py`
+- `deepiri/diri-cyrex/train/data/etl_pipeline.py`
 
 ---
 
 ### AI Systems Intern 4
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/tests/ai/benchmarks/` & `deepiri/python_backend/train/scripts/`
+**Location:** `deepiri/diri-cyrex/tests/ai/benchmarks/` & `deepiri/diri-cyrex/train/scripts/`
 **Stack:** Python, Pytest, Benchmarking Tools, Performance Profiling, Regression Testing
 **Start Here:**
-- Benchmarks: `deepiri/python_backend/tests/ai/benchmarks/benchmark_classifier.py`
-- Evaluation: `deepiri/python_backend/train/scripts/evaluate_model.py`
+- Benchmarks: `deepiri/diri-cyrex/tests/ai/benchmarks/benchmark_classifier.py`
+- Evaluation: `deepiri/diri-cyrex/train/scripts/evaluate_model.py`
 **Unique Mission:** Focuses on evaluating failure modes + regression tests.
 **Your Tasks:**
 - Evaluate AI system failure modes
@@ -559,24 +559,24 @@
 - Validate model outputs for correctness
 - Create test suites for AI services
 **Files to Work On:**
-- `deepiri/python_backend/tests/ai/benchmarks/benchmark_classifier.py`
-- `deepiri/python_backend/train/scripts/evaluate_model.py`
-- `deepiri/python_backend/tests/ai/benchmarks/benchmark_generator.py`
-- `deepiri/python_backend/train/scripts/quality_metrics.py`
+- `deepiri/diri-cyrex/tests/ai/benchmarks/benchmark_classifier.py`
+- `deepiri/diri-cyrex/train/scripts/evaluate_model.py`
+- `deepiri/diri-cyrex/tests/ai/benchmarks/benchmark_generator.py`
+- `deepiri/diri-cyrex/train/scripts/quality_metrics.py`
 
 ---
 
 ### AI Systems Intern 5
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/docs/` & `deepiri/services/shared-utils/`
+**Location:** `deepiri/diri-cyrex/docs/` & `deepiri/services/shared-utils/`
 **Stack:** Python, Documentation Tools, Testing, Code Quality, Refactoring
 **Start Here:**
-1. **Test Suite**: Review `deepiri/python_backend/tests/` for testing patterns
-2. **Training README**: Read `deepiri/python_backend/train/README.md` for training context
+1. **Test Suite**: Review `deepiri/diri-cyrex/tests/` for testing patterns
+2. **Training README**: Read `deepiri/diri-cyrex/train/README.md` for training context
 3. **Shared Utils**: Study `deepiri/services/shared-utils/` for common utilities
 4. **Code Quality**: Check for linting and code quality tools
 5. **Refactoring Patterns**: Review existing refactoring approaches
-6. **Documentation**: Check `deepiri/python_backend/docs/` for documentation standards
+6. **Documentation**: Check `deepiri/diri-cyrex/docs/` for documentation standards
 **Unique Mission:** Maintains shared-utils consistency + code refactors. Maintain shared utilities across AI services. Refactor code for consistency and maintainability. Ensure code quality standards across AI codebase. Help with code organization and structure. Support code review and refactoring efforts.
 **Your Tasks:**
 - Maintain shared utilities across AI services
@@ -589,11 +589,11 @@
 
 ### AI Systems Intern 6
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/python_backend/tests/ai/` & `deepiri/python_backend/train/experiments/`
+**Location:** `deepiri/diri-cyrex/tests/ai/` & `deepiri/diri-cyrex/train/experiments/`
 **Stack:** Python, Pytest, Simulation Frameworks, Validation Tools, QA Testing
 **Start Here:**
-- AI tests: `deepiri/python_backend/tests/ai/`
-- Integration tests: `deepiri/python_backend/tests/integration/`
+- AI tests: `deepiri/diri-cyrex/tests/ai/`
+- Integration tests: `deepiri/diri-cyrex/tests/integration/`
 **Unique Mission:** QA Agent testing, simulation environments, validation.
 **Your Tasks:**
 - QA testing for AI agents and services
@@ -608,13 +608,13 @@
 
 ### Backend Lead
 **Reports to:** Product Lead / Founder
-**Location:** `deepiri/services/` & `deepiri/python_backend/app/`
+**Location:** `deepiri/services/` & `deepiri/diri-cyrex/app/`
 **Stack:** Node.js, Express, Python, FastAPI, MongoDB, Redis, Microservices Architecture
 **Start Here:**
 - Architecture: `deepiri/docs/MICROSERVICES_SETUP.md` - **READ THIS FIRST!**
 - API Gateway: `deepiri/services/api-gateway/server.js` (Port 5000)
 - Services: `deepiri/services/` - Each service has its own `server.js`
-- Python backend: `deepiri/python_backend/app/main.py` (Port 8000)
+- Python backend: `deepiri/diri-cyrex/app/main.py` (Port 8000)
 - Docker Compose: `deepiri/docker-compose.dev.yml`
 **Unique Mission:** Oversees microservices architecture, REST/GraphQL APIs, database schema quality, cross-team coordination, service boundaries, backend correctness. Reviews and merges code for backend team.
 **Your Tasks:**
@@ -694,15 +694,15 @@
 
 ### Backend Engineer 3 - AI Integration & Gamification
 **Reports to:** Backend Lead
-**Location:** `deepiri/python_backend/app/routes/` & `deepiri/services/challenge-service/`
+**Location:** `deepiri/diri-cyrex/app/routes/` & `deepiri/services/challenge-service/`
 **Stack:** Python, FastAPI, Node.js, Express, AI Integration, State Management
 **Start Here:**
 1. **Challenge Service**: Review `deepiri/services/challenge-service/server.js` (Port 5007) for challenge management
-2. **Challenge Routes**: Study `deepiri/python_backend/app/routes/challenge.py` (Port 8000) for AI endpoints
-3. **AI Services**: Explore `deepiri/python_backend/app/services/` to understand AI service architecture
+2. **Challenge Routes**: Study `deepiri/diri-cyrex/app/routes/challenge.py` (Port 8000) for AI endpoints
+3. **AI Services**: Explore `deepiri/diri-cyrex/app/services/` to understand AI service architecture
 4. **State Management**: Check how challenge state is managed across services
 5. **Gamification Rules**: Review gamification rule engine logic
-6. **Python Service Communication**: Understand how Node.js services communicate with Python AI service (`http://pyagent:8000`)
+6. **Python Service Communication**: Understand how Node.js services communicate with Python AI service (`http://cyrex:8000`)
 **Unique Mission:** AI Integration: Python service communication layer, challenge state management, gamification rule engine logic.
 **Your Tasks:**
 - Python service communication layer (FastAPI integration)
@@ -711,25 +711,25 @@
 - AI validation pipeline for challenge generation
 - AI-provided instructions mapping into tasks for both native IDE and online IDE
 - Manages cross-context data structures (task states, user states, challenge metadata)
-- Integrate with Python AI service (`http://pyagent:8000`)
+- Integrate with Python AI service (`http://cyrex:8000`)
 - Challenge completion tracking and reward distribution
 **Files to Work On:**
 - `deepiri/services/challenge-service/server.js` - Challenge service (port 5007) - Main service file
-- `deepiri/python_backend/app/routes/challenge.py` - Python AI routes
+- `deepiri/diri-cyrex/app/routes/challenge.py` - Python AI routes
 - `deepiri/services/challenge-service/Dockerfile` - Container definition
 
 ---
 
 ### Backend Engineer 4 - Database & Caching
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/*/src/` & `deepiri/python_backend/app/database/`
+**Location:** `deepiri/services/*/src/` & `deepiri/diri-cyrex/app/database/`
 **Stack:** MongoDB, Redis, InfluxDB, SQL, Database Optimization, Query Performance, Data Migrations
 **Start Here:**
 1. **User Service**: Review `deepiri/services/user-service/server.js` (Port 5001) for time-series tracking
 2. **Analytics Service**: Study `deepiri/services/analytics-service/server.js` (Port 5004) for InfluxDB integration
-3. **Database Models**: Check `deepiri/python_backend/app/database/models.py` for data models
-4. **Database Config**: Review `deepiri/python_backend/app/config/database.py` for connection settings
-5. **Caching Layer**: Understand Redis caching implementation in `deepiri/python_backend/app/utils/cache.py`
+3. **Database Models**: Check `deepiri/diri-cyrex/app/database/models.py` for data models
+4. **Database Config**: Review `deepiri/diri-cyrex/app/config/database.py` for connection settings
+5. **Caching Layer**: Understand Redis caching implementation in `deepiri/diri-cyrex/app/utils/cache.py`
 6. **Indexing Strategy**: Review MongoDB collection indexes for performance
 7. **Offline-First Sync**: Study how desktop IDE handles offline-first with sync recovery
 **Unique Mission:** DB indexing strategy, caching layers, query performance optimization, database migrations.
@@ -745,19 +745,19 @@
 **Files to Work On:**
 - `deepiri/services/user-service/src/timeSeriesService.js` - Time-series tracking
 - `deepiri/services/analytics-service/src/timeSeriesAnalytics.js` - InfluxDB analytics
-- `deepiri/python_backend/app/database/models.py` - Database models
-- `deepiri/python_backend/app/utils/cache.py` - Caching utilities
+- `deepiri/diri-cyrex/app/database/models.py` - Database models
+- `deepiri/diri-cyrex/app/utils/cache.py` - Caching utilities
 
 ---
 
 ### FullStack Engineer 1 (AI)
 **Reports to:** Backend Lead
-**Location:** `deepiri/frontend/src/pages/` & `deepiri/python_backend/app/routes/`
+**Location:** `deepiri/frontend/src/pages/` & `deepiri/diri-cyrex/app/routes/`
 **Stack:** React, TypeScript, FastAPI, REST APIs, Real-time Updates
 **Start Here:**
 1. **Productivity Chat**: Review `deepiri/frontend/src/pages/ProductivityChat.jsx` for AI interaction UI
-2. **Challenge Routes**: Study `deepiri/python_backend/app/routes/challenge.py` for AI endpoints
-3. **AI Services**: Check `deepiri/python_backend/app/services/` for AI service integration
+2. **Challenge Routes**: Study `deepiri/diri-cyrex/app/routes/challenge.py` for AI endpoints
+3. **AI Services**: Check `deepiri/diri-cyrex/app/services/` for AI service integration
 4. **Real-Time Updates**: Understand WebSocket integration for live AI feedback
 5. **Model Output Visualization**: Review how AI responses are displayed in UI
 6. **Frontend API Integration**: Check how frontend connects to AI services
@@ -902,10 +902,10 @@
 
 ### Systems Architect 3 - Security & Compliance
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/` & `deepiri/python_backend/app/middleware/`
+**Location:** `deepiri/services/` & `deepiri/diri-cyrex/app/middleware/`
 **Stack:** Security Architecture, OAuth2, JWT, Encryption, API Security
 **Start Here:**
-- Middleware: `deepiri/python_backend/app/middleware/`
+- Middleware: `deepiri/diri-cyrex/app/middleware/`
 - Services: `deepiri/services/`
 **Unique Mission:** Authentication flows, token security, data privacy requirements, API hardening.
 **Your Tasks:**
@@ -961,7 +961,7 @@
 **Stack:** System Integration, End-to-End Testing, API Integration, System Validation
 **Start Here:**
 - Root: `deepiri/`
-- Integration tests: `deepiri/python_backend/tests/integration/`
+- Integration tests: `deepiri/diri-cyrex/tests/integration/`
 **Unique Mission:** Ensure the entire Deepiri system (web IDE, native desktop IDE, AI services, backend, and cloud) works seamlessly as an integrated product.
 **Your Tasks:**
 - Conduct end-to-end flow validation across web and desktop platforms
@@ -1118,7 +1118,7 @@
 3. **Service Architecture**: Check `deepiri/docs/MICROSERVICES_SETUP.md` for service structure
 4. **API Testing**: Review API testing approaches in existing tests
 5. **Test Automation**: Understand test automation frameworks used
-6. **Integration Tests**: Check `deepiri/python_backend/tests/integration/` for integration testing
+6. **Integration Tests**: Check `deepiri/diri-cyrex/tests/integration/` for integration testing
 **Unique Mission:** Microservice testing, CI/CD pipeline support, API validation. Microservice testing. Supports CI/CD pipeline. Automates test workflows and API validation. Integration testing for services. Test coverage improvement.
 **Your Tasks:**
 - Microservice testing
