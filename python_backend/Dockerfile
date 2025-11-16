@@ -5,7 +5,10 @@ FROM python:3.11-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    TRANSFORMERS_CACHE=/app/.cache/huggingface \
+    HF_HOME=/app/.cache/huggingface \
+    SENTENCE_TRANSFORMERS_HOME=/app/.cache/sentence_transformers
 
 # Set working directory
 WORKDIR /app
@@ -32,7 +35,8 @@ RUN pip install --no-cache-dir --upgrade pip setuptools wheel && \
 
 # Create non-root user and set up directories
 RUN groupadd -r appuser && useradd -r -g appuser appuser && \
-    mkdir -p /app/logs && chown -R appuser:appuser /app
+    mkdir -p /app/logs /app/.cache/huggingface /app/.cache/sentence_transformers && \
+    chown -R appuser:appuser /app
 
 # Note: Some dependencies may require additional setup:
 # - bitsandbytes requires CUDA (optional, for GPU)

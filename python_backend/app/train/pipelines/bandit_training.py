@@ -7,7 +7,7 @@ from typing import List, Dict, Optional
 import json
 from pathlib import Path
 import pickle
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("train.bandit")
 

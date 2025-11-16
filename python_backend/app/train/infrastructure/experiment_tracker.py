@@ -12,8 +12,7 @@ import yaml
 import hashlib
 from datetime import datetime
 from typing import Dict, Optional, List
-import git
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("experiment.tracker")
 
@@ -88,15 +87,6 @@ class ExperimentTracker:
         except Exception as e:
             logger.warning("Code logging failed", error=str(e))
     
-    def log_git_info(self):
-        """Log git commit and branch."""
-        try:
-            repo = git.Repo(search_parent_directories=True)
-            mlflow.log_param("git_commit", repo.head.object.hexsha)
-            mlflow.log_param("git_branch", repo.active_branch.name)
-        except Exception as e:
-            logger.warning("Git info logging failed", error=str(e))
-    
     def end_run(self, status: str = "FINISHED"):
         """End current run."""
         if self.current_run:
@@ -145,7 +135,8 @@ class DatasetVersioning:
             "-f", str(dvc_path.with_suffix('.dvc'))
         ], check=True)
         
-        subprocess.run(["git", "add", str(dvc_path.with_suffix('.dvc')) + ".gitignore")], check=True)
+        dvc_file = str(dvc_path.with_suffix('.dvc'))
+        subprocess.run(["git", "add", dvc_file, dvc_file + ".gitignore"], check=True)
         
         logger.info("Dataset versioned", path=dataset_path)
 

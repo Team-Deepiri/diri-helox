@@ -11,7 +11,7 @@ from .data_collection_pipeline import get_data_collector
 from .lora_training import QLoRATrainingPipeline
 from .bandit_training import train_bandit_from_data
 from ..infrastructure.experiment_tracker import ExperimentTracker
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("train.ml_pipeline")
 

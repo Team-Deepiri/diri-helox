@@ -31,7 +31,7 @@ from typing import Dict, Optional
 import argparse
 from ..infrastructure.lora_training import LoRATrainer, QLoRATrainingPipeline
 from ..infrastructure.experiment_tracker import ExperimentTracker
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("train.pipeline")
 

@@ -393,6 +393,9 @@ services:
       INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
       INFLUXDB_ORG: ${INFLUXDB_ORG:-deepiri}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET:-analytics}
+      TRANSFORMERS_CACHE: /app/.cache/huggingface
+      HF_HOME: /app/.cache/huggingface
+      SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence_transformers
     ports:
       - "8000:8000"
     volumes:
@@ -400,6 +403,7 @@ services:
       - ./python_backend/train/models:/app/train/models
       - ./python_backend/train/data:/app/train/data
       - ./python_backend/inference/models:/app/inference/models
+      - pyagent_cache:/app/.cache
     depends_on:
       - influxdb
     networks:
@@ -420,6 +424,7 @@ services:
     environment:
       BACKEND_STORE_URI: file:/mlflow
       DEFAULT_ARTIFACT_ROOT: file:/mlflow/artifacts
+    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:/mlflow --default-artifact-root file:/mlflow/artifacts
     volumes:
       - mlflow_dev_data:/mlflow
     networks:
@@ -485,6 +490,8 @@ volumes:
   mlflow_dev_data:
     driver: local
   influxdb_dev_data:
+    driver: local
+  pyagent_cache:
     driver: local
 
 networks:

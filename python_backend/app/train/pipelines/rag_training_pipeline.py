@@ -9,7 +9,7 @@ from typing import List, Dict
 import json
 from pathlib import Path
 from ..infrastructure.rag_pipeline import RAGPipeline
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("train.rag")
 

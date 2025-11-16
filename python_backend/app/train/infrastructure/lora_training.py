@@ -3,6 +3,7 @@ LoRA/QLoRA Fine-Tuning Pipeline
 Production-ready fine-tuning with bitsandbytes, PEFT, and DeepSpeed
 """
 import torch
+from typing import Optional, List, Dict
 from transformers import (
     AutoModelForCausalLM,
     AutoTokenizer,
@@ -14,7 +15,7 @@ from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from datasets import load_dataset
 import json
 from pathlib import Path
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("lora.training")
 

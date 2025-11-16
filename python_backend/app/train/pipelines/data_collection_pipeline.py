@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 from datetime import datetime
 import sqlite3
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("train.data_collection")
 

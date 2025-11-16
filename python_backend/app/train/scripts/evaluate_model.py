@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Dict
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("eval.model")
 

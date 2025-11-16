@@ -8,7 +8,7 @@ from sentence_transformers import SentenceTransformer
 from pymilvus import connections, Collection, FieldSchema, CollectionSchema, DataType, utility
 import json
 from pathlib import Path
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("rag.pipeline")
 

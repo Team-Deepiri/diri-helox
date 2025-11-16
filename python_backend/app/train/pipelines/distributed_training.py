@@ -9,7 +9,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 from peft import LoraConfig, get_peft_model
 import os
 from typing import Dict
-from ..logging_config import get_logger
+from ...logging_config import get_logger
 
 logger = get_logger("train.distributed")
 
