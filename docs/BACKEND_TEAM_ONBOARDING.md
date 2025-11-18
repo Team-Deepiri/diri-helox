@@ -51,7 +51,7 @@ cd Deepiri/deepiri
 ```bash
 # Copy environment templates
 cp env.example .env
-cp env.example.server api-server/.env
+cp env.example.server deepiri-core-api/.env
 
 # Edit .env files with your configuration
 ```
@@ -104,14 +104,14 @@ docker-compose -f docker-compose.dev.yml up -d \
   influxdb \
   mongo-express \
   api-gateway \
-  user-service \
-  task-service \
+  auth-service \
+  task-orchestrator \
   gamification-service \
   analytics-service \
   notification-service \
-  integration-service \
+  external-bridge-service \
   challenge-service \
-  websocket-service \
+  realtime-gateway \
   cyrex \
   mlflow
 
@@ -119,8 +119,8 @@ docker-compose -f docker-compose.dev.yml up -d \
 docker-compose -f docker-compose.dev.yml ps
 
 # View logs for specific service
-docker-compose -f docker-compose.dev.yml logs -f user-service
-docker-compose -f docker-compose.dev.yml logs -f task-service
+docker-compose -f docker-compose.dev.yml logs -f auth-service
+docker-compose -f docker-compose.dev.yml logs -f task-orchestrator
 # ... etc for any service
 
 # View all logs
@@ -131,31 +131,31 @@ docker-compose -f docker-compose.dev.yml logs -f
 - **Databases:** mongodb, redis, influxdb
 - **Admin Tools:** mongo-express
 - **API Gateway:** api-gateway (port 5000)
-- **Core Services:** user-service (5001), task-service (5002), gamification-service (5003)
+- **Core Services:** auth-service (5001), task-orchestrator (5002), gamification-service (5003)
 - **Analytics:** analytics-service (5004)
-- **Communication:** notification-service (5005), websocket-service (5008)
-- **Integrations:** integration-service (5006)
+- **Communication:** notification-service (5005), realtime-gateway (5008)
+- **Integrations:** external-bridge-service (5006)
 - **AI:** challenge-service (5007), cyrex (8000)
 - **MLOps:** mlflow (5500)
 
 **Services NOT typically needed:**
-- `frontend-dev` (unless testing full stack)
+- `deepiri-web-frontend-dev` (unless testing full stack)
 - `jupyter` (AI team only)
 
 **Individual Service Development:**
 ```bash
 # API Gateway (routes all requests)
-cd services/api-gateway
+cd services/deepiri-api-gateway
 npm install
 npm start  # Port 5000
 
 # User Service
-cd services/user-service
+cd services/deepiri-auth-service
 npm install
 npm start  # Port 5001
 
 # Task Service
-cd services/task-service
+cd services/deepiri-task-orchestrator
 npm install
 npm start  # Port 5002
 
@@ -171,7 +171,7 @@ npm start  # Port 5002
 docker-compose -f docker-compose.dev.yml stop
 
 # Or stop specific services
-docker-compose -f docker-compose.dev.yml stop user-service task-service
+docker-compose -f docker-compose.dev.yml stop auth-service task-orchestrator
 
 # Remove containers and volumes
 docker-compose -f docker-compose.dev.yml down -v
@@ -228,7 +228,7 @@ cat MICROSERVICES_ARCHITECTURE.md
 
 **Key Files:**
 - `docs/MICROSERVICES_SETUP.md` - Microservices architecture
-- `services/api-gateway/server.js` - API Gateway routing
+- `services/deepiri-api-gateway/server.js` - API Gateway routing
 - `services/*/server.js` - Individual service servers
 - `docker-compose.dev.yml` - Service orchestration
 
@@ -245,18 +245,18 @@ npm install crypto  # For webhook signature verification
 ```
 
 **First Tasks:**
-1. Review `services/integration-service/server.js` - Service entry point
-2. Review `services/integration-service/src/webhookService.js` - Webhook processing
-3. Review `services/integration-service/src/index.js` - Route handlers
+1. Review `services/deepiri-external-bridge-service/server.js` - Service entry point
+2. Review `services/deepiri-external-bridge-service/src/webhookService.js` - Webhook processing
+3. Review `services/deepiri-external-bridge-service/src/index.js` - Route handlers
 4. Set up OAuth flows for each provider (GitHub, Notion, Trello)
 5. Test webhook endpoints
 6. Verify service runs on port 5006
 
 **Key Files:**
-- `services/integration-service/server.js` - Service server
-- `services/integration-service/src/webhookService.js` - Webhook processing
-- `services/integration-service/src/index.js` - Route handlers
-- `services/integration-service/Dockerfile` - Container definition
+- `services/deepiri-external-bridge-service/server.js` - Service server
+- `services/deepiri-external-bridge-service/src/webhookService.js` - Webhook processing
+- `services/deepiri-external-bridge-service/src/index.js` - Route handlers
+- `services/deepiri-external-bridge-service/Dockerfile` - Container definition
 
 **OAuth Setup:**
 ```bash
@@ -284,7 +284,7 @@ ngrok http 5000
 
 **Additional Setup:**
 ```bash
-cd services/integration-service
+cd services/deepiri-external-bridge-service
 
 # Install OAuth libraries
 npm install passport passport-oauth2
@@ -292,18 +292,18 @@ npm install axios
 ```
 
 **First Tasks:**
-1. Review `services/integration-service/README.md`
+1. Review `services/deepiri-external-bridge-service/README.md`
 2. Set up OAuth flows for Notion, Trello, GitHub
 3. Implement webhook handlers
 4. Create data synchronization logic
 
 **Key Files:**
-- `services/integration-service/` (create service structure)
-- `api-server/services/integrationService.js` (existing)
+- `services/deepiri-external-bridge-service/` (create service structure)
+- `deepiri-core-api/services/integrationService.js` (existing)
 
 **Service Structure:**
 ```
-services/integration-service/
+services/deepiri-external-bridge-service/
 ├── src/
 │   ├── notion.js
 │   ├── trello.js
@@ -333,24 +333,24 @@ npm install redis  # For pub/sub
 ```
 
 **First Tasks:**
-1. Review `services/websocket-service/server.js` - WebSocket service server
-2. Review `services/notification-service/server.js` - Notification service with WebSocket
-3. Review `services/websocket-service/README.md`
+1. Review `services/deepiri-realtime-gateway/server.js` - WebSocket service server
+2. Review `services/deepiri-notification-service/server.js` - Notification service with WebSocket
+3. Review `services/deepiri-realtime-gateway/README.md`
 4. Test WebSocket connections on port 5008
 5. Implement challenge update broadcasting
 6. Create multiplayer session management
 7. Set up presence tracking
 
 **Key Files:**
-- `services/websocket-service/server.js` - WebSocket service (port 5008)
-- `services/notification-service/server.js` - Notification service (port 5005)
-- `services/notification-service/src/websocketService.js` - WebSocket handler
+- `services/deepiri-realtime-gateway/server.js` - WebSocket service (port 5008)
+- `services/deepiri-notification-service/server.js` - Notification service (port 5005)
+- `services/deepiri-notification-service/src/websocketService.js` - WebSocket handler
 - `docker-compose.dev.yml` - Service configuration
 
 **WebSocket Setup:**
 ```javascript
 // Example: Initialize WebSocket service
-const { WebSocketService } = require('./services/notification-service/src/websocketService');
+const { WebSocketService } = require('./services/deepiri-notification-service/src/websocketService');
 const wsService = new WebSocketService();
 wsService.initialize(server);
 ```
@@ -368,19 +368,19 @@ npm install ioredis
 ```
 
 **First Tasks:**
-1. Review `services/websocket-service/README.md`
+1. Review `services/deepiri-realtime-gateway/README.md`
 2. Set up Socket.IO server
 3. Implement challenge update broadcasting
 4. Create multiplayer session management
 5. Set up presence tracking
 
 **Key Files:**
-- `services/websocket-service/` (create service)
-- `api-server/services/` (review existing)
+- `services/deepiri-realtime-gateway/` (create service)
+- `deepiri-core-api/services/` (review existing)
 
 **Service Structure:**
 ```
-services/websocket-service/
+services/deepiri-realtime-gateway/
 ├── src/
 │   ├── server.js
 │   ├── challenge_updates.js
@@ -412,7 +412,7 @@ pip install -r requirements.txt
 ```
 
 **First Tasks:**
-1. Review `services/challenge-service/server.js` - Challenge service (port 5007)
+1. Review `services/deepiri-challenge-service/server.js` - Challenge service (port 5007)
 2. Review `diri-cyrex/app/routes/challenge.py` - Python AI routes
 3. Review `diri-cyrex/app/services/` - All AI services
 4. Test challenge service → Python AI service communication
@@ -420,8 +420,8 @@ pip install -r requirements.txt
 6. Set up AI response validation
 
 **Key Files:**
-- `services/challenge-service/server.js` - Challenge service (port 5007)
-- `services/challenge-service/src/index.js` - Route handlers
+- `services/deepiri-challenge-service/server.js` - Challenge service (port 5007)
+- `services/deepiri-challenge-service/src/index.js` - Route handlers
 - `diri-cyrex/app/routes/challenge.py` - Python AI routes
 - `diri-cyrex/app/services/challenge_generator.py` - Challenge generation
 - `diri-cyrex/app/services/rl_environment.py` - RL environment
@@ -466,7 +466,7 @@ pip install -r requirements.txt
 **Key Files:**
 - `diri-cyrex/app/routes/challenge.py`
 - `diri-cyrex/app/services/challenge_generator.py`
-- `services/challenge-service/` (create)
+- `services/deepiri-challenge-service/` (create)
 
 **Integration Example:**
 ```javascript
@@ -491,8 +491,8 @@ npm install @influxdata/influxdb-client  # For time-series analytics
 
 **First Tasks:**
 1. Review database models
-2. Review `services/user-service/src/timeSeriesService.js` - NEW: Time-series service
-3. Review `services/analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
+2. Review `services/deepiri-auth-service/src/timeSeriesService.js` - NEW: Time-series service
+3. Review `services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
 4. Analyze query performance
 5. Set up caching strategies
 6. Create database migrations
@@ -500,11 +500,11 @@ npm install @influxdata/influxdb-client  # For time-series analytics
 8. Set up InfluxDB for time-series data
 
 **Key Files:**
-- `api-server/models/` - Database models
+- `deepiri-core-api/models/` - Database models
 - `diri-cyrex/app/database/models.py` - Python models
 - `diri-cyrex/app/utils/cache.py` - Caching utilities
-- `services/user-service/src/timeSeriesService.js` - NEW: Time-series tracking
-- `services/analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
+- `services/deepiri-auth-service/src/timeSeriesService.js` - NEW: Time-series tracking
+- `services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
 
 **Time-Series Setup:**
 ```bash
@@ -535,7 +535,7 @@ npm install mongodb
 5. Implement backup systems
 
 **Key Files:**
-- `api-server/models/`
+- `deepiri-core-api/models/`
 - `diri-cyrex/app/database/models.py`
 - `diri-cyrex/app/utils/cache.py`
 
@@ -554,8 +554,8 @@ artillery quick --count 100 --num 10 http://localhost:5000/api/tasks
 
 **Additional Setup:**
 ```bash
-# Frontend setup
-cd frontend
+# deepiri-web-frontend setup
+cd deepiri-web-frontend
 npm install
 
 # Install AI visualization libraries
@@ -564,22 +564,22 @@ npm install react-query
 ```
 
 **First Tasks:**
-1. Review `frontend/src/pages/ProductivityChat.jsx`
+1. Review `deepiri-web-frontend/src/pages/ProductivityChat.jsx`
 2. Create challenge generation UI
 3. Implement real-time AI response handling
 4. Create model output visualization
 5. Integrate with AI service APIs
 
 **Key Files:**
-- `frontend/src/pages/ProductivityChat.jsx`
-- `frontend/src/components/` (create AI components)
-- `frontend/src/services/challengeApi.js` (create)
+- `deepiri-web-frontend/src/pages/ProductivityChat.jsx`
+- `deepiri-web-frontend/src/components/` (create AI components)
+- `deepiri-web-frontend/src/services/challengeApi.js` (create)
 
-**Frontend + Backend:**
+**deepiri-web-frontend + Backend:**
 ```bash
 # Start both
-cd api-server && npm run dev &
-cd frontend && npm run dev
+cd deepiri-core-api && npm run dev &
+cd deepiri-web-frontend && npm run dev
 ```
 
 ---
@@ -588,7 +588,7 @@ cd frontend && npm run dev
 
 **Additional Setup:**
 ```bash
-cd frontend
+cd deepiri-web-frontend
 
 # Install animation libraries
 npm install framer-motion
@@ -597,9 +597,9 @@ npm install socket.io-client
 ```
 
 **First Tasks:**
-1. Review `services/gamification-service/src/multiCurrencyService.js` - NEW: Multi-currency
-2. Review `services/gamification-service/src/eloLeaderboardService.js` - NEW: ELO ranking
-3. Review `services/gamification-service/src/badgeSystemService.js` - NEW: Badge system
+1. Review `services/deepiri-engagement-service/src/multiCurrencyService.js` - NEW: Multi-currency
+2. Review `services/deepiri-engagement-service/src/eloLeaderboardService.js` - NEW: ELO ranking
+3. Review `services/deepiri-engagement-service/src/badgeSystemService.js` - NEW: Badge system
 4. Review gamification service
 5. Create progress tracking components
 6. Implement badge animations
@@ -608,12 +608,12 @@ npm install socket.io-client
 9. Implement multi-currency UI
 
 **Key Files:**
-- `services/gamification-service/src/multiCurrencyService.js` - NEW: Multi-currency
-- `services/gamification-service/src/eloLeaderboardService.js` - NEW: ELO leaderboard
-- `services/gamification-service/src/badgeSystemService.js` - NEW: Badge system
-- `services/gamification-service/` - Gamification service
-- `frontend/src/components/gamification/` - Frontend components
-- `api-server/services/gamificationService.js` - Existing service
+- `services/deepiri-engagement-service/src/multiCurrencyService.js` - NEW: Multi-currency
+- `services/deepiri-engagement-service/src/eloLeaderboardService.js` - NEW: ELO leaderboard
+- `services/deepiri-engagement-service/src/badgeSystemService.js` - NEW: Badge system
+- `services/deepiri-engagement-service/` - Gamification service
+- `deepiri-web-frontend/src/components/gamification/` - deepiri-web-frontend components
+- `deepiri-core-api/services/gamificationService.js` - Existing service
 
 ---
 
@@ -621,26 +621,26 @@ npm install socket.io-client
 
 **Additional Setup:**
 ```bash
-cd frontend
+cd deepiri-web-frontend
 
 # Install OAuth UI libraries
 npm install react-oauth
 ```
 
 **First Tasks:**
-1. Review `services/integration-service/src/webhookService.js` - NEW: Webhook service
+1. Review `services/deepiri-external-bridge-service/src/webhookService.js` - NEW: Webhook service
 2. Create integration dashboard UI
-3. Implement OAuth flows in frontend
+3. Implement OAuth flows in deepiri-web-frontend
 4. Create webhook management UI
 5. Create data sync monitoring
 6. Build configuration interfaces
 7. Test webhook endpoints
 
 **Key Files:**
-- `services/integration-service/src/webhookService.js` - NEW: Webhook processing
-- `frontend/src/pages/integrations/` - Integration pages
-- `frontend/src/components/integrations/` - Integration components
-- `services/integration-service/` - Integration service
+- `services/deepiri-external-bridge-service/src/webhookService.js` - NEW: Webhook processing
+- `deepiri-web-frontend/src/pages/integrations/` - Integration pages
+- `deepiri-web-frontend/src/components/integrations/` - Integration components
+- `services/deepiri-external-bridge-service/` - Integration service
 
 ---
 
@@ -648,7 +648,7 @@ npm install react-oauth
 
 **Additional Setup:**
 ```bash
-cd frontend
+cd deepiri-web-frontend
 
 # Install charting libraries
 npm install chart.js react-chartjs-2
@@ -657,9 +657,9 @@ npm install date-fns
 ```
 
 **First Tasks:**
-1. Review `services/analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series
-2. Review `services/analytics-service/src/behavioralClustering.js` - NEW: Clustering
-3. Review `services/analytics-service/src/predictiveModeling.js` - NEW: Predictive models
+1. Review `services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series
+2. Review `services/deepiri-platform-analytics-service/src/behavioralClustering.js` - NEW: Clustering
+3. Review `services/deepiri-platform-analytics-service/src/predictiveModeling.js` - NEW: Predictive models
 4. Create analytics dashboard
 5. Implement productivity visualization
 6. Create real-time analytics API
@@ -669,12 +669,12 @@ npm install date-fns
 10. Implement clustering visualizations
 
 **Key Files:**
-- `services/analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
-- `services/analytics-service/src/behavioralClustering.js` - NEW: Behavioral clustering
-- `services/analytics-service/src/predictiveModeling.js` - NEW: Predictive modeling
-- `frontend/src/pages/analytics/` - Analytics pages
-- `services/analytics-service/` - Analytics service
-- `api-server/services/analyticsService.js` - Existing service
+- `services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
+- `services/deepiri-platform-analytics-service/src/behavioralClustering.js` - NEW: Behavioral clustering
+- `services/deepiri-platform-analytics-service/src/predictiveModeling.js` - NEW: Predictive modeling
+- `deepiri-web-frontend/src/pages/analytics/` - Analytics pages
+- `services/deepiri-platform-analytics-service/` - Analytics service
+- `deepiri-core-api/services/analyticsService.js` - Existing service
 
 ---
 
@@ -695,7 +695,7 @@ npm install -g @apollo/gateway
 
 **Key Files:**
 - `MICROSERVICES_ARCHITECTURE.md`
-- `services/api-gateway/` (create)
+- `services/deepiri-api-gateway/` (create)
 - `architecture/` (create directory)
 
 ---
@@ -738,7 +738,7 @@ npm install express-rate-limit
 4. Design API security
 
 **Key Files:**
-- `api-server/middleware/authenticateJWT.js`
+- `deepiri-core-api/middleware/authenticateJWT.js`
 - `architecture/security_design.md` (create)
 
 ---
@@ -759,7 +759,7 @@ npm install cluster
 4. Plan load balancing
 
 **Key Files:**
-- `services/websocket-service/`
+- `services/deepiri-realtime-gateway/`
 - `architecture/multiplayer_scaling.md` (create)
 
 ---
@@ -946,7 +946,7 @@ docker-compose up service-name
 
 ### Important Directories
 
-- `api-server/` - Main backend API
+- `deepiri-core-api/` - Main backend API
 - `services/` - Microservices
 - `diri-cyrex/` - AI service integration
 - `ops/` - Deployment configs
@@ -969,4 +969,7 @@ docker-compose up service-name
 ---
 
 **Welcome to the Backend Team! Let's build scalable microservices.**
+
+
+
 

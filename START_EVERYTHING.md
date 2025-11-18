@@ -252,7 +252,7 @@ docker-compose -f docker-compose.dev.yml logs -f
 # Specific service
 docker-compose -f docker-compose.dev.yml logs -f api-gateway
 docker-compose -f docker-compose.dev.yml logs -f cyrex
-docker-compose -f docker-compose.dev.yml logs -f user-service
+docker-compose -f docker-compose.dev.yml logs -f auth-service
 ```
 
 ### Check Service Status

@@ -88,14 +88,14 @@ def main():
                 "PORT": "5000",
                 "MONGO_URI": mongo_uri,
                 "REDIS_URL": redis_url,
-                "USER_SERVICE_URL": "http://user-service:5001",
-                "TASK_SERVICE_URL": "http://task-service:5002",
-                "GAMIFICATION_SERVICE_URL": "http://gamification-service:5003",
-                "ANALYTICS_SERVICE_URL": "http://analytics-service:5004",
+                "AUTH_SERVICE_URL": "http://deepiri-auth-service:5001",
+                "TASK_ORCHESTRATOR_URL": "http://deepiri-task-orchestrator:5002",
+                "ENGAGEMENT_SERVICE_URL": "http://deepiri-engagement-service:5003",
+                "PLATFORM_ANALYTICS_SERVICE_URL": "http://deepiri-platform-analytics-service:5004",
                 "NOTIFICATION_SERVICE_URL": "http://notification-service:5005",
-                "INTEGRATION_SERVICE_URL": "http://integration-service:5006",
+                "EXTERNAL_BRIDGE_SERVICE_URL": "http://deepiri-external-bridge-service:5006",
                 "CHALLENGE_SERVICE_URL": "http://challenge-service:5007",
-                "WEBSOCKET_SERVICE_URL": "http://websocket-service:5008",
+                "REALTIME_GATEWAY_URL": "http://deepiri-realtime-gateway:5008",
             },
             "volumes": {
                 str(project_root / "services" / "api-gateway"): "/app",
@@ -105,9 +105,9 @@ def main():
         },
         {
             "image": None,
-            "name": "deepiri-user-service-backend",
+            "name": "deepiri-deepiri-auth-service-backend",
             "build": {
-                "context": str(project_root / "services" / "user-service"),
+                "context": str(project_root / "services" / "deepiri-auth-service"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5001/tcp": 5001},
@@ -117,16 +117,16 @@ def main():
                 "MONGO_URI": mongo_uri,
             },
             "volumes": {
-                str(project_root / "services" / "user-service"): "/app",
+                str(project_root / "services" / "deepiri-auth-service"): "/app",
                 "/app/node_modules": {},
             },
             "depends_on": [("mongodb", 5)],
         },
         {
             "image": None,
-            "name": "deepiri-task-service-backend",
+            "name": "deepiri-deepiri-task-orchestrator-backend",
             "build": {
-                "context": str(project_root / "services" / "task-service"),
+                "context": str(project_root / "services" / "deepiri-task-orchestrator"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5002/tcp": 5002},
@@ -136,16 +136,16 @@ def main():
                 "MONGO_URI": mongo_uri,
             },
             "volumes": {
-                str(project_root / "services" / "task-service"): "/app",
+                str(project_root / "services" / "deepiri-task-orchestrator"): "/app",
                 "/app/node_modules": {},
             },
             "depends_on": [("mongodb", 5)],
         },
         {
             "image": None,
-            "name": "deepiri-gamification-service-backend",
+            "name": "deepiri-deepiri-engagement-service-backend",
             "build": {
-                "context": str(project_root / "services" / "gamification-service"),
+                "context": str(project_root / "services" / "deepiri-engagement-service"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5003/tcp": 5003},
@@ -156,16 +156,16 @@ def main():
                 "REDIS_URL": redis_url,
             },
             "volumes": {
-                str(project_root / "services" / "gamification-service"): "/app",
+                str(project_root / "services" / "deepiri-engagement-service"): "/app",
                 "/app/node_modules": {},
             },
             "depends_on": [("mongodb", 5), ("redis", 2)],
         },
         {
             "image": None,
-            "name": "deepiri-analytics-service-backend",
+            "name": "deepiri-deepiri-platform-analytics-service-backend",
             "build": {
-                "context": str(project_root / "services" / "analytics-service"),
+                "context": str(project_root / "services" / "deepiri-platform-analytics-service"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5004/tcp": 5004},
@@ -179,7 +179,7 @@ def main():
                 "INFLUXDB_BUCKET": env.get("INFLUXDB_BUCKET", "analytics"),
             },
             "volumes": {
-                str(project_root / "services" / "analytics-service"): "/app",
+                str(project_root / "services" / "deepiri-platform-analytics-service"): "/app",
                 "/app/node_modules": {},
             },
             "depends_on": [("mongodb", 5), ("influxdb", 5)],
@@ -205,9 +205,9 @@ def main():
         },
         {
             "image": None,
-            "name": "deepiri-integration-service-backend",
+            "name": "deepiri-deepiri-external-bridge-service-backend",
             "build": {
-                "context": str(project_root / "services" / "integration-service"),
+                "context": str(project_root / "services" / "deepiri-external-bridge-service"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5006/tcp": 5006},
@@ -221,16 +221,16 @@ def main():
                 "NOTION_CLIENT_SECRET": env.get("NOTION_CLIENT_SECRET", ""),
             },
             "volumes": {
-                str(project_root / "services" / "integration-service"): "/app",
+                str(project_root / "services" / "deepiri-external-bridge-service"): "/app",
                 "/app/node_modules": {},
             },
             "depends_on": [("mongodb", 5)],
         },
         {
             "image": None,
-            "name": "deepiri-websocket-service-backend",
+            "name": "deepiri-deepiri-realtime-gateway-backend",
             "build": {
-                "context": str(project_root / "services" / "websocket-service"),
+                "context": str(project_root / "services" / "deepiri-realtime-gateway"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5008/tcp": 5008},
@@ -241,7 +241,7 @@ def main():
                 "REDIS_URL": redis_url,
             },
             "volumes": {
-                str(project_root / "services" / "websocket-service"): "/app",
+                str(project_root / "services" / "deepiri-realtime-gateway"): "/app",
                 "/app/node_modules": {},
             },
             "depends_on": [("mongodb", 5), ("redis", 2)],

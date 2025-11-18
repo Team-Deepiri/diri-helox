@@ -38,7 +38,7 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./services/api-gateway
+      context: ./services/deepiri-api-gateway
       dockerfile: Dockerfile
     container_name: deepiri-api-gateway
     restart: unless-stopped
@@ -51,12 +51,12 @@ services:
       REDIS_URL: redis://:${REDIS_PASSWORD:-redispassword}@redis:6379
       JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_key_here}
       # Service URLs
-      USER_SERVICE_URL: http://user-service:5001
-      TASK_SERVICE_URL: http://task-service:5002
+      AUTH_SERVICE_URL: http://auth-service:5001
+      TASK_ORCHESTRATOR_URL: http://task-orchestrator:5002
       CHALLENGE_SERVICE_URL: http://challenge-service:5003
-      GAMIFICATION_SERVICE_URL: http://gamification-service:5004
-      ANALYTICS_SERVICE_URL: http://analytics-service:5005
-      INTEGRATION_SERVICE_URL: http://integration-service:5006
+      ENGAGEMENT_SERVICE_URL: http://engagement-service:5004
+      PLATFORM_ANALYTICS_SERVICE_URL: http://platform-analytics-service:5005
+      EXTERNAL_BRIDGE_SERVICE_URL: http://external-bridge-service:5006
       NOTIFICATION_SERVICE_URL: http://notification-service:5007
     depends_on:
       - mongodb
@@ -66,12 +66,12 @@ services:
     profiles:
       - microservices
 
-  # User Service
-  user-service:
+  # Auth Service
+  auth-service:
     build:
-      context: ./services/user-service
+      context: ./services/deepiri-auth-service
       dockerfile: Dockerfile
-    container_name: deepiri-user-service
+    container_name: deepiri-auth-service
     restart: unless-stopped
     ports:
       - "5001:5001"
@@ -87,12 +87,12 @@ services:
     profiles:
       - microservices
 
-  # Task Service
-  task-service:
+  # Task Orchestrator Service
+  task-orchestrator:
     build:
-      context: ./services/task-service
+      context: ./services/deepiri-task-orchestrator
       dockerfile: Dockerfile
-    container_name: deepiri-task-service
+    container_name: deepiri-task-orchestrator
     restart: unless-stopped
     ports:
       - "5002:5002"
@@ -110,7 +110,7 @@ services:
   # Challenge Service
   challenge-service:
     build:
-      context: ./services/challenge-service
+      context: ./services/deepiri-challenge-service
       dockerfile: Dockerfile
     container_name: deepiri-challenge-service
     restart: unless-stopped
@@ -129,12 +129,12 @@ services:
     profiles:
       - microservices
 
-  # Gamification Service
-  gamification-service:
+  # Engagement Service
+  engagement-service:
     build:
-      context: ./services/gamification-service
+      context: ./services/deepiri-engagement-service
       dockerfile: Dockerfile
-    container_name: deepiri-gamification-service
+    container_name: deepiri-engagement-service
     restart: unless-stopped
     ports:
       - "5004:5004"
@@ -151,12 +151,12 @@ services:
     profiles:
       - microservices
 
-  # Analytics Service
-  analytics-service:
+  # Platform Analytics Service
+  platform-analytics-service:
     build:
-      context: ./services/analytics-service
+      context: ./services/deepiri-platform-analytics-service
       dockerfile: Dockerfile
-    container_name: deepiri-analytics-service
+    container_name: deepiri-platform-analytics-service
     restart: unless-stopped
     ports:
       - "5005:5005"
@@ -171,12 +171,12 @@ services:
     profiles:
       - microservices
 
-  # Integration Service
-  integration-service:
+  # External Bridge Service
+  external-bridge-service:
     build:
-      context: ./services/integration-service
+      context: ./services/deepiri-external-bridge-service
       dockerfile: Dockerfile
-    container_name: deepiri-integration-service
+    container_name: deepiri-external-bridge-service
     restart: unless-stopped
     ports:
       - "5006:5006"
@@ -194,7 +194,7 @@ services:
   # Notification Service
   notification-service:
     build:
-      context: ./services/notification-service
+      context: ./services/deepiri-notification-service
       dockerfile: Dockerfile
     container_name: deepiri-notification-service
     restart: unless-stopped
@@ -211,12 +211,12 @@ services:
     profiles:
       - microservices
 
-  # WebSocket Service
-  websocket-service:
+  # Realtime Gateway Service
+  realtime-gateway:
     build:
-      context: ./services/websocket-service
+      context: ./services/deepiri-realtime-gateway
       dockerfile: Dockerfile
-    container_name: deepiri-websocket-service
+    container_name: deepiri-realtime-gateway
     restart: unless-stopped
     ports:
       - "5008:5008"

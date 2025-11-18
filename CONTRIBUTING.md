@@ -75,7 +75,7 @@ docker compose -f docker-compose.dev.yml logs -f
 #### Backend Setup
 
 ```bash
-cd api-server
+cd deepiri-core-api
 npm install
 cp ../.env.example .env
 # Edit .env with your configuration
@@ -85,7 +85,7 @@ npm run dev
 #### Frontend Setup
 
 ```bash
-cd frontend
+cd deepiri-web-frontend
 npm install
 cp ../.env.example .env
 # Edit .env with your configuration
@@ -118,7 +118,7 @@ This installs dependencies for all services.
 
 ```
 deepiri/
-├── api-server/          # Node.js backend (Express)
+├── deepiri-core-api/          # Node.js backend (Express)
 │   ├── models/         # MongoDB models
 │   ├── services/       # Business logic
 │   ├── routes/         # API routes
@@ -126,7 +126,7 @@ deepiri/
 │   ├── controllers/    # Route controllers
 │   └── utils/          # Utility functions
 │
-├── frontend/           # React frontend (Vite)
+├── deepiri-web-frontend/           # React deepiri-web-frontend (Vite)
 │   ├── src/
 │   │   ├── components/ # Reusable components
 │   │   ├── pages/      # Page components
@@ -187,11 +187,11 @@ git checkout -b docs/your-documentation-update
 
 ```bash
 # Run backend tests
-cd api-server
+cd deepiri-core-api
 npm test
 
-# Run frontend tests
-cd frontend
+# Run deepiri-web-frontend tests
+cd deepiri-web-frontend
 npm test
 
 # Run Python tests
@@ -345,7 +345,7 @@ npm run lint
 ### Backend Tests (Jest)
 
 ```javascript
-// api-server/tests/taskService.test.js
+// deepiri-core-api/tests/taskService.test.js
 describe('Task Service', () => {
   describe('createTask', () => {
     it('should create a task successfully', async () => {
@@ -366,7 +366,7 @@ describe('Task Service', () => {
 ### Frontend Tests (Vitest)
 
 ```javascript
-// frontend/src/components/TaskCard.test.jsx
+// deepiri-web-frontend/src/components/TaskCard.test.jsx
 import { render, screen } from '@testing-library/react';
 import { TaskCard } from './TaskCard';
 
@@ -396,10 +396,10 @@ def test_generate_challenge():
 
 ```bash
 # Backend
-cd api-server && npm test
+cd deepiri-core-api && npm test
 
 # Frontend
-cd frontend && npm test
+cd deepiri-web-frontend && npm test
 
 # Python
 cd diri-cyrex && pytest
@@ -439,7 +439,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) speci
 ### Scope (Optional)
 
 - `api`: Backend API changes
-- `frontend`: Frontend changes
+- `deepiri-web-frontend`: Frontend changes
 - `ai`: AI service changes
 - `deps`: Dependency updates
 - `docker`: Docker configuration
@@ -456,7 +456,7 @@ Closes #123
 ```
 
 ```
-fix(frontend): resolve authentication token refresh issue
+fix(deepiri-web-frontend): resolve authentication token refresh issue
 
 The token refresh was failing silently. Now properly handles
 token expiration and redirects to login when needed.

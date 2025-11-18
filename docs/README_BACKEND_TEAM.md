@@ -38,7 +38,7 @@ The Backend Team builds and maintains Node.js/Fastify microservices, databases, 
 
 ### Service Structure
 ```
-api-server/
+deepiri-core-api/
 ├── services/          # Business logic
 │   ├── userService.js
 │   ├── taskService.js
@@ -75,7 +75,7 @@ api-server/
 
 ### Setup
 ```bash
-cd api-server
+cd deepiri-core-api
 npm install
 cp env.example.server .env
 # Configure environment variables
@@ -109,9 +109,9 @@ Each microservice should be independently deployable with:
 3. **challenge-service** - Challenge generation and management
 4. **gamification-service** - Points, badges, leaderboards
 5. **analytics-service** - Analytics and insights
-6. **integration-service** - External API integrations
+6. **external-bridge-service** - External API integrations
 7. **notification-service** - Real-time notifications
-8. **websocket-service** - WebSocket server for real-time updates
+8. **realtime-gateway** - WebSocket server for real-time updates
 9. **api-gateway** - API gateway for routing
 
 ## Database Architecture
@@ -249,4 +249,6 @@ const response = await axios.post('http://cyrex:8000/generate-challenge', {
 - MongoDB Documentation
 - Redis Documentation
 - Fastify Documentation (for new services)
+
+
 

@@ -71,3 +71,4 @@ bash scripts/fix-dependencies.sh
 - **[../ENVIRONMENT_VARIABLES.md](../ENVIRONMENT_VARIABLES.md)** - Environment variables reference
 - **[../START_EVERYTHING.md](../START_EVERYTHING.md)** - Complete testing guide
 - **[../GETTING_STARTED.md](../GETTING_STARTED.md)** - Local development setup
+

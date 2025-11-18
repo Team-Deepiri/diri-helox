@@ -131,3 +131,4 @@ docker compose -f docker-compose.dev.yml logs -f
 
 **Key Point:** Normal `docker compose up` does NOT rebuild - it's fast and efficient. Only rebuild when code changes!
 
+

@@ -27,7 +27,7 @@ DEV_CLIENT_URL=http://localhost:5173
 DEV_API_URL=http://localhost:5000/api
 DEV_CYREX_URL=http://localhost:8000
 
-# api-server/.env
+# deepiri-core-api/.env
 NODE_ENV=development
 PORT=5000
 MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
@@ -45,7 +45,7 @@ NODE_BACKEND_URL=http://localhost:5000
 VECTOR_STORE=chromadb
 CHROMADB_PATH=./chroma_db
 
-# frontend/.env.local
+# deepiri-web-frontend/.env.local
 VITE_API_URL=http://localhost:5000/api
 VITE_CYREX_URL=http://localhost:8000
 ```
@@ -58,15 +58,15 @@ VITE_CYREX_URL=http://localhost:8000
 deepiri/
 ├── .env                          # Root env (for Docker Compose)
 ├── env.example                   # Root env template
-├── api-server/
+├── deepiri-core-api/
 │   ├── .env                      # Backend env
-│   └── env.example.api-server    # Backend env template
+│   └── env.example.deepiri-core-api    # Backend env template
 ├── diri-cyrex/
 │   ├── .env                      # Python Agent env
 │   └── env.example.diri-cyrex # Python Agent env template
-└── frontend/
+└── deepiri-web-frontend/
     ├── .env.local                # Frontend env
-    └── env.example.frontend      # Frontend env template
+    └── env.example.deepiri-web-frontend      # Frontend env template
 ```
 
 ---
@@ -109,7 +109,7 @@ DEV_API_URL=http://localhost:5000/api
 DEV_CYREX_URL=http://localhost:8000
 ```
 
-### `api-server/.env`
+### `deepiri-core-api/.env`
 
 **Server Configuration:**
 ```bash
@@ -175,7 +175,7 @@ CHROMADB_COLLECTION=deepiri_embeddings
 EMBEDDING_MODEL=all-minilm-l6-v2
 ```
 
-### `frontend/.env.local`
+### `deepiri-web-frontend/.env.local`
 
 ```bash
 VITE_API_URL=http://localhost:5000/api

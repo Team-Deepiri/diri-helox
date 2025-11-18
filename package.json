@@ -5,14 +5,14 @@
   "private": true,
   "workspaces": [
     "services/*",
-    "services/shared-utils",
-    "api-server",
-    "frontend"
+    "services/deepiri-shared-utils",
+    "deepiri-core-api",
+    "deepiri-web-frontend"
   ],
   "scripts": {
     "install:all": "npm install",
     "install:services": "npm install --workspace=services/*",
-    "install:shared": "npm install --workspace=services/shared-utils",
+    "install:shared": "npm install --workspace=services/deepiri-shared-utils",
     "fix-deps": "bash scripts/fix-dependencies.sh"
   },
   "engines": {

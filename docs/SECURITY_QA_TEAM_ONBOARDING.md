@@ -61,18 +61,18 @@ docker-compose -f docker-compose.dev.yml up -d \
   influxdb \
   mongo-express \
   api-gateway \
-  user-service \
-  task-service \
+  auth-service \
+  task-orchestrator \
   gamification-service \
   analytics-service \
   notification-service \
-  integration-service \
+  external-bridge-service \
   challenge-service \
-  websocket-service \
+  realtime-gateway \
   cyrex \
   mlflow \
   jupyter \
-  frontend-dev
+  deepiri-web-frontend-dev
 
 # Verify all services are running
 docker-compose -f docker-compose.dev.yml ps
@@ -90,7 +90,7 @@ curl http://localhost:5008/health  # WebSocket Service
 curl http://localhost:8000/health   # Python Agent
 curl http://localhost:5500        # MLflow
 curl http://localhost:8888        # Jupyter
-curl http://localhost:5173        # Frontend
+curl http://localhost:5173        # deepiri-web-frontend
 
 # View logs for security/QA testing
 docker-compose -f docker-compose.dev.yml logs -f
@@ -99,7 +99,7 @@ docker-compose -f docker-compose.dev.yml logs -f
 **All Security & QA Services:**
 - **All microservices** - For comprehensive security and QA testing
 - **All databases** - For data security testing
-- **Frontend** - For UI/UX testing
+- **deepiri-web-frontend** - For UI/UX testing
 - **AI services** - For AI security testing
 
 **Note:** Security & QA team needs all services to perform:
@@ -113,11 +113,11 @@ docker-compose -f docker-compose.dev.yml logs -f
 
 ```bash
 # Backend testing
-cd api-server
+cd deepiri-core-api
 npm install --save-dev jest supertest
 
-# Frontend testing
-cd frontend
+# deepiri-web-frontend testing
+cd deepiri-web-frontend
 npm install --save-dev @testing-library/react @testing-library/jest-dom
 
 # Python testing
@@ -132,7 +132,7 @@ pip install pytest pytest-cov
 docker-compose -f docker-compose.dev.yml stop
 
 # Or stop specific services for targeted testing
-docker-compose -f docker-compose.dev.yml stop user-service task-service
+docker-compose -f docker-compose.dev.yml stop auth-service task-orchestrator
 
 # Remove containers and volumes (cleanup)
 docker-compose -f docker-compose.dev.yml down -v
@@ -162,9 +162,9 @@ npm install -g npm-audit-resolver
 **First Tasks:**
 1. Review `docs/MICROSERVICES_SETUP.md` - Microservices architecture
 2. Review security architecture for all microservices
-3. Review `services/user-service/server.js` - OAuth 2.0 service (port 5001)
-4. Review `services/integration-service/server.js` - Webhook service (port 5006)
-5. Review `services/notification-service/server.js` - Push notification service (port 5005)
+3. Review `services/deepiri-auth-service/server.js` - OAuth 2.0 service (port 5001)
+4. Review `services/deepiri-external-bridge-service/server.js` - Webhook service (port 5006)
+5. Review `services/deepiri-notification-service/server.js` - Push notification service (port 5005)
 6. Test OAuth flows across services
 7. Test webhook security
 8. Audit API Gateway security
@@ -176,11 +176,11 @@ npm install -g npm-audit-resolver
 10. Plan security improvements
 
 **Key Files:**
-- `services/user-service/src/oauthService.js` - NEW: OAuth 2.0 service
-- `services/integration-service/src/webhookService.js` - NEW: Webhook service
-- `services/notification-service/src/pushNotificationService.js` - NEW: Push notifications
+- `services/deepiri-auth-service/src/oauthService.js` - NEW: OAuth 2.0 service
+- `services/deepiri-external-bridge-service/src/webhookService.js` - NEW: Webhook service
+- `services/deepiri-notification-service/src/pushNotificationService.js` - NEW: Push notifications
 - `infrastructure/security/` (create)
-- `api-server/SECURITY_AUDIT.md` (review)
+- `deepiri-core-api/SECURITY_AUDIT.md` (review)
 
 **Security Testing:**
 ```bash
@@ -229,7 +229,7 @@ npm install -g docsify
 
 **Key Files:**
 - `docs/user/` (create)
-- `frontend/src/pages/support/` (create)
+- `deepiri-web-frontend/src/pages/support/` (create)
 
 ---
 
@@ -417,9 +417,9 @@ cd scripts/security
 
 ```bash
 # Run all tests
-cd api-server && npm test
+cd deepiri-core-api && npm test
 cd diri-cyrex && pytest
-cd frontend && npm test
+cd deepiri-web-frontend && npm test
 
 # Run integration tests
 pytest tests/integration/
@@ -473,4 +473,7 @@ pytest tests/integration/
 ---
 
 **Welcome to the Security & QA Team! Let's ensure quality and security.**
+
+
+
 

@@ -31,17 +31,17 @@ for service in services/*; do
 done
 
 # Install shared utils
-if [ -f "services/shared-utils/package.json" ]; then
-  echo "  Installing dependencies for shared-utils..."
-  cd "services/shared-utils"
+if [ -f "services/deepiri-shared-utils/package.json" ]; then
+  echo "  Installing dependencies for deepiri-shared-utils..."
+  cd "services/deepiri-shared-utils"
   npm install --legacy-peer-deps
   cd "$PROJECT_ROOT"
 fi
 
 # Fix API server
-if [ -f "api-server/package.json" ]; then
-  echo "  Installing dependencies for api-server..."
-  cd "api-server"
+if [ -f "deepiri-core-api/package.json" ]; then
+  echo "  Installing dependencies for deepiri-core-api..."
+  cd "deepiri-core-api"
   if [ -f "package-lock.json" ]; then
     npm ci --legacy-peer-deps || npm install --legacy-peer-deps
   else
@@ -51,9 +51,9 @@ if [ -f "api-server/package.json" ]; then
 fi
 
 # Fix Frontend
-if [ -f "frontend/package.json" ]; then
-  echo "  Installing dependencies for frontend..."
-  cd "frontend"
+if [ -f "deepiri-web-frontend/package.json" ]; then
+  echo "  Installing dependencies for deepiri-web-frontend..."
+  cd "deepiri-web-frontend"
   if [ -f "package-lock.json" ]; then
     npm ci --legacy-peer-deps || npm install --legacy-peer-deps
   else

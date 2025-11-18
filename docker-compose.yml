@@ -68,7 +68,7 @@ services:
   # Backend API
   backend:
     build:
-      context: ./api-server
+      context: ./deepiri-core-api
       dockerfile: Dockerfile
     container_name: deepiri-backend
     restart: unless-stopped
@@ -140,8 +140,8 @@ services:
       CLIENT_URL: ${CLIENT_URL:-http://localhost:3000}
     
     volumes:
-      - ./api-server/config:/app/config:ro
-      - ./api-server/logs:/app/logs
+      - ./deepiri-core-api/config:/app/config:ro
+      - ./deepiri-core-api/logs:/app/logs
     depends_on:
       - mongodb
       - redis
@@ -217,7 +217,7 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend
+      context: ./deepiri-web-frontend
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}

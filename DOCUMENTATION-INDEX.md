@@ -379,63 +379,63 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 - Service responsibilities
 - Service communication patterns
 
-### `services/api-gateway/README.md`
+### `services/deepiri-api-gateway/README.md`
 **API Gateway service documentation**
 - Gateway configuration
 - Routing rules
 - Rate limiting
 - Authentication
 
-### `services/user-service/README.md`
+### `services/deepiri-auth-service/README.md`
 **User service documentation**
 - User management
 - Authentication flows
 - Profile management
 
-### `services/task-service/README.md`
+### `services/deepiri-task-orchestrator/README.md`
 **Task service documentation**
 - Task CRUD operations
 - Task metadata
 - Task filtering
 
-### `services/challenge-service/README.md`
+### `services/deepiri-challenge-service/README.md`
 **Challenge service documentation**
 - Challenge generation
 - Challenge state management
 - AI integration
 
-### `services/gamification-service/README.md`
+### `services/deepiri-engagement-service/README.md`
 **Gamification service documentation**
 - Points system
 - Badge management
 - Leaderboards
 - Streak tracking
 
-### `services/analytics-service/README.md`
+### `services/deepiri-platform-analytics-service/README.md`
 **Analytics service documentation**
 - Performance tracking
 - Analytics collection
 - Insights generation
 
-### `services/notification-service/README.md`
+### `services/deepiri-notification-service/README.md`
 **Notification service documentation**
 - Notification delivery
 - Notification preferences
 - Push notifications
 
-### `services/integration-service/README.md`
+### `services/deepiri-external-bridge-service/README.md`
 **Integration service documentation**
 - External API integrations
 - OAuth flows
 - Webhook management
 
-### `services/websocket-service/README.md`
+### `services/deepiri-realtime-gateway/README.md`
 **WebSocket service documentation**
 - Real-time communication
 - WebSocket connections
 - Event broadcasting
 
-### `services/shared-utils/README.md`
+### `services/deepiri-shared-utils/README.md`
 **Shared utilities documentation**
 - Common utilities
 - Shared libraries
@@ -574,4 +574,6 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 
 **Last Updated:** 2025-11-16
 **Total Documentation Files:** 63 markdown files
+
+
 

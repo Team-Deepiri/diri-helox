@@ -132,7 +132,7 @@ The services are already integrated into the API:
 - Challenge generation: `POST /agent/challenge/generate`
 
 Both endpoints work with:
-- Web app (React frontend)
+- Web app (React deepiri-web-frontend)
 - Desktop IDE (Electron app)
 
 ## Resources
@@ -145,4 +145,5 @@ Both endpoints work with:
 ## Questions?
 
 See `README_AI_TEAM.md` for full team documentation.
+
 

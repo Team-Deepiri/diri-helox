@@ -75,7 +75,7 @@ bash scripts/fix-dependencies.sh
 
 ```bash
 # Install dependencies for a specific service
-cd services/user-service
+cd services/deepiri-auth-service
 npm install
 
 # Or install all services
@@ -98,22 +98,22 @@ docker-compose -f docker-compose.dev.yml build --no-cache
 
 | Service | Common Dependencies |
 |---------|-------------------|
-| user-service | axios, express, mongoose, winston |
-| task-service | axios, express, mongoose, winston |
+| auth-service | axios, express, mongoose, winston |
+| task-orchestrator | axios, express, mongoose, winston |
 | gamification-service | axios, express, mongoose, redis, winston |
 | analytics-service | axios, express, mongoose, @influxdata/influxdb-client |
-| integration-service | axios, express, passport, winston |
+| external-bridge-service | axios, express, passport, winston |
 | notification-service | express, socket.io, firebase-admin, winston |
 
 ### Verification
 
 ```bash
 # Check if dependencies are installed
-cd services/user-service
+cd services/deepiri-auth-service
 ls node_modules/axios
 
 # Or check package.json
-cat services/user-service/package.json | grep axios
+cat services/deepiri-auth-service/package.json | grep axios
 ```
 
 ---
@@ -185,19 +185,19 @@ Each service has its own logger utility in `services/{service}/utils/logger.js`.
 
 ```
 services/
-├── user-service/
+├── auth-service/
 │   ├── utils/
 │   │   └── logger.js          ✅ Logger exists here
 │   └── src/
 │       └── oauthService.js    ✅ Imports: require('../../utils/logger')
 │
-├── task-service/
+├── task-orchestrator/
 │   ├── utils/
 │   │   └── logger.js          ✅ Logger exists here
 │   └── src/
 │       └── taskVersioningService.js  ✅ Imports: require('../../utils/logger')
 │
-└── integration-service/
+└── external-bridge-service/
     ├── utils/
     │   └── logger.js          ✅ Logger exists here
     └── src/
@@ -211,12 +211,12 @@ services/
 find services -name "logger.js" -type f
 
 # Should output:
-# services/user-service/utils/logger.js
-# services/task-service/utils/logger.js
-# services/gamification-service/utils/logger.js
-# services/analytics-service/utils/logger.js
-# services/notification-service/utils/logger.js
-# services/integration-service/utils/logger.js
+# services/deepiri-auth-service/utils/logger.js
+# services/deepiri-task-orchestrator/utils/logger.js
+# services/deepiri-engagement-service/utils/logger.js
+# services/deepiri-platform-analytics-service/utils/logger.js
+# services/deepiri-notification-service/utils/logger.js
+# services/deepiri-external-bridge-service/utils/logger.js
 ```
 
 ### If Logger is Missing
@@ -229,7 +229,7 @@ The logger utility should be automatically created. If it's missing:
 
 ```bash
 # Rebuild a specific service
-docker-compose -f docker-compose.dev.yml build --no-cache user-service
+docker-compose -f docker-compose.dev.yml build --no-cache auth-service
 ```
 
 ---
@@ -302,7 +302,7 @@ RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
 3. **Check Dockerfile syntax**:
    ```bash
-   docker build -t test -f services/user-service/Dockerfile services/user-service
+   docker build -t test -f services/deepiri-auth-service/Dockerfile services/deepiri-auth-service
    ```
 
 ---
@@ -324,7 +324,7 @@ Service not responding
    docker-compose -f docker-compose.dev.yml ps
    
    # Check specific service logs
-   docker logs deepiri-user-service-dev
+   docker logs deepiri-auth-service-dev
    ```
 
 2. **Verify environment variables**:
@@ -333,16 +333,16 @@ Service not responding
    ls -la .env
    
    # Check environment in container
-   docker exec deepiri-user-service-dev env | grep MONGO
+   docker exec deepiri-auth-service-dev env | grep MONGO
    ```
 
 3. **Check network connectivity**:
    ```bash
    # Test MongoDB connection
-   docker exec deepiri-user-service-dev curl http://mongodb:27017
+   docker exec deepiri-auth-service-dev curl http://mongodb:27017
    
    # Test Redis connection
-   docker exec deepiri-gamification-service-dev redis-cli -h redis ping
+   docker exec deepiri-engagement-service-dev redis-cli -h redis ping
    ```
 
 4. **Restart services**:
@@ -362,13 +362,13 @@ docker-compose -f docker-compose.dev.yml ps
 docker-compose -f docker-compose.dev.yml logs
 
 # Check service health endpoints
-curl http://localhost:5001/health  # user-service
-curl http://localhost:5002/health  # task-service
+curl http://localhost:5001/health  # auth-service
+curl http://localhost:5002/health  # task-orchestrator
 curl http://localhost:5000/health  # api-gateway
 curl http://localhost:8000/health  # cyrex
 
 # Check dependencies
-cd services/user-service && npm list --depth=0
+cd services/deepiri-auth-service && npm list --depth=0
 cd diri-cyrex && pip list | grep numpy
 
 # Rebuild everything
@@ -421,4 +421,7 @@ To avoid these issues in the future:
      fi
    done
    ```
+
+
+
 

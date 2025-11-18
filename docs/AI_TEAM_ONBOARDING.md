@@ -189,7 +189,7 @@ docker-compose -f docker-compose.dev.yml logs -f mlflow
 
 **Services NOT needed for AI team:**
 - `api-gateway` (unless testing full integration)
-- `frontend-dev` (frontend team)
+- `deepiri-web-frontend-dev` (deepiri-web-frontend team)
 - `user-service`, `task-service`, etc. (backend team)
 - `mongo-express` (optional, for database admin)
 
@@ -253,7 +253,7 @@ mlflow ui
 - `diri-cyrex/mlops/registry/model_registry.py` - Model registry
 - `diri-cyrex/mlops/ci/model_ci_pipeline.py` - CI/CD pipeline
 - `diri-cyrex/mlops/deployment/deployment_automation.py` - Deployment automation
-- `services/challenge-service/server.js` - Challenge service (calls Python AI)
+- `services/deepiri-challenge-service/server.js` - Challenge service (calls Python AI)
 
 ---
 
@@ -766,4 +766,6 @@ git push origin feature/your-feature-name
 ---
 
 **Welcome to the team! Let's build amazing AI systems.**
+
+
 

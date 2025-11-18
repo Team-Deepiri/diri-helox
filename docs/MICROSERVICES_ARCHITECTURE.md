@@ -1,40 +1,40 @@
 # Microservices Architecture - Deepiri
 
 ## Current Structure
-All services are currently in `api-server/` as a monolith. This document outlines the target microservices architecture.
+All services are currently in `deepiri-core-api/` as a monolith. This document outlines the target microservices architecture.
 
 ## Target Microservices
 
 ### 1. API Gateway
-**Location**: `services/api-gateway/`
+**Location**: `services/deepiri-api-gateway/`
 - Routes requests to appropriate services
 - Authentication/authorization
 - Rate limiting
 - Request/response transformation
 
 ### 2. User Service
-**Location**: `services/user-service/`
+**Location**: `services/deepiri-auth-service/`
 - User registration and authentication
 - Profile management
 - User preferences
 - Firebase integration
 
 ### 3. Task Service
-**Location**: `services/task-service/`
+**Location**: `services/deepiri-task-orchestrator/`
 - Task CRUD operations
 - Task metadata management
 - Task completion tracking
 - Task filtering and search
 
 ### 4. Challenge Service
-**Location**: `services/challenge-service/`
+**Location**: `services/deepiri-challenge-service/`
 - Challenge generation (calls AI service)
 - Challenge completion tracking
 - Challenge state management
 - Challenge linking to tasks
 
 ### 5. Gamification Service
-**Location**: `services/gamification-service/`
+**Location**: `services/deepiri-engagement-service/`
 - Points and XP system
 - Badge management
 - Leaderboard functionality
@@ -42,27 +42,27 @@ All services are currently in `api-server/` as a monolith. This document outline
 - Level progression
 
 ### 6. Analytics Service
-**Location**: `services/analytics-service/`
+**Location**: `services/deepiri-platform-analytics-service/`
 - Performance tracking
 - Efficiency calculations
 - Productivity insights
 - Time management analytics
 
 ### 7. Integration Service
-**Location**: `services/integration-service/`
+**Location**: `services/deepiri-external-bridge-service/`
 - External API integrations (Notion, Trello, GitHub)
 - OAuth flows
 - Webhook management
 - Data synchronization
 
 ### 8. Notification Service
-**Location**: `services/notification-service/`
+**Location**: `services/deepiri-notification-service/`
 - Real-time notifications
 - Notification preferences
 - Notification history
 
 ### 9. WebSocket Service
-**Location**: `services/websocket-service/`
+**Location**: `services/deepiri-realtime-gateway/`
 - WebSocket server
 - Real-time challenge updates
 - Multiplayer sessions
@@ -98,10 +98,13 @@ Each service should have its own database or database schema:
 5. Deploy services separately
 
 ## Current Implementation
-The current `api-server/` structure serves as the foundation. Services are logically separated in:
+The current `deepiri-core-api/` structure serves as the foundation. Services are logically separated in:
 - `services/` - Business logic
 - `routes/` - API endpoints
 - `models/` - Database schemas
 
 This structure can be gradually split into independent microservices.
+
+
+
 

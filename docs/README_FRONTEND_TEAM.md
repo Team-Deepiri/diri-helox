@@ -1,17 +1,17 @@
-# Frontend Team - Deepiri
+# deepiri-web-frontend Team - Deepiri
 
 ## Team Overview
-The Frontend Team develops React 18 + Tailwind UI, implements challenge delivery, timers, hints, real-time updates, and builds responsive/mobile-first views.
+The deepiri-web-frontend Team develops React 18 + Tailwind UI, implements challenge delivery, timers, hints, real-time updates, and builds responsive/mobile-first views.
 
 ## Core Responsibilities
 
-### Frontend Lead
+### deepiri-web-frontend Lead
 - Oversee React/Vite web apps
 - UX/UI consistency
 - Component library standards
 - Performance optimization
 
-### Frontend Engineers
+### deepiri-web-frontend Engineers
 - **Web Pages & Forms**: Dashboard, forms, Firebase integration
 - **AI/Visualization Dashboards**: Charting, data visualization
 - **Gamification Visuals**: Badges, progress bars, avatars
@@ -22,7 +22,7 @@ The Frontend Team develops React 18 + Tailwind UI, implements challenge delivery
 - Branding
 - Visual identity
 
-## Current Frontend Structure
+## Current deepiri-web-frontend Structure
 
 ### Technology Stack
 - React 18
@@ -33,7 +33,7 @@ The Frontend Team develops React 18 + Tailwind UI, implements challenge delivery
 
 ### Directory Structure
 ```
-frontend/
+deepiri-web-frontend/
 ├── src/
 │   ├── components/     # Reusable components
 │   ├── pages/          # Page components
@@ -54,9 +54,9 @@ frontend/
 
 ### Setup
 ```bash
-cd frontend
+cd deepiri-web-frontend
 npm install
-cp env.example.frontend .env.local
+cp env.example.deepiri-web-frontend .env.local
 # Configure environment variables
 ```
 
@@ -226,4 +226,5 @@ socket.on('progress-update', (data) => {
 - Tailwind CSS Documentation
 - Socket.IO Client Documentation
 - Firebase Documentation
+
 

@@ -64,7 +64,7 @@ services:
   # Backend API
   backend:
     build:
-      context: ./api-server
+      context: ./deepiri-core-api
       dockerfile: Dockerfile
       args:
         NODE_ENV: ${NODE_ENV:-development}
@@ -105,8 +105,8 @@ services:
       LOG_LEVEL: ${LOG_LEVEL:-info}
     
     volumes:
-      - ./api-server/config:/app/config:ro
-      - ./api-server/logs:/app/logs
+      - ./deepiri-core-api/config:/app/config:ro
+      - ./deepiri-core-api/logs:/app/logs
     depends_on:
       mongodb:
         condition: service_healthy
@@ -170,7 +170,7 @@ services:
   # Frontend
   frontend:
     build:
-      context: ./frontend
+      context: ./deepiri-web-frontend
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL:-http://localhost:5000/api}
@@ -269,7 +269,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./ops/fluentd/fluent.conf:/fluentd/etc/fluent.conf:ro
-      - ./api-server/logs:/var/log/app:ro
+      - ./deepiri-core-api/logs:/var/log/app:ro
       - fluentd_data:/var/log/fluentd
     networks:
       - deepiri-network

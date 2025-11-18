@@ -20,9 +20,9 @@ docker compose -f docker-compose.yml logs backend
 docker compose -f docker-compose.dev.yml logs cyrex
 ```
 
-**Frontend Logs:**
+**deepiri-web-frontend Logs:**
 ```bash
-docker compose -f docker-compose.dev.yml logs frontend-dev
+docker compose -f docker-compose.dev.yml logs deepiri-web-frontend-dev
 ```
 
 **MongoDB Logs:**
@@ -47,7 +47,7 @@ docker compose -f docker-compose.dev.yml logs mongo-express
 # For docker-compose.dev.yml:
 docker logs deepiri-api-gateway-dev
 docker logs deepiri-cyrex-dev
-docker logs deepiri-frontend-dev
+docker logs deepiri-deepiri-web-frontend-dev
 docker logs deepiri-mongodb-dev
 docker logs deepiri-redis-dev
 docker logs deepiri-mongo-express-dev
@@ -127,7 +127,7 @@ docker compose -f docker-compose.yml logs -f --tail=50 -t backend
 ```bash
 # For docker-compose.dev.yml:
 docker compose -f docker-compose.dev.yml logs api-gateway cyrex
-docker compose -f docker-compose.dev.yml logs api-gateway frontend-dev mongodb
+docker compose -f docker-compose.dev.yml logs api-gateway deepiri-web-frontend-dev mongodb
 
 # For docker-compose.yml:
 docker compose -f docker-compose.yml logs backend cyrex
@@ -274,7 +274,7 @@ docker compose -f docker-compose.dev.yml logs -f redis
 docker compose -f docker-compose.dev.yml logs -f
 
 # View specific services together (docker-compose.dev.yml):
-docker compose -f docker-compose.dev.yml logs -f api-gateway cyrex frontend-dev
+docker compose -f docker-compose.dev.yml logs -f api-gateway cyrex deepiri-web-frontend-dev
 
 # For docker-compose.yml:
 docker compose -f docker-compose.yml logs -f backend cyrex
@@ -335,8 +335,8 @@ docker compose -f docker-compose.yml logs backend | grep -i "connect\|mongodb\|r
 ## Log File Locations
 
 ### Application Logs (Inside Containers)
-- **API Gateway** (docker-compose.dev.yml): `/app/logs/` (mounted to `./services/api-gateway/logs/`)
-- **Backend** (docker-compose.yml): `/app/logs/` (mounted to `./api-server/logs/`)
+- **API Gateway** (docker-compose.dev.yml): `/app/logs/` (mounted to `./services/deepiri-api-gateway/logs/`)
+- **Backend** (docker-compose.yml): `/app/logs/` (mounted to `./deepiri-core-api/logs/`)
 - **Python Service**: Logs to stdout/stderr (captured by Docker)
 
 ### Docker Logs
@@ -347,17 +347,17 @@ Docker stores logs in:
 ### Access Log Files Directly
 ```bash
 # View backend application logs (docker-compose.yml - if mounted)
-cat ./api-server/logs/combined.log
-cat ./api-server/logs/error.log
+cat ./deepiri-core-api/logs/combined.log
+cat ./deepiri-core-api/logs/error.log
 
 # View API Gateway logs (docker-compose.dev.yml - if mounted)
-cat ./services/api-gateway/logs/combined.log
-cat ./services/api-gateway/logs/error.log
+cat ./services/deepiri-api-gateway/logs/combined.log
+cat ./services/deepiri-api-gateway/logs/error.log
 
 # Follow backend logs
-tail -f ./api-server/logs/combined.log
+tail -f ./deepiri-core-api/logs/combined.log
 # Or for API Gateway:
-tail -f ./services/api-gateway/logs/combined.log
+tail -f ./services/deepiri-api-gateway/logs/combined.log
 ```
 
 ## Best Practices
@@ -398,4 +398,6 @@ docker compose -f docker-compose.yml logs -f backend
 docker compose -f docker-compose.yml logs --tail=100 backend
 docker compose -f docker-compose.yml logs backend | grep -i error
 ```
+
+
 

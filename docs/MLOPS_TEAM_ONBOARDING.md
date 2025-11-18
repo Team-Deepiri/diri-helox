@@ -79,7 +79,7 @@ docker-compose -f docker-compose.dev.yml logs -f cyrex
 
 **Services NOT needed for MLOps:**
 - `api-gateway` (unless testing full integration)
-- `frontend-dev` (frontend team)
+- `deepiri-web-frontend-dev` (deepiri-web-frontend team)
 - `user-service`, `task-service`, etc. (backend team)
 - `redis` (unless needed for caching)
 - `mongo-express` (optional)
@@ -506,4 +506,5 @@ deployment.rollback("model_name", target_version="1.0.0")
 ---
 
 **Welcome to the MLOps team! 🚀**
+
 

@@ -93,7 +93,7 @@ services:
   api-gateway:
     image: deepiri-dev-api-gateway:latest
     build:
-      context: ./services/api-gateway
+      context: ./services/deepiri-api-gateway
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-api-gateway-dev
@@ -108,36 +108,36 @@ services:
     environment:
       NODE_ENV: development
       PORT: 5000
-      USER_SERVICE_URL: http://user-service:5001
-      TASK_SERVICE_URL: http://task-service:5002
-      GAMIFICATION_SERVICE_URL: http://gamification-service:5003
-      ANALYTICS_SERVICE_URL: http://analytics-service:5004
+      AUTH_SERVICE_URL: http://auth-service:5001
+      TASK_ORCHESTRATOR_URL: http://task-orchestrator:5002
+      ENGAGEMENT_SERVICE_URL: http://engagement-service:5003
+      PLATFORM_ANALYTICS_SERVICE_URL: http://platform-analytics-service:5004
       NOTIFICATION_SERVICE_URL: http://notification-service:5005
-      INTEGRATION_SERVICE_URL: http://integration-service:5006
+      EXTERNAL_BRIDGE_SERVICE_URL: http://external-bridge-service:5006
       CHALLENGE_SERVICE_URL: http://challenge-service:5007
-      WEBSOCKET_SERVICE_URL: http://websocket-service:5008
+      REALTIME_GATEWAY_URL: http://realtime-gateway:5008
       CYREX_URL: http://cyrex:8000
     depends_on:
-      - user-service
-      - task-service
-      - gamification-service
-      - analytics-service
+      - auth-service
+      - task-orchestrator
+      - engagement-service
+      - platform-analytics-service
       - notification-service
-      - integration-service
+      - external-bridge-service
       - challenge-service
-      - websocket-service
+      - realtime-gateway
       - cyrex
     networks:
       - deepiri-dev-network
 
-  # User Service
-  user-service:
-    image: deepiri-dev-user-service:latest
+  # Auth Service
+  auth-service:
+    image: deepiri-dev-auth-service:latest
     build:
-      context: ./services/user-service
+      context: ./services/deepiri-auth-service
       dockerfile: Dockerfile
     pull_policy: build
-    container_name: deepiri-user-service-dev
+    container_name: deepiri-auth-service-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -157,7 +157,7 @@ services:
       OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
       OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
     volumes:
-      - ./services/user-service:/app
+      - ./services/deepiri-auth-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -165,14 +165,14 @@ services:
     networks:
       - deepiri-dev-network
 
-  # Task Service
-  task-service:
-    image: deepiri-dev-task-service:latest
+  # Task Orchestrator Service
+  task-orchestrator:
+    image: deepiri-dev-task-orchestrator:latest
     build:
-      context: ./services/task-service
+      context: ./services/deepiri-task-orchestrator
       dockerfile: Dockerfile
     pull_policy: build
-    container_name: deepiri-task-service-dev
+    container_name: deepiri-task-orchestrator-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -186,21 +186,21 @@ services:
       PORT: 5002
       MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
     volumes:
-      - ./services/task-service:/app
+      - ./services/deepiri-task-orchestrator:/app
       - /app/node_modules
     depends_on:
       - mongodb
     networks:
       - deepiri-dev-network
 
-  # Gamification Service
-  gamification-service:
-    image: deepiri-dev-gamification-service:latest
+  # Engagement Service
+  engagement-service:
+    image: deepiri-dev-engagement-service:latest
     build:
-      context: ./services/gamification-service
+      context: ./services/deepiri-engagement-service
       dockerfile: Dockerfile
     pull_policy: build
-    container_name: deepiri-gamification-service-dev
+    container_name: deepiri-engagement-service-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -217,7 +217,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}
     volumes:
-      - ./services/gamification-service:/app
+      - ./services/deepiri-engagement-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -225,14 +225,14 @@ services:
     networks:
       - deepiri-dev-network
 
-  # Analytics Service
-  analytics-service:
-    image: deepiri-dev-analytics-service:latest
+  # Platform Analytics Service
+  platform-analytics-service:
+    image: deepiri-dev-platform-analytics-service:latest
     build:
-      context: ./services/analytics-service
+      context: ./services/deepiri-platform-analytics-service
       dockerfile: Dockerfile
     pull_policy: build
-    container_name: deepiri-analytics-service-dev
+    container_name: deepiri-platform-analytics-service-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -250,7 +250,7 @@ services:
       INFLUXDB_ORG: ${INFLUXDB_ORG:-deepiri}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET:-analytics}
     volumes:
-      - ./services/analytics-service:/app
+      - ./services/deepiri-platform-analytics-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -262,7 +262,7 @@ services:
   notification-service:
     image: deepiri-dev-notification-service:latest
     build:
-      context: ./services/notification-service
+      context: ./services/deepiri-notification-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-notification-service-dev
@@ -282,21 +282,21 @@ services:
       APNS_KEY_ID: ${APNS_KEY_ID}
       APNS_TEAM_ID: ${APNS_TEAM_ID}
     volumes:
-      - ./services/notification-service:/app
+      - ./services/deepiri-notification-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
     networks:
       - deepiri-dev-network
 
-  # Integration Service
-  integration-service:
-    image: deepiri-dev-integration-service:latest
+  # External Bridge Service
+  external-bridge-service:
+    image: deepiri-dev-external-bridge-service:latest
     build:
-      context: ./services/integration-service
+      context: ./services/deepiri-external-bridge-service
       dockerfile: Dockerfile
     pull_policy: build
-    container_name: deepiri-integration-service-dev
+    container_name: deepiri-external-bridge-service-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -319,7 +319,7 @@ services:
       NOTION_WEBHOOK_SECRET: ${NOTION_WEBHOOK_SECRET}
       TRELLO_WEBHOOK_SECRET: ${TRELLO_WEBHOOK_SECRET}
     volumes:
-      - ./services/integration-service:/app
+      - ./services/deepiri-external-bridge-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -330,7 +330,7 @@ services:
   challenge-service:
     image: deepiri-dev-challenge-service:latest
     build:
-      context: ./services/challenge-service
+      context: ./services/deepiri-challenge-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-challenge-service-dev
@@ -348,7 +348,7 @@ services:
       MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
       CYREX_URL: http://cyrex:8000
     volumes:
-      - ./services/challenge-service:/app
+      - ./services/deepiri-challenge-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -356,14 +356,14 @@ services:
     networks:
       - deepiri-dev-network
 
-  # WebSocket Service
-  websocket-service:
-    image: deepiri-dev-websocket-service:latest
+  # Realtime Gateway Service
+  realtime-gateway:
+    image: deepiri-dev-realtime-gateway:latest
     build:
-      context: ./services/websocket-service
+      context: ./services/deepiri-realtime-gateway
       dockerfile: Dockerfile
     pull_policy: build
-    container_name: deepiri-websocket-service-dev
+    container_name: deepiri-realtime-gateway-dev
     restart: unless-stopped
     logging:
       driver: "json-file"
@@ -376,7 +376,7 @@ services:
       NODE_ENV: development
       PORT: 5008
     volumes:
-      - ./services/websocket-service:/app
+      - ./services/deepiri-realtime-gateway:/app
       - /app/node_modules
     networks:
       - deepiri-dev-network
@@ -494,7 +494,7 @@ services:
   frontend-dev:
     image: deepiri-dev-frontend:latest
     build:
-      context: ./frontend
+      context: ./deepiri-web-frontend
       dockerfile: Dockerfile.dev
     pull_policy: build
     container_name: deepiri-frontend-dev
@@ -513,7 +513,7 @@ services:
       CHOKIDAR_USEPOLLING: true
       WATCHPACK_POLLING: true
     volumes:
-      - ./frontend:/app
+      - ./deepiri-web-frontend:/app
       - /app/node_modules
     depends_on:
       - api-gateway

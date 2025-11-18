@@ -78,16 +78,16 @@ cp env.example.diri-cyrex .env
 uvicorn app.main:app --reload --port 8000
 
 # 5. Start Node Backend
-cd api-server
+cd deepiri-core-api
 npm install
-cp env.example.api-server .env
+cp env.example.deepiri-core-api .env
 # Edit .env: Set AI_PROVIDER=localai, LOCALAI_API_BASE=http://localhost:8080/v1
 npm start
 
 # 6. Start Frontend
-cd frontend
+cd deepiri-web-frontend
 npm install
-cp env.example.frontend .env.local
+cp env.example.deepiri-web-frontend .env.local
 # Edit .env.local: VITE_API_URL=http://localhost:5000/api
 npm run dev
 ```
@@ -321,13 +321,13 @@ uvicorn app.main:app --reload --port 8000
 ### 4. Node.js Backend
 
 ```bash
-cd api-server
+cd deepiri-core-api
 
 # Install dependencies
 npm install
 
 # Copy and configure env
-cp env.example.api-server .env
+cp env.example.deepiri-core-api .env
 # Edit .env: Set AI_PROVIDER=localai
 
 # Start server
@@ -337,13 +337,13 @@ npm start
 ### 5. Frontend
 
 ```bash
-cd frontend
+cd deepiri-web-frontend
 
 # Install dependencies
 npm install
 
 # Copy and configure env
-cp env.example.frontend .env.local
+cp env.example.deepiri-web-frontend .env.local
 # Edit .env.local: VITE_API_URL=http://localhost:5000/api
 
 # Start dev server
@@ -479,9 +479,9 @@ pip install -r requirements.txt --force-reinstall
 ### Frontend Can't Connect to Backend
 
 1. Check backend is running: `curl http://localhost:5000/health`
-2. Check frontend `.env.local`: `VITE_API_URL=http://localhost:5000/api`
+2. Check deepiri-web-frontend `.env.local`: `VITE_API_URL=http://localhost:5000/api`
 3. Check browser console for CORS errors
-4. Restart frontend dev server
+4. Restart deepiri-web-frontend dev server
 
 ### Kubernetes Pods Not Starting
 

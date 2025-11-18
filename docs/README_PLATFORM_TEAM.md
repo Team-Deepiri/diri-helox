@@ -39,14 +39,14 @@ The Platform & Infrastructure Team manages deployment pipelines, CI/CD automatio
 ### Docker Setup
 - `docker-compose.yml` - Production configuration
 - `docker-compose.dev.yml` - Development configuration
-- Services: MongoDB, Redis, Backend, Python AI, Frontend
+- Services: MongoDB, Redis, Backend, Python AI, deepiri-web-frontend
 
 ### Services
 - MongoDB 7.0
 - Redis 7.2
 - Node.js Backend (Port 5000)
 - Python AI Service (Port 8000)
-- React Frontend (Port 3000/5173)
+- React deepiri-web-frontend (Port 3000/5173)
 - Prometheus (Port 9090)
 - Grafana (Port 3001)
 - Mongo Express (Port 8081)
@@ -63,7 +63,7 @@ The Platform & Infrastructure Team manages deployment pipelines, CI/CD automatio
     ┌──────────┴──────────┐
     │                     │
 ┌───▼────┐         ┌─────▼───┐
-│Frontend│         │ API GW   │
+│deepiri-web-frontend│         │ API GW   │
 │(React) │         │(Express) │
 └────────┘         └─────┬─────┘
                          │
@@ -236,4 +236,5 @@ docker-compose up -d
 - Cloud Provider Documentation (AWS/GCP/DO)
 - Prometheus Documentation
 - Grafana Documentation
+
 

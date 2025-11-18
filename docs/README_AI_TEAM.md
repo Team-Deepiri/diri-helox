@@ -199,7 +199,7 @@ diri-cyrex/
 - WebSocket for real-time challenge updates
 - Database access for training data
 
-### Frontend Integration
+### deepiri-web-frontend Integration
 - Challenge delivery endpoints
 - Real-time AI response streaming
 - Model output visualization
@@ -226,4 +226,5 @@ For detailed information on all AI services, see:
 - **AI Services Overview:** `docs/AI_SERVICES_OVERVIEW.md` - Complete guide to all services
 - **Service Code:** `diri-cyrex/app/services/` - Implementation details
 - **API Documentation:** Check FastAPI docs at `/docs` endpoint when server is running
+
 

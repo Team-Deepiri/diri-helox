@@ -39,13 +39,13 @@ install_deps() {
     
     # API server dependencies
     log_info "Installing API server dependencies..."
-    cd api-server
+    cd deepiri-core-api
     npm install
     cd ..
     
     # Frontend dependencies
-    log_info "Installing frontend dependencies..."
-    cd frontend
+    log_info "Installing deepiri-web-frontend dependencies..."
+    cd deepiri-web-deepiri-web-frontend
     npm install
     cd ..
     
@@ -64,7 +64,7 @@ run_tests() {
     
     # Node.js API server tests
     log_info "Running API server tests..."
-    cd api-server
+    cd deepiri-core-api
     npm test
     cd ..
     
@@ -75,8 +75,8 @@ run_tests() {
     cd ..
     
     # Frontend tests
-    log_info "Running frontend tests..."
-    cd frontend
+    log_info "Running deepiri-web-frontend tests..."
+    cd deepiri-web-frontend
     npm test
     cd ..
     
@@ -89,13 +89,13 @@ lint_all() {
     
     # API server linting
     log_info "Linting API server code..."
-    cd api-server
+    cd deepiri-core-api
     npm run lint || true
     cd ..
     
     # Frontend linting
-    log_info "Linting frontend code..."
-    cd frontend
+    log_info "Linting deepiri-web-frontend code..."
+    cd deepiri-web-frontend
     npm run lint || true
     cd ..
     
@@ -108,13 +108,13 @@ format_all() {
     
     # Server formatting
     log_info "Formatting server code..."
-    cd api-server
+    cd deepiri-core-api
     npx prettier --write "**/*.{js,json}" || true
     cd ..
     
     # Client formatting
     log_info "Formatting client code..."
-    cd frontend
+    cd deepiri-web-frontend
     npx prettier --write "**/*.{js,jsx,json,css}" || true
     cd ..
     
@@ -134,7 +134,7 @@ generate_docs() {
     
     # Server API docs
     log_info "Generating API server API docs..."
-    cd api-server
+    cd deepiri-core-api
     npx swagger-jsdoc -d swaggerDef.js -o swagger.json routes/*.js || true
     cd ..
     
@@ -200,11 +200,11 @@ security_audit() {
     log_info "Auditing Node.js dependencies..."
     npm audit || true
     
-    cd api-server
+    cd deepiri-core-api
     npm audit || true
     cd ..
     
-    cd frontend
+    cd deepiri-web-frontend
     npm audit || true
     cd ..
     
@@ -223,7 +223,7 @@ performance_analysis() {
     
     # Node.js performance
     log_info "Analyzing Node.js performance..."
-    cd api-server
+    cd deepiri-core-api
     npx clinic doctor -- node server.js &
     SERVER_PID=$!
     sleep 10
@@ -279,7 +279,7 @@ backup_config() {
     mkdir -p "$backup_dir"
     
     # Copy configuration files
-    cp -r api-server/config "$backup_dir/" || true
+    cp -r deepiri-core-api/config "$backup_dir/" || true
     cp -r diri-cyrex/app/settings.py "$backup_dir/" || true
     cp docker-compose.yml "$backup_dir/"
     cp .env "$backup_dir/" || true
@@ -312,7 +312,7 @@ restore_config() {
     local backup_dir=$(basename "$backup_file" .tar.gz)
     
     # Restore files
-    cp -r "$backup_dir/config" api-server/ || true
+    cp -r "$backup_dir/config" deepiri-core-api/ || true
     cp "$backup_dir/settings.py" diri-cyrex/app/ || true
     cp "$backup_dir/docker-compose.yml" . || true
     cp "$backup_dir/.env" . || true
@@ -329,7 +329,7 @@ dev_server() {
     
     # Start all services in development mode
     log_info "Starting backend server..."
-    cd api-server
+    cd deepiri-core-api
     npm run dev &
     SERVER_PID=$!
     cd ..
@@ -340,8 +340,8 @@ dev_server() {
     PYTHON_PID=$!
     cd ..
     
-    log_info "Starting frontend..."
-    cd frontend
+    log_info "Starting deepiri-web-frontend..."
+    cd deepiri-web-frontend
     npm run dev &
     CLIENT_PID=$!
     cd ..
@@ -362,7 +362,7 @@ prod_build() {
     
     # Build client
     log_info "Building client..."
-    cd frontend
+    cd deepiri-web-frontend
     npm run build
     cd ..
     

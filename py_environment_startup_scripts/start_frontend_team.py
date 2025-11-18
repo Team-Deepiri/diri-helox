@@ -63,7 +63,7 @@ def main():
             "image": None,  # Will build from Dockerfile
             "name": "deepiri-api-gateway-frontend",
             "build": {
-                "context": str(Path(__file__).parent.parent / "services" / "api-gateway"),
+                "context": str(Path(__file__).parent.parent / "services" / "deepiri-api-gateway"),
                 "dockerfile": "Dockerfile",
             },
             "ports": {"5000/tcp": 5000},
@@ -85,7 +85,7 @@ def main():
             "image": None,  # Will build from Dockerfile
             "name": "deepiri-frontend-dev",
             "build": {
-                "context": str(Path(__file__).parent.parent / "frontend"),
+                "context": str(Path(__file__).parent.parent / "deepiri-web-frontend"),
                 "dockerfile": "Dockerfile.dev",
             },
             "ports": {"5173/tcp": 5173},
@@ -97,7 +97,7 @@ def main():
                 "WATCHPACK_POLLING": "true",
             },
             "volumes": {
-                str(Path(__file__).parent.parent / "frontend"): "/app",
+                str(Path(__file__).parent.parent / "deepiri-web-frontend"): "/app",
                 "/app/node_modules": {},
             },
             "wait_url": "http://localhost:5173",

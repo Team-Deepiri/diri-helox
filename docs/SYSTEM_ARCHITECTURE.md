@@ -41,7 +41,7 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                         Frontend Layer                           │
+│                         deepiri-web-frontend Layer                           │
 │  React 18 + Vite + Tailwind CSS + Socket.IO Client              │
 │  - Dashboard, Task Management, Challenges, Gamification UI       │
 └────────────────────┬────────────────────────────────────────────┘
@@ -80,46 +80,46 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ### ✅ Fully Implemented
 
 #### Backend Services (Node.js API Server)
-- ✅ **User Service** (`api-server/services/userService.js`)
+- ✅ **User Service** (`deepiri-core-api/services/userService.js`)
   - User registration and authentication (JWT)
   - User profiles and preferences
   - Firebase integration for auth
 
-- ✅ **Task Service** (`api-server/services/taskService.js`)
+- ✅ **Task Service** (`deepiri-core-api/services/taskService.js`)
   - CRUD operations for tasks
   - Task metadata storage
   - Task completion tracking
   - Task filtering and querying
 
-- ✅ **Challenge Service** (`api-server/services/challengeService.js`)
+- ✅ **Challenge Service** (`deepiri-core-api/services/challengeService.js`)
   - Challenge generation endpoint
   - Challenge completion tracking
   - Challenge linking to tasks
   - Integration with Python AI service
 
-- ✅ **Gamification Service** (`api-server/services/gamificationService.js`)
+- ✅ **Gamification Service** (`deepiri-core-api/services/gamificationService.js`)
   - Points and XP system
   - Badge management
   - Leaderboard functionality
   - Streak tracking
   - Level progression
 
-- ✅ **Analytics Service** (`api-server/services/analyticsService.js`)
+- ✅ **Analytics Service** (`deepiri-core-api/services/analyticsService.js`)
   - Performance tracking
   - Efficiency calculations
   - Productivity insights
   - Time management analytics
 
-- ✅ **Integration Service** (`api-server/services/integrationService.js`)
+- ✅ **Integration Service** (`deepiri-core-api/services/integrationService.js`)
   - Integration connection/disconnection
   - Framework for syncing external services
   - Task import structure
 
-- ✅ **Notification Service** (`api-server/services/notificationService.js`)
+- ✅ **Notification Service** (`deepiri-core-api/services/notificationService.js`)
   - Notification creation and management
   - Socket.IO integration for real-time notifications
 
-- ✅ **Socket.IO Server** (`api-server/server.js`)
+- ✅ **Socket.IO Server** (`deepiri-core-api/server.js`)
   - Real-time communication infrastructure
   - User rooms and adventure rooms
   - File change notifications (dev mode)
@@ -137,16 +137,16 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
   - Task understanding and classification
   - Challenge type selection (quiz, puzzle, coding, timed)
 
-#### Frontend (React + Vite)
+#### deepiri-web-frontend (React + Vite)
 - ✅ **Core Pages**
-  - Dashboard (`frontend/src/pages/Dashboard.jsx`)
-  - Task Management (`frontend/src/pages/TaskManagement.jsx`)
-  - Challenges (`frontend/src/pages/Challenges.jsx`)
-  - Gamification Dashboard (`frontend/src/pages/GamificationDashboard.jsx`)
-  - Analytics Dashboard (`frontend/src/pages/AnalyticsDashboard.jsx`)
-  - Leaderboard (`frontend/src/pages/Leaderboard.jsx`)
-  - Profile (`frontend/src/pages/Profile.jsx`)
-  - Notifications (`frontend/src/pages/Notifications.jsx`)
+  - Dashboard (`deepiri-web-frontend/src/pages/Dashboard.jsx`)
+  - Task Management (`deepiri-web-frontend/src/pages/TaskManagement.jsx`)
+  - Challenges (`deepiri-web-frontend/src/pages/Challenges.jsx`)
+  - Gamification Dashboard (`deepiri-web-frontend/src/pages/GamificationDashboard.jsx`)
+  - Analytics Dashboard (`deepiri-web-frontend/src/pages/AnalyticsDashboard.jsx`)
+  - Leaderboard (`deepiri-web-frontend/src/pages/Leaderboard.jsx`)
+  - Profile (`deepiri-web-frontend/src/pages/Profile.jsx`)
+  - Notifications (`deepiri-web-frontend/src/pages/Notifications.jsx`)
 
 - ✅ **Authentication**
   - Login/Register pages
@@ -210,7 +210,7 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
   - **Missing**: Schedule optimization suggestions
   - **Missing**: Break timing recommendations
 
-#### Frontend Features
+#### deepiri-web-frontend Features
 - ⚠️ **UI exists but needs enhancement**
   - Basic task management UI
   - **Missing**: Rich challenge visualization (mini-games UI)
@@ -280,7 +280,7 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 
 ## Technology Stack
 
-### Frontend
+### deepiri-web-frontend
 - **React 18**: Component-based UI framework
 - **Vite**: Fast build tool and dev server
 - **Tailwind CSS**: Utility-first CSS framework
@@ -332,9 +332,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ### Microservices Breakdown
 
 #### 1. User Service
-**Location**: `api-server/services/userService.js`  
-**Routes**: `api-server/routes/userRoutes.js`  
-**Model**: `api-server/models/User.js`
+**Location**: `deepiri-core-api/services/userService.js`  
+**Routes**: `deepiri-core-api/routes/userRoutes.js`  
+**Model**: `deepiri-core-api/models/User.js`
 
 **Responsibilities**:
 - User registration and authentication
@@ -353,9 +353,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 2. Task Service
-**Location**: `api-server/services/taskService.js`  
-**Routes**: `api-server/routes/taskRoutes.js`  
-**Model**: `api-server/models/Task.js`
+**Location**: `deepiri-core-api/services/taskService.js`  
+**Routes**: `deepiri-core-api/routes/taskRoutes.js`  
+**Model**: `deepiri-core-api/models/Task.js`
 
 **Responsibilities**:
 - Task CRUD operations
@@ -376,9 +376,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 3. Challenge Service
-**Location**: `api-server/services/challengeService.js`  
-**Routes**: `api-server/routes/challengeRoutes.js`  
-**Model**: `api-server/models/Challenge.js`
+**Location**: `deepiri-core-api/services/challengeService.js`  
+**Routes**: `deepiri-core-api/routes/challengeRoutes.js`  
+**Model**: `deepiri-core-api/models/Challenge.js`
 
 **Responsibilities**:
 - Challenge generation coordination
@@ -400,9 +400,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 4. Gamification Service
-**Location**: `api-server/services/gamificationService.js`  
-**Routes**: `api-server/routes/gamificationRoutes.js`  
-**Model**: `api-server/models/Gamification.js`, `Badge.js`
+**Location**: `deepiri-core-api/services/gamificationService.js`  
+**Routes**: `deepiri-core-api/routes/gamificationRoutes.js`  
+**Model**: `deepiri-core-api/models/Gamification.js`, `Badge.js`
 
 **Responsibilities**:
 - Points and XP management
@@ -422,9 +422,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 5. Analytics Service
-**Location**: `api-server/services/analyticsService.js`  
-**Routes**: `api-server/routes/analyticsRoutes.js`  
-**Model**: `api-server/models/Analytics.js`
+**Location**: `deepiri-core-api/services/analyticsService.js`  
+**Routes**: `deepiri-core-api/routes/analyticsRoutes.js`  
+**Model**: `deepiri-core-api/models/Analytics.js`
 
 **Responsibilities**:
 - Performance tracking
@@ -442,9 +442,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 6. Integration Service
-**Location**: `api-server/services/integrationService.js`  
-**Routes**: `api-server/routes/integrationRoutes.js`  
-**Model**: `api-server/models/Integration.js`
+**Location**: `deepiri-core-api/services/integrationService.js`  
+**Routes**: `deepiri-core-api/routes/integrationRoutes.js`  
+**Model**: `deepiri-core-api/models/Integration.js`
 
 **Responsibilities**:
 - External service connections
@@ -463,9 +463,9 @@ Deepiri transforms productivity by gamifying tasks, study material, coding proje
 ---
 
 #### 7. Notification Service
-**Location**: `api-server/services/notificationService.js`  
-**Routes**: `api-server/routes/notificationRoutes.js`  
-**Model**: `api-server/models/Notification.js`
+**Location**: `deepiri-core-api/services/notificationService.js`  
+**Routes**: `deepiri-core-api/routes/notificationRoutes.js`  
+**Model**: `deepiri-core-api/models/Notification.js`
 
 **Responsibilities**:
 - Notification creation
@@ -534,7 +534,7 @@ User Input
                     Notification Service
                                  │
                                  ▼
-                    Socket.IO → Frontend
+                    Socket.IO → deepiri-web-frontend
                                  │
                                  ▼
                     User Sees Challenge
@@ -557,7 +557,7 @@ Challenge Service Updates Status
 Socket.IO Broadcasts Update
     │
     ▼
-Frontend Updates in Real-Time
+deepiri-web-frontend Updates in Real-Time
 ```
 
 ### Integration Sync Flow
@@ -819,7 +819,7 @@ Integration Service
    - Notion integration (OAuth + API)
    - Trello integration (OAuth + API)
 
-3. **Frontend Polish**
+3. **deepiri-web-frontend Polish**
    - Improve UI/UX
    - Add animations and transitions
    - Mobile responsiveness improvements
@@ -914,12 +914,12 @@ docker compose -f docker-compose.dev.yml down
 ### Local Development
 ```bash
 # Backend
-cd api-server
+cd deepiri-core-api
 npm install
 npm run dev
 
-# Frontend
-cd frontend
+# deepiri-web-frontend
+cd deepiri-web-frontend
 npm install
 npm run dev
 
@@ -932,15 +932,15 @@ uvicorn app.main:app --reload
 ### Testing
 ```bash
 # Backend tests
-cd api-server
+cd deepiri-core-api
 npm test
 
 # Python tests
 cd diri-cyrex
 pytest
 
-# Frontend tests
-cd frontend
+# deepiri-web-frontend tests
+cd deepiri-web-frontend
 npm test
 ```
 
@@ -949,18 +949,18 @@ npm test
 ## Key Files Reference
 
 ### Backend
-- `api-server/server.js` - Main Express server
-- `api-server/models/` - MongoDB models
-- `api-server/services/` - Business logic services
-- `api-server/routes/` - API route handlers
-- `api-server/middleware/` - Express middleware
+- `deepiri-core-api/server.js` - Main Express server
+- `deepiri-core-api/models/` - MongoDB models
+- `deepiri-core-api/services/` - Business logic services
+- `deepiri-core-api/routes/` - API route handlers
+- `deepiri-core-api/middleware/` - Express middleware
 
-### Frontend
-- `frontend/src/App.jsx` - Main app component
-- `frontend/src/pages/` - Page components
-- `frontend/src/components/` - Reusable components
-- `frontend/src/api/` - API client functions
-- `frontend/src/contexts/` - React contexts
+### deepiri-web-frontend
+- `deepiri-web-frontend/src/App.jsx` - Main app component
+- `deepiri-web-frontend/src/pages/` - Page components
+- `deepiri-web-frontend/src/components/` - Reusable components
+- `deepiri-web-frontend/src/api/` - API client functions
+- `deepiri-web-frontend/src/contexts/` - React contexts
 
 ### Python Service
 - `diri-cyrex/app/main.py` - FastAPI application
@@ -990,4 +990,5 @@ The system is designed to scale and can accommodate future enhancements while ma
 **Last Updated**: November 2024  
 **Version**: 3.0.0  
 **Status**: Active Development
+
 

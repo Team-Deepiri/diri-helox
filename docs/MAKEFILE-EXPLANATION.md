@@ -92,3 +92,4 @@ make clean                # Clean everything (containers, images, volumes, cache
 
 **Key Point:** Normal `docker compose up` or `make up` does NOT rebuild - it's fast! Only rebuild when code changes.
 
+

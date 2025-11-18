@@ -1579,14 +1579,14 @@ docker build --build-arg NODE_VERSION=20 -t myapp:1.0 .
 ### Project 1: Three-Tier Web Application
 
 **Architecture:**
-- Frontend (Nginx)
+- deepiri-web-frontend (Nginx)
 - Backend (Python Flask)
 - Database (PostgreSQL)
 
 **Create project structure:**
 ```
 three-tier-app/
-├── frontend/
+├── deepiri-web-frontend/
 │   └── index.html
 ├── backend/
 │   ├── app.py
@@ -1599,12 +1599,12 @@ three-tier-app/
 version: '3.8'
 
 services:
-  frontend:
+  deepiri-web-frontend:
     image: nginx:alpine
     ports:
       - "8080:80"
     volumes:
-      - ./frontend:/usr/share/nginx/html
+      - ./deepiri-web-frontend:/usr/share/nginx/html
     depends_on:
       - backend
 
@@ -2157,6 +2157,8 @@ Remember: Cloud engineering is a journey, not a destination. Keep practicing, ke
 
 **Last Updated:** 2025-01-14  
 **Next Steps:** Begin Day 2 - Advanced Orchestration and Infrastructure as Code
+
+
 
 
 

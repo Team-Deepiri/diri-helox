@@ -30,8 +30,8 @@ function log(message, color = colors.reset) {
 }
 
 // Check if required directories exist
-const frontendDir = path.join(__dirname, 'frontend');
-const apiServerDir = path.join(__dirname, 'api-server');
+const frontendDir = path.join(__dirname, 'deepiri-web-frontend');
+const apiServerDir = path.join(__dirname, 'deepiri-core-api');
 
 if (!fs.existsSync(frontendDir)) {
   log('Frontend directory not found!', colors.red);

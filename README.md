@@ -138,8 +138,8 @@ deepiri/
 │   ├── TROUBLESHOOTING.md      # Common issues
 │   └── DOCKER-*.md             # Docker guides
 │
-├── frontend/                    # React frontend
-├── api-server/                  # Node.js backend
+├── deepiri-web-frontend/        # React frontend
+├── deepiri-core-api/            # Node.js backend
 ├── diri-cyrex/              # Python AI agent
 ├── services/                    # Microservices
 └── docker-compose.dev.yml       # Docker configuration
@@ -211,13 +211,13 @@ See [ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md) for complete list.
 
 ```bash
 # Backend tests
-cd api-server && npm test
+cd deepiri-core-api && npm test
 
 # Python agent tests
 cd diri-cyrex && pytest -q
 
 # Frontend tests
-cd frontend && npm test
+cd deepiri-web-frontend && npm test
 ```
 
 ---

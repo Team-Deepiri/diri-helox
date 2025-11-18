@@ -33,7 +33,7 @@ Deepiri is now fully architected as a microservices system. All services run ind
 ## Services
 
 ### 1. API Gateway (Port 5000)
-- **Location**: `services/api-gateway/`
+- **Location**: `services/deepiri-api-gateway/`
 - **Purpose**: Routes all requests to appropriate microservices
 - **Endpoints**:
   - `/api/users/*` → User Service
@@ -46,42 +46,42 @@ Deepiri is now fully architected as a microservices system. All services run ind
   - `/api/agent/*` → Python AI Service
 
 ### 2. User Service (Port 5001)
-- **Location**: `services/user-service/`
+- **Location**: `services/deepiri-auth-service/`
 - **Features**: OAuth 2.0, Skill Trees, Social Graph, Time-Series
 - **Endpoints**: `/oauth/*`, `/skill-tree/*`, `/social/*`, `/time-series/*`
 
 ### 3. Task Service (Port 5002)
-- **Location**: `services/task-service/`
+- **Location**: `services/deepiri-task-orchestrator/`
 - **Features**: Task CRUD, Versioning, Dependency Graphs
 - **Endpoints**: `/tasks/*`, `/dependencies/*`
 
 ### 4. Gamification Service (Port 5003)
-- **Location**: `services/gamification-service/`
+- **Location**: `services/deepiri-engagement-service/`
 - **Features**: Multi-Currency, Badges, ELO Leaderboards
 - **Endpoints**: `/currency/*`, `/badges/*`, `/leaderboard/*`
 
 ### 5. Analytics Service (Port 5004)
-- **Location**: `services/analytics-service/`
+- **Location**: `services/deepiri-platform-analytics-service/`
 - **Features**: Time-Series Analytics, Behavioral Clustering, Predictive Modeling
 - **Endpoints**: `/time-series/*`, `/clustering/*`, `/predictive/*`
 
 ### 6. Notification Service (Port 5005)
-- **Location**: `services/notification-service/`
+- **Location**: `services/deepiri-notification-service/`
 - **Features**: WebSocket Server, Push Notifications (FCM/APNS)
 - **Endpoints**: `/push/*`, `/websocket/*`
 
 ### 7. Integration Service (Port 5006)
-- **Location**: `services/integration-service/`
+- **Location**: `services/deepiri-external-bridge-service/`
 - **Features**: OAuth Flows, Webhook Processing
 - **Endpoints**: `/webhooks/*`, `/oauth/*`
 
 ### 8. Challenge Service (Port 5007)
-- **Location**: `services/challenge-service/`
+- **Location**: `services/deepiri-challenge-service/`
 - **Features**: Challenge Generation (calls AI service)
 - **Endpoints**: `/generate`
 
 ### 9. WebSocket Service (Port 5008)
-- **Location**: `services/websocket-service/`
+- **Location**: `services/deepiri-realtime-gateway/`
 - **Features**: Real-time WebSocket connections
 - **Protocol**: WebSocket (Socket.IO)
 
@@ -114,12 +114,12 @@ Each service can be run independently:
 
 ```bash
 # User Service
-cd services/user-service
+cd services/deepiri-auth-service
 npm install
 npm start  # or npm run dev
 
 # Task Service
-cd services/task-service
+cd services/deepiri-task-orchestrator
 npm install
 npm start
 
@@ -130,18 +130,18 @@ npm start
 
 ### Internal Communication
 Services communicate via HTTP REST APIs using service names as hostnames:
-- `http://user-service:5001`
-- `http://task-service:5002`
+- `http://auth-service:5001`
+- `http://task-orchestrator:5002`
 - etc.
 
 ### External Communication
 All external requests go through the API Gateway:
-- Frontend → `http://api-gateway:5000/api/*`
+- deepiri-web-frontend → `http://api-gateway:5000/api/*`
 - External APIs → `http://api-gateway:5000/api/*`
 
 ### WebSocket
 WebSocket connections go directly to the WebSocket Service:
-- `ws://websocket-service:5008`
+- `ws://realtime-gateway:5008`
 
 ## Environment Variables
 
@@ -209,12 +209,12 @@ All Services
 The API Gateway uses `http-proxy-middleware` to route requests:
 
 ```javascript
-/api/users/* → http://user-service:5001/*
-/api/tasks/* → http://task-service:5002/tasks/*
+/api/users/* → http://auth-service:5001/*
+/api/tasks/* → http://task-orchestrator:5002/tasks/*
 /api/gamification/* → http://gamification-service:5003/*
 /api/analytics/* → http://analytics-service:5004/*
 /api/notifications/* → http://notification-service:5005/*
-/api/integrations/* → http://integration-service:5006/*
+/api/integrations/* → http://external-bridge-service:5006/*
 /api/challenges/* → http://challenge-service:5007/*
 /api/agent/* → http://cyrex:8000/agent/*
 ```
@@ -228,12 +228,12 @@ The API Gateway uses `http-proxy-middleware` to route requests:
 
 2. **Start Services** (individually or all):
    ```bash
-   docker-compose -f docker-compose.dev.yml up api-gateway user-service task-service -d
+   docker-compose -f docker-compose.dev.yml up api-gateway auth-service task-orchestrator -d
    ```
 
-3. **Start Frontend**:
+3. **Start deepiri-web-frontend**:
    ```bash
-   docker-compose -f docker-compose.dev.yml up frontend-dev -d
+   docker-compose -f docker-compose.dev.yml up deepiri-web-frontend-dev -d
    ```
 
 4. **View Logs**:
@@ -297,4 +297,7 @@ Production configuration:
 
 **Status**: ✅ Fully Microservices Architecture
 **Last Updated**: 2024
+
+
+
 

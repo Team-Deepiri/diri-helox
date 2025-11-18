@@ -33,7 +33,7 @@ cd Deepiri/deepiri
 
 ```bash
 # Copy example environment files
-cp api-server/env.example.api-server .env.api-server
+cp deepiri-core-api/env.example.deepiri-core-api .env.deepiri-core-api
 cp diri-cyrex/env.example.diri-cyrex .env.diri-cyrex
 
 # Edit .env files with your configuration
@@ -76,10 +76,10 @@ for service in services/*; do
 done
 
 # Install API server dependencies
-cd api-server && npm install && cd ..
+cd deepiri-core-api && npm install && cd ..
 
-# Install frontend dependencies
-cd frontend && npm install && cd ..
+# Install deepiri-web-frontend dependencies
+cd deepiri-web-frontend && npm install && cd ..
 ```
 
 **Python Backend:**
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 find services -name "logger.js" -type f
 
 # Check that dependencies are installed
-ls services/user-service/node_modules/axios
+ls services/deepiri-auth-service/node_modules/axios
 python -c "import numpy; print('numpy OK')"
 ```
 
@@ -131,16 +131,16 @@ docker-compose logs -f
 | Service | Port | Description |
 |---------|------|-------------|
 | api-gateway | 5000 | Main API gateway |
-| user-service | 5001 | User management, OAuth |
-| task-service | 5002 | Task management |
+| auth-service | 5001 | User management, OAuth |
+| task-orchestrator | 5002 | Task management |
 | gamification-service | 5003 | Gamification features |
 | analytics-service | 5004 | Analytics and metrics |
 | notification-service | 5005 | Notifications |
-| integration-service | 5006 | External integrations |
+| external-bridge-service | 5006 | External integrations |
 | challenge-service | 5007 | Challenge generation |
-| websocket-service | 5008 | WebSocket connections |
+| realtime-gateway | 5008 | WebSocket connections |
 | cyrex | 8000 | AI/ML service |
-| frontend-dev | 5173 | Frontend (dev) |
+| deepiri-web-frontend-dev | 5173 | Frontend (dev) |
 
 ### Infrastructure Services
 
@@ -158,16 +158,16 @@ docker-compose logs -f
 ```
 deepiri/
 ├── services/              # Microservices
-│   ├── user-service/
+│   ├── auth-service/
 │   │   ├── src/          # Source code
 │   │   ├── utils/        # Utilities (logger, etc.)
 │   │   ├── package.json  # Dependencies
 │   │   └── Dockerfile    # Service Dockerfile
-│   ├── task-service/
+│   ├── task-orchestrator/
 │   ├── ...
 │   └── shared-utils/     # Shared utilities package
-├── api-server/           # Main API server
-├── frontend/             # React frontend
+├── deepiri-core-api/           # Main API server
+├── deepiri-web-frontend/             # React deepiri-web-frontend
 ├── diri-cyrex/       # Python AI/ML backend
 │   ├── app/             # Application code
 │   ├── requirements.txt # Python dependencies
@@ -183,7 +183,7 @@ deepiri/
 
 **Node.js Service:**
 ```bash
-cd services/user-service
+cd services/deepiri-auth-service
 npm install <package-name> --save
 ```
 
@@ -206,10 +206,10 @@ echo "<package-name>==<version>" >> requirements.txt
 
 ```bash
 # View logs
-docker logs deepiri-user-service-dev -f
+docker logs deepiri-auth-service-dev -f
 
 # Execute command in container
-docker exec -it deepiri-user-service-dev sh
+docker exec -it deepiri-auth-service-dev sh
 
 # Check service health
 curl http://localhost:5001/health
@@ -219,8 +219,8 @@ curl http://localhost:5001/health
 
 ```bash
 # Rebuild specific service
-docker-compose -f docker-compose.dev.yml build --no-cache user-service
-docker-compose -f docker-compose.dev.yml up -d user-service
+docker-compose -f docker-compose.dev.yml build --no-cache auth-service
+docker-compose -f docker-compose.dev.yml up -d auth-service
 
 # Rebuild all services
 docker-compose -f docker-compose.dev.yml build --no-cache
@@ -249,7 +249,7 @@ docker-compose -f docker-compose.dev.yml ps
 
 ```bash
 # Run service tests
-cd services/user-service
+cd services/deepiri-auth-service
 npm test
 
 # Check service health
@@ -312,4 +312,6 @@ docker-compose -f docker-compose.dev.yml up -d
 ---
 
 **Welcome to the Deepiri team!** 🚀
+
+
 

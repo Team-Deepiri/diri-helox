@@ -255,3 +255,4 @@ pytest tests/ai/test_adaptive_challenge_generator.py
 - **Tests**: `diri-cyrex/tests/ai/`
 - **Training**: `diri-cyrex/train/`
 
+
