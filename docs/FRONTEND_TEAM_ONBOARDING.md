@@ -260,9 +260,9 @@ npm install react-query  # For data fetching
 ```
 
 **First Tasks:**
-1. Review `services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series
-2. Review `services/deepiri-platform-analytics-service/src/behavioralClustering.js` - NEW: Clustering
-3. Review `services/deepiri-platform-analytics-service/src/predictiveModeling.js` - NEW: Predictive models
+1. Review `platform-services/backend/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series
+2. Review `platform-services/backend/deepiri-platform-analytics-service/src/behavioralClustering.js` - NEW: Clustering
+3. Review `platform-services/backend/deepiri-platform-analytics-service/src/predictiveModeling.js` - NEW: Predictive models
 4. Create AI visualization dashboards
 5. Implement time-series charts (InfluxDB integration)
 6. Create clustering visualizations
@@ -270,9 +270,9 @@ npm install react-query  # For data fetching
 8. Build real-time analytics displays
 
 **Key Files:**
-- `services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
-- `services/deepiri-platform-analytics-service/src/behavioralClustering.js` - NEW: Behavioral clustering
-- `services/deepiri-platform-analytics-service/src/predictiveModeling.js` - NEW: Predictive modeling
+- `platform-services/backend/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - NEW: Time-series analytics
+- `platform-services/backend/deepiri-platform-analytics-service/src/behavioralClustering.js` - NEW: Behavioral clustering
+- `platform-services/backend/deepiri-platform-analytics-service/src/predictiveModeling.js` - NEW: Predictive modeling
 - `deepiri-web-frontend/src/pages/analytics/` - Analytics pages
 - `deepiri-web-frontend/src/components/charts/` - Chart components
 
@@ -324,10 +324,10 @@ npm install lottie-react  # for Lottie animations
 ```
 
 **First Tasks:**
-1. Review `services/deepiri-engagement-service/server.js` - Gamification service (port 5003)
-2. Review `services/deepiri-engagement-service/src/multiCurrencyService.js` - Multi-currency
-3. Review `services/deepiri-engagement-service/src/eloLeaderboardService.js` - ELO ranking
-4. Review `services/deepiri-engagement-service/src/badgeSystemService.js` - Badge system (500+ badges)
+1. Review `platform-services/backend/deepiri-engagement-service/server.js` - Gamification service (port 5003)
+2. Review `platform-services/backend/deepiri-engagement-service/src/multiCurrencyService.js` - Multi-currency
+3. Review `platform-services/backend/deepiri-engagement-service/src/eloLeaderboardService.js` - ELO ranking
+4. Review `platform-services/backend/deepiri-engagement-service/src/badgeSystemService.js` - Badge system (500+ badges)
 5. Test API calls through API Gateway: `http://localhost:5000/api/gamification/*`
 6. Create badge components with animations (support 500+ badges)
 7. Create progress bar components
@@ -337,11 +337,11 @@ npm install lottie-react  # for Lottie animations
 11. Create ELO leaderboard UI
 
 **Key Files:**
-- `services/deepiri-engagement-service/server.js` - Service server (port 5003)
-- `services/deepiri-engagement-service/src/index.js` - Route handlers
-- `services/deepiri-engagement-service/src/multiCurrencyService.js` - Multi-currency
-- `services/deepiri-engagement-service/src/eloLeaderboardService.js` - ELO leaderboard
-- `services/deepiri-engagement-service/src/badgeSystemService.js` - Badge system
+- `platform-services/backend/deepiri-engagement-service/server.js` - Service server (port 5003)
+- `platform-services/backend/deepiri-engagement-service/src/index.js` - Route handlers
+- `platform-services/backend/deepiri-engagement-service/src/multiCurrencyService.js` - Multi-currency
+- `platform-services/backend/deepiri-engagement-service/src/eloLeaderboardService.js` - ELO leaderboard
+- `platform-services/backend/deepiri-engagement-service/src/badgeSystemService.js` - Badge system
 - `deepiri-web-frontend/src/components/gamification/` - deepiri-web-frontend components
 
 **Animation Example:**

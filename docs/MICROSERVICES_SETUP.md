@@ -33,7 +33,7 @@ Deepiri is now fully architected as a microservices system. All services run ind
 ## Services
 
 ### 1. API Gateway (Port 5000)
-- **Location**: `services/deepiri-api-gateway/`
+- **Location**: `platform-services/backend/deepiri-api-gateway/`
 - **Purpose**: Routes all requests to appropriate microservices
 - **Endpoints**:
   - `/api/users/*` → User Service
@@ -46,42 +46,42 @@ Deepiri is now fully architected as a microservices system. All services run ind
   - `/api/agent/*` → Python AI Service
 
 ### 2. User Service (Port 5001)
-- **Location**: `services/deepiri-auth-service/`
+- **Location**: `platform-services/backend/deepiri-auth-service/`
 - **Features**: OAuth 2.0, Skill Trees, Social Graph, Time-Series
 - **Endpoints**: `/oauth/*`, `/skill-tree/*`, `/social/*`, `/time-series/*`
 
 ### 3. Task Service (Port 5002)
-- **Location**: `services/deepiri-task-orchestrator/`
+- **Location**: `platform-services/backend/deepiri-task-orchestrator/`
 - **Features**: Task CRUD, Versioning, Dependency Graphs
 - **Endpoints**: `/tasks/*`, `/dependencies/*`
 
 ### 4. Gamification Service (Port 5003)
-- **Location**: `services/deepiri-engagement-service/`
+- **Location**: `platform-services/backend/deepiri-engagement-service/`
 - **Features**: Multi-Currency, Badges, ELO Leaderboards
 - **Endpoints**: `/currency/*`, `/badges/*`, `/leaderboard/*`
 
 ### 5. Analytics Service (Port 5004)
-- **Location**: `services/deepiri-platform-analytics-service/`
+- **Location**: `platform-services/backend/deepiri-platform-analytics-service/`
 - **Features**: Time-Series Analytics, Behavioral Clustering, Predictive Modeling
 - **Endpoints**: `/time-series/*`, `/clustering/*`, `/predictive/*`
 
 ### 6. Notification Service (Port 5005)
-- **Location**: `services/deepiri-notification-service/`
+- **Location**: `platform-services/backend/deepiri-notification-service/`
 - **Features**: WebSocket Server, Push Notifications (FCM/APNS)
 - **Endpoints**: `/push/*`, `/websocket/*`
 
 ### 7. Integration Service (Port 5006)
-- **Location**: `services/deepiri-external-bridge-service/`
+- **Location**: `platform-services/backend/deepiri-external-bridge-service/`
 - **Features**: OAuth Flows, Webhook Processing
 - **Endpoints**: `/webhooks/*`, `/oauth/*`
 
 ### 8. Challenge Service (Port 5007)
-- **Location**: `services/deepiri-challenge-service/`
+- **Location**: `platform-services/backend/deepiri-challenge-service/`
 - **Features**: Challenge Generation (calls AI service)
 - **Endpoints**: `/generate`
 
 ### 9. WebSocket Service (Port 5008)
-- **Location**: `services/deepiri-realtime-gateway/`
+- **Location**: `platform-services/backend/deepiri-realtime-gateway/`
 - **Features**: Real-time WebSocket connections
 - **Protocol**: WebSocket (Socket.IO)
 
@@ -114,12 +114,12 @@ Each service can be run independently:
 
 ```bash
 # User Service
-cd services/deepiri-auth-service
+cd platform-services/backend/deepiri-auth-service
 npm install
 npm start  # or npm run dev
 
 # Task Service
-cd services/deepiri-task-orchestrator
+cd platform-services/backend/deepiri-task-orchestrator
 npm install
 npm start
 

@@ -9,7 +9,7 @@ This package provides common utilities that are used across multiple microservic
 ## Installation
 
 ```bash
-cd services/deepiri-shared-utils
+cd platform-services/shared/deepiri-shared-utils
 npm install
 ```
 

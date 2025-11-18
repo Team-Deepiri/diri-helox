@@ -4,15 +4,15 @@
   "description": "Deepiri - AI-Powered Task Management Platform",
   "private": true,
   "workspaces": [
-    "services/*",
-    "services/deepiri-shared-utils",
+    "platform-services/backend/*",
+    "platform-services/shared/deepiri-shared-utils",
     "deepiri-core-api",
     "deepiri-web-frontend"
   ],
   "scripts": {
     "install:all": "npm install",
-    "install:services": "npm install --workspace=services/*",
-    "install:shared": "npm install --workspace=services/deepiri-shared-utils",
+    "install:services": "npm install --workspace=platform-services/backend/*",
+    "install:shared": "npm install --workspace=platform-services/shared/deepiri-shared-utils",
     "fix-deps": "bash scripts/fix-dependencies.sh"
   },
   "engines": {

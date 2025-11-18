@@ -75,11 +75,11 @@ bash scripts/fix-dependencies.sh
 
 ```bash
 # Install dependencies for a specific service
-cd services/deepiri-auth-service
+cd platform-services/backend/deepiri-auth-service
 npm install
 
 # Or install all services
-for service in services/*; do
+for service in platform-services/backend/*; do
   if [ -f "$service/package.json" ]; then
     echo "Installing $service..."
     cd "$service" && npm install && cd ../..
@@ -109,11 +109,11 @@ docker-compose -f docker-compose.dev.yml build --no-cache
 
 ```bash
 # Check if dependencies are installed
-cd services/deepiri-auth-service
+cd platform-services/backend/deepiri-auth-service
 ls node_modules/axios
 
 # Or check package.json
-cat services/deepiri-auth-service/package.json | grep axios
+cat platform-services/backend/deepiri-auth-service/package.json | grep axios
 ```
 
 ---
@@ -208,15 +208,15 @@ services/
 
 ```bash
 # Check if logger files exist
-find services -name "logger.js" -type f
+find platform-services/backend -name "logger.js" -type f
 
 # Should output:
-# services/deepiri-auth-service/utils/logger.js
-# services/deepiri-task-orchestrator/utils/logger.js
-# services/deepiri-engagement-service/utils/logger.js
-# services/deepiri-platform-analytics-service/utils/logger.js
-# services/deepiri-notification-service/utils/logger.js
-# services/deepiri-external-bridge-service/utils/logger.js
+# platform-services/backend/deepiri-auth-service/utils/logger.js
+# platform-services/backend/deepiri-task-orchestrator/utils/logger.js
+# platform-services/backend/deepiri-engagement-service/utils/logger.js
+# platform-services/backend/deepiri-platform-analytics-service/utils/logger.js
+# platform-services/backend/deepiri-notification-service/utils/logger.js
+# platform-services/backend/deepiri-external-bridge-service/utils/logger.js
 ```
 
 ### If Logger is Missing
@@ -302,7 +302,7 @@ RUN npm install --omit=dev --legacy-peer-deps && npm cache clean --force
 
 3. **Check Dockerfile syntax**:
    ```bash
-   docker build -t test -f services/deepiri-auth-service/Dockerfile services/deepiri-auth-service
+   docker build -t test -f platform-services/backend/deepiri-auth-service/Dockerfile platform-services/backend/deepiri-auth-service
    ```
 
 ---
@@ -368,7 +368,7 @@ curl http://localhost:5000/health  # api-gateway
 curl http://localhost:8000/health  # cyrex
 
 # Check dependencies
-cd services/deepiri-auth-service && npm list --depth=0
+cd platform-services/backend/deepiri-auth-service && npm list --depth=0
 cd diri-cyrex && pip list | grep numpy
 
 # Rebuild everything
@@ -407,7 +407,7 @@ To avoid these issues in the future:
 3. **Keep dependencies updated**:
    ```bash
    # Update Node.js dependencies
-   npm update --workspace=services/*
+   npm update --workspace=platform-services/backend/*
    
    # Update Python dependencies
    pip install --upgrade -r diri-cyrex/requirements.txt
@@ -415,7 +415,7 @@ To avoid these issues in the future:
 
 4. **Generate package-lock.json files** for reproducible builds:
    ```bash
-   for service in services/*; do
+   for service in platform-services/backend/*; do
      if [ -f "$service/package.json" ]; then
        cd "$service" && npm install && cd ../..
      fi

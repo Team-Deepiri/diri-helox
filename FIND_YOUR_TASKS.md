@@ -345,7 +345,7 @@
 1. **Challenge Generator Training**: Review `deepiri/diri-cyrex/train/scripts/train_challenge_generator.py` for challenge generation models
 2. **Personalization Training**: Study `deepiri/diri-cyrex/train/scripts/train_personalization_model.py` for user personalization
 3. **Session Analysis**: Check `deepiri/diri-cyrex/app/services/session_analyzer.py` for user behavior analysis
-4. **Time-Series Data**: Review `deepiri/services/deepiri-platform-analytics-service/` for user activity data
+4. **Time-Series Data**: Review `deepiri/platform-services/backend/deepiri-platform-analytics-service/` for user activity data
 5. **Temporal Models**: Look for existing LSTM/GRU implementations in `deepiri/diri-cyrex/train/scripts/`
 6. **Behavior Data**: Check `deepiri/diri-cyrex/train/data/` for user behavior datasets
 **Unique Mission:** Model user habits and predict behavior patterns for personalization. Train temporal sequence models for user behavior prediction. Build habit-prediction networks for challenge timing. Train ensemble scoring models for user performance. Local recommendation models for challenge suggestions. Implement time-series analysis for productivity patterns. Build user behavior clustering models. Predict optimal challenge timing based on user history. Integrate behavior models with gamification service.
@@ -427,9 +427,9 @@
 **Start Here:**
 1. **Data Collection Pipeline**: Review `deepiri/diri-cyrex/train/pipelines/data_collection_pipeline.py` for current data ingestion
 2. **Dataset Preparation**: Study `deepiri/diri-cyrex/train/data/prepare_dataset.py` for data preprocessing workflows
-3. **Analytics Service**: Check `deepiri/services/deepiri-platform-analytics-service/` for time-series data handling
-4. **Event Streaming**: Review existing streaming infrastructure (Kafka/NATS/Redis Streams) in `deepiri/services/`
-5. **InfluxDB Integration**: Check `deepiri/services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` for time-series storage
+3. **Analytics Service**: Check `deepiri/platform-services/backend/deepiri-platform-analytics-service/` for time-series data handling
+4. **Event Streaming**: Review existing streaming infrastructure (Kafka/NATS/Redis Streams) in `deepiri/platform-services/backend/`
+5. **InfluxDB Integration**: Check `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` for time-series storage
 6. **Real-Time Features**: Look for feature generation code in `deepiri/diri-cyrex/app/services/analytics/`
 **Unique Mission:** Create real-time event pipelines to feed ML and Gamification services. Stream user activity via Kafka/NATS (or Redis Streams). Build challenge analytics pipelines. Generate real-time features for ML models. Integrate with Analytics Service for time-series data. Real-time event processing for gamification triggers. Data pipeline for user behavior tracking. Event streaming for challenge completion events. Integration with InfluxDB for time-series storage.
 **Your Tasks:**
@@ -568,12 +568,12 @@
 
 ### AI Systems Intern 5
 **Reports to:** AI Systems Lead
-**Location:** `deepiri/diri-cyrex/docs/` & `deepiri/services/deepiri-shared-utils/`
+**Location:** `deepiri/diri-cyrex/docs/` & `deepiri/platform-services/shared/deepiri-shared-utils/`
 **Stack:** Python, Documentation Tools, Testing, Code Quality, Refactoring
 **Start Here:**
 1. **Test Suite**: Review `deepiri/diri-cyrex/tests/` for testing patterns
 2. **Training README**: Read `deepiri/diri-cyrex/train/README.md` for training context
-3. **Shared Utils**: Study `deepiri/services/deepiri-shared-utils/` for common utilities
+3. **Shared Utils**: Study `deepiri/platform-services/shared/deepiri-shared-utils/` for common utilities
 4. **Code Quality**: Check for linting and code quality tools
 5. **Refactoring Patterns**: Review existing refactoring approaches
 6. **Documentation**: Check `deepiri/diri-cyrex/docs/` for documentation standards
@@ -608,12 +608,12 @@
 
 ### Backend Lead
 **Reports to:** Product Lead / Founder
-**Location:** `deepiri/services/` & `deepiri/diri-cyrex/app/`
+**Location:** `deepiri/platform-services/backend/` & `deepiri/diri-cyrex/app/`
 **Stack:** Node.js, Express, Python, FastAPI, MongoDB, Redis, Microservices Architecture
 **Start Here:**
 - Architecture: `deepiri/docs/MICROSERVICES_SETUP.md` - **READ THIS FIRST!**
-- API Gateway: `deepiri/services/deepiri-api-gateway/server.js` (Port 5000)
-- Services: `deepiri/services/` - Each service has its own `server.js`
+- API Gateway: `deepiri/platform-services/backend/deepiri-api-gateway/server.js` (Port 5000)
+- Services: `deepiri/platform-services/backend/` - Each service has its own `server.js`
 - Python backend: `deepiri/diri-cyrex/app/main.py` (Port 8000)
 - Docker Compose: `deepiri/docker-compose.dev.yml`
 **Unique Mission:** Oversees microservices architecture, REST/GraphQL APIs, database schema quality, cross-team coordination, service boundaries, backend correctness. Reviews and merges code for backend team.
@@ -628,23 +628,23 @@
 - Coordinate service boundaries and API contracts
 - Ensure backend correctness and reliability
 **Key Files:**
-- `deepiri/services/deepiri-api-gateway/server.js` - API Gateway (routes all requests)
-- `deepiri/services/*/server.js` - Individual service servers
+- `deepiri/platform-services/backend/deepiri-api-gateway/server.js` - API Gateway (routes all requests)
+- `deepiri/platform-services/backend/*/server.js` - Individual service servers
 - `deepiri/docker-compose.dev.yml` - Service orchestration
 
 ---
 
 ### Backend Engineer 1 - External Integrations
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/deepiri-external-bridge-service/`
+**Location:** `deepiri/platform-services/backend/deepiri-external-bridge-service/`
 **Stack:** Node.js, Express, OAuth2, REST APIs, Webhooks, External API Integration
 **Start Here:**
-1. **Service Server**: Start with `deepiri/services/deepiri-external-bridge-service/server.js` (Port 5006) to understand service setup
-2. **Route Handlers**: Review `deepiri/services/deepiri-external-bridge-service/src/index.js` for API endpoints
-3. **Webhook Service**: Study `deepiri/services/deepiri-external-bridge-service/src/webhookService.js` for webhook processing
-4. **Integration README**: Read `deepiri/services/deepiri-external-bridge-service/README.md` for integration documentation
+1. **Service Server**: Start with `deepiri/platform-services/backend/deepiri-external-bridge-service/server.js` (Port 5006) to understand service setup
+2. **Route Handlers**: Review `deepiri/platform-services/backend/deepiri-external-bridge-service/src/index.js` for API endpoints
+3. **Webhook Service**: Study `deepiri/platform-services/backend/deepiri-external-bridge-service/src/webhookService.js` for webhook processing
+4. **Integration README**: Read `deepiri/platform-services/backend/deepiri-external-bridge-service/README.md` for integration documentation
 5. **OAuth Flows**: Check for existing OAuth implementations for Notion, Trello, GitHub
-6. **API Gateway**: Understand how requests route through `deepiri/services/deepiri-api-gateway/server.js`
+6. **API Gateway**: Understand how requests route through `deepiri/platform-services/backend/deepiri-api-gateway/server.js`
 **Unique Mission:** External Integrations: Notion/Trello/GitHub APIs, OAuth flows, webhook management, data synchronization.
 **Your Tasks:**
 - Build OAuth flows for Notion, Trello, GitHub, Google Docs
@@ -656,21 +656,21 @@
 - Handle OAuth token refresh and management
 - Parse and transform external service data formats
 **Files to Work On:**
-- `deepiri/services/deepiri-external-bridge-service/server.js` - Service server
-- `deepiri/services/deepiri-external-bridge-service/src/index.js` - Route handlers
-- `deepiri/services/deepiri-external-bridge-service/src/webhookService.js` - Webhook processing
-- `deepiri/services/deepiri-external-bridge-service/Dockerfile` - Container definition
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/server.js` - Service server
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/src/index.js` - Route handlers
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/src/webhookService.js` - Webhook processing
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/Dockerfile` - Container definition
 
 ---
 
 ### Backend Engineer 2 - WebSocket Infrastructure
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/deepiri-realtime-gateway/` & `deepiri/services/deepiri-notification-service/`
+**Location:** `deepiri/platform-services/backend/deepiri-realtime-gateway/` & `deepiri/platform-services/backend/deepiri-notification-service/`
 **Stack:** Node.js, Socket.IO, WebSockets, Real-time Systems, Redis Pub/Sub
 **Start Here:**
-1. **WebSocket Service**: Review `deepiri/services/deepiri-realtime-gateway/server.js` (Port 5008) for real-time communication setup
-2. **Notification Service**: Study `deepiri/services/deepiri-notification-service/server.js` (Port 5005) for notification handling
-3. **WebSocket Handler**: Check `deepiri/services/deepiri-notification-service/src/websocketService.js` for connection management
+1. **WebSocket Service**: Review `deepiri/platform-services/backend/deepiri-realtime-gateway/server.js` (Port 5008) for real-time communication setup
+2. **Notification Service**: Study `deepiri/platform-services/backend/deepiri-notification-service/server.js` (Port 5005) for notification handling
+3. **WebSocket Handler**: Check `deepiri/platform-services/backend/deepiri-notification-service/src/websocketService.js` for connection management
 4. **Redis Pub/Sub**: Review Redis configuration for message broadcasting
 5. **Presence Tracking**: Look for user presence tracking implementations
 6. **Challenge Sessions**: Understand how challenge sessions use WebSocket connections
@@ -685,19 +685,19 @@
 - Real-time challenge tracking and updates
 - WebSocket connection management and scaling
 **Files to Work On:**
-- `deepiri/services/deepiri-realtime-gateway/server.js` - WebSocket service
-- `deepiri/services/deepiri-notification-service/server.js` - Notification service
-- `deepiri/services/deepiri-notification-service/src/websocketService.js` - WebSocket handler
-- `deepiri/services/deepiri-realtime-gateway/Dockerfile` - Container definition
+- `deepiri/platform-services/backend/deepiri-realtime-gateway/server.js` - WebSocket service
+- `deepiri/platform-services/backend/deepiri-notification-service/server.js` - Notification service
+- `deepiri/platform-services/backend/deepiri-notification-service/src/websocketService.js` - WebSocket handler
+- `deepiri/platform-services/backend/deepiri-realtime-gateway/Dockerfile` - Container definition
 
 ---
 
 ### Backend Engineer 3 - AI Integration & Gamification
 **Reports to:** Backend Lead
-**Location:** `deepiri/diri-cyrex/app/routes/` & `deepiri/services/deepiri-challenge-service/`
+**Location:** `deepiri/diri-cyrex/app/routes/` & `deepiri/platform-services/backend/deepiri-challenge-service/`
 **Stack:** Python, FastAPI, Node.js, Express, AI Integration, State Management
 **Start Here:**
-1. **Challenge Service**: Review `deepiri/services/deepiri-challenge-service/server.js` (Port 5007) for challenge management
+1. **Challenge Service**: Review `deepiri/platform-services/backend/deepiri-challenge-service/server.js` (Port 5007) for challenge management
 2. **Challenge Routes**: Study `deepiri/diri-cyrex/app/routes/challenge.py` (Port 8000) for AI endpoints
 3. **AI Services**: Explore `deepiri/diri-cyrex/app/services/` to understand AI service architecture
 4. **State Management**: Check how challenge state is managed across services
@@ -714,19 +714,19 @@
 - Integrate with Python AI service (`http://cyrex:8000`)
 - Challenge completion tracking and reward distribution
 **Files to Work On:**
-- `deepiri/services/deepiri-challenge-service/server.js` - Challenge service (port 5007) - Main service file
+- `deepiri/platform-services/backend/deepiri-challenge-service/server.js` - Challenge service (port 5007) - Main service file
 - `deepiri/diri-cyrex/app/routes/challenge.py` - Python AI routes
-- `deepiri/services/deepiri-challenge-service/Dockerfile` - Container definition
+- `deepiri/platform-services/backend/deepiri-challenge-service/Dockerfile` - Container definition
 
 ---
 
 ### Backend Engineer 4 - Database & Caching
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/*/src/` & `deepiri/diri-cyrex/app/database/`
+**Location:** `deepiri/platform-services/backend/*/src/` & `deepiri/diri-cyrex/app/database/`
 **Stack:** MongoDB, Redis, InfluxDB, SQL, Database Optimization, Query Performance, Data Migrations
 **Start Here:**
-1. **User Service**: Review `deepiri/services/deepiri-auth-service/server.js` (Port 5001) for time-series tracking
-2. **Analytics Service**: Study `deepiri/services/deepiri-platform-analytics-service/server.js` (Port 5004) for InfluxDB integration
+1. **User Service**: Review `deepiri/platform-services/backend/deepiri-auth-service/server.js` (Port 5001) for time-series tracking
+2. **Analytics Service**: Study `deepiri/platform-services/backend/deepiri-platform-analytics-service/server.js` (Port 5004) for InfluxDB integration
 3. **Database Models**: Check `deepiri/diri-cyrex/app/database/models.py` for data models
 4. **Database Config**: Review `deepiri/diri-cyrex/app/config/database.py` for connection settings
 5. **Caching Layer**: Understand Redis caching implementation in `deepiri/diri-cyrex/app/utils/cache.py`
@@ -743,8 +743,8 @@
 - Redis caching for leaderboards and real-time data
 - InfluxDB integration for time-series analytics
 **Files to Work On:**
-- `deepiri/services/deepiri-auth-service/src/timeSeriesService.js` - Time-series tracking
-- `deepiri/services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - InfluxDB analytics
+- `deepiri/platform-services/backend/deepiri-auth-service/src/timeSeriesService.js` - Time-series tracking
+- `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - InfluxDB analytics
 - `deepiri/diri-cyrex/app/database/models.py` - Database models
 - `deepiri/diri-cyrex/app/utils/cache.py` - Caching utilities
 
@@ -775,12 +775,12 @@
 
 ### FullStack Engineer 2 - Gamification UI
 **Reports to:** Backend Lead
-**Location:** `deepiri/frontend/src/components/gamification/` & `deepiri/services/deepiri-engagement-service/`
+**Location:** `deepiri/frontend/src/components/gamification/` & `deepiri/platform-services/backend/deepiri-engagement-service/`
 **Stack:** React, TypeScript, Socket.IO, Real-time Updates, Animations
 **Start Here:**
-- Gamification service: `deepiri/services/deepiri-engagement-service/server.js` (Port 5003)
-- Route handlers: `deepiri/services/deepiri-engagement-service/src/index.js`
-- Services: `deepiri/services/deepiri-engagement-service/src/multiCurrencyService.js`, `eloLeaderboardService.js`, `badgeSystemService.js`
+- Gamification service: `deepiri/platform-services/backend/deepiri-engagement-service/server.js` (Port 5003)
+- Route handlers: `deepiri/platform-services/backend/deepiri-engagement-service/src/index.js`
+- Services: `deepiri/platform-services/backend/deepiri-engagement-service/src/multiCurrencyService.js`, `eloLeaderboardService.js`, `badgeSystemService.js`
 - Frontend components: `deepiri/frontend/src/components/`
 **Unique Mission:** Designs gamified progress flows, achievement animations, leaderboard systems.
 **Your Tasks:**
@@ -793,22 +793,22 @@
 - Streak tracking UI components
 - Progress bar and XP visualization
 **Files to Work On:**
-- `deepiri/services/deepiri-engagement-service/server.js` - Service server (port 5003)
-- `deepiri/services/deepiri-engagement-service/src/index.js` - Route handlers
-- `deepiri/services/deepiri-engagement-service/src/multiCurrencyService.js` - Multi-currency
-- `deepiri/services/deepiri-engagement-service/src/eloLeaderboardService.js` - ELO leaderboard
-- `deepiri/services/deepiri-engagement-service/src/badgeSystemService.js` - Badge system
+- `deepiri/platform-services/backend/deepiri-engagement-service/server.js` - Service server (port 5003)
+- `deepiri/platform-services/backend/deepiri-engagement-service/src/index.js` - Route handlers
+- `deepiri/platform-services/backend/deepiri-engagement-service/src/multiCurrencyService.js` - Multi-currency
+- `deepiri/platform-services/backend/deepiri-engagement-service/src/eloLeaderboardService.js` - ELO leaderboard
+- `deepiri/platform-services/backend/deepiri-engagement-service/src/badgeSystemService.js` - Badge system
 
 ---
 
 ### FullStack Engineer 3 - Integrations UI
 **Reports to:** Backend Lead
-**Location:** `deepiri/frontend/src/pages/integrations/` & `deepiri/services/deepiri-external-bridge-service/`
+**Location:** `deepiri/frontend/src/pages/integrations/` & `deepiri/platform-services/backend/deepiri-external-bridge-service/`
 **Stack:** React, TypeScript, Node.js, OAuth2, REST APIs
 **Start Here:**
-1. **Integration Service**: Review `deepiri/services/deepiri-external-bridge-service/server.js` (Port 5006) for backend API
-2. **Route Handlers**: Study `deepiri/services/deepiri-external-bridge-service/src/index.js` for endpoint structure
-3. **Webhook Service**: Check `deepiri/services/deepiri-external-bridge-service/src/webhookService.js` for webhook processing
+1. **Integration Service**: Review `deepiri/platform-services/backend/deepiri-external-bridge-service/server.js` (Port 5006) for backend API
+2. **Route Handlers**: Study `deepiri/platform-services/backend/deepiri-external-bridge-service/src/index.js` for endpoint structure
+3. **Webhook Service**: Check `deepiri/platform-services/backend/deepiri-external-bridge-service/src/webhookService.js` for webhook processing
 4. **Frontend Pages**: Explore `deepiri/frontend/src/pages/` for existing integration UI
 5. **OAuth Flows**: Understand OAuth implementation for Notion, Trello, GitHub
 6. **Sync Status**: Review how real-time sync status is displayed in UI
@@ -822,22 +822,22 @@
 - Integration status and health monitoring UI
 - Webhook configuration interface
 **Files to Work On:**
-- `deepiri/services/deepiri-external-bridge-service/server.js` - Service server
-- `deepiri/services/deepiri-external-bridge-service/src/index.js` - Route handlers
-- `deepiri/services/deepiri-external-bridge-service/src/webhookService.js` - Webhook processing
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/server.js` - Service server
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/src/index.js` - Route handlers
+- `deepiri/platform-services/backend/deepiri-external-bridge-service/src/webhookService.js` - Webhook processing
 
 ---
 
 ### FullStack Engineer 4 - Analytics UI
 **Reports to:** Backend Lead
-**Location:** `deepiri/frontend/src/pages/analytics/` & `deepiri/services/deepiri-platform-analytics-service/`
+**Location:** `deepiri/frontend/src/pages/analytics/` & `deepiri/platform-services/backend/deepiri-platform-analytics-service/`
 **Stack:** React, TypeScript, Chart.js/D3.js, Node.js, InfluxDB, Real-time Data
 **Start Here:**
-1. **Analytics Service**: Review `deepiri/services/deepiri-platform-analytics-service/server.js` (Port 5004) for data API
-2. **Route Handlers**: Study `deepiri/services/deepiri-platform-analytics-service/src/index.js` for endpoint structure
-3. **Time-Series Analytics**: Check `deepiri/services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` for InfluxDB queries
-4. **Behavioral Clustering**: Review `deepiri/services/deepiri-platform-analytics-service/src/behavioralClustering.js` for clustering logic
-5. **Predictive Modeling**: Study `deepiri/services/deepiri-platform-analytics-service/src/predictiveModeling.js` for predictions
+1. **Analytics Service**: Review `deepiri/platform-services/backend/deepiri-platform-analytics-service/server.js` (Port 5004) for data API
+2. **Route Handlers**: Study `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/index.js` for endpoint structure
+3. **Time-Series Analytics**: Check `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` for InfluxDB queries
+4. **Behavioral Clustering**: Review `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/behavioralClustering.js` for clustering logic
+5. **Predictive Modeling**: Study `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/predictiveModeling.js` for predictions
 6. **Frontend Pages**: Explore `deepiri/frontend/src/pages/analytics/` for existing dashboards
 7. **Charting Libraries**: Review Chart.js/D3.js integration for data visualization
 **Unique Mission:** Data visualizations, productivity metrics UI, real-time analytics integration.
@@ -850,21 +850,21 @@
 - Time-series charts and graphs
 - User behavior visualization
 **Files to Work On:**
-- `deepiri/services/deepiri-platform-analytics-service/server.js` - Service server (port 5004)
-- `deepiri/services/deepiri-platform-analytics-service/src/index.js` - Route handlers
-- `deepiri/services/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - InfluxDB analytics
-- `deepiri/services/deepiri-platform-analytics-service/src/behavioralClustering.js` - Clustering
-- `deepiri/services/deepiri-platform-analytics-service/src/predictiveModeling.js` - Predictive models
+- `deepiri/platform-services/backend/deepiri-platform-analytics-service/server.js` - Service server (port 5004)
+- `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/index.js` - Route handlers
+- `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/timeSeriesAnalytics.js` - InfluxDB analytics
+- `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/behavioralClustering.js` - Clustering
+- `deepiri/platform-services/backend/deepiri-platform-analytics-service/src/predictiveModeling.js` - Predictive models
 
 ---
 
 ### Systems Architect 1 - Microservices Communication
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/` & `deepiri/docs/MICROSERVICES_SETUP.md`
+**Location:** `deepiri/platform-services/backend/` & `deepiri/docs/MICROSERVICES_SETUP.md`
 **Stack:** System Design, Microservices Patterns, API Gateway, Service Mesh
 **Start Here:**
 - Architecture doc: `deepiri/docs/MICROSERVICES_SETUP.md` - **READ THIS FIRST!**
-- API Gateway: `deepiri/services/deepiri-api-gateway/server.js` (Port 5000)
+- API Gateway: `deepiri/platform-services/backend/deepiri-api-gateway/server.js` (Port 5000)
 - Docker Compose: `deepiri/docker-compose.dev.yml`
 **Unique Mission:** Establishes new microservices communication patterns, Improves microservice communication, cloud scaling approach, native-to-cloud handshake protocol.
 **Your Tasks:**
@@ -876,18 +876,18 @@
 - Service discovery and health checks
 - Inter-service communication protocols
 **Files to Work On:**
-- `deepiri/services/deepiri-api-gateway/server.js` - API Gateway routing
-- `deepiri/services/deepiri-api-gateway/src/index.js` - Route definitions
+- `deepiri/platform-services/backend/deepiri-api-gateway/server.js` - API Gateway routing
+- `deepiri/platform-services/backend/deepiri-api-gateway/src/index.js` - Route definitions
 - `deepiri/docker-compose.dev.yml` - Service orchestration
 
 ---
 
 ### Systems Architect 2 - Event Bus & Streaming
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/` (Event-Driven Architecture)
+**Location:** `deepiri/platform-services/backend/` (Event-Driven Architecture)
 **Stack:** Kafka, RabbitMQ, Event Sourcing, CQRS, Message Queues
 **Start Here:**
-- Services: `deepiri/services/`
+- Services: `deepiri/platform-services/backend/`
 **Unique Mission:** Event bus architecture, real-time stream processing, message queue logic.
 **Your Tasks:**
 - Event bus architecture (Redis Streams/Kafka)
@@ -902,11 +902,11 @@
 
 ### Systems Architect 3 - Security & Compliance
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/` & `deepiri/diri-cyrex/app/middleware/`
+**Location:** `deepiri/platform-services/backend/` & `deepiri/diri-cyrex/app/middleware/`
 **Stack:** Security Architecture, OAuth2, JWT, Encryption, API Security
 **Start Here:**
 - Middleware: `deepiri/diri-cyrex/app/middleware/`
-- Services: `deepiri/services/`
+- Services: `deepiri/platform-services/backend/`
 **Unique Mission:** Authentication flows, token security, data privacy requirements, API hardening.
 **Your Tasks:**
 - Authentication flows (JWT, OAuth)
@@ -921,11 +921,11 @@
 
 ### Systems Architect 4 - Scaling & High Availability
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/deepiri-realtime-gateway/` & `deepiri/services/deepiri-engagement-service/`
+**Location:** `deepiri/platform-services/backend/deepiri-realtime-gateway/` & `deepiri/platform-services/backend/deepiri-engagement-service/`
 **Stack:** Real-time Systems, WebSockets, Scalability, Multiplayer Architecture
 **Start Here:**
-- WebSocket service: `deepiri/services/deepiri-realtime-gateway/`
-- Gamification service: `deepiri/services/deepiri-engagement-service/`
+- WebSocket service: `deepiri/platform-services/backend/deepiri-realtime-gateway/`
+- Gamification service: `deepiri/platform-services/backend/deepiri-engagement-service/`
 **Unique Mission:** Scaling live sessions, game state management, global replication strategies.
 **Your Tasks:**
 - Scaling live sessions (WebSocket connections)
@@ -940,11 +940,11 @@
 
 ### Systems Architect Intern (Officially: Systems Architect)
 **Reports to:** Backend Lead
-**Location:** `deepiri/architecture/` & `deepiri/services/`
+**Location:** `deepiri/architecture/` & `deepiri/platform-services/backend/`
 **Stack:** System Design, Documentation, Architecture Patterns
 **Start Here:**
 - Architecture docs: `deepiri/docs/MICROSERVICES_SETUP.md`
-- Services: `deepiri/services/`
+- Services: `deepiri/platform-services/backend/`
 **Unique Mission:** Supporting system architecture design, documentation, prototyping.
 **Your Tasks:**
 - Documents architecture decisions
@@ -1110,10 +1110,10 @@
 
 ### Backend Intern 1 (MLOps Intern)
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/*/tests/` & `deepiri/.github/workflows/`
+**Location:** `deepiri/platform-services/backend/*/tests/` & `deepiri/.github/workflows/`
 **Stack:** Testing, CI/CD, Test Automation
 **Start Here:**
-1. **Service Tests**: Review `deepiri/services/*/tests/` for existing test patterns
+1. **Service Tests**: Review `deepiri/platform-services/backend/*/tests/` for existing test patterns
 2. **CI/CD Workflows**: Study `deepiri/.github/workflows/` for automation pipelines
 3. **Service Architecture**: Check `deepiri/docs/MICROSERVICES_SETUP.md` for service structure
 4. **API Testing**: Review API testing approaches in existing tests
@@ -1131,10 +1131,10 @@
 
 ### Backend Intern 2 - Documentation
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/*/docs/` & `deepiri/services/*/src/`
+**Location:** `deepiri/platform-services/backend/*/docs/` & `deepiri/platform-services/backend/*/src/`
 **Stack:** Documentation, API Documentation, Logging
 **Start Here:**
-- Services: `deepiri/services/`
+- Services: `deepiri/platform-services/backend/`
 **Unique Mission:** Writes request/response schemas, improves logging clarity, builds internal documentation.
 **Your Tasks:**
 - Writes request/response schemas
@@ -1147,11 +1147,11 @@
 
 ### Backend Intern 3 - Performance Testing
 **Reports to:** Backend Lead
-**Location:** `deepiri/services/*/tests/performance/` & `deepiri/services/*/src/`
+**Location:** `deepiri/platform-services/backend/*/tests/performance/` & `deepiri/platform-services/backend/*/src/`
 **Stack:** Performance Testing, Load Testing, Bug Fixes
 **Start Here:**
-1. **Service Architecture**: Review `deepiri/services/` to understand service structure
-2. **Performance Tests**: Check `deepiri/services/*/tests/performance/` for existing performance tests
+1. **Service Architecture**: Review `deepiri/platform-services/backend/` to understand service structure
+2. **Performance Tests**: Check `deepiri/platform-services/backend/*/tests/performance/` for existing performance tests
 3. **API Endpoints**: Study service endpoints to understand what needs testing
 4. **Load Testing Tools**: Familiarize with load testing tools used
 5. **Performance Metrics**: Understand performance benchmarks and targets
@@ -1256,7 +1256,7 @@
 **Stack:** React, TypeScript, CSS Animations, Gamification UI
 **Start Here:**
 1. **Gamification Components**: Review `deepiri/frontend/src/components/gamification/` for existing UI
-2. **Gamification Service**: Study `deepiri/services/deepiri-engagement-service/` to understand backend API
+2. **Gamification Service**: Study `deepiri/platform-services/backend/deepiri-engagement-service/` to understand backend API
 3. **Badge System**: Check badge and achievement UI implementations
 4. **Progress Visualization**: Review progress bars, XP displays, and streak tracking
 5. **Animation Patterns**: Study CSS animation patterns used in the codebase
@@ -1323,11 +1323,11 @@
 
 ### IT Lead
 **Reports to:** Founder
-**Location:** `deepiri/infrastructure/security/` & `deepiri/services/auth-service/`
+**Location:** `deepiri/infrastructure/security/` & `deepiri/platform-services/backend/auth-service/`
 **Stack:** Security Architecture, Network Defense, Cloud Security, Secure Microservices
 **Start Here:**
 - Infrastructure: `deepiri/infrastructure/`
-- Auth service: `deepiri/services/auth-service/`
+- Auth service: `deepiri/platform-services/backend/auth-service/`
 **Unique Mission:** Infrastructure support, organizational tech support, Network defense, secure microservices, cloud security.
 **Your Tasks:**
 - Infrastructure support for development and production

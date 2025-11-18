@@ -68,7 +68,7 @@ This will:
 **Node.js Services:**
 ```bash
 # Install dependencies for all services
-for service in services/*; do
+for service in platform-services/backend/*; do
   if [ -f "$service/package.json" ]; then
     echo "Installing $service..."
     cd "$service" && npm install && cd ../..
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 find services -name "logger.js" -type f
 
 # Check that dependencies are installed
-ls services/deepiri-auth-service/node_modules/axios
+ls platform-services/backend/deepiri-auth-service/node_modules/axios
 python -c "import numpy; print('numpy OK')"
 ```
 
@@ -157,8 +157,9 @@ docker-compose logs -f
 
 ```
 deepiri/
-├── services/              # Microservices
-│   ├── auth-service/
+├── platform-services/     # Platform microservices
+│   ├── backend/           # Backend microservices
+│   │   ├── deepiri-auth-service/
 │   │   ├── src/          # Source code
 │   │   ├── utils/        # Utilities (logger, etc.)
 │   │   ├── package.json  # Dependencies
@@ -183,7 +184,7 @@ deepiri/
 
 **Node.js Service:**
 ```bash
-cd services/deepiri-auth-service
+cd platform-services/backend/deepiri-auth-service
 npm install <package-name> --save
 ```
 
@@ -196,7 +197,7 @@ echo "<package-name>==<version>" >> requirements.txt
 
 ### Adding a New Service
 
-1. Create service directory: `services/new-service/`
+1. Create service directory: `platform-services/backend/new-service/`
 2. Add `package.json` with dependencies
 3. Create `Dockerfile`
 4. Add service to `docker-compose.dev.yml`
@@ -249,7 +250,7 @@ docker-compose -f docker-compose.dev.yml ps
 
 ```bash
 # Run service tests
-cd services/deepiri-auth-service
+cd platform-services/backend/deepiri-auth-service
 npm test
 
 # Check service health

@@ -253,7 +253,7 @@ mlflow ui
 - `diri-cyrex/mlops/registry/model_registry.py` - Model registry
 - `diri-cyrex/mlops/ci/model_ci_pipeline.py` - CI/CD pipeline
 - `diri-cyrex/mlops/deployment/deployment_automation.py` - Deployment automation
-- `services/deepiri-challenge-service/server.js` - Challenge service (calls Python AI)
+- `platform-services/backend/deepiri-challenge-service/server.js` - Challenge service (calls Python AI)
 
 ---
 

@@ -17,7 +17,7 @@ cd "$PROJECT_ROOT"
 # Fix Node.js services
 echo ""
 echo "📦 Installing Node.js service dependencies..."
-for service in services/*; do
+for service in platform-services/backend/*; do
   if [ -f "$service/package.json" ]; then
     echo "  Installing dependencies for $(basename $service)..."
     cd "$service"
@@ -31,9 +31,9 @@ for service in services/*; do
 done
 
 # Install shared utils
-if [ -f "services/deepiri-shared-utils/package.json" ]; then
+if [ -f "platform-services/shared/deepiri-shared-utils/package.json" ]; then
   echo "  Installing dependencies for deepiri-shared-utils..."
-  cd "services/deepiri-shared-utils"
+  cd "platform-services/shared/deepiri-shared-utils"
   npm install --legacy-peer-deps
   cd "$PROJECT_ROOT"
 fi

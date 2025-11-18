@@ -141,7 +141,11 @@ deepiri/
 ├── deepiri-web-frontend/        # React frontend
 ├── deepiri-core-api/            # Node.js backend
 ├── diri-cyrex/              # Python AI agent
-├── services/                    # Microservices
+├── platform-services/           # Platform microservices
+│   ├── backend/                 # Backend microservices
+│   ├── shared/                  # Shared utilities
+│   ├── ai-ml/                   # AI/ML services (future)
+│   └── data/                    # Data processing services (future)
 └── docker-compose.dev.yml       # Docker configuration
 ```
 

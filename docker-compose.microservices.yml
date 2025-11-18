@@ -38,7 +38,7 @@ services:
   # API Gateway
   api-gateway:
     build:
-      context: ./services/deepiri-api-gateway
+      context: ./platform-services/backend/deepiri-api-gateway
       dockerfile: Dockerfile
     container_name: deepiri-api-gateway
     restart: unless-stopped
@@ -69,7 +69,7 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: ./services/deepiri-auth-service
+      context: ./platform-services/backend/deepiri-auth-service
       dockerfile: Dockerfile
     container_name: deepiri-auth-service
     restart: unless-stopped
@@ -90,7 +90,7 @@ services:
   # Task Orchestrator Service
   task-orchestrator:
     build:
-      context: ./services/deepiri-task-orchestrator
+      context: ./platform-services/backend/deepiri-task-orchestrator
       dockerfile: Dockerfile
     container_name: deepiri-task-orchestrator
     restart: unless-stopped
@@ -110,7 +110,7 @@ services:
   # Challenge Service
   challenge-service:
     build:
-      context: ./services/deepiri-challenge-service
+      context: ./platform-services/backend/deepiri-challenge-service
       dockerfile: Dockerfile
     container_name: deepiri-challenge-service
     restart: unless-stopped
@@ -132,7 +132,7 @@ services:
   # Engagement Service
   engagement-service:
     build:
-      context: ./services/deepiri-engagement-service
+      context: ./platform-services/backend/deepiri-engagement-service
       dockerfile: Dockerfile
     container_name: deepiri-engagement-service
     restart: unless-stopped
@@ -154,7 +154,7 @@ services:
   # Platform Analytics Service
   platform-analytics-service:
     build:
-      context: ./services/deepiri-platform-analytics-service
+      context: ./platform-services/backend/deepiri-platform-analytics-service
       dockerfile: Dockerfile
     container_name: deepiri-platform-analytics-service
     restart: unless-stopped
@@ -174,7 +174,7 @@ services:
   # External Bridge Service
   external-bridge-service:
     build:
-      context: ./services/deepiri-external-bridge-service
+      context: ./platform-services/backend/deepiri-external-bridge-service
       dockerfile: Dockerfile
     container_name: deepiri-external-bridge-service
     restart: unless-stopped
@@ -194,7 +194,7 @@ services:
   # Notification Service
   notification-service:
     build:
-      context: ./services/deepiri-notification-service
+      context: ./platform-services/backend/deepiri-notification-service
       dockerfile: Dockerfile
     container_name: deepiri-notification-service
     restart: unless-stopped
@@ -214,7 +214,7 @@ services:
   # Realtime Gateway Service
   realtime-gateway:
     build:
-      context: ./services/deepiri-realtime-gateway
+      context: ./platform-services/backend/deepiri-realtime-gateway
       dockerfile: Dockerfile
     container_name: deepiri-realtime-gateway
     restart: unless-stopped

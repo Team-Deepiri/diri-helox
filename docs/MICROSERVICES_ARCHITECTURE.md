@@ -6,35 +6,35 @@ All services are currently in `deepiri-core-api/` as a monolith. This document o
 ## Target Microservices
 
 ### 1. API Gateway
-**Location**: `services/deepiri-api-gateway/`
+**Location**: `platform-services/backend/deepiri-api-gateway/`
 - Routes requests to appropriate services
 - Authentication/authorization
 - Rate limiting
 - Request/response transformation
 
 ### 2. User Service
-**Location**: `services/deepiri-auth-service/`
+**Location**: `platform-services/backend/deepiri-auth-service/`
 - User registration and authentication
 - Profile management
 - User preferences
 - Firebase integration
 
 ### 3. Task Service
-**Location**: `services/deepiri-task-orchestrator/`
+**Location**: `platform-services/backend/deepiri-task-orchestrator/`
 - Task CRUD operations
 - Task metadata management
 - Task completion tracking
 - Task filtering and search
 
 ### 4. Challenge Service
-**Location**: `services/deepiri-challenge-service/`
+**Location**: `platform-services/backend/deepiri-challenge-service/`
 - Challenge generation (calls AI service)
 - Challenge completion tracking
 - Challenge state management
 - Challenge linking to tasks
 
 ### 5. Gamification Service
-**Location**: `services/deepiri-engagement-service/`
+**Location**: `platform-services/backend/deepiri-engagement-service/`
 - Points and XP system
 - Badge management
 - Leaderboard functionality
@@ -42,27 +42,27 @@ All services are currently in `deepiri-core-api/` as a monolith. This document o
 - Level progression
 
 ### 6. Analytics Service
-**Location**: `services/deepiri-platform-analytics-service/`
+**Location**: `platform-services/backend/deepiri-platform-analytics-service/`
 - Performance tracking
 - Efficiency calculations
 - Productivity insights
 - Time management analytics
 
 ### 7. Integration Service
-**Location**: `services/deepiri-external-bridge-service/`
+**Location**: `platform-services/backend/deepiri-external-bridge-service/`
 - External API integrations (Notion, Trello, GitHub)
 - OAuth flows
 - Webhook management
 - Data synchronization
 
 ### 8. Notification Service
-**Location**: `services/deepiri-notification-service/`
+**Location**: `platform-services/backend/deepiri-notification-service/`
 - Real-time notifications
 - Notification preferences
 - Notification history
 
 ### 9. WebSocket Service
-**Location**: `services/deepiri-realtime-gateway/`
+**Location**: `platform-services/backend/deepiri-realtime-gateway/`
 - WebSocket server
 - Real-time challenge updates
 - Multiplayer sessions

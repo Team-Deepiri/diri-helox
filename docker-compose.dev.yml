@@ -93,7 +93,7 @@ services:
   api-gateway:
     image: deepiri-dev-api-gateway:latest
     build:
-      context: ./services/deepiri-api-gateway
+      context: ./platform-services/backend/deepiri-api-gateway
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-api-gateway-dev
@@ -134,7 +134,7 @@ services:
   auth-service:
     image: deepiri-dev-auth-service:latest
     build:
-      context: ./services/deepiri-auth-service
+      context: ./platform-services/backend/deepiri-auth-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-auth-service-dev
@@ -157,7 +157,7 @@ services:
       OAUTH_CLIENT_ID: ${OAUTH_CLIENT_ID}
       OAUTH_CLIENT_SECRET: ${OAUTH_CLIENT_SECRET}
     volumes:
-      - ./services/deepiri-auth-service:/app
+      - ./platform-services/backend/deepiri-auth-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -169,7 +169,7 @@ services:
   task-orchestrator:
     image: deepiri-dev-task-orchestrator:latest
     build:
-      context: ./services/deepiri-task-orchestrator
+      context: ./platform-services/backend/deepiri-task-orchestrator
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-task-orchestrator-dev
@@ -186,7 +186,7 @@ services:
       PORT: 5002
       MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
     volumes:
-      - ./services/deepiri-task-orchestrator:/app
+      - ./platform-services/backend/deepiri-task-orchestrator:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -197,7 +197,7 @@ services:
   engagement-service:
     image: deepiri-dev-engagement-service:latest
     build:
-      context: ./services/deepiri-engagement-service
+      context: ./platform-services/backend/deepiri-engagement-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-engagement-service-dev
@@ -217,7 +217,7 @@ services:
       REDIS_PORT: 6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:-redispassword}
     volumes:
-      - ./services/deepiri-engagement-service:/app
+      - ./platform-services/backend/deepiri-engagement-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -229,7 +229,7 @@ services:
   platform-analytics-service:
     image: deepiri-dev-platform-analytics-service:latest
     build:
-      context: ./services/deepiri-platform-analytics-service
+      context: ./platform-services/backend/deepiri-platform-analytics-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-platform-analytics-service-dev
@@ -250,7 +250,7 @@ services:
       INFLUXDB_ORG: ${INFLUXDB_ORG:-deepiri}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET:-analytics}
     volumes:
-      - ./services/deepiri-platform-analytics-service:/app
+      - ./platform-services/backend/deepiri-platform-analytics-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -262,7 +262,7 @@ services:
   notification-service:
     image: deepiri-dev-notification-service:latest
     build:
-      context: ./services/deepiri-notification-service
+      context: ./platform-services/backend/deepiri-notification-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-notification-service-dev
@@ -282,7 +282,7 @@ services:
       APNS_KEY_ID: ${APNS_KEY_ID}
       APNS_TEAM_ID: ${APNS_TEAM_ID}
     volumes:
-      - ./services/deepiri-notification-service:/app
+      - ./platform-services/backend/deepiri-notification-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -293,7 +293,7 @@ services:
   external-bridge-service:
     image: deepiri-dev-external-bridge-service:latest
     build:
-      context: ./services/deepiri-external-bridge-service
+      context: ./platform-services/backend/deepiri-external-bridge-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-external-bridge-service-dev
@@ -319,7 +319,7 @@ services:
       NOTION_WEBHOOK_SECRET: ${NOTION_WEBHOOK_SECRET}
       TRELLO_WEBHOOK_SECRET: ${TRELLO_WEBHOOK_SECRET}
     volumes:
-      - ./services/deepiri-external-bridge-service:/app
+      - ./platform-services/backend/deepiri-external-bridge-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -330,7 +330,7 @@ services:
   challenge-service:
     image: deepiri-dev-challenge-service:latest
     build:
-      context: ./services/deepiri-challenge-service
+      context: ./platform-services/backend/deepiri-challenge-service
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-challenge-service-dev
@@ -348,7 +348,7 @@ services:
       MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
       CYREX_URL: http://cyrex:8000
     volumes:
-      - ./services/deepiri-challenge-service:/app
+      - ./platform-services/backend/deepiri-challenge-service:/app
       - /app/node_modules
     depends_on:
       - mongodb
@@ -360,7 +360,7 @@ services:
   realtime-gateway:
     image: deepiri-dev-realtime-gateway:latest
     build:
-      context: ./services/deepiri-realtime-gateway
+      context: ./platform-services/backend/deepiri-realtime-gateway
       dockerfile: Dockerfile
     pull_policy: build
     container_name: deepiri-realtime-gateway-dev
@@ -376,7 +376,7 @@ services:
       NODE_ENV: development
       PORT: 5008
     volumes:
-      - ./services/deepiri-realtime-gateway:/app
+      - ./platform-services/backend/deepiri-realtime-gateway:/app
       - /app/node_modules
     networks:
       - deepiri-dev-network

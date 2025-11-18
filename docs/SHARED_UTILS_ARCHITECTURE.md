@@ -18,7 +18,7 @@ Each service has its own `utils/logger.js` file that provides logging functional
 
 ### Shared Utils Package
 
-Located at `services/deepiri-shared-utils/`, this package provides:
+Located at `platform-services/shared/deepiri-shared-utils/`, this package provides:
 
 - Logger factory function
 - Common utilities (to be expanded)
@@ -32,8 +32,8 @@ Use npm workspaces or yarn workspaces to manage shared code:
 ```json
 {
   "workspaces": [
-    "services/*",
-    "services/deepiri-shared-utils"
+    "platform-services/backend/*",
+    "platform-services/shared/deepiri-shared-utils"
   ]
 }
 ```
@@ -69,7 +69,7 @@ npm publish @deepiri/shared-utils
 Use git submodules to share code:
 
 ```bash
-git submodule add <repo-url> services/deepiri-shared-utils
+git submodule add <repo-url> platform-services/shared/deepiri-shared-utils
 ```
 
 **Pros:**
@@ -87,7 +87,7 @@ Create a base Docker image with shared utilities:
 ```dockerfile
 FROM node:18-alpine AS shared-utils
 WORKDIR /shared
-COPY services/deepiri-shared-utils ./
+COPY platform-services/shared/deepiri-shared-utils ./
 RUN npm install
 
 FROM node:18-alpine
@@ -122,8 +122,8 @@ Update root `package.json`:
   "name": "deepiri",
   "private": true,
   "workspaces": [
-    "services/*",
-    "services/deepiri-shared-utils"
+    "platform-services/backend/*",
+    "platform-services/shared/deepiri-shared-utils"
   ]
 }
 ```
@@ -159,8 +159,8 @@ Ensure workspace dependencies are installed:
 
 ```dockerfile
 COPY package*.json ./
-COPY services/deepiri-shared-utils ./services/deepiri-shared-utils
-RUN npm install --workspace=services/deepiri-shared-utils
+COPY platform-services/shared/deepiri-shared-utils ./platform-services/shared/deepiri-shared-utils
+RUN npm install --workspace=platform-services/shared/deepiri-shared-utils
 ```
 
 ## Best Practices

@@ -373,69 +373,69 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 
 ## 📦 Service Documentation
 
-### `services/README.md`
+### `platform-services/README.md`
 **Microservices overview**
 - Service catalog
 - Service responsibilities
 - Service communication patterns
 
-### `services/deepiri-api-gateway/README.md`
+### `platform-services/backend/deepiri-api-gateway/README.md`
 **API Gateway service documentation**
 - Gateway configuration
 - Routing rules
 - Rate limiting
 - Authentication
 
-### `services/deepiri-auth-service/README.md`
+### `platform-services/backend/deepiri-auth-service/README.md`
 **User service documentation**
 - User management
 - Authentication flows
 - Profile management
 
-### `services/deepiri-task-orchestrator/README.md`
+### `platform-services/backend/deepiri-task-orchestrator/README.md`
 **Task service documentation**
 - Task CRUD operations
 - Task metadata
 - Task filtering
 
-### `services/deepiri-challenge-service/README.md`
+### `platform-services/backend/deepiri-challenge-service/README.md`
 **Challenge service documentation**
 - Challenge generation
 - Challenge state management
 - AI integration
 
-### `services/deepiri-engagement-service/README.md`
+### `platform-services/backend/deepiri-engagement-service/README.md`
 **Gamification service documentation**
 - Points system
 - Badge management
 - Leaderboards
 - Streak tracking
 
-### `services/deepiri-platform-analytics-service/README.md`
+### `platform-services/backend/deepiri-platform-analytics-service/README.md`
 **Analytics service documentation**
 - Performance tracking
 - Analytics collection
 - Insights generation
 
-### `services/deepiri-notification-service/README.md`
+### `platform-services/backend/deepiri-notification-service/README.md`
 **Notification service documentation**
 - Notification delivery
 - Notification preferences
 - Push notifications
 
-### `services/deepiri-external-bridge-service/README.md`
+### `platform-services/backend/deepiri-external-bridge-service/README.md`
 **Integration service documentation**
 - External API integrations
 - OAuth flows
 - Webhook management
 
-### `services/deepiri-realtime-gateway/README.md`
+### `platform-services/backend/deepiri-realtime-gateway/README.md`
 **WebSocket service documentation**
 - Real-time communication
 - WebSocket connections
 - Event broadcasting
 
-### `services/deepiri-shared-utils/README.md`
+### `platform-services/shared/deepiri-shared-utils/README.md`
 **Shared utilities documentation**
 - Common utilities
 - Shared libraries
@@ -561,7 +561,7 @@ Complete guide to all markdown documentation files in the Deepiri project. Use t
 - `SYSTEM_ARCHITECTURE.md`, `MICROSERVICES_ARCHITECTURE.md`, `MICROSERVICES_SETUP.md`
 - `SHARED_UTILS_ARCHITECTURE.md`
 
-### Service Docs (`services/*/README.md`)
+### Service Docs (`platform-services/backend/*/README.md`)
 - Individual service documentation in each service directory
 
 ### Python Backend (`diri-cyrex/`)

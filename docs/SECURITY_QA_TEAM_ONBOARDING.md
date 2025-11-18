@@ -162,9 +162,9 @@ npm install -g npm-audit-resolver
 **First Tasks:**
 1. Review `docs/MICROSERVICES_SETUP.md` - Microservices architecture
 2. Review security architecture for all microservices
-3. Review `services/deepiri-auth-service/server.js` - OAuth 2.0 service (port 5001)
-4. Review `services/deepiri-external-bridge-service/server.js` - Webhook service (port 5006)
-5. Review `services/deepiri-notification-service/server.js` - Push notification service (port 5005)
+3. Review `platform-services/backend/deepiri-auth-service/server.js` - OAuth 2.0 service (port 5001)
+4. Review `platform-services/backend/deepiri-external-bridge-service/server.js` - Webhook service (port 5006)
+5. Review `platform-services/backend/deepiri-notification-service/server.js` - Push notification service (port 5005)
 6. Test OAuth flows across services
 7. Test webhook security
 8. Audit API Gateway security
@@ -176,9 +176,9 @@ npm install -g npm-audit-resolver
 10. Plan security improvements
 
 **Key Files:**
-- `services/deepiri-auth-service/src/oauthService.js` - NEW: OAuth 2.0 service
-- `services/deepiri-external-bridge-service/src/webhookService.js` - NEW: Webhook service
-- `services/deepiri-notification-service/src/pushNotificationService.js` - NEW: Push notifications
+- `platform-services/backend/deepiri-auth-service/src/oauthService.js` - NEW: OAuth 2.0 service
+- `platform-services/backend/deepiri-external-bridge-service/src/webhookService.js` - NEW: Webhook service
+- `platform-services/backend/deepiri-notification-service/src/pushNotificationService.js` - NEW: Push notifications
 - `infrastructure/security/` (create)
 - `deepiri-core-api/SECURITY_AUDIT.md` (review)
 
