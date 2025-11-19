@@ -1,25 +1,38 @@
+# Build shared-utils first
+FROM node:18-alpine AS shared-utils-builder
+WORKDIR /shared-utils
+COPY shared/deepiri-shared-utils/package*.json ./
+COPY shared/deepiri-shared-utils/tsconfig.json ./
+COPY shared/deepiri-shared-utils/src ./src
+RUN npm install --legacy-peer-deps && npm run build
+
+# Build the service
 FROM node:18-alpine
 
 WORKDIR /app
 
-# Install system dependencies (dumb-init and curl needed at runtime)
 RUN apk add --no-cache curl dumb-init
 
-COPY package*.json ./
-COPY tsconfig.json ./
+# Copy package files
+COPY backend/deepiri-auth-service/package*.json ./
+COPY backend/deepiri-auth-service/tsconfig.json ./
 
-# Install dependencies and clean up in one layer
-RUN npm install --legacy-peer-deps && \
-    npm cache clean --force && \
-    rm -rf /tmp/* /var/tmp/*
+# Copy built shared-utils to a temp location
+COPY --from=shared-utils-builder /shared-utils /tmp/shared-utils
+
+# Install shared-utils as a local file dependency first, then install other dependencies
+RUN npm install --legacy-peer-deps file:/tmp/shared-utils && \
+    npm install --legacy-peer-deps && \
+    npm cache clean --force
 
 # Copy source files
-COPY src ./src
+COPY backend/deepiri-auth-service/src ./src
 
 # Build TypeScript
-RUN npm run build
+RUN npm run build && \
+    rm -rf /tmp/* /var/tmp/*
 
-# Create non-root user and set up directories in one layer
+# Create non-root user and set up directories
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S nodejs -u 1001 && \
     mkdir -p logs && chown -R nodejs:nodejs /app
@@ -33,4 +46,3 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 CMD ["node", "dist/server.js"]
-

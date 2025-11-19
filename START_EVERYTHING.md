@@ -56,11 +56,50 @@ cp env.example .env
 # - NOTION_CLIENT_ID, NOTION_CLIENT_SECRET (optional)
 ```
 
-## Step 2: Start All Services with Docker Compose
+## Step 2: Choose Your Deployment Method
 
-**This is the EASIEST way to start everything:**
+### ⭐ Option A: Kubernetes with Skaffold (PRIMARY - Recommended) ☸️
 
-### Normal Start (Uses Existing Images - No Rebuild)
+**This is the RECOMMENDED way to start everything for production-like development:**
+
+```bash
+# 1. Setup Minikube (first time only)
+minikube start --driver=docker --cpus=4 --memory=8192
+eval $(minikube docker-env)
+
+# Or use the setup script
+./scripts/setup-minikube-wsl2.sh      # Linux/WSL2
+.\scripts\setup-minikube-wsl2.ps1     # Windows PowerShell
+
+# 2. Start with Skaffold (handles everything automatically)
+skaffold dev --port-forward
+
+# Or use the helper script
+./scripts/start-skaffold-dev.sh        # Linux/WSL2
+.\scripts\start-skaffold-dev.ps1      # Windows PowerShell
+```
+
+**Skaffold automatically:**
+- ✅ Builds Docker images using Minikube's Docker daemon
+- ✅ Deploys to Kubernetes
+- ✅ Auto-syncs files for instant updates (no rebuilds needed for `.ts`, `.js`, `.py` files)
+- ✅ Port-forwards all services automatically
+- ✅ Streams logs from all services
+- ✅ Cleans up on exit (Ctrl+C)
+
+**Stop Skaffold:**
+```bash
+# Press Ctrl+C in Skaffold terminal (auto-cleanup)
+# Or manually cleanup:
+./scripts/stop-skaffold.sh             # Linux/WSL2
+.\scripts\stop-skaffold.ps1            # Windows PowerShell
+```
+
+**See [SKAFFOLD_QUICK_START.md](SKAFFOLD_QUICK_START.md) or [docs/SKAFFOLD_SETUP.md](docs/SKAFFOLD_SETUP.md) for detailed Skaffold documentation.**
+
+### Option B: Docker Compose (Alternative) 🐳
+
+**Simpler option for quick local testing:**
 
 ```bash
 # Start all services (uses existing images - fast!)
@@ -78,7 +117,7 @@ docker compose -f docker-compose.dev.yml logs -f cyrex
 docker compose -f docker-compose.dev.yml logs -f jupyter
 ```
 
-**Note:** Normal `docker compose up` does NOT rebuild images - it uses existing ones. This is fast and efficient for daily use.
+**💡 Tip:** Normal `docker compose up` does NOT rebuild images - it uses existing ones. This is fast and efficient for daily use.
 
 ### Rebuilding (Only When Needed)
 
@@ -96,8 +135,6 @@ docker compose -f docker-compose.dev.yml logs -f jupyter
 # 4. Rebuilds everything fresh
 # 5. Starts all services
 ```
-
-**💡 Tip:** Only use `rebuild.sh` / `rebuild.ps1` when you need to rebuild. Normal `docker compose up` is faster and doesn't rebuild. See [docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md](docs/DOCKER-IMAGE-CLEANSING-COMMANDS.md) for details.
 
 ### Common Issues and Fixes
 
@@ -277,6 +314,16 @@ cd frontend && npm run dev
 ```
 
 ### Stop Everything
+
+**⭐ PRIMARY: Kubernetes with Skaffold**
+```bash
+# Press Ctrl+C in Skaffold terminal (auto-cleanup)
+# Or manually:
+./scripts/stop-skaffold.sh        # Linux/Mac
+.\scripts\stop-skaffold.ps1         # Windows
+```
+
+**Alternative: Docker Compose**
 ```bash
 # Stop all services
 docker-compose -f docker-compose.dev.yml down

@@ -1,0 +1,139 @@
+apiVersion: skaffold/v4beta7
+kind: Config
+metadata:
+  name: deepiri
+
+build:
+  local:
+    useBuildkit: true
+    push: false  # Use local registry (minikube docker-env)
+  artifacts:
+    # Backend API Service
+    - image: deepiri-backend
+      context: ./deepiri-core-api
+      docker:
+        dockerfile: Dockerfile
+        cacheFrom: ['deepiri-backend:latest']
+      sync:
+        # Auto-sync without rebuilds for faster dev iteration
+        '**/*.ts': /app/src/
+        '**/*.js': /app/dist/
+        '**/*.json': /app/
+        '**/*.md': /app/
+    
+    # AI/ML Service (Cyrex)
+    - image: deepiri-cyrex
+      context: ./diri-cyrex
+      docker:
+        dockerfile: Dockerfile
+        cacheFrom: ['deepiri-cyrex:latest']
+        buildArgs:
+          BUILD_TYPE: from-scratch
+          BASE_IMAGE: python:3.11-slim
+          PYTORCH_VERSION: 2.0.0
+          PYTHON_VERSION: 3.11
+      sync:
+        # Auto-sync Python files for faster dev iteration
+        '**/*.py': /app/
+        '**/*.txt': /app/
+        '**/*.md': /app/
+        '**/*.yml': /app/
+        '**/*.yaml': /app/
+    
+    # Frontend (optional - uncomment if you want to build frontend with Skaffold)
+    # - image: deepiri-frontend
+    #   context: ./deepiri-web-frontend
+    #   docker:
+    #     dockerfile: Dockerfile
+    #     cacheFrom: ['deepiri-frontend:latest']
+    #   sync:
+    #     '**/*.tsx': /app/src/
+    #     '**/*.ts': /app/src/
+    #     '**/*.jsx': /app/src/
+    #     '**/*.js': /app/src/
+    #     '**/*.css': /app/src/
+    #     '**/*.html': /app/
+
+deploy:
+  kubectl:
+    manifests:
+      # Infrastructure services (deploy first)
+      - ops/k8s/mongodb-deployment.yaml
+      - ops/k8s/redis-deployment.yaml
+      - ops/k8s/localai-deployment.yaml
+      
+      # Application services
+      - ops/k8s/backend-deployment.yaml
+      - ops/k8s/cyrex-deployment.yaml
+      
+      # Configuration
+      - ops/k8s/configmaps/configmap.yaml
+      - ops/k8s/secrets/secrets.yaml
+      
+      # Networking
+      - ops/k8s/services.yaml
+      - ops/k8s/ingress.yaml
+
+portForward:
+  # Auto-port-forward for development
+  - resourceType: service
+    resourceName: backend-service
+    namespace: default
+    port: 5000
+    localPort: 5000
+  - resourceType: service
+    resourceName: cyrex-service
+    namespace: default
+    port: 8000
+    localPort: 8000
+  - resourceType: service
+    resourceName: mongodb-service
+    namespace: default
+    port: 27017
+    localPort: 27017
+  - resourceType: service
+    resourceName: redis-service
+    namespace: default
+    port: 6379
+    localPort: 6379
+  - resourceType: service
+    resourceName: localai-service
+    namespace: default
+    port: 8080
+    localPort: 8080
+
+profiles:
+  # Development profile with enhanced sync and debugging
+  - name: dev
+    patches:
+      - op: replace
+        path: /build/local/push
+        value: false
+      - op: add
+        path: /deploy/kubectl/flags
+        value: ['--force']
+    # Enable more aggressive file sync in dev
+    build:
+      artifacts:
+        - image: deepiri-backend
+          sync:
+            '**/*': /app/
+        - image: deepiri-cyrex
+          sync:
+            '**/*': /app/
+  
+  # Production profile (for cloud deployments)
+  - name: prod
+    patches:
+      - op: replace
+        path: /build/local/push
+        value: true
+      - op: replace
+        path: /build/local/useBuildkit
+        value: true
+    build:
+      googleCloudBuild:
+        projectId: your-gcp-project-id  # Update with your GCP project
+        region: us-central1
+        machineType: n1-highcpu-8
+

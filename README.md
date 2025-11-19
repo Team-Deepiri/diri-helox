@@ -9,6 +9,7 @@ Welcome to Deepiri, your AI-powered digital productivity playground that gamifie
 1. **Prerequisites**
    - Docker and Docker Compose installed
    - Git
+   - (Optional) Minikube + Skaffold for Kubernetes development
 
 2. **Clone and Setup**
    ```bash
@@ -19,6 +20,24 @@ Welcome to Deepiri, your AI-powered digital productivity playground that gamifie
    ```
 
 3. **Start Everything**
+
+   **⭐ PRIMARY: Kubernetes with Skaffold (Recommended)**
+   ```bash
+   # Setup Minikube (first time only)
+   minikube start --driver=docker --cpus=4 --memory=8192
+   eval $(minikube docker-env)
+   
+   # Start with Skaffold (smart rebuilds, file sync, auto port-forward)
+   skaffold dev --port-forward
+   
+   # Or use helper scripts
+   ./scripts/setup-minikube-wsl2.sh      # Linux/WSL2
+   ./scripts/start-skaffold-dev.sh        # Linux/WSL2
+   .\scripts\setup-minikube-wsl2.ps1     # Windows PowerShell
+   .\scripts\start-skaffold-dev.ps1      # Windows PowerShell
+   ```
+
+   **Alternative: Docker Compose**
    ```bash
    # Normal start (uses existing images - fast!)
    docker compose -f docker-compose.dev.yml up -d
@@ -44,8 +63,10 @@ Welcome to Deepiri, your AI-powered digital productivity playground that gamifie
 ### Essential Guides
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete setup guide for new developers
 - **[START_EVERYTHING.md](START_EVERYTHING.md)** - Detailed service startup instructions
+- **[SKAFFOLD_QUICK_START.md](SKAFFOLD_QUICK_START.md)** - Quick Skaffold + Kubernetes guide
 - **[FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)** - Find tasks and responsibilities by role
 - **[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)** - Common issues and solutions
+- **[docs/SKAFFOLD_SETUP.md](docs/SKAFFOLD_SETUP.md)** - Complete Skaffold documentation
 
 ### Team-Specific Guides
 - **AI Team** → [docs/AI_TEAM_ONBOARDING.md](docs/AI_TEAM_ONBOARDING.md)
@@ -71,6 +92,22 @@ Welcome to Deepiri, your AI-powered digital productivity playground that gamifie
 ## 🛠️ Common Tasks
 
 ### Starting Services
+
+**⭐ PRIMARY: Kubernetes with Skaffold**
+```bash
+# Setup Minikube (first time only)
+minikube start --driver=docker --cpus=4 --memory=8192
+eval $(minikube docker-env)
+
+# Start with Skaffold (smart rebuilds, file sync, auto port-forward)
+skaffold dev --port-forward
+
+# Or use helper scripts
+./scripts/start-skaffold-dev.sh        # Linux/Mac
+.\scripts\start-skaffold-dev.ps1       # Windows
+```
+
+**Alternative: Docker Compose**
 ```bash
 # Normal start (no rebuild)
 docker compose -f docker-compose.dev.yml up -d
@@ -81,6 +118,16 @@ docker compose -f docker-compose.dev.yml up -d
 ```
 
 ### Stopping Services
+
+**⭐ PRIMARY: Kubernetes with Skaffold**
+```bash
+# Press Ctrl+C in Skaffold terminal (auto-cleanup)
+# Or manually:
+./scripts/stop-skaffold.sh        # Linux/Mac
+.\scripts\stop-skaffold.ps1       # Windows
+```
+
+**Alternative: Docker Compose**
 ```bash
 docker compose -f docker-compose.dev.yml down
 ```

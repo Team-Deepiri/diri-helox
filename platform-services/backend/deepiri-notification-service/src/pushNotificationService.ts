@@ -1,4 +1,4 @@
-import * as admin from 'firebase-admin';
+import * as webpush from 'web-push';
 import { createLogger } from '@deepiri/shared-utils';
 
 const logger = createLogger('push-notification-service');
@@ -8,98 +8,136 @@ interface Notification {
   body: string;
   data?: Record<string, string>;
   badge?: number;
+  icon?: string;
+  url?: string;
+}
+
+interface PushSubscription {
+  endpoint: string;
+  keys: {
+    p256dh: string;
+    auth: string;
+  };
 }
 
 class PushNotificationService {
-  private fcmInitialized: boolean = false;
+  private webPushInitialized: boolean = false;
 
   constructor() {
-    this._initializeFCM();
+    this._initializeWebPush();
   }
 
-  private _initializeFCM(): void {
+  private _initializeWebPush(): void {
     try {
-      if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-        const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-        admin.initializeApp({
-          credential: admin.credential.cert(serviceAccount)
-        });
-        this.fcmInitialized = true;
-        logger.info('FCM initialized');
+      const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+      const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+      const vapidEmail = process.env.VAPID_EMAIL || 'mailto:notifications@deepiri.com';
+
+      if (vapidPublicKey && vapidPrivateKey) {
+        webpush.setVapidDetails(
+          vapidEmail,
+          vapidPublicKey,
+          vapidPrivateKey
+        );
+        this.webPushInitialized = true;
+        logger.info('Web Push API initialized');
       } else {
-        logger.warn('FCM not configured - FIREBASE_SERVICE_ACCOUNT not set');
+        logger.warn('Web Push not configured - VAPID keys not set. Generate with: npm install -g web-push && web-push generate-vapid-keys');
       }
     } catch (error) {
-      logger.error('FCM initialization failed:', error);
+      logger.error('Web Push initialization failed:', error);
     }
   }
 
-  async sendPushNotification(userId: string, deviceToken: string, notification: Notification) {
+  /**
+   * Send push notification to a single device
+   * @param userId - User ID
+   * @param subscription - Web Push subscription object (from browser)
+   * @param notification - Notification payload
+   */
+  async sendPushNotification(userId: string, subscription: PushSubscription, notification: Notification) {
     try {
-      if (!this.fcmInitialized) {
-        logger.warn('FCM not initialized, skipping push notification');
-        return { success: false, reason: 'FCM not initialized' };
+      if (!this.webPushInitialized) {
+        logger.warn('Web Push not initialized, skipping push notification');
+        return { success: false, reason: 'Web Push not initialized' };
       }
 
-      const message = {
-        token: deviceToken,
-        notification: {
-          title: notification.title,
-          body: notification.body
-        },
-        data: notification.data || {},
-        android: {
-          priority: 'high' as const,
-          notification: {
-            sound: 'default',
-            channelId: 'deepiri_notifications'
-          }
-        },
-        apns: {
-          payload: {
-            aps: {
-              sound: 'default',
-              badge: notification.badge || 0
-            }
-          }
+      const payload = JSON.stringify({
+        title: notification.title,
+        body: notification.body,
+        icon: notification.icon || '/icon-192x192.png',
+        badge: notification.badge || 0,
+        data: {
+          ...notification.data,
+          url: notification.url || '/'
         }
+      });
+
+      const options = {
+        TTL: 3600, // Time to live in seconds
+        urgency: 'high' as const
       };
 
-      const response = await admin.messaging().send(message);
-      logger.info('Push notification sent', { userId, messageId: response });
+      await webpush.sendNotification(subscription, payload, options);
+      logger.info('Push notification sent', { userId });
       
-      return { success: true, messageId: response };
+      return { success: true };
     } catch (error: any) {
       logger.error('Error sending push notification:', error);
+      
+      // Handle specific error cases
+      if (error.statusCode === 410) {
+        // Subscription expired or invalid
+        return { success: false, error: 'Subscription expired', shouldRemove: true };
+      }
+      
       return { success: false, error: error.message };
     }
   }
 
-  async sendToMultipleDevices(deviceTokens: string[], notification: Notification) {
+  /**
+   * Send push notification to multiple devices
+   * @param subscriptions - Array of Web Push subscriptions
+   * @param notification - Notification payload
+   */
+  async sendToMultipleDevices(subscriptions: PushSubscription[], notification: Notification) {
     try {
-      if (!this.fcmInitialized) {
-        return { success: false, reason: 'FCM not initialized' };
+      if (!this.webPushInitialized) {
+        return { success: false, reason: 'Web Push not initialized' };
       }
 
-      const message = {
-        notification: {
-          title: notification.title,
-          body: notification.body
-        },
-        data: notification.data || {},
-        tokens: deviceTokens
+      const payload = JSON.stringify({
+        title: notification.title,
+        body: notification.body,
+        icon: notification.icon || '/icon-192x192.png',
+        badge: notification.badge || 0,
+        data: {
+          ...notification.data,
+          url: notification.url || '/'
+        }
+      });
+
+      const options = {
+        TTL: 3600,
+        urgency: 'high' as const
       };
 
-      const response = await admin.messaging().sendMulticast(message);
+      const results = await Promise.allSettled(
+        subscriptions.map(sub => webpush.sendNotification(sub, payload, options))
+      );
+
+      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const failureCount = results.filter(r => r.status === 'rejected').length;
+
       logger.info('Multicast push notification sent', { 
-        successCount: response.successCount,
-        failureCount: response.failureCount 
+        successCount,
+        failureCount 
       });
 
       return {
         success: true,
-        successCount: response.successCount,
-        failureCount: response.failureCount
+        successCount,
+        failureCount
       };
     } catch (error: any) {
       logger.error('Error sending multicast push:', error);
@@ -107,43 +145,27 @@ class PushNotificationService {
     }
   }
 
-  async subscribeToTopic(deviceToken: string, topic: string) {
+  /**
+   * Validate a push subscription
+   * @param subscription - Web Push subscription to validate
+   */
+  async validateSubscription(subscription: PushSubscription): Promise<boolean> {
     try {
-      if (!this.fcmInitialized) {
-        return { success: false };
+      if (!subscription.endpoint || !subscription.keys?.p256dh || !subscription.keys?.auth) {
+        return false;
       }
-
-      await admin.messaging().subscribeToTopic([deviceToken], topic);
-      logger.info('Device subscribed to topic', { deviceToken, topic });
-      return { success: true };
-    } catch (error: any) {
-      logger.error('Error subscribing to topic:', error);
-      return { success: false, error: error.message };
+      return true;
+    } catch (error) {
+      logger.error('Error validating subscription:', error);
+      return false;
     }
   }
 
-  async sendToTopic(topic: string, notification: Notification) {
-    try {
-      if (!this.fcmInitialized) {
-        return { success: false };
-      }
-
-      const message = {
-        topic,
-        notification: {
-          title: notification.title,
-          body: notification.body
-        },
-        data: notification.data || {}
-      };
-
-      const response = await admin.messaging().send(message);
-      logger.info('Topic notification sent', { topic, messageId: response });
-      return { success: true, messageId: response };
-    } catch (error: any) {
-      logger.error('Error sending topic notification:', error);
-      return { success: false, error: error.message };
-    }
+  /**
+   * Get VAPID public key (for client-side subscription)
+   */
+  getVapidPublicKey(): string | null {
+    return process.env.VAPID_PUBLIC_KEY || null;
   }
 
   async getUserNotifications(userId: string) {

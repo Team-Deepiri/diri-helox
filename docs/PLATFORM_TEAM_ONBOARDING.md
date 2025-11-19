@@ -66,6 +66,23 @@ curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stabl
 
 # Verify
 kubectl version --client
+
+# Install Minikube (for local K8s development)
+# macOS
+brew install minikube
+
+# Linux/WSL2
+curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
+sudo install minikube-linux-amd64 /usr/local/bin/minikube
+
+# Install Skaffold (recommended for K8s development)
+# macOS
+brew install skaffold
+
+# Linux/WSL2
+curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+chmod +x skaffold
+sudo mv skaffold /usr/local/bin/
 ```
 
 ### 4. Terraform Setup (if using)
@@ -291,7 +308,44 @@ docker-compose up -d
 docker-compose logs -f
 ```
 
-### 3. Kubernetes Deployment
+### 3. Kubernetes Deployment with Skaffold (Recommended)
+
+**Skaffold provides smart rebuilds, file sync, and automatic port-forwarding:**
+
+```bash
+# Setup Minikube (first time)
+minikube start --driver=docker --cpus=4 --memory=8192
+eval $(minikube docker-env)
+
+# Start with Skaffold (handles everything automatically)
+skaffold dev --port-forward
+
+# Or use helper scripts
+./scripts/setup-minikube-wsl2.sh      # Linux/WSL2
+./scripts/start-skaffold-dev.sh        # Linux/WSL2
+.\scripts\setup-minikube-wsl2.ps1     # Windows PowerShell
+.\scripts\start-skaffold-dev.ps1      # Windows PowerShell
+```
+
+**Skaffold automatically:**
+- ✅ Builds Docker images using Minikube's Docker daemon
+- ✅ Deploys to Kubernetes
+- ✅ Auto-syncs files for instant updates (no rebuilds needed)
+- ✅ Port-forwards all services automatically
+- ✅ Streams logs from all services
+- ✅ Cleans up on exit
+
+**Stop Skaffold:**
+```bash
+# Press Ctrl+C in Skaffold terminal (auto-cleanup)
+# Or manually:
+./scripts/stop-skaffold.sh        # Linux/Mac
+.\scripts\stop-skaffold.ps1       # Windows
+```
+
+See [SKAFFOLD_QUICK_START.md](../SKAFFOLD_QUICK_START.md) or [docs/SKAFFOLD_SETUP.md](SKAFFOLD_SETUP.md) for detailed documentation.
+
+### 4. Manual Kubernetes Deployment
 
 ```bash
 # Apply configs
@@ -302,7 +356,7 @@ kubectl get pods
 kubectl get services
 ```
 
-### 4. CI/CD Testing
+### 5. CI/CD Testing
 
 ```bash
 # Test GitHub Actions locally (using act)

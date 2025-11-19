@@ -139,37 +139,175 @@ if ($dockerAvailable) {
 
 # Step 10: Stop Docker Desktop and Shutdown WSL COMPLETELY
 Write-ColorOutput Yellow "Stopping Docker Desktop and WSL..."
-$dockerProcesses = Get-Process -Name "com.docker.backend","com.docker.desktop","Docker Desktop","dockerd","vmmem","wslhost" -ErrorAction SilentlyContinue
-if ($dockerProcesses) {
-    Write-ColorOutput Yellow "Stopping Docker processes..."
-    taskkill /IM "com.docker.backend.exe" /F 2>$null | Out-Null
-    taskkill /IM "com.docker.desktop.exe" /F 2>$null | Out-Null
-    taskkill /IM "dockerd.exe" /F 2>$null | Out-Null
-    taskkill /IM "vmmem.exe" /F 2>$null | Out-Null
-    taskkill /IM "wslhost.exe" /F 2>$null | Out-Null
-    Start-Sleep -Seconds 3
-    Write-ColorOutput Green "[OK] Docker Desktop processes stopped"
-} else {
-    Write-ColorOutput Yellow "[INFO] Docker Desktop processes not running (may not be installed)"
+
+# Function to forcefully kill processes by name pattern
+function Stop-ProcessesForcefully {
+    param([string[]]$ProcessNames)
+    
+    foreach ($processName in $ProcessNames) {
+        try {
+            # Get all processes matching the name (case-insensitive, partial match)
+            $processes = Get-Process | Where-Object { $_.ProcessName -like "*$processName*" -or $_.Name -like "*$processName*" } -ErrorAction SilentlyContinue
+            
+            if ($processes) {
+                foreach ($proc in $processes) {
+                    try {
+                        Write-ColorOutput Yellow "  Forcefully killing: $($proc.ProcessName) (PID: $($proc.Id))"
+                        Stop-Process -Id $proc.Id -Force -ErrorAction Stop
+                    } catch {
+                        # If Stop-Process fails, try taskkill as fallback
+                        try {
+                            taskkill /PID $proc.Id /F 2>$null | Out-Null
+                        } catch {
+                            Write-ColorOutput Yellow "    [WARNING] Could not kill $($proc.ProcessName) (PID: $($proc.Id))"
+                        }
+                    }
+                }
+            }
+        } catch {
+            # Process not found, continue
+        }
+    }
 }
 
+# Kill Docker processes
+Write-ColorOutput Yellow "Forcefully killing Docker processes..."
+Stop-ProcessesForcefully @("com.docker.backend", "com.docker.desktop", "Docker Desktop", "dockerd", "docker")
+Start-Sleep -Seconds 2
+
+# Kill ALL WSL-related processes aggressively
+Write-ColorOutput Yellow "Forcefully killing ALL WSL processes..."
+$wslProcessNames = @("wsl", "wslhost", "wslservice", "wslservicehost", "vmmem", "vmcompute", "vmwp", "vmmemWSL")
+Stop-ProcessesForcefully $wslProcessNames
+Start-Sleep -Seconds 2
+
+# Also kill by executable name patterns
+$wslExeNames = @("wsl.exe", "wslhost.exe", "wslservice.exe", "vmmem.exe", "vmcompute.exe", "vmwp.exe")
+foreach ($exeName in $wslExeNames) {
+    try {
+        Get-Process | Where-Object { $_.Path -like "*$exeName*" } | ForEach-Object {
+            Write-ColorOutput Yellow "  Forcefully killing: $($_.ProcessName) (Path: $($_.Path))"
+            Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+        }
+    } catch {
+        # Continue if process not found
+    }
+}
+
+# Kill any remaining processes with "wsl" in the name
+Get-Process | Where-Object { $_.ProcessName -like "*wsl*" -or $_.Name -like "*wsl*" } | ForEach-Object {
+    try {
+        Write-ColorOutput Yellow "  Forcefully killing remaining WSL process: $($_.ProcessName) (PID: $($_.Id))"
+        Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+    } catch {
+        try {
+            taskkill /PID $_.Id /F 2>$null | Out-Null
+        } catch {
+            # Ignore errors
+        }
+    }
+}
+
+Start-Sleep -Seconds 3
+
+# Terminate all WSL distributions individually
+Write-ColorOutput Yellow "Terminating all WSL distributions..."
+try {
+    $distributions = wsl --list --quiet 2>$null | Where-Object { $_ -and $_.Trim() }
+    foreach ($distro in $distributions) {
+        if ($distro.Trim()) {
+            Write-ColorOutput Yellow "  Terminating distribution: $distro"
+            wsl --terminate $distro 2>$null | Out-Null
+        }
+    }
+} catch {
+    Write-ColorOutput Yellow "  Could not list distributions, continuing..."
+}
+
+Start-Sleep -Seconds 2
+
+# Now shutdown WSL with timeout
 Write-ColorOutput Yellow "Shutting down WSL completely..."
-wsl --shutdown
-Start-Sleep -Seconds 10
+$shutdownJob = Start-Job -ScriptBlock { wsl --shutdown }
+$shutdownComplete = Wait-Job $shutdownJob -Timeout 10
 
-# Verify WSL is actually shut down
-$wslStillRunning = wsl --list --running 2>$null
-$retries = 0
-while ($wslStillRunning -and $retries -lt 5) {
-    Write-ColorOutput Yellow "WSL still running, waiting..."
-    wsl --shutdown
-    Start-Sleep -Seconds 5
-    $wslStillRunning = wsl --list --running 2>$null
-    $retries++
+if (-not $shutdownComplete) {
+    Write-ColorOutput Yellow "  WSL shutdown timed out, forcefully killing WSL processes again..."
+    Stop-Job $shutdownJob -ErrorAction SilentlyContinue
+    Remove-Job $shutdownJob -ErrorAction SilentlyContinue
+    
+    # Kill WSL processes again
+    Stop-ProcessesForcefully $wslProcessNames
+    Start-Sleep -Seconds 2
+    
+    # Try shutdown again
+    wsl --shutdown 2>$null | Out-Null
 }
 
-if ($wslStillRunning) {
+Start-Sleep -Seconds 5
+
+# Verify WSL is actually shut down - kill any remaining processes
+$retries = 0
+$maxRetries = 10
+while ($retries -lt $maxRetries) {
+    $wslStillRunning = wsl --list --running 2>$null
+    $wslProcesses = Get-Process | Where-Object { $_.ProcessName -like "*wsl*" -or $_.Name -like "*wsl*" -or $_.ProcessName -like "*vmmem*" } -ErrorAction SilentlyContinue
+    
+    if ($wslStillRunning -or $wslProcesses) {
+        Write-ColorOutput Yellow "  WSL still running (attempt $($retries + 1)/$maxRetries), forcefully killing remaining processes..."
+        
+        # Kill all WSL processes again
+        if ($wslProcesses) {
+            $wslProcesses | ForEach-Object {
+                try {
+                    Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+                } catch {
+                    taskkill /PID $_.Id /F 2>$null | Out-Null
+                }
+            }
+        }
+        
+        # Terminate distributions again
+        try {
+            $distributions = wsl --list --quiet 2>$null | Where-Object { $_ -and $_.Trim() }
+            foreach ($distro in $distributions) {
+                if ($distro.Trim()) {
+                    wsl --terminate $distro 2>$null | Out-Null
+                }
+            }
+        } catch {
+            # Ignore
+        }
+        
+        wsl --shutdown 2>$null | Out-Null
+        Start-Sleep -Seconds 3
+        $retries++
+    } else {
+        break
+    }
+}
+
+# Final check and kill
+$finalWslProcesses = Get-Process | Where-Object { $_.ProcessName -like "*wsl*" -or $_.Name -like "*wsl*" -or $_.ProcessName -like "*vmmem*" } -ErrorAction SilentlyContinue
+if ($finalWslProcesses) {
+    Write-ColorOutput Yellow "  Final cleanup: Killing remaining WSL processes..."
+    $finalWslProcesses | ForEach-Object {
+        try {
+            Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
+        } catch {
+            taskkill /PID $_.Id /F 2>$null | Out-Null
+        }
+    }
+    Start-Sleep -Seconds 2
+}
+
+$finalCheck = wsl --list --running 2>$null
+if ($finalCheck) {
     Write-ColorOutput Red "[WARNING] WSL may still be running. Compaction might fail."
+    Write-ColorOutput Yellow "  Remaining processes:"
+    Get-Process | Where-Object { $_.ProcessName -like "*wsl*" -or $_.Name -like "*wsl*" -or $_.ProcessName -like "*vmmem*" } | ForEach-Object {
+        Write-ColorOutput Yellow "    - $($_.ProcessName) (PID: $($_.Id))"
+    }
 } else {
     Write-ColorOutput Green "[OK] WSL shutdown complete"
 }

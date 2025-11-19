@@ -93,8 +93,8 @@ services:
   api-gateway:
     image: deepiri-dev-api-gateway:latest
     build:
-      context: ./platform-services/backend/deepiri-api-gateway
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-api-gateway/Dockerfile
     pull_policy: build
     container_name: deepiri-api-gateway-dev
     restart: unless-stopped
@@ -134,8 +134,8 @@ services:
   auth-service:
     image: deepiri-dev-auth-service:latest
     build:
-      context: ./platform-services/backend/deepiri-auth-service
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-auth-service/Dockerfile
     pull_policy: build
     container_name: deepiri-auth-service-dev
     restart: unless-stopped
@@ -169,8 +169,8 @@ services:
   task-orchestrator:
     image: deepiri-dev-task-orchestrator:latest
     build:
-      context: ./platform-services/backend/deepiri-task-orchestrator
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-task-orchestrator/Dockerfile
     pull_policy: build
     container_name: deepiri-task-orchestrator-dev
     restart: unless-stopped
@@ -197,8 +197,8 @@ services:
   engagement-service:
     image: deepiri-dev-engagement-service:latest
     build:
-      context: ./platform-services/backend/deepiri-engagement-service
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-engagement-service/Dockerfile
     pull_policy: build
     container_name: deepiri-engagement-service-dev
     restart: unless-stopped
@@ -229,8 +229,8 @@ services:
   platform-analytics-service:
     image: deepiri-dev-platform-analytics-service:latest
     build:
-      context: ./platform-services/backend/deepiri-platform-analytics-service
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-platform-analytics-service/Dockerfile
     pull_policy: build
     container_name: deepiri-platform-analytics-service-dev
     restart: unless-stopped
@@ -262,8 +262,8 @@ services:
   notification-service:
     image: deepiri-dev-notification-service:latest
     build:
-      context: ./platform-services/backend/deepiri-notification-service
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-notification-service/Dockerfile
     pull_policy: build
     container_name: deepiri-notification-service-dev
     restart: unless-stopped
@@ -293,8 +293,8 @@ services:
   external-bridge-service:
     image: deepiri-dev-external-bridge-service:latest
     build:
-      context: ./platform-services/backend/deepiri-external-bridge-service
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-external-bridge-service/Dockerfile
     pull_policy: build
     container_name: deepiri-external-bridge-service-dev
     restart: unless-stopped
@@ -330,8 +330,8 @@ services:
   challenge-service:
     image: deepiri-dev-challenge-service:latest
     build:
-      context: ./platform-services/backend/deepiri-challenge-service
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-challenge-service/Dockerfile
     pull_policy: build
     container_name: deepiri-challenge-service-dev
     restart: unless-stopped
@@ -360,8 +360,8 @@ services:
   realtime-gateway:
     image: deepiri-dev-realtime-gateway:latest
     build:
-      context: ./platform-services/backend/deepiri-realtime-gateway
-      dockerfile: Dockerfile
+      context: ./platform-services
+      dockerfile: backend/deepiri-realtime-gateway/Dockerfile
     pull_policy: build
     container_name: deepiri-realtime-gateway-dev
     restart: unless-stopped
@@ -389,8 +389,8 @@ services:
       dockerfile: Dockerfile
       args:
         BUILDKIT_INLINE_CACHE: 1
-        BUILD_TYPE: ${BUILD_TYPE:-prebuilt}
-        BASE_IMAGE: ${BASE_IMAGE:-pytorch/pytorch:2.0.0-cpu}
+        BUILD_TYPE: ${BUILD_TYPE:-from-scratch}
+        BASE_IMAGE: ${BASE_IMAGE:-python:3.11-slim}
         PYTORCH_VERSION: ${PYTORCH_VERSION:-2.0.0}
         CUDA_VERSION: ${CUDA_VERSION:-12.1}
         PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
@@ -465,8 +465,8 @@ services:
       dockerfile: Dockerfile.jupyter
       args:
         BUILDKIT_INLINE_CACHE: 1
-        BUILD_TYPE: ${BUILD_TYPE:-prebuilt}
-        BASE_IMAGE: ${BASE_IMAGE:-pytorch/pytorch:2.0.0-cpu}
+        BUILD_TYPE: ${BUILD_TYPE:-from-scratch}
+        BASE_IMAGE: ${BASE_IMAGE:-python:3.11-slim}
         PYTORCH_VERSION: ${PYTORCH_VERSION:-2.0.0}
         CUDA_VERSION: ${CUDA_VERSION:-12.1}
         PYTHON_VERSION: ${PYTHON_VERSION:-3.11}

@@ -161,7 +161,7 @@ class MultiCurrencyService {
         balance.currencies.energy = Math.min(balance.currencies.energy, this.MAX_ENERGY);
       }
 
-      if (amount > 0 && ['xp', 'coins', 'gems'].includes(currencyType)) {
+      if (amount > 0 && (currencyType === 'xp' || currencyType === 'coins' || currencyType === 'gems')) {
         balance.totalEarned[currencyType] = (balance.totalEarned[currencyType] || 0) + amount;
       }
 
@@ -185,7 +185,9 @@ class MultiCurrencyService {
       return {
         currencyType,
         newBalance: balance.currencies[currencyType],
-        totalEarned: balance.totalEarned[currencyType] || 0
+        totalEarned: (currencyType === 'xp' || currencyType === 'coins' || currencyType === 'gems') 
+          ? (balance.totalEarned[currencyType] || 0)
+          : 0
       };
     } catch (error) {
       logger.error('Error awarding currency:', error);
