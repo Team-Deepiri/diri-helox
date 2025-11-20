@@ -209,7 +209,7 @@ curl http://localhost:8086  # InfluxDB (browser)
 
 ```bash
 # Navigate to frontend
-cd frontend
+cd deepiri-web-frontend
 
 # Install dependencies (first time only)
 npm install
@@ -310,7 +310,7 @@ docker-compose -f docker-compose.dev.yml ps api-gateway
 ### Start Everything
 ```bash
 docker-compose -f docker-compose.dev.yml up -d
-cd frontend && npm run dev
+cd deepiri-web-frontend && npm run dev
 ```
 
 ### Stop Everything

@@ -64,7 +64,7 @@ kubectl get services
 kubectl get pods
 
 # View logs
-kubectl logs -f deployment/deepiri-backend
+kubectl logs -f deployment/deepiri-core-api
 kubectl logs -f deployment/deepiri-cyrex
 
 # Open Kubernetes dashboard

@@ -45,13 +45,52 @@ cd Deepiri/deepiri
 
 ### 2. Docker Setup
 
+**For WSL2 users (Recommended): Use Docker Engine instead of Docker Desktop**
+
+Docker Engine provides more reliable WSL2 integration and better performance. Use our automated installation script:
+
 ```bash
-# Verify Docker
+# Run the automated Docker Engine installation script
+cd deepiri
+./scripts/setup-docker-wsl2.sh
+
+# After the script completes, restart WSL2:
+# In Windows PowerShell (as Administrator): wsl --shutdown
+# Then restart your WSL2 terminal
+
+# Verify Docker installation
 docker --version
+docker buildx version
 docker-compose --version
 
 # Test Docker
+docker ps
 docker run hello-world
+```
+
+**What the script does:**
+- Installs Docker Engine, Buildx, and Compose (official Docker packages)
+- Verifies Docker's official GPG key fingerprint (security check)
+- Configures WSL2 for systemd (required for Docker service)
+- Sets up DNS configuration
+- Adds your user to the docker group
+- Handles repository errors gracefully
+
+**For macOS/Linux (non-WSL2):**
+```bash
+# macOS
+brew install docker docker-compose
+
+# Linux (Ubuntu/Debian)
+# See: https://docs.docker.com/engine/install/ubuntu/
+# Or use the manual installation steps in QUICK-START-SCRIPTS.md
+```
+
+**Verify Docker is working:**
+```bash
+docker --version
+docker-compose --version
+docker ps
 ```
 
 ### 3. Kubernetes Setup (if using)

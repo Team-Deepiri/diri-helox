@@ -30,7 +30,7 @@ if command -v kubectl &> /dev/null; then
     echo "🧹 Cleaning up Kubernetes resources..."
     
     # Delete deployments
-    kubectl delete deployment deepiri-backend deepiri-cyrex mongodb redis localai 2>/dev/null || true
+    kubectl delete deployment deepiri-core-api deepiri-cyrex mongodb redis localai 2>/dev/null || true
     
     # Delete services
     kubectl delete service backend-service cyrex-service mongodb-service redis-service localai-service 2>/dev/null || true

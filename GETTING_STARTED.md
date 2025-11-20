@@ -4,14 +4,32 @@
 
 ---
 
+## 🚀 **START HERE: Complete Setup Guide**
+
+**⭐ NEW USERS: Begin with the complete setup guide for building and running the entire project:**
+
+👉 **[COMPLETE_SETUP.md](COMPLETE_SETUP.md)** - **Complete step-by-step guide for setting up and running all services**
+
+This guide covers:
+- ✅ All prerequisites and dependencies
+- ✅ Complete environment setup
+- ✅ Building all services
+- ✅ Running the entire stack
+- ✅ Verification and testing
+
+**After completing the setup guide, return here for team-specific information.**
+
+---
+
 ## 🎯 Quick Navigation by Role
 
 ### **New to the Project? Start Here:**
 
-1. **Find Your Role** → [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)
-2. **Read Your Team's Onboarding Guide** (see links below)
-3. **Choose Your Development Environment** (⭐ **PRIMARY: Skaffold** or Docker Compose)
-4. **Set Up Your Environment** (follow your team's guide)
+1. **⭐ Complete Setup** → [COMPLETE_SETUP.md](COMPLETE_SETUP.md) - **Build and run the entire project**
+2. **Find Your Role** → [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)
+3. **Read Your Team's Onboarding Guide** (see links below)
+4. **Choose Your Development Environment** (⭐ **PRIMARY: Skaffold** or Docker Compose)
+5. **Set Up Your Environment** (follow your team's guide)
 
 ---
 
@@ -53,6 +71,36 @@
 ## 🚀 Quick Start Options
 
 **⭐ PRIMARY RECOMMENDATION: Use Skaffold for Kubernetes development (Option 1)**
+
+### **Prerequisites: Install Docker First**
+
+**For WSL2 users (Recommended):**
+```bash
+# Install Docker Engine (not Docker Desktop - more reliable in WSL2)
+cd deepiri
+./scripts/setup-docker-wsl2.sh
+
+# After installation, restart WSL2:
+# In Windows PowerShell (as Administrator): wsl --shutdown
+# Then restart your WSL2 terminal
+
+# Verify Docker is working
+docker --version
+docker ps
+```
+
+**What the script does:**
+- Installs Docker Engine, Buildx, and Compose (official Docker packages)
+- Verifies Docker's official GPG key fingerprint (security check)
+- Configures WSL2 for systemd
+- See [QUICK-START-SCRIPTS.md](QUICK-START-SCRIPTS.md) for manual installation steps
+
+**Why Docker Engine instead of Docker Desktop?**
+- More reliable WSL2 integration (no socket connection issues)
+- Better performance in WSL2
+- Full control over Docker daemon
+
+---
 
 Choose the development environment that works best for you:
 
@@ -372,7 +420,7 @@ eval $(minikube docker-env)
 skaffold build
 
 # Build specific image
-skaffold build --artifact=deepiri-backend
+skaffold build --artifact=deepiri-core-api
 skaffold build --artifact=deepiri-cyrex
 ```
 
@@ -426,11 +474,11 @@ skaffold delete
 # Or view logs manually:
 
 # All pods
-kubectl logs -f -l app=deepiri-backend
+kubectl logs -f -l app=deepiri-core-api
 kubectl logs -f -l app=deepiri-cyrex
 
 # Specific deployment
-kubectl logs -f deployment/deepiri-backend
+kubectl logs -f deployment/deepiri-core-api
 kubectl logs -f deployment/deepiri-cyrex
 kubectl logs -f deployment/mongodb
 kubectl logs -f deployment/redis
@@ -440,10 +488,10 @@ kubectl get pods                    # List pods
 kubectl logs -f <pod-name>          # View pod logs
 
 # Last 100 lines
-kubectl logs --tail=100 deployment/deepiri-backend
+kubectl logs --tail=100 deployment/deepiri-core-api
 
 # Previous container (if pod restarted)
-kubectl logs -f --previous deployment/deepiri-backend
+kubectl logs -f --previous deployment/deepiri-core-api
 ```
 
 ---
@@ -547,7 +595,7 @@ docker compose -f docker-compose.dev.yml restart <service-name>
 
 **Kubernetes:**
 ```bash
-kubectl rollout restart deployment/deepiri-backend
+kubectl rollout restart deployment/deepiri-core-api
 kubectl rollout restart deployment/deepiri-cyrex
 ```
 
@@ -562,7 +610,7 @@ docker compose -f docker-compose.dev.yml exec cyrex sh
 
 **Kubernetes:**
 ```bash
-kubectl exec -it deployment/deepiri-backend -- sh
+kubectl exec -it deployment/deepiri-core-api -- sh
 kubectl exec -it deployment/deepiri-cyrex -- sh
 ```
 

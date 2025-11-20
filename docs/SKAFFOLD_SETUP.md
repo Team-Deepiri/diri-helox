@@ -15,10 +15,19 @@ Skaffold provides:
 ## Prerequisites
 
 1. **WSL2** with Ubuntu or similar Linux distribution
-2. **Docker Desktop** or Docker Engine running in WSL2
+2. **Docker Engine** running in WSL2 (recommended - more reliable than Docker Desktop)
+   - **Quick Install:** Run `./scripts/setup-docker-wsl2.sh` (see [QUICK-START-SCRIPTS.md](../QUICK-START-SCRIPTS.md))
+   - The script installs Docker Engine with GPG key verification
+   - After installation, restart WSL2: `wsl --shutdown` (in Windows PowerShell as Admin)
 3. **Minikube** installed
 4. **kubectl** installed
 5. **Skaffold** installed
+
+**Why Docker Engine instead of Docker Desktop?**
+- More reliable WSL2 integration (no socket connection issues)
+- Better performance in WSL2
+- Full control over Docker daemon
+- No need for Docker Desktop GUI
 
 ## Installation
 
@@ -181,7 +190,7 @@ Features:
 
 ```bash
 # Rebuild only backend
-skaffold build --artifact=deepiri-backend
+skaffold build --artifact=deepiri-core-api
 
 # Rebuild only cyrex
 skaffold build --artifact=deepiri-cyrex
@@ -194,7 +203,7 @@ skaffold build --artifact=deepiri-cyrex
 skaffold dev --port-forward
 
 # Specific service
-kubectl logs -f deployment/deepiri-backend
+kubectl logs -f deployment/deepiri-core-api
 kubectl logs -f deployment/deepiri-cyrex
 ```
 

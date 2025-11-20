@@ -70,7 +70,7 @@ services:
     build:
       context: ./deepiri-core-api
       dockerfile: Dockerfile
-    container_name: deepiri-backend
+    container_name: deepiri-core-api
     restart: unless-stopped
     logging:
       driver: "json-file"

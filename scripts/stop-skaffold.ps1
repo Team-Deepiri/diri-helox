@@ -29,7 +29,7 @@ if (Get-Command kubectl -ErrorAction SilentlyContinue) {
     Write-Host "🧹 Cleaning up Kubernetes resources..." -ForegroundColor Cyan
     
     # Delete deployments
-    kubectl delete deployment deepiri-backend,deepiri-cyrex,mongodb,redis,localai 2>&1 | Out-Null
+    kubectl delete deployment deepiri-core-api,deepiri-cyrex,mongodb,redis,localai 2>&1 | Out-Null
     
     # Delete services
     kubectl delete service backend-service,cyrex-service,mongodb-service,redis-service,localai-service 2>&1 | Out-Null
