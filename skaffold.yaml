@@ -7,6 +7,9 @@ build:
   local:
     useBuildkit: true
     push: false  # Use local registry (minikube docker-env)
+  tagPolicy:
+    customTemplate:
+      template: "latest"  # ALWAYS :latest - overwrites, no duplicates
   artifacts:
     # Backend API Service (Monolith - Legacy)
     - image: deepiri-core-api
@@ -40,6 +43,32 @@ build:
         manual:
           - src: '**/*.py'
             dest: /app/
+          - src: '**/*.txt'
+            dest: /app/
+          - src: '**/*.md'
+            dest: /app/
+          - src: '**/*.yml'
+            dest: /app/
+          - src: '**/*.yaml'
+            dest: /app/
+    
+    # Jupyter Notebook for AI Research
+    - image: deepiri-jupyter
+      context: ./diri-cyrex
+      docker:
+        dockerfile: Dockerfile.jupyter
+        #target: base-prebuilt  # Skip ML downloads (faster build)
+        buildArgs:
+          BUILD_TYPE: prebuilt
+          BASE_IMAGE: python:3.11-slim
+          PYTORCH_VERSION: 2.9.1
+          PYTHON_VERSION: 3.11
+      sync:
+        manual:
+          - src: '**/*.py'
+            dest: /app/
+          - src: '**/*.ipynb'
+            dest: /app/notebooks/
           - src: '**/*.txt'
             dest: /app/
           - src: '**/*.md'
@@ -234,6 +263,16 @@ portForward:
     namespace: default
     port: 8080
     localPort: 8080
+
+# Automatically clean up dangling images after build (saves storage)
+hooks:
+  after:
+    - host:
+        command: ["sh", "-c", "docker image prune -f > /dev/null 2>&1 || true"]
+        os: [linux, darwin]
+    - host:
+        command: ["powershell", "-Command", "docker image prune -f | Out-Null"]
+        os: [windows]
 
 profiles:
   # Development profile with enhanced sync and debugging

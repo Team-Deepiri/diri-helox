@@ -136,5 +136,7 @@ temp/
 # BINARY FILES & EXECUTABLES
 # ========================================
 minikube-*
+kubectl
+skaffold
 *.bin
 binary/

@@ -9,6 +9,9 @@ build:
   local:
     useBuildkit: true
     push: false  # Use local registry (minikube docker-env)
+  tagPolicy:
+    customTemplate:
+      template: "latest"  # ALWAYS :latest - overwrites, no duplicates
   artifacts:
     # Backend API Service (Monolith - Legacy)
     - image: deepiri-core-api
@@ -250,6 +253,96 @@ profiles:
         flags:
           global: 
             - '--force'
+  
+  # Docker Compose profile - builds images with names Docker Compose expects
+  - name: dev-compose
+    build:
+      local:
+        push: false
+        useBuildkit: true
+        concurrency: 0  # Build in parallel
+      tagPolicy:
+        customTemplate:
+          template: "latest"  # CONSTANT tag - rebuilds OVERWRITE instead of creating duplicates
+      artifacts:
+        # Build with Docker Compose naming convention
+        - image: deepiri-dev-cyrex
+          context: ./diri-cyrex
+          docker:
+            dockerfile: Dockerfile
+            buildArgs:
+              BUILD_TYPE: prebuilt
+              BASE_IMAGE: python:3.11-slim
+              PYTORCH_VERSION: 2.9.1
+              PYTHON_VERSION: 3.11
+        
+        - image: deepiri-dev-frontend
+          context: ./deepiri-web-frontend
+          docker:
+            dockerfile: Dockerfile.dev
+        
+        - image: deepiri-dev-api-gateway
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-api-gateway/Dockerfile
+        
+        - image: deepiri-dev-auth-service
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-auth-service/Dockerfile
+        
+        - image: deepiri-dev-task-orchestrator
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-task-orchestrator/Dockerfile
+        
+        - image: deepiri-dev-challenge-service
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-challenge-service/Dockerfile
+        
+        - image: deepiri-dev-engagement-service
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-engagement-service/Dockerfile
+        
+        - image: deepiri-dev-platform-analytics-service
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-platform-analytics-service/Dockerfile
+        
+        - image: deepiri-dev-external-bridge-service
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-external-bridge-service/Dockerfile
+        
+        - image: deepiri-dev-notification-service
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-notification-service/Dockerfile
+        
+        - image: deepiri-dev-realtime-gateway
+          context: ./platform-services
+          docker:
+            dockerfile: backend/deepiri-realtime-gateway/Dockerfile
+        
+        - image: deepiri-dev-jupyter
+          context: ./diri-cyrex
+          docker:
+            dockerfile: Dockerfile.jupyter
+            #target: base-prebuilt  # Skip ML downloads (faster build)
+            buildArgs:
+              BUILD_TYPE: prebuilt
+              BASE_IMAGE: python:3.11-slim
+              PYTORCH_VERSION: 2.9.1
+              PYTHON_VERSION: 3.11
+    # Don't deploy to K8s - just build for Docker Compose
+    deploy:
+      kubectl:
+        manifests: []
+    
+    # Note: Use scripts/remove-dangling-images.sh or .ps1 to clean up dangling images after build
+    # Hooks are not supported in profiles for v2beta29 API
   
   # GPU profile - uses CUDA-enabled PyTorch image for Cyrex
   # Note: Requires NVIDIA GPU with CUDA support (Intel Iris Xe not supported)
