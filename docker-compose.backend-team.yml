@@ -1,26 +1,24 @@
-name: deepiri-dev
+name: deepiri-backend-team
 
-# IMPORTANT: Set DOCKER_BUILDKIT=1 before building to enable layer caching
-# This prevents 50GB+ of dangling images on every build
+# Backend Team Configuration
+# All backend microservices + infrastructure
 
 x-build-args: &build-args
-  # Use BuildKit for better caching and no dangling images
   DOCKER_BUILDKIT: 1
   BUILDKIT_PROGRESS: plain
 
-# Minimal logging - logs are automatically cleared and not saved
 x-logging: &minimal-logging
   driver: "local"
   options:
-    max-size: "1m"      # Only 1MB per file
-    max-file: "1"       # Only 1 file (no rotation backup)
-    compress: "false"   # No compression (faster cleanup)
+    max-size: "1m"
+    max-file: "1"
+    compress: "false"
 
 services:
   # MongoDB Database
   mongodb:
     image: mongo:7.0
-    container_name: deepiri-mongodb-dev
+    container_name: deepiri-mongodb-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -30,49 +28,29 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
       MONGO_INITDB_DATABASE: ${MONGO_DB:-deepiri}
     volumes:
-      - mongodb_dev_data:/data/db
+      - mongodb_backend_data:/data/db
       - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
     networks:
-      - deepiri-dev-network
-
-  # Mongo Express - Database Admin UI
-  mongo-express:
-    image: mongo-express:1.0.2
-    container_name: deepiri-mongo-express-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    ports:
-      - "8081:8081"
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-password}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/
-      ME_CONFIG_BASICAUTH: false
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
-    depends_on:
-      - mongodb
-    networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Redis Cache
   redis:
     image: redis:7.2-alpine
-    container_name: deepiri-redis-dev
+    container_name: deepiri-redis-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
-      - "6380:6379"  # Using 6380 to avoid conflict with system Redis on 6379
+      - "6380:6379"
     command: redis-server --requirepass ${REDIS_PASSWORD:-redispassword}
     volumes:
-      - redis_dev_data:/data
+      - redis_backend_data:/data
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # InfluxDB for Time-Series Analytics
   influxdb:
     image: influxdb:2.7
-    container_name: deepiri-influxdb-dev
+    container_name: deepiri-influxdb-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -85,62 +63,9 @@ services:
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET:-analytics}
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN:-your-influxdb-token}
     volumes:
-      - influxdb_dev_data:/var/lib/influxdb2
+      - influxdb_backend_data:/var/lib/influxdb2
     networks:
-      - deepiri-dev-network
-
-  # etcd service for Milvus metadata
-  etcd:
-    image: quay.io/coreos/etcd:v3.5.5
-    container_name: deepiri-etcd-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    environment:
-      ETCD_AUTO_COMPACTION_MODE: revision
-      ETCD_AUTO_COMPACTION_RETENTION: 1000
-      ETCD_QUOTA_BACKEND_BYTES: 4294967296
-      ETCD_SNAPSHOT_COUNT: 50000
-    volumes:
-      - etcd_dev_data:/etcd
-    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
-    networks:
-      - deepiri-dev-network
-
-  # MinIO service for Milvus object storage
-  minio:
-    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
-    container_name: deepiri-minio-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    environment:
-      MINIO_ACCESS_KEY: minioadmin
-      MINIO_SECRET_KEY: minioadmin
-    volumes:
-      - minio_dev_data:/data
-    command: minio server /data --console-address ":9001"
-    networks:
-      - deepiri-dev-network
-
-  # Milvus Vector Database for RAG (needs MinIO and etcd services)
-  milvus:
-    image: milvusdb/milvus:v2.3.0
-    container_name: deepiri-milvus-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    command: ["milvus", "run", "standalone"]
-    ports:
-      - "19530:19530"
-      - "9091:9091"
-    environment:
-      ETCD_ENDPOINTS: etcd:2379
-      MINIO_ADDRESS: minio:9000
-    volumes:
-      - milvus_dev_data:/var/lib/milvus
-    depends_on:
-      - etcd
-      - minio
-    networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # API Gateway - Routes requests to all microservices
   api-gateway:
@@ -149,7 +74,7 @@ services:
       dockerfile: backend/deepiri-api-gateway/Dockerfile
     image: deepiri-dev-api-gateway:latest
     pull_policy: never
-    container_name: deepiri-api-gateway-dev
+    container_name: deepiri-api-gateway-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -175,9 +100,8 @@ services:
       - external-bridge-service
       - challenge-service
       - realtime-gateway
-      - cyrex
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Auth Service
   auth-service:
@@ -186,7 +110,7 @@ services:
       dockerfile: backend/deepiri-auth-service/Dockerfile
     image: deepiri-dev-auth-service:latest
     pull_policy: never
-    container_name: deepiri-auth-service-dev
+    container_name: deepiri-auth-service-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -210,7 +134,7 @@ services:
       - mongodb
       - influxdb
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Task Orchestrator Service
   task-orchestrator:
@@ -219,7 +143,7 @@ services:
       dockerfile: backend/deepiri-task-orchestrator/Dockerfile
     image: deepiri-dev-task-orchestrator:latest
     pull_policy: never
-    container_name: deepiri-task-orchestrator-dev
+    container_name: deepiri-task-orchestrator-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -236,7 +160,7 @@ services:
     depends_on:
       - mongodb
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Engagement Service
   engagement-service:
@@ -245,7 +169,7 @@ services:
       dockerfile: backend/deepiri-engagement-service/Dockerfile
     image: deepiri-dev-engagement-service:latest
     pull_policy: never
-    container_name: deepiri-engagement-service-dev
+    container_name: deepiri-engagement-service-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -266,7 +190,7 @@ services:
       - mongodb
       - redis
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Platform Analytics Service
   platform-analytics-service:
@@ -275,7 +199,7 @@ services:
       dockerfile: backend/deepiri-platform-analytics-service/Dockerfile
     image: deepiri-dev-platform-analytics-service:latest
     pull_policy: never
-    container_name: deepiri-platform-analytics-service-dev
+    container_name: deepiri-platform-analytics-service-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -297,7 +221,7 @@ services:
       - mongodb
       - influxdb
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Notification Service
   notification-service:
@@ -306,7 +230,7 @@ services:
       dockerfile: backend/deepiri-notification-service/Dockerfile
     image: deepiri-dev-notification-service:latest
     pull_policy: never
-    container_name: deepiri-notification-service-dev
+    container_name: deepiri-notification-service-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -326,7 +250,7 @@ services:
     depends_on:
       - mongodb
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # External Bridge Service
   external-bridge-service:
@@ -335,7 +259,7 @@ services:
       dockerfile: backend/deepiri-external-bridge-service/Dockerfile
     image: deepiri-dev-external-bridge-service:latest
     pull_policy: never
-    container_name: deepiri-external-bridge-service-dev
+    container_name: deepiri-external-bridge-service-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -361,7 +285,7 @@ services:
     depends_on:
       - mongodb
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Challenge Service
   challenge-service:
@@ -370,7 +294,7 @@ services:
       dockerfile: backend/deepiri-challenge-service/Dockerfile
     image: deepiri-dev-challenge-service:latest
     pull_policy: never
-    container_name: deepiri-challenge-service-dev
+    container_name: deepiri-challenge-service-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -387,9 +311,8 @@ services:
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - mongodb
-      - cyrex
     networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
   # Realtime Gateway Service
   realtime-gateway:
@@ -398,7 +321,7 @@ services:
       dockerfile: backend/deepiri-realtime-gateway/Dockerfile
     image: deepiri-dev-realtime-gateway:latest
     pull_policy: never
-    container_name: deepiri-realtime-gateway-dev
+    container_name: deepiri-realtime-gateway-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
@@ -412,148 +335,17 @@ services:
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     networks:
-      - deepiri-dev-network
-
-  # Python Agent API (AI Service)
-  cyrex:
-    build:
-      context: ./diri-cyrex
-      dockerfile: Dockerfile
-      args:
-        BUILD_TYPE: prebuilt
-        BASE_IMAGE: python:3.11-slim
-        PYTORCH_VERSION: 2.9.1
-        PYTHON_VERSION: 3.11
-    image: deepiri-dev-cyrex:latest
-    pull_policy: never
-    container_name: deepiri-cyrex-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
-      CORS_ORIGIN: http://localhost:5173
-      CYREX_API_KEY: ${CYREX_API_KEY:-change-me}
-      MLFLOW_TRACKING_URI: ${MLFLOW_TRACKING_URI:-http://mlflow:5000}
-      WANDB_API_KEY: ${WANDB_API_KEY}
-      MODEL_REGISTRY_PATH: /app/model_registry
-      STAGING_MODEL_PATH: /app/models/staging
-      PRODUCTION_MODEL_PATH: /app/models/production
-      PINECONE_API_KEY: ${PINECONE_API_KEY}
-      PINECONE_ENVIRONMENT: ${PINECONE_ENVIRONMENT:-us-east1-gcp}
-      PINECONE_INDEX: ${PINECONE_INDEX:-deepiri}
-      WEAVIATE_URL: ${WEAVIATE_URL}
-      INFLUXDB_URL: http://influxdb:8086
-      INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
-      INFLUXDB_ORG: ${INFLUXDB_ORG:-deepiri}
-      INFLUXDB_BUCKET: ${INFLUXDB_BUCKET:-analytics}
-      MILVUS_HOST: milvus
-      MILVUS_PORT: 19530
-      TRANSFORMERS_CACHE: /app/.cache/huggingface
-      HF_HOME: /app/.cache/huggingface
-      SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence_transformers
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./diri-cyrex/app:/app/app
-      - ./diri-cyrex/train/models:/app/train/models
-      - ./diri-cyrex/train/data:/app/train/data
-      - ./diri-cyrex/inference/models:/app/inference/models
-      - cyrex_cache:/app/.cache
-    depends_on:
-      - influxdb
-      - milvus
-    networks:
-      - deepiri-dev-network
-
-  # MLflow for AI Experiment Tracking
-  mlflow:
-    image: ghcr.io/mlflow/mlflow:v2.8.1
-    container_name: deepiri-mlflow-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    ports:
-      - "5500:5000"
-    environment:
-      BACKEND_STORE_URI: file:/mlflow
-      DEFAULT_ARTIFACT_ROOT: file:/mlflow/artifacts
-    command: mlflow server --host 0.0.0.0 --port 5000 --backend-store-uri file:/mlflow --default-artifact-root file:/mlflow/artifacts
-    volumes:
-      - mlflow_dev_data:/mlflow
-    networks:
-      - deepiri-dev-network
-
-  # Jupyter Notebook for AI Research
-  jupyter:
-    build:
-      context: ./diri-cyrex
-      dockerfile: Dockerfile.jupyter
-      args:
-        BUILD_TYPE: prebuilt
-        BASE_IMAGE: python:3.11-slim
-        PYTORCH_VERSION: 2.9.1
-        PYTHON_VERSION: 3.11
-    image: deepiri-dev-jupyter:latest
-    pull_policy: never
-    container_name: deepiri-jupyter-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    command: jupyter notebook --ip=0.0.0.0 --port=8888 --no-browser --allow-root --NotebookApp.token='' --NotebookApp.password='' --NotebookApp.runtime_dir=/tmp/jupyter_runtime --NotebookApp.notebook_dir=/app/notebooks
-    ports:
-      - "8888:8888"
-    volumes:
-      - ./diri-cyrex/train/notebooks:/app/notebooks
-      - ./diri-cyrex/train/data:/app/data
-    environment:
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
-      JUPYTER_RUNTIME_DIR: /tmp/jupyter_runtime
-    networks:
-      - deepiri-dev-network
-
-  # Frontend with Vite HMR
-  frontend-dev:
-    build:
-      context: ./deepiri-web-frontend
-      dockerfile: Dockerfile.dev
-    image: deepiri-dev-frontend:latest
-    pull_policy: never
-    container_name: deepiri-frontend-dev
-    restart: unless-stopped
-    logging: *minimal-logging
-    ports:
-      - "5173:5173"
-    environment:
-      NODE_ENV: development
-      VITE_API_URL: http://localhost:5000/api
-      VITE_CYREX_URL: http://localhost:8000
-      CHOKIDAR_USEPOLLING: true
-      WATCHPACK_POLLING: true
-    volumes:
-      - ./deepiri-web-frontend:/app
-      - /app/node_modules
-    depends_on:
-      - api-gateway
-    networks:
-      - deepiri-dev-network
+      - deepiri-backend-network
 
 volumes:
-  mongodb_dev_data:
+  mongodb_backend_data:
     driver: local
-  redis_dev_data:
+  redis_backend_data:
     driver: local
-  mlflow_dev_data:
-    driver: local
-  influxdb_dev_data:
-    driver: local
-  milvus_dev_data:
-    driver: local
-  etcd_dev_data:
-    driver: local
-  minio_dev_data:
-    driver: local
-  cyrex_cache:
+  influxdb_backend_data:
     driver: local
 
 networks:
-  deepiri-dev-network:
+  deepiri-backend-network:
     driver: bridge
+
