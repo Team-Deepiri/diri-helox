@@ -426,7 +426,7 @@ These are database and cache services that support the application.
 
 ---
 
-## 📝 Quick Reference
+## Quick Reference
 
 ### All Service URLs
 
@@ -448,7 +448,7 @@ These are database and cache services that support the application.
 | Realtime Gateway | API | http://localhost:5008 | 5008 |
 | Cyrex AI | API | http://localhost:8000 | 8000 |
 | MongoDB | Database | mongodb://localhost:27017 | 27017 |
-| Redis | Cache | redis://localhost:6380 | 6380 |
+| Redis | Data Transmission / Cache | redis://localhost:6380 | 6380 |
 
 ---
 

@@ -89,6 +89,59 @@ services:
     networks:
       - deepiri-dev-network
 
+  # etcd service for Milvus metadata
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    container_name: deepiri-etcd-dev
+    restart: unless-stopped
+    logging: *minimal-logging
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_AUTO_COMPACTION_RETENTION: 1000
+      ETCD_QUOTA_BACKEND_BYTES: 4294967296
+      ETCD_SNAPSHOT_COUNT: 50000
+    volumes:
+      - etcd_dev_data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+    networks:
+      - deepiri-dev-network
+
+  # MinIO service for Milvus object storage
+  minio:
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    container_name: deepiri-minio-dev
+    restart: unless-stopped
+    logging: *minimal-logging
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    volumes:
+      - minio_dev_data:/data
+    command: minio server /data --console-address ":9001"
+    networks:
+      - deepiri-dev-network
+
+  # Milvus Vector Database for RAG (needs MinIO and etcd services)
+  milvus:
+    image: milvusdb/milvus:v2.3.0
+    container_name: deepiri-milvus-dev
+    restart: unless-stopped
+    logging: *minimal-logging
+    command: ["milvus", "run", "standalone"]
+    ports:
+      - "19530:19530"
+      - "9091:9091"
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    volumes:
+      - milvus_dev_data:/var/lib/milvus
+    depends_on:
+      - etcd
+      - minio
+    networks:
+      - deepiri-dev-network
+
   # API Gateway - Routes requests to all microservices
   api-gateway:
     build:
@@ -394,6 +447,8 @@ services:
       INFLUXDB_TOKEN: ${INFLUXDB_TOKEN}
       INFLUXDB_ORG: ${INFLUXDB_ORG:-deepiri}
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET:-analytics}
+      MILVUS_HOST: milvus
+      MILVUS_PORT: 19530
       TRANSFORMERS_CACHE: /app/.cache/huggingface
       HF_HOME: /app/.cache/huggingface
       SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence_transformers
@@ -407,6 +462,7 @@ services:
       - cyrex_cache:/app/.cache
     depends_on:
       - influxdb
+      - milvus
     networks:
       - deepiri-dev-network
 
@@ -488,6 +544,12 @@ volumes:
   mlflow_dev_data:
     driver: local
   influxdb_dev_data:
+    driver: local
+  milvus_dev_data:
+    driver: local
+  etcd_dev_data:
+    driver: local
+  minio_dev_data:
     driver: local
   cyrex_cache:
     driver: local
