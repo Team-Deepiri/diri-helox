@@ -45,7 +45,10 @@ team_submodule_commands/
 ```bash
 # Clone the main repository with all submodules
 git clone --recursive https://github.com/Team-Deepiri/deepiri.git
-cd deepiri
+cd deepiri-platform
+
+# Set up Git hooks (REQUIRED - protects main and dev branches)
+./setup-hooks.sh
 ```
 
 ### After Pulling Main Repo
