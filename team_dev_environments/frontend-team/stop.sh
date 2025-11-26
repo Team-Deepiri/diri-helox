@@ -12,9 +12,10 @@ echo "🛑 Stopping Frontend Team services..."
 # This stops all services defined in docker-compose.frontend-team.yml:
 # - frontend-dev, api-gateway, auth-service
 # - task-orchestrator, engagement-service, platform-analytics-service
-# - notification-service, external-bridge-service, challenge-service
+# - notification-service, challenge-service
 # - realtime-gateway
 # - mongodb, redis, influxdb, mongo-express
+# Note: external-bridge-service excluded - frontend team doesn't need integrations
 docker compose -f docker-compose.frontend-team.yml stop
 
 echo "✅ Frontend Team services stopped!"

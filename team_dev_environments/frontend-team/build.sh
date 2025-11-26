@@ -16,9 +16,10 @@ echo "🔨 Building Frontend Team services..."
 # Build all platform-services that frontend needs (api-gateway depends on all of these)
 # Services to build: frontend-dev, api-gateway, auth-service, task-orchestrator,
 # engagement-service, platform-analytics-service, notification-service,
-# external-bridge-service, challenge-service, realtime-gateway
+# challenge-service, realtime-gateway
+# Note: external-bridge-service excluded - frontend team doesn't need integrations
 SERVICES=()
-for service in frontend-dev api-gateway auth-service task-orchestrator engagement-service platform-analytics-service notification-service external-bridge-service challenge-service realtime-gateway; do
+for service in frontend-dev api-gateway auth-service task-orchestrator engagement-service platform-analytics-service notification-service challenge-service realtime-gateway; do
   case $service in
     api-gateway)
       if [ -f "platform-services/backend/deepiri-api-gateway/Dockerfile" ]; then
@@ -29,13 +30,6 @@ for service in frontend-dev api-gateway auth-service task-orchestrator engagemen
       ;;
     auth-service)
       if [ -f "platform-services/backend/deepiri-auth-service/Dockerfile" ]; then
-        SERVICES+=("$service")
-      else
-        echo "⚠️  Skipping $service (submodule not initialized)"
-      fi
-      ;;
-    external-bridge-service)
-      if [ -f "platform-services/backend/deepiri-external-bridge-service/Dockerfile" ]; then
         SERVICES+=("$service")
       else
         echo "⚠️  Skipping $service (submodule not initialized)"
