@@ -1,6 +1,6 @@
 #!/bin/bash
 # Frontend Team - Stop script
-# Stops: frontend-dev + auth-service + their dependencies
+# Stops all frontend team services and their dependencies
 
 set -e
 
@@ -8,40 +8,12 @@ cd "$(dirname "$0")/../.." || exit 1
 
 echo "🛑 Stopping Frontend Team services..."
 
-# Stop services that exist (skip submodules if not initialized)
-SERVICES=()
-for service in frontend-dev auth-service; do
-  case $service in
-    auth-service)
-      if [ -f "platform-services/backend/deepiri-auth-service/Dockerfile" ]; then
-        SERVICES+=("$service")
-      else
-        echo "⚠️  Skipping $service (submodule not initialized)"
-      fi
-      ;;
-    frontend-dev)
-      if [ -f "deepiri-web-frontend/Dockerfile.dev" ]; then
-        SERVICES+=("$service")
-      else
-        echo "⚠️  Skipping $service (submodule not initialized)"
-      fi
-      ;;
-    *)
-      SERVICES+=("$service")
-      ;;
-  esac
-done
-
-if [ ${#SERVICES[@]} -eq 0 ]; then
-  echo "❌ No services to stop!"
-  exit 1
-fi
-
-echo "Stopping: ${SERVICES[*]} (and all frontend team services)"
-
 # Stop all services in the frontend-team compose file
 # This stops all services defined in docker-compose.frontend-team.yml:
 # - frontend-dev, api-gateway, auth-service
+# - task-orchestrator, engagement-service, platform-analytics-service
+# - notification-service, external-bridge-service, challenge-service
+# - realtime-gateway
 # - mongodb, redis, influxdb, mongo-express
 docker compose -f docker-compose.frontend-team.yml stop
 

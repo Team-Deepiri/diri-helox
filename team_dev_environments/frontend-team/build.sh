@@ -1,7 +1,7 @@
 #!/bin/bash
 # Frontend Team - Build script
-# Requirements: frontend-dev + auth-service + their dependencies
-# Dependencies: mongodb, influxdb (for auth-service), mongo-express (admin UI)
+# Requirements: frontend-dev + all platform-services needed by api-gateway
+# Dependencies: mongodb, influxdb, mongo-express (pulled as images, not built)
 
 set -e
 
@@ -13,12 +13,29 @@ export COMPOSE_DOCKER_CLI_BUILD=1
 
 echo "🔨 Building Frontend Team services..."
 
-# Build services that exist (skip submodules if not initialized)
+# Build all platform-services that frontend needs (api-gateway depends on all of these)
+# Services to build: frontend-dev, api-gateway, auth-service, task-orchestrator,
+# engagement-service, platform-analytics-service, notification-service,
+# external-bridge-service, challenge-service, realtime-gateway
 SERVICES=()
-for service in frontend-dev auth-service; do
+for service in frontend-dev api-gateway auth-service task-orchestrator engagement-service platform-analytics-service notification-service external-bridge-service challenge-service realtime-gateway; do
   case $service in
+    api-gateway)
+      if [ -f "platform-services/backend/deepiri-api-gateway/Dockerfile" ]; then
+        SERVICES+=("$service")
+      else
+        echo "⚠️  Skipping $service (submodule not initialized)"
+      fi
+      ;;
     auth-service)
       if [ -f "platform-services/backend/deepiri-auth-service/Dockerfile" ]; then
+        SERVICES+=("$service")
+      else
+        echo "⚠️  Skipping $service (submodule not initialized)"
+      fi
+      ;;
+    external-bridge-service)
+      if [ -f "platform-services/backend/deepiri-external-bridge-service/Dockerfile" ]; then
         SERVICES+=("$service")
       else
         echo "⚠️  Skipping $service (submodule not initialized)"
@@ -32,6 +49,7 @@ for service in frontend-dev auth-service; do
       fi
       ;;
     *)
+      # For services without specific Dockerfile checks (task-orchestrator, engagement-service, etc.)
       SERVICES+=("$service")
       ;;
   esac
