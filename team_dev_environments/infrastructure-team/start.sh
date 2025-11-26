@@ -1,6 +1,8 @@
 #!/bin/bash
 # Infrastructure Team - Start script
-# Services: All infrastructure + all microservices for monitoring
+# Services from SERVICE_COMMUNICATION_AND_TEAMS.md:
+# - All Infrastructure Services (MongoDB, Redis, InfluxDB, Mongo Express)
+# - API Gateway and All Microservices for monitoring
 
 set -e
 
@@ -9,7 +11,8 @@ cd "$(dirname "$0")/../.." || exit 1
 echo "🚀 Starting Infrastructure Team services..."
 echo "Services: All infrastructure + all microservices"
 
-docker compose -f docker-compose.dev.yml up -d
+# Use --no-build to prevent automatic building (images should already be built)
+docker compose -f docker-compose.dev.yml up -d --no-build
 
 echo "✅ Infrastructure Team services started!"
 echo ""

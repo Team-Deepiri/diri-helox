@@ -32,7 +32,8 @@ fi
 
 echo "Building: ${SERVICES[*]}"
 
-docker compose -f docker-compose.dev.yml build "${SERVICES[@]}"
+# Use --no-deps to prevent building dependencies we don't need
+docker compose -f docker-compose.dev.yml build --no-deps "${SERVICES[@]}"
 
 echo "✅ AI Team services built successfully!"
 

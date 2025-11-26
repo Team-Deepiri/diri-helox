@@ -6,6 +6,10 @@ set -e
 
 cd "$(dirname "$0")/../.." || exit 1
 
+# Enable BuildKit for better builds
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 echo "🔨 Building Backend Team services..."
 
 # Build services that exist (skip submodules if not initialized)
@@ -46,7 +50,8 @@ fi
 
 echo "Building: ${SERVICES[*]}"
 
-docker compose -f docker-compose.dev.yml build "${SERVICES[@]}"
+# Use --no-deps to prevent building dependencies we don't need (like cyrex)
+docker compose -f docker-compose.dev.yml build --no-deps "${SERVICES[@]}"
 
 echo "✅ Backend Team services built successfully!"
 

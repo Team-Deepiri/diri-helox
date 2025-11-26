@@ -1,6 +1,7 @@
 #!/bin/bash
 # Platform Engineers - Start script
-# Services: Everything (all services for platform tooling development)
+# Services from SERVICE_COMMUNICATION_AND_TEAMS.md:
+# - All Services for platform tooling development
 
 set -e
 
@@ -9,7 +10,8 @@ cd "$(dirname "$0")/../.." || exit 1
 echo "🚀 Starting Platform Engineers services..."
 echo "Services: ALL SERVICES (complete stack)"
 
-docker compose -f docker-compose.dev.yml up -d
+# Use --no-build to prevent automatic building (images should already be built)
+docker compose -f docker-compose.dev.yml up -d --no-build
 
 echo "✅ Platform Engineers services started!"
 echo ""

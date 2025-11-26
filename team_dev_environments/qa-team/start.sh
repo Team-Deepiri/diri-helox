@@ -1,6 +1,7 @@
 #!/bin/bash
 # QA Team - Start script
-# Services: Everything (all services for end-to-end testing)
+# Services from SERVICE_COMMUNICATION_AND_TEAMS.md:
+# - All Services for end-to-end testing
 
 set -e
 
@@ -9,7 +10,8 @@ cd "$(dirname "$0")/../.." || exit 1
 echo "🚀 Starting QA Team services..."
 echo "Services: ALL SERVICES (complete stack for testing)"
 
-docker compose -f docker-compose.dev.yml up -d
+# Use --no-build to prevent automatic building (images should already be built)
+docker compose -f docker-compose.dev.yml up -d --no-build
 
 echo "✅ QA Team services started!"
 echo ""

@@ -259,13 +259,11 @@ docker compose -f docker-compose.dev.yml up -d \
 ###  Frontend Team
 
 **Primary Services:**
-- ✅ **Frontend Service** (Port 3000) - React application
-- ✅ **API Gateway** (Port 5000) - Backend API
+- ✅ **Frontend Service** (Port 5173) - React application
 - ✅ **Realtime Gateway** (Port 5008) - WebSocket for real-time features
 
 **Infrastructure Needed:**
-- ✅ **All Backend Services** - For API calls
-- ✅ **MongoDB** (optional) - For direct DB access in dev
+- ✅ **Backend Services** - For API calls (auth-service, task-orchestrator, engagement-service, platform-analytics-service, notification-service, challenge-service)
 
 **What They Work On:**
 - `deepiri-web-frontend/` - React frontend
@@ -275,13 +273,13 @@ docker compose -f docker-compose.dev.yml up -d \
 
 **Start Command:**
 ```bash
-# Start frontend + backend
+# Start frontend + backend services (excluding api-gateway and external-bridge-service)
 docker compose -f docker-compose.dev.yml up -d \
-  mongodb redis influxdb \
-  api-gateway auth-service task-orchestrator \
+  \
+  auth-service task-orchestrator \
   engagement-service platform-analytics-service \
-  notification-service external-bridge-service \
-  challenge-service realtime-gateway frontend
+  notification-service \
+  challenge-service realtime-gateway frontend-dev
 ```
 
 ---
@@ -355,7 +353,7 @@ docker compose -f docker-compose.dev.yml up -d
 | Challenge Service | 5007 | Backend, AI, QA |
 | Realtime Gateway | 5008 | Backend, Frontend, QA |
 | Cyrex AI | 8000 | AI, ML, QA |
-| Frontend | 3000 | Frontend, QA |
+| Frontend | 5173 | Frontend, QA |
 | MongoDB | 27017 | Infrastructure, All Teams |
 | Redis | 6379 | Infrastructure, Backend |
 | InfluxDB | 8086 | Infrastructure, Backend, ML, AI |
