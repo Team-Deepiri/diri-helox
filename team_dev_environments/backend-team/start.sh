@@ -10,8 +10,9 @@ cd "$(dirname "$0")/../.." || exit 1
 echo "🚀 Starting Backend Team services..."
 
 # Start services that exist (skip submodules if not initialized)
+# api-gateway depends on all these services, so we need to start them all
 SERVICES=()
-for service in frontend-dev api-gateway auth-service; do
+for service in frontend-dev api-gateway auth-service task-orchestrator engagement-service platform-analytics-service notification-service external-bridge-service challenge-service realtime-gateway; do
   case $service in
     api-gateway)
       if [ -f "platform-services/backend/deepiri-api-gateway/Dockerfile" ]; then
@@ -22,6 +23,13 @@ for service in frontend-dev api-gateway auth-service; do
       ;;
     auth-service)
       if [ -f "platform-services/backend/deepiri-auth-service/Dockerfile" ]; then
+        SERVICES+=("$service")
+      else
+        echo "⚠️  Skipping $service (submodule not initialized)"
+      fi
+      ;;
+    external-bridge-service)
+      if [ -f "platform-services/backend/deepiri-external-bridge-service/Dockerfile" ]; then
         SERVICES+=("$service")
       else
         echo "⚠️  Skipping $service (submodule not initialized)"
@@ -48,9 +56,8 @@ fi
 echo "Starting: ${SERVICES[*]} (and their dependencies)"
 
 # Use --no-build to prevent automatic building (images should already be built)
-# Dependencies (mongodb, redis, influxdb, mongo-express, task-orchestrator, 
-# engagement-service, platform-analytics-service, notification-service, challenge-service, 
-# realtime-gateway) will be started automatically
+# Dependencies (mongodb, redis, influxdb, mongo-express) will be started automatically
+# All platform-services are explicitly listed above to ensure they're built and started
 docker compose -f docker-compose.backend-team.yml up -d --no-build "${SERVICES[@]}"
 
 # Get API Gateway port from environment or use default
