@@ -4,6 +4,18 @@
 
 This directory contains build and start scripts for the Platform Engineers' development environment.
 
+## ⚠️ Initial Setup (One-Time)
+
+**Before using this environment, set up Git hooks from the repository root:**
+
+```bash
+# From repository root
+cd ../..
+./setup-hooks.sh
+```
+
+This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_PROTECTION.md](../../BRANCH_PROTECTION.md) for details.
+
 ## Services
 
 **Primary Services:**

@@ -1,6 +1,8 @@
 # Deepiri - AI-Powered Learning Platform
 
-> **Quick Start:** Run `./build.sh` (Linux/Mac/WSL) or `.\build.ps1` (Windows), then `docker compose -f docker-compose.dev.yml up -d`
+> **🚀 NEW TO THE PROJECT?** Start here: [START_HERE.md](START_HERE.md)  
+> **👥 FIND YOUR TEAM:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)  
+> **⚡ Quick Start:** Run `./build.sh` (Linux/Mac/WSL) or `.\build.ps1` (Windows), then `docker compose -f docker-compose.dev.yml up -d`
 
 ## What is Deepiri?
 
@@ -14,32 +16,41 @@ Deepiri is an AI-powered learning and development platform featuring:
 
 ## Getting Started
 
-### Prerequisites
-- Docker & Docker Compose
-- WSL2 (Windows only)
-- 8GB+ RAM recommended
+### 🎯 For New Team Members
 
-### Build & Run
+1. **Find your team:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)
+2. **Follow your team's path:** [START_HERE.md](START_HERE.md)
+3. **Git hooks:** Automatically configured on clone (protects main and dev branches)
+
+### Quick Build & Run
 
 ```bash
 # 1. Clone the repository
 git clone <your-repo-url>
-cd deepiri
+cd deepiri-platform
 
-# 2. Build all services (auto-cleans dangling images)
+# 2. Git hooks are automatically configured! (protects main and dev branches)
+# If hooks aren't working, run: ./setup-hooks.sh
+
+# 3. Build all services (auto-cleans dangling images)
 ./build.sh              # Linux/Mac/WSL
 .\build.ps1             # Windows PowerShell
 
-# 3. Start the stack
+# 4. Start the stack
 docker compose -f docker-compose.dev.yml up -d
 
-# 4. Access services
+# 5. Access services
 # - Frontend: http://localhost:5173
 # - API Gateway: http://localhost:5000
 # - Cyrex AI: http://localhost:8000
 # - Jupyter: http://localhost:8888
 # - MLflow: http://localhost:5500
 ```
+
+### Prerequisites
+- Docker & Docker Compose
+- WSL2 (Windows only)
+- 8GB+ RAM recommended
 
 ### Stop
 
@@ -62,7 +73,9 @@ docker compose -f docker-compose.dev.yml down
 - **[scripts/STORAGE-TROUBLESHOOTING.md](scripts/STORAGE-TROUBLESHOOTING.md)** - Disk space issues
 - **[docs/LOG_INSPECTION_GUIDE.md](docs/LOG_INSPECTION_GUIDE.md)** - Debugging logs
 
-### Team-Specific
+### Team-Specific (Find Your Team First!)
+- **👉 Start here:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md) - Find your team and role
+- **👉 Complete setup:** [START_HERE.md](START_HERE.md) - Step-by-step getting started guide
 - **[docs/AI_TEAM_ONBOARDING.md](docs/AI_TEAM_ONBOARDING.md)** - AI/ML development
 - **[docs/BACKEND_TEAM_ONBOARDING.md](docs/BACKEND_TEAM_ONBOARDING.md)** - Backend services
 - **[docs/FRONTEND_TEAM_ONBOARDING.md](docs/FRONTEND_TEAM_ONBOARDING.md)** - Frontend development
@@ -219,13 +232,14 @@ deepiri/
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Run `./build.sh` to test
-5. Submit a pull request
+1. **Git hooks:** Automatically configured on clone (protects main and dev branches)
+2. Fork the repository
+3. Create a feature branch (NOT from main or dev)
+4. Make your changes
+5. Run `./build.sh` to test
+6. Submit a pull request to `staging` (NOT main or dev)
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for complete workflow details.
 
 ## License
 

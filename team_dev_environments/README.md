@@ -2,6 +2,17 @@
 
 This directory contains team-specific build and start scripts for each development team.
 
+## ⚠️ Initial Setup (One-Time - Required for All Teams)
+
+**Before using any team environment, set up Git hooks from the repository root:**
+
+```bash
+# From repository root
+./setup-hooks.sh
+```
+
+This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_PROTECTION.md](../BRANCH_PROTECTION.md) for details.
+
 ## Directory Structure
 
 Each team has its own folder with:
