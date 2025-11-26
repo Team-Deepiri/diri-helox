@@ -1,22 +1,11 @@
 # Deepiri - AI-Powered Learning Platform
 
-> **🚀 NEW TO THE PROJECT?** Start here: [START_HERE.md](START_HERE.md)  
-> **👥 FIND YOUR TEAM:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)  
-> **⚡ Quick Start:** Run `./build.sh` (Linux/Mac/WSL) or `.\build.ps1` (Windows), then `docker compose -f docker-compose.dev.yml up -d`
+> ** NEW TO THE PROJECT?** Start here: [START_HERE.md](START_HERE.md)  
+> **FIND YOUR TEAM:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)  
+> ** Quick Start:** Run `./build.sh` (Linux/Mac/WSL) or `.\build.ps1` (Windows), then `docker compose -f docker-compose.dev.yml up -d`
 
-## What is Deepiri?
 
-Deepiri is an AI-powered learning and development platform featuring:
-- 🤖 AI agents (Cyrex) for intelligent assistance
-- 🎮 Gamification and challenges
-- 📊 Real-time analytics
-- 🔔 Notifications and webhooks
-- 🌐 External integrations (GitHub, Notion, Trello)
-- 📝 Jupyter notebooks for research
-
-## Getting Started
-
-### 🎯 For New Team Members
+### For New Team Members
 
 1. **Find your team:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)
 2. **Follow your team's path:** [START_HERE.md](START_HERE.md)
@@ -254,3 +243,4 @@ See [LICENSE.md](LICENSE.md)
 ---
 
 **Note:** Old Skaffold-based build docs are archived in `docs/archive/skaffold/` for reference only. Use the Docker Compose workflow documented in [HOW_TO_BUILD.md](HOW_TO_BUILD.md).
+
