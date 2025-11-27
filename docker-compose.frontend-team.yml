@@ -119,7 +119,6 @@ services:
       ENGAGEMENT_SERVICE_URL: http://engagement-service:5003
       PLATFORM_ANALYTICS_SERVICE_URL: http://platform-analytics-service:5004
       NOTIFICATION_SERVICE_URL: http://notification-service:5005
-      EXTERNAL_BRIDGE_SERVICE_URL: http://external-bridge-service:5006
       CHALLENGE_SERVICE_URL: http://challenge-service:5007
       REALTIME_GATEWAY_URL: http://realtime-gateway:5008
       CYREX_URL: http://cyrex:8000
@@ -134,7 +133,6 @@ services:
       - engagement-service
       - platform-analytics-service
       - notification-service
-      - external-bridge-service
       - challenge-service
       - realtime-gateway
     networks:
@@ -281,41 +279,6 @@ services:
       APNS_TEAM_ID: ${APNS_TEAM_ID}
     volumes:
       - ./platform-services/backend/deepiri-notification-service:/app
-      - ./platform-services/shared/deepiri-shared-utils:/shared-utils
-      - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
-    depends_on:
-      - mongodb
-    networks:
-      - deepiri-frontend-network
-
-  # External Bridge Service (needed for API calls)
-  external-bridge-service:
-    build:
-      context: ./platform-services
-      dockerfile: backend/deepiri-external-bridge-service/Dockerfile
-    image: deepiri-dev-external-bridge-service:latest
-    pull_policy: never
-    container_name: deepiri-external-bridge-service-frontend
-    restart: unless-stopped
-    logging: *minimal-logging
-    ports:
-      - "5006:5006"
-    environment:
-      NODE_ENV: development
-      PORT: 5006
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
-      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
-      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
-      NOTION_CLIENT_ID: ${NOTION_CLIENT_ID}
-      NOTION_CLIENT_SECRET: ${NOTION_CLIENT_SECRET}
-      TRELLO_API_KEY: ${TRELLO_API_KEY}
-      TRELLO_API_SECRET: ${TRELLO_API_SECRET}
-      GITHUB_WEBHOOK_SECRET: ${GITHUB_WEBHOOK_SECRET}
-      NOTION_WEBHOOK_SECRET: ${NOTION_WEBHOOK_SECRET}
-      TRELLO_WEBHOOK_SECRET: ${TRELLO_WEBHOOK_SECRET}
-    volumes:
-      - ./platform-services/backend/deepiri-external-bridge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
