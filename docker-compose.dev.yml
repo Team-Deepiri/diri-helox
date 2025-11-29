@@ -466,6 +466,10 @@ services:
       INFLUXDB_BUCKET: ${INFLUXDB_BUCKET:-analytics}
       MILVUS_HOST: milvus
       MILVUS_PORT: 19530
+      # Local LLM Configuration
+      OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://host.docker.internal:11434}
+      LOCAL_LLM_BACKEND: ${LOCAL_LLM_BACKEND:-ollama}
+      LOCAL_LLM_MODEL: ${LOCAL_LLM_MODEL:-llama3:8b}
       TRANSFORMERS_CACHE: /app/.cache/huggingface
       HF_HOME: /app/.cache/huggingface
       SENTENCE_TRANSFORMERS_HOME: /app/.cache/sentence_transformers
