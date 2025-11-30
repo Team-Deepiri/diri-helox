@@ -49,7 +49,7 @@ def run_docker_compose():
         print("  - Frontend:        http://localhost:5173")
         print("  - API Gateway:     http://localhost:5100")
         print("  - Auth Service:    http://localhost:5001")
-        print("  - MongoDB Express: http://localhost:8081")
+        print("  - pgAdmin: http://localhost:5050")
         print()
         print(f"{GRAY}View logs:{RESET}")
         print("  docker compose -f docker-compose.backend-team.yml logs -f")

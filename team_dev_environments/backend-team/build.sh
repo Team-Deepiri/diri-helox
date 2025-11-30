@@ -3,10 +3,10 @@
 # Requirements: core-api, web-frontend, api-gateway, auth + all their dependencies
 # Dependencies: api-gateway needs (auth-service, task-orchestrator, engagement-service, 
 #   platform-analytics-service, notification-service, challenge-service, realtime-gateway)
-#   engagement-service needs (mongodb, redis)
-#   challenge-service needs (mongodb)
-#   auth-service needs (mongodb, influxdb)
-#   Infrastructure: mongodb, redis, influxdb, mongo-express (pulled as images, not built)
+#   engagement-service needs (postgres, redis)
+#   challenge-service needs (postgres)
+#   auth-service needs (postgres, influxdb)
+#   Infrastructure: postgres, redis, influxdb, pgadmin (pulled as images, not built)
 
 set -e
 

@@ -30,7 +30,7 @@ This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_
 - ✅ **Realtime Gateway** (Port 5008) - WebSocket
 
 **Infrastructure:**
-- ✅ **MongoDB** (Port 27017) - All services use MongoDB
+- ✅ **PostgreSQL** (Port 5432) - All services use PostgreSQL
 - ✅ **Redis** (Port 6380) - Engagement and Notification services
 - ✅ **InfluxDB** (Port 8086) - Auth and Analytics services
 

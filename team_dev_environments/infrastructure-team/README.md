@@ -20,7 +20,7 @@ This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_
 
 **Primary Services:**
 - ✅ **All Infrastructure Services**
-  - MongoDB (Port 27017)
+  - PostgreSQL (Port 5432)
   - Redis (Port 6379)
   - InfluxDB (Port 8086)
   - Mongo Express (Port 8081) - DB admin UI
@@ -137,7 +137,8 @@ docker compose -f docker-compose.dev.yml logs -f redis
 
 ## Service URLs
 
-- **MongoDB**: localhost:27017
+- **PostgreSQL**: localhost:5432
+- **pgAdmin**: localhost:5050
 - **Mongo Express**: http://localhost:8081
 - **Redis**: localhost:6380
 - **InfluxDB**: http://localhost:8086

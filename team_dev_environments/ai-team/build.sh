@@ -4,9 +4,9 @@
 # Dependencies: cyrex needs (influxdb, milvus), milvus needs (etcd, minio)
 #   api-gateway needs (auth-service, task-orchestrator, engagement-service, platform-analytics-service, 
 #     notification-service, challenge-service, realtime-gateway, cyrex)
-#   engagement-service needs (mongodb, redis)
-#   challenge-service needs (mongodb, cyrex)
-#   external-bridge-service needs (mongodb)
+#   engagement-service needs (postgres, redis)
+#   challenge-service needs (postgres, cyrex)
+#   external-bridge-service needs (postgres)
 
 set -e
 

@@ -25,7 +25,7 @@ This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_
 - ✅ **Analytics Service** (Port 5004) - Feature engineering data
 
 **Infrastructure:**
-- ✅ **MongoDB** (Port 27017) - Training datasets
+- ✅ **PostgreSQL** (Port 5432) - Training datasets metadata
 - ✅ **InfluxDB** (Port 8086) - Time-series features, model metrics
 - ✅ **Redis** (Port 6380) - Feature caching
 

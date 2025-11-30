@@ -1,7 +1,7 @@
 #!/bin/bash
 # Frontend Team - Start script
 # Requirements: frontend-dev + api-gateway + all platform-services needed by api-gateway
-# Dependencies: mongodb, redis, influxdb, mongo-express (started automatically)
+# Dependencies: postgres, redis, influxdb, pgadmin (started automatically)
 
 set -e
 
@@ -48,10 +48,10 @@ if [ ${#SERVICES[@]} -eq 0 ]; then
   exit 1
 fi
 
-echo "Starting: ${SERVICES[*]} (and their dependencies: mongodb, redis, influxdb, mongo-express)"
+echo "Starting: ${SERVICES[*]} (and their dependencies: postgres, redis, influxdb, pgadmin)"
 
 # Use --no-build to prevent automatic building (images should already be built)
-# Dependencies (mongodb, redis, influxdb, mongo-express) will be started automatically
+# Dependencies (postgres, redis, influxdb, pgadmin) will be started automatically
 docker compose -f docker-compose.frontend-team.yml up -d --no-build "${SERVICES[@]}"
 
 # Get API Gateway port from environment or use default
@@ -62,5 +62,6 @@ echo ""
 echo "🎨 Frontend: http://localhost:5173"
 echo "🌐 API Gateway: http://localhost:${API_GATEWAY_PORT}"
 echo "🔐 Auth Service: http://localhost:5001"
-echo "🗄️  Mongo Express: http://localhost:8081"
+echo "🗄️  pgAdmin: http://localhost:5050"
+echo "🔍 Adminer: http://localhost:8080"
 

@@ -23,7 +23,7 @@ Write-Host "  - Cyrex API:       http://localhost:8000"
 Write-Host "  - Cyrex Interface: http://localhost:5175"
 Write-Host "  - MLflow:          http://localhost:5500"
 Write-Host "  - Jupyter:         http://localhost:8888"
-Write-Host "  - MongoDB Express: http://localhost:8081"
+Write-Host "  - pgAdmin: http://localhost:5050"
 Write-Host "  - MinIO Console:   http://localhost:9001"
 Write-Host ""
 Write-Host "View logs:" -ForegroundColor Gray

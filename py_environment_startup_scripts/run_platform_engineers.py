@@ -52,7 +52,7 @@ def run_docker_compose():
         print("  - Cyrex Interface: http://localhost:5175")
         print("  - MLflow:          http://localhost:5500")
         print("  - Jupyter:         http://localhost:8888")
-        print("  - MongoDB Express: http://localhost:8081")
+        print("  - pgAdmin: http://localhost:5050")
         print("  - MinIO Console:   http://localhost:9001")
         print()
         print(f"{GRAY}View logs:{RESET}")

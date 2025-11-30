@@ -18,22 +18,7 @@ ops/k8s/
 │   ├── realtime-gateway-configmap.yaml
 │   ├── cyrex-configmap.yaml
 │   └── frontend-dev-configmap.yaml
-├── secrets/             # Confidential configuration (sensitive)
-│   ├── api-gateway-secret.yaml
-│   ├── auth-service-secret.yaml
-│   ├── task-orchestrator-secret.yaml
-│   ├── engagement-service-secret.yaml
-│   ├── platform-analytics-service-secret.yaml
-│   ├── notification-service-secret.yaml
-│   ├── external-bridge-service-secret.yaml
-│   ├── challenge-service-secret.yaml
-│   ├── realtime-gateway-secret.yaml
-│   ├── cyrex-secret.yaml
-│   └── frontend-dev-secret.yaml
-├── generate-env-files.sh    # Script to generate .env files from ConfigMaps/Secrets
-└── README.md                # This file
-```
-
+├── secrets/    
 ## Quick Start
 
 ### 1. Update Secret Values
@@ -141,7 +126,7 @@ The `generate-env-files.sh` script:
 - **Secret**: (Optional) API keys
 
 ### Engagement Service
-- **ConfigMap**: MongoDB URI, Redis host/port
+- **ConfigMap**: PostgreSQL DATABASE_URL, Redis host/port
 - **Secret**: REDIS_PASSWORD
 
 ### Platform Analytics Service
@@ -157,7 +142,7 @@ The `generate-env-files.sh` script:
 - **Secret**: GITHUB_CLIENT_SECRET, NOTION_CLIENT_SECRET, TRELLO_API_SECRET, webhook secrets
 
 ### Challenge Service
-- **ConfigMap**: MongoDB URI, CYREX_URL
+- **ConfigMap**: PostgreSQL DATABASE_URL, CYREX_URL
 - **Secret**: (Optional) API keys
 
 ### Realtime Gateway
@@ -223,8 +208,8 @@ services:
 You can override values via environment variables before running `generate-env-files.sh`:
 
 ```bash
-export MONGO_ROOT_USER=myuser
-export MONGO_ROOT_PASSWORD=mypassword
+export POSTGRES_USER=deepiri
+export POSTGRES_PASSWORD=mypassword
 export REDIS_PASSWORD=myredispassword
 export API_GATEWAY_PORT=5100
 ./ops/k8s/generate-env-files.sh

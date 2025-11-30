@@ -6,66 +6,12 @@ Mimics Kubernetes by injecting ConfigMaps and Secrets into Docker Compose
 
 import os
 import sys
-import yaml
 import subprocess
 from pathlib import Path
 
-# Colors for output
-GREEN = '\033[92m'
-YELLOW = '\033[93m'
-CYAN = '\033[96m'
-GRAY = '\033[90m'
-RESET = '\033[0m'
+# Import shared k8s loader
+from k8s_env_loader import load_all_configmaps_and_secrets, GREEN, YELLOW, CYAN, GRAY, RESET
 
-def load_k8s_config(yaml_file):
-    """Load environment variables from k8s ConfigMap or Secret YAML"""
-    if not yaml_file.exists():
-        return {}
-    
-    with open(yaml_file, 'r', encoding='utf-8') as f:
-        config = yaml.safe_load(f)
-    
-    env_vars = {}
-    
-    # Extract from ConfigMap (data section)
-    if 'data' in config:
-        for key, value in config['data'].items():
-            env_vars[key] = str(value)
-    
-    # Extract from Secret (stringData section)
-    if 'stringData' in config:
-        for key, value in config['stringData'].items():
-            env_vars[key] = str(value)
-    
-    return env_vars
-
-def load_all_configmaps_and_secrets():
-    """Load all ConfigMaps and Secrets from ops/k8s/"""
-    script_dir = Path(__file__).parent
-    project_root = script_dir.parent
-    k8s_dir = project_root / 'ops' / 'k8s'
-    
-    all_env_vars = {}
-    
-    # Load all ConfigMaps
-    configmaps_dir = k8s_dir / 'configmaps'
-    if configmaps_dir.exists():
-        for configmap_file in configmaps_dir.glob('*.yaml'):
-            env_vars = load_k8s_config(configmap_file)
-            all_env_vars.update(env_vars)
-            print(f"{GRAY}   ✓ Loaded {len(env_vars)} vars from {configmap_file.name}{RESET}")
-    
-    # Load all Secrets
-    secrets_dir = k8s_dir / 'secrets'
-    if secrets_dir.exists():
-        for secret_file in secrets_dir.glob('*.yaml'):
-            if secret_file.name.endswith('.example'):
-                continue  # Skip example files
-            env_vars = load_k8s_config(secret_file)
-            all_env_vars.update(env_vars)
-            print(f"{GRAY}   ✓ Loaded {len(env_vars)} vars from {secret_file.name}{RESET}")
-    
-    return all_env_vars
 
 def run_docker_compose():
     """Run docker-compose with injected environment variables"""
@@ -77,7 +23,7 @@ def run_docker_compose():
     print()
     
     # Load all k8s config
-    env_vars = load_all_configmaps_and_secrets()
+    env_vars = load_all_configmaps_and_secrets(project_root)
     
     print()
     print(f"{GREEN}📦 Loaded {len(env_vars)} environment variables{RESET}")
@@ -112,7 +58,10 @@ def run_docker_compose():
     except subprocess.CalledProcessError as e:
         print(f"{YELLOW}❌ Error starting services: {e}{RESET}", file=sys.stderr)
         sys.exit(1)
+    except FileNotFoundError:
+        print(f"{YELLOW}❌ Error: 'docker' command not found. Is Docker installed?{RESET}", file=sys.stderr)
+        sys.exit(1)
+
 
 if __name__ == '__main__':
     run_docker_compose()
-

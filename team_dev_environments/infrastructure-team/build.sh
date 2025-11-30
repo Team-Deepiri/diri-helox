@@ -14,7 +14,7 @@ echo "🔨 Building Infrastructure Team services..."
 
 # Build all services except frontend-dev
 ALL_SERVICES=(
-  mongodb redis influxdb mongo-express etcd minio milvus
+  postgres pgadmin redis influxdb etcd minio milvus
   api-gateway auth-service task-orchestrator engagement-service platform-analytics-service
   notification-service external-bridge-service challenge-service realtime-gateway
   cyrex cyrex-interface mlflow jupyter

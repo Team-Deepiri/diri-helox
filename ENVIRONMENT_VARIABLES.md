@@ -85,9 +85,11 @@ HOST=0.0.0.0
 **Database Configuration:**
 ```bash
 MONGODB_URI=mongodb://admin:password@localhost:27017/deepiri?authSource=admin
-MONGO_ROOT_USER=admin
-MONGO_ROOT_PASSWORD=password
-MONGO_DB=deepiri
+POSTGRES_USER=deepiri
+POSTGRES_PASSWORD=deepiripassword
+POSTGRES_DB=deepiri
+PGADMIN_EMAIL=admin@deepiri.local
+PGADMIN_PASSWORD=admin
 
 REDIS_URL=redis://localhost:6379
 REDIS_HOST=redis
@@ -260,7 +262,7 @@ In Docker Compose, use docker service names:
 ### Required Variables
 
 **For Local Development:**
-- `MONGODB_URI` - MongoDB connection string
+- `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
 - `JWT_SECRET` - JWT signing secret
 - `AI_PROVIDER` - AI provider (localai/openai/deepinfra)
@@ -347,9 +349,12 @@ API_URL: https://api.deepiri.com
 
 | Variable | Description | Example | Required |
 |----------|-------------|---------|----------|
-| `MONGODB_URI` | MongoDB connection string | `mongodb://admin:password@localhost:27017/deepiri?authSource=admin` | Yes |
-| `MONGO_ROOT_USER` | MongoDB admin user | `admin` | Yes |
-| `MONGO_ROOT_PASSWORD` | MongoDB admin password | `password` | Yes |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://deepiri:deepiripassword@localhost:5432/deepiri` | Yes |
+| `POSTGRES_USER` | PostgreSQL database user | `deepiri` | Yes |
+| `POSTGRES_PASSWORD` | PostgreSQL database password | `deepiripassword` | Yes |
+| `POSTGRES_DB` | PostgreSQL database name | `deepiri` | Yes |
+| `PGADMIN_EMAIL` | pgAdmin admin email | `admin@deepiri.local` | No |
+| `PGADMIN_PASSWORD` | pgAdmin admin password | `admin` | No |
 | `REDIS_URL` | Redis connection string | `redis://localhost:6379` | Yes |
 | `REDIS_PASSWORD` | Redis password | `redispassword` | Optional |
 
@@ -432,7 +437,7 @@ REDIS_URL: "redis://:password@redis-service:6379"
 **Secrets:**
 ```yaml
 JWT_SECRET: "your-secret-key"
-MONGO_ROOT_PASSWORD: "password"
+POSTGRES_PASSWORD: "deepiripassword"
 REDIS_PASSWORD: "redispassword"
 ```
 

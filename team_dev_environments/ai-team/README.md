@@ -25,7 +25,7 @@ This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_
 - ✅ **Challenge Service** (Port 5007) - Integration testing with AI
 
 **Infrastructure:**
-- ✅ **MongoDB** (Port 27017) - Training data, model metadata
+- ✅ **PostgreSQL** (Port 5432) - Training data, model metadata
 - ✅ **InfluxDB** (Port 8086) - Model performance metrics, training metrics
 - ✅ **Redis** (Port 6380) - Caching model predictions
 - ✅ **Milvus** (Port 19530) - Vector database for RAG

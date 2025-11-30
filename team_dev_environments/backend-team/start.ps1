@@ -20,7 +20,7 @@ Write-Host "Access your services:" -ForegroundColor Yellow
 Write-Host "  - Frontend:        http://localhost:5173"
 Write-Host "  - API Gateway:     http://localhost:5100"
 Write-Host "  - Auth Service:    http://localhost:5001"
-Write-Host "  - MongoDB Express: http://localhost:8081"
+Write-Host "  - pgAdmin: http://localhost:5050"
 Write-Host ""
 Write-Host "View logs:" -ForegroundColor Gray
 Write-Host "  docker compose -f docker-compose.backend-team.yml logs -f"

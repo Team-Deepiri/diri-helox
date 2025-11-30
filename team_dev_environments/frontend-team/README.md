@@ -24,7 +24,7 @@ This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_
 - ✅ **Realtime Gateway** (Port 5008) - WebSocket for real-time features
 
 **Infrastructure:**
-- ✅ **MongoDB** (Port 27017) - Optional, for direct DB access in dev
+- ✅ **PostgreSQL** (Port 5432) - Optional, for direct DB access in dev
 - ✅ **Redis** (Port 6380) - Optional
 - ✅ **InfluxDB** (Port 8086) - Optional
 - ✅ **All Backend Services** - For API calls

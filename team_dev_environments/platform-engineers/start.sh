@@ -21,5 +21,6 @@ echo "🎨 Frontend: http://localhost:5173"
 echo "🤖 Cyrex: http://localhost:8000"
 echo "📊 MLflow: http://localhost:5500"
 echo "📓 Jupyter: http://localhost:8888"
-echo "🗄️  Mongo Express: http://localhost:8081"
+echo "🗄️  pgAdmin: http://localhost:5050"
+echo "🔍 Adminer: http://localhost:8080"
 

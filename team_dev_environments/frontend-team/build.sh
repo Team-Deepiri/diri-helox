@@ -1,7 +1,7 @@
 #!/bin/bash
 # Frontend Team - Build script
 # Requirements: frontend-dev + all platform-services needed by api-gateway
-# Dependencies: mongodb, influxdb, mongo-express (pulled as images, not built)
+# Dependencies: postgres, influxdb, pgadmin (pulled as images, not built)
 
 set -e
 
@@ -56,7 +56,7 @@ fi
 
 echo "Building: ${SERVICES[*]} (and their dependencies)"
 
-# Build services with their dependencies (mongodb, influxdb, mongo-express will be pulled as images, not built)
+# Build services with their dependencies (postgres, influxdb, pgadmin will be pulled as images, not built)
 docker compose -f docker-compose.frontend-team.yml build "${SERVICES[@]}"
 
 echo "✅ Frontend Team services built successfully!"

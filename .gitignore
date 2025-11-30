@@ -20,20 +20,15 @@
 !env.example*
 !*env.example*
 
-# Kubernetes Secrets
-# Ignore actual secrets in ops/k8s/secrets/ but allow examples and docs
-ops/k8s/secrets/secrets.yaml
-ops/k8s/secrets/*-prod.*
-ops/k8s/secrets/*-production.*
-ops/k8s/secrets/*-staging.*
-# Don't ignore example files and documentation
-!ops/k8s/secrets/*.example
-!ops/k8s/secrets/*.example.*
-!ops/k8s/secrets/*-template.*
-!ops/k8s/secrets/*.template
+# Kubernetes Secrets - NEVER commit ANY secrets (including examples)
+# Ignore ALL YAML files in secrets folder
+ops/k8s/secrets/*.yaml
+ops/k8s/secrets/*.yml
+# Only allow documentation and gitignore
 !ops/k8s/secrets/README.md
+!ops/k8s/secrets/.gitignore
 !ops/k8s/secrets/.gitkeep
-# Generic secrets files
+# Generic secrets files anywhere
 *.secrets.yaml
 *.secrets.yml
 

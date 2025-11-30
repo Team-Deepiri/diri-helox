@@ -14,7 +14,7 @@ echo "🛑 Stopping Frontend Team services..."
 # - task-orchestrator, engagement-service, platform-analytics-service
 # - notification-service, challenge-service
 # - realtime-gateway
-# - mongodb, redis, influxdb, mongo-express
+# - postgres, redis, influxdb, pgadmin
 # Note: external-bridge-service excluded - frontend team doesn't need integrations
 docker compose -f docker-compose.frontend-team.yml stop
 

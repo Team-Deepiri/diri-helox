@@ -26,41 +26,60 @@ x-logging: &minimal-logging
     compress: "false"   # No compression (faster cleanup)
 
 services:
-  # MongoDB Database
-  mongodb:
-    image: mongo:7.0
-    container_name: deepiri-mongodb-qa
+  # PostgreSQL Database - Primary database for users, roles, tasks, quests, metadata
+  postgres:
+    image: postgres:16-alpine
+    container_name: deepiri-postgres-qa
     restart: unless-stopped
     logging: *minimal-logging
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
-      MONGO_INITDB_DATABASE: ${MONGO_DB:-deepiri}
+      POSTGRES_USER: ${POSTGRES_USER:-deepiri}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deepiripassword}
+      POSTGRES_DB: ${POSTGRES_DB:-deepiri}
     volumes:
-      - mongodb_qa_data:/data/db
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - postgres_qa_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - deepiri-qa-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-deepiri}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin - Database Admin UI
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: deepiri-pgadmin-qa
+    restart: unless-stopped
+    logging: *minimal-logging
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@deepiri.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_qa_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
     networks:
       - deepiri-qa-network
 
-  # Mongo Express - Database Admin UI
-  mongo-express:
-    image: mongo-express:1.0.2
-    container_name: deepiri-mongo-express-qa
+  # Adminer - Lightweight Database Viewer (for quick inspection)
+  adminer:
+    image: adminer:latest
+    container_name: deepiri-adminer-qa
     restart: unless-stopped
     logging: *minimal-logging
     ports:
-      - "8081:8081"
+      - "8080:8080"
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-password}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/
-      ME_CONFIG_BASICAUTH: false
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
+      ADMINER_DEFAULT_SERVER: postgres
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-qa-network
 
@@ -216,14 +235,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5001
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-auth-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - influxdb
     networks:
       - deepiri-qa-network
@@ -245,14 +264,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5002
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-task-orchestrator:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-qa-network
 
@@ -273,14 +292,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5003
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-engagement-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - redis
     networks:
       - deepiri-qa-network
@@ -302,14 +321,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5004
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-platform-analytics-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - influxdb
     networks:
       - deepiri-qa-network
@@ -331,14 +350,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5005
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-notification-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-qa-network
 
@@ -359,14 +378,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5006
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-external-bridge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-qa-network
 
@@ -387,14 +406,14 @@ services:
     environment:
       # Override or add docker-specific variables here if needed
       PORT: 5007
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-challenge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - cyrex
     networks:
       - deepiri-qa-network
@@ -548,7 +567,9 @@ services:
       - deepiri-qa-network
 
 volumes:
-  mongodb_qa_data:
+  postgres_qa_data:
+    driver: local
+  pgadmin_qa_data:
     driver: local
   redis_qa_data:
     driver: local

@@ -48,7 +48,7 @@ fi
 echo "Starting: ${SERVICES[*]} (and their dependencies)"
 
 # Use --no-build to prevent automatic building (images should already be built)
-# Dependencies (mongodb, redis, influxdb, etcd, minio, milvus, auth-service, task-orchestrator,
+# Dependencies (postgres, redis, influxdb, etcd, minio, milvus, auth-service, task-orchestrator,
 # platform-analytics-service, notification-service, realtime-gateway) will be started automatically
 docker compose -f docker-compose.dev.yml up -d --no-build "${SERVICES[@]}"
 
@@ -60,4 +60,5 @@ echo "🌐 API Gateway: http://localhost:${API_GATEWAY_PORT}"
 echo "🎮 Engagement Service: http://localhost:5003"
 echo "🏆 Challenge Service: http://localhost:5007"
 echo "🌉 External Bridge: http://localhost:5006"
+echo "🔍 Adminer: http://localhost:8080"
 
