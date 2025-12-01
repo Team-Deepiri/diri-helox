@@ -139,5 +139,11 @@ docker compose -f docker-compose.dev.yml logs -f frontend-dev
 - **Cyrex**: http://localhost:8000
 - **MLflow**: http://localhost:5500
 - **Jupyter**: http://localhost:8888
-- **Mongo Express**: http://localhost:8081
+- **PostgreSQL**: localhost:5432
+- **pgAdmin**: http://localhost:5050 (email: admin@deepiri.local, password: admin)
+- **Adminer**: http://localhost:8080 (System: PostgreSQL, Server: postgres, Username: deepiri, Password: deepiripassword, Database: deepiri)
+
+## Database Setup
+
+PostgreSQL is automatically initialized with the schema from `scripts/postgres-init.sql` on first startup. For testing, you can reset the database by stopping and removing the PostgreSQL container and volume, then restarting.
 

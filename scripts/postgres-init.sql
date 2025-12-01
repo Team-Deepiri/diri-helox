@@ -367,6 +367,52 @@ CREATE INDEX idx_season_boosts_is_active ON public.season_boosts(is_active);
 CREATE TRIGGER update_season_boosts_updated_at BEFORE UPDATE ON public.season_boosts 
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+-- Quest Milestones table
+CREATE TABLE IF NOT EXISTS public.quest_milestones (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    quest_id UUID NOT NULL REFERENCES public.quests(id) ON DELETE CASCADE,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    completed BOOLEAN DEFAULT FALSE,
+    completed_at TIMESTAMP,
+    momentum_reward INT DEFAULT 0,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_quest_milestones_quest_id ON public.quest_milestones(quest_id);
+CREATE INDEX idx_quest_milestones_completed ON public.quest_milestones(completed);
+CREATE INDEX idx_quest_milestones_sort_order ON public.quest_milestones(quest_id, sort_order);
+
+CREATE TRIGGER update_quest_milestones_updated_at BEFORE UPDATE ON public.quest_milestones 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Rewards table
+CREATE TABLE IF NOT EXISTS public.rewards (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+    reward_type VARCHAR(50) NOT NULL CHECK (reward_type IN ('boost_credits', 'momentum_bonus', 'skip_day', 'break_time', 'custom')),
+    amount INT NOT NULL,
+    source VARCHAR(50) NOT NULL CHECK (source IN ('streak', 'momentum', 'season', 'achievement', 'manual')),
+    source_id UUID,
+    description TEXT NOT NULL,
+    status VARCHAR(50) DEFAULT 'pending' CHECK (status IN ('pending', 'claimed', 'expired')),
+    claimed_at TIMESTAMP,
+    expires_at TIMESTAMP,
+    metadata JSONB DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_rewards_user_id ON public.rewards(user_id);
+CREATE INDEX idx_rewards_status ON public.rewards(status);
+CREATE INDEX idx_rewards_expires_at ON public.rewards(expires_at);
+CREATE INDEX idx_rewards_reward_type ON public.rewards(reward_type);
+
+CREATE TRIGGER update_rewards_updated_at BEFORE UPDATE ON public.rewards 
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 -- ===========================
 -- ANALYTICS SCHEMA: GAMIFICATION
 -- ===========================

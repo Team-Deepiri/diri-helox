@@ -150,7 +150,7 @@ class TaskVersioningService {
         }
       });
 
-      return versions.map(v => ({
+      return versions.map((v: typeof versions[0]) => ({
         version: v.version,
         changes: {
           title: v.title,
