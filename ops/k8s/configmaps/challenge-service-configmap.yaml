@@ -11,7 +11,7 @@ data:
   PORT: "5007"
   
   # Database URLs (using Docker service names)
-  MONGO_URI: "mongodb://admin:password@mongodb:27017/deepiri?authSource=admin"
+  DATABASE_URL: "postgresql://deepiri:deepiripassword@postgres:5432/deepiri"
   
   # Service URLs
   CYREX_URL: "http://cyrex:8000"

@@ -8,7 +8,7 @@ name: deepiri-backend-team
 # - team_dev_environments/backend-team/stop.sh
 #
 # Primary services: frontend-dev, api-gateway, auth-service
-# Dependencies: mongodb, redis, influxdb, task-orchestrator, engagement-service,
+# Dependencies: postgres, redis, influxdb, task-orchestrator, engagement-service,
 #   platform-analytics-service, notification-service, external-bridge-service,
 #   challenge-service, realtime-gateway
 #
@@ -34,41 +34,60 @@ x-logging: &minimal-logging
     compress: "false"   # No compression (faster cleanup)
 
 services:
-  # MongoDB Database
-  mongodb:
-    image: mongo:7.0
-    container_name: deepiri-mongodb-backend
+  # PostgreSQL Database - Primary database for users, roles, tasks, quests, metadata
+  postgres:
+    image: postgres:16-alpine
+    container_name: deepiri-postgres-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
-      - "27017:27017"
+      - "5432:5432"
     environment:
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-password}
-      MONGO_INITDB_DATABASE: ${MONGO_DB:-deepiri}
+      POSTGRES_USER: ${POSTGRES_USER:-deepiri}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deepiripassword}
+      POSTGRES_DB: ${POSTGRES_DB:-deepiri}
     volumes:
-      - mongodb_backend_data:/data/db
-      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - postgres_backend_data:/var/lib/postgresql/data
+      - ./scripts/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - deepiri-backend-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-deepiri}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # pgAdmin - Database Admin UI
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: deepiri-pgadmin-backend
+    restart: unless-stopped
+    logging: *minimal-logging
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@deepiri.local}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    volumes:
+      - pgadmin_backend_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
     networks:
       - deepiri-backend-network
 
-  # Mongo Express - Database Admin UI
-  mongo-express:
-    image: mongo-express:1.0.2
-    container_name: deepiri-mongo-express-backend
+  # Adminer - Lightweight Database Viewer (for quick inspection)
+  adminer:
+    image: adminer:latest
+    container_name: deepiri-adminer-backend
     restart: unless-stopped
     logging: *minimal-logging
     ports:
-      - "8081:8081"
+      - "8080:8080"
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_ROOT_USER:-admin}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_ROOT_PASSWORD:-password}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/
-      ME_CONFIG_BASICAUTH: false
-      ME_CONFIG_MONGODB_SERVER: mongodb
-      ME_CONFIG_MONGODB_PORT: 27017
+      ADMINER_DEFAULT_SERVER: postgres
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-backend-network
 
@@ -118,10 +137,10 @@ services:
     logging: *minimal-logging
     ports:
       - "${API_GATEWAY_PORT:-5100}:5000"  # Using 5100 externally to avoid conflict with macOS AirPlay on port 5000
-    env_file:
-      - .env-k8s/api-gateway.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/api-gateway-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
+      # Use docker-compose-k8s.sh or docker-compose-k8s.ps1 to auto-load from k8s YAML files
       PORT: 5000
     volumes:
       - ./platform-services/backend/deepiri-api-gateway:/app
@@ -152,19 +171,19 @@ services:
     logging: *minimal-logging
     ports:
       - "5001:5001"
-    env_file:
-      - .env-k8s/auth-service.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/auth-service-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
+      # Use docker-compose-k8s.sh or docker-compose-k8s.ps1 to auto-load from k8s YAML files
       PORT: 5001
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-auth-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - influxdb
     networks:
       - deepiri-backend-network
@@ -181,19 +200,18 @@ services:
     logging: *minimal-logging
     ports:
       - "5002:5002"
-    env_file:
-      - .env-k8s/task-orchestrator.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/task-orchestrator-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5002
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-task-orchestrator:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-backend-network
 
@@ -209,19 +227,18 @@ services:
     logging: *minimal-logging
     ports:
       - "5003:5003"
-    env_file:
-      - .env-k8s/engagement-service.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/engagement-service-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5003
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-engagement-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - redis
     networks:
       - deepiri-backend-network
@@ -238,19 +255,18 @@ services:
     logging: *minimal-logging
     ports:
       - "5004:5004"
-    env_file:
-      - .env-k8s/platform-analytics-service.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/platform-analytics-service-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5004
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-platform-analytics-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
       - influxdb
     networks:
       - deepiri-backend-network
@@ -267,19 +283,18 @@ services:
     logging: *minimal-logging
     ports:
       - "5005:5005"
-    env_file:
-      - .env-k8s/notification-service.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/notification-service-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5005
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-notification-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-backend-network
 
@@ -295,19 +310,18 @@ services:
     logging: *minimal-logging
     ports:
       - "5006:5006"
-    env_file:
-      - .env-k8s/external-bridge-service.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/external-bridge-service-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5006
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-external-bridge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-backend-network
 
@@ -323,19 +337,18 @@ services:
     logging: *minimal-logging
     ports:
       - "5007:5007"
-    env_file:
-      - .env-k8s/challenge-service.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/challenge-service-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5007
-      MONGO_URI: mongodb://${MONGO_ROOT_USER:-admin}:${MONGO_ROOT_PASSWORD:-password}@mongodb:27017/${MONGO_DB:-deepiri}?authSource=admin
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
     volumes:
       - ./platform-services/backend/deepiri-challenge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
     command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
-      - mongodb
+      - postgres
     networks:
       - deepiri-backend-network
 
@@ -351,10 +364,9 @@ services:
     logging: *minimal-logging
     ports:
       - "5008:5008"
-    env_file:
-      - .env-k8s/realtime-gateway.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/realtime-gateway-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       PORT: 5008
     volumes:
       - ./platform-services/backend/deepiri-realtime-gateway:/app
@@ -376,10 +388,9 @@ services:
     logging: *minimal-logging
     ports:
       - "5173:5173"
-    env_file:
-      - .env-k8s/frontend-dev.env
     environment:
-      # Override or add docker-specific variables here if needed
+      # Variables loaded from ops/k8s/configmaps/frontend-dev-configmap.yaml
+      # Variables loaded from ops/k8s/secrets/secrets.yaml
       VITE_API_URL: http://localhost:${API_GATEWAY_PORT:-5100}/api
     volumes:
       - ./deepiri-web-frontend:/app
@@ -390,7 +401,9 @@ services:
       - deepiri-backend-network
 
 volumes:
-  mongodb_backend_data:
+  postgres_backend_data:
+    driver: local
+  pgadmin_backend_data:
     driver: local
   redis_backend_data:
     driver: local

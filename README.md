@@ -1,8 +1,8 @@
 # Deepiri 
 
-> ** NEW TO THE PROJECT?** Start here: [START_HERE.md](START_HERE.md)  
+> **NEW TO THE PROJECT?** Start here: [START_HERE.md](START_HERE.md)  
 > **FIND YOUR TEAM:** [FIND_YOUR_TASKS.md](FIND_YOUR_TASKS.md)  
-> ** Quick Start for all services:** Run `./build.sh` (Linux/Mac/WSL) or `.\build.ps1` (Windows), then `docker compose -f docker-compose.dev.yml up -d`
+> **🌟 Quick Start (All Services):** `python run_dev.py` - Runs full stack with K8s config!
 
 
 ### For New Team Members
@@ -18,19 +18,23 @@
 git clone <deepiri-platform repo>
 cd deepiri-platform
 
-# 2. Git hooks are automatically configured! (protects main and dev branches)
-# If hooks aren't working, run: ./setup-hooks.sh
+# 2. One-time setup
+pip install pyyaml
+touch ops/k8s/secrets/secrets.yaml  # Create empty secrets file (see ops/k8s/secrets/README.md)
 
 # 3. Build all services (auto-cleans dangling images)
 ./build.sh              # Linux/Mac/WSL
 .\build.ps1             # Windows PowerShell
 
-# 4. Start the stack
+# 4. Start the full stack (with K8s config!)
+python run_dev.py       # 🌟 Recommended - loads k8s configmaps & secrets
+
+# OR use docker compose directly
 docker compose -f docker-compose.dev.yml up -d
 
 # 5. Access services
 # - Frontend: http://localhost:5173
-# - API Gateway: http://localhost:5000
+# - API Gateway: http://localhost:5100
 # - Cyrex AI: http://localhost:8000
 # - Jupyter: http://localhost:8888
 # - MLflow: http://localhost:5500
@@ -41,22 +45,27 @@ docker compose -f docker-compose.dev.yml up -d
 - WSL2 (Windows only)
 - 8GB+ RAM recommended
 
-### Stop
+### Stop All Services
 
 ```bash
 docker compose -f docker-compose.dev.yml down
 ```
 
+**Pro Tip:** Use `python run_dev.py` instead of `docker compose` - it auto-loads your k8s config!
+
 ## Documentation
 
 ### Essential Guides
+- **[RUN_DEV_GUIDE.md](RUN_DEV_GUIDE.md)** - 🌟 Run full stack with `python run_dev.py`
+- **[team_dev_environments/QUICK_START.md](team_dev_environments/QUICK_START.md)** - Team-specific environments
 - **[HOW_TO_BUILD.md](HOW_TO_BUILD.md)** - THE definitive build guide
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** - Complete setup walkthrough
 - **[SERVICE_COMMUNICATION_AND_TEAMS.md](SERVICE_COMMUNICATION_AND_TEAMS.md)** - Architecture overview
 
 ### Environment Setup
-- **[ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md)** - All environment variables
+- **[ENVIRONMENT_VARIABLES.md](ENVIRONMENT_VARIABLES.md)** - All environment variables (includes k8s config integration)
 - **[docker-compose.dev.yml](docker-compose.dev.yml)** - Development configuration
+- **[ops/k8s/](ops/k8s/)** - Kubernetes configmaps and secrets (also used by Docker Compose)
 
 ### Troubleshooting
 - **[scripts/STORAGE-TROUBLESHOOTING.md](scripts/STORAGE-TROUBLESHOOTING.md)** - Disk space issues
@@ -89,7 +98,7 @@ docker compose -f docker-compose.dev.yml down
 - **MLflow** (Port 5500) - Experiment tracking
 
 ### Infrastructure
-- **MongoDB** (Port 27017) - Primary database
+- **PostgreSQL** (Port 5432) - Primary database for users, roles, tasks, quests, metadata
 - **Redis** (Port 6380) - Cache & sessions
 - **InfluxDB** (Port 8086) - Time-series analytics
 
@@ -136,13 +145,26 @@ docker compose -f docker-compose.dev.yml down
 ```
 
 ### Running only services you need for your team
+
+**🌟 Recommended:** Use Python scripts (professional K8s-like workflow):
 ```bash
-docker compose -f docker-compose.<team_name>-team.yml up -d
-# Examples:
-docker compose -f docker-compose.ai-team.yml up -d
-docker compose -f docker-compose.backend-team.yml up -d
-docker compose -f docker-compose.frontend-team.yml up -d
+cd team_dev_environments/backend-team
+python run.py         # Auto-loads k8s configmaps & secrets!
 ```
+
+**Alternative:** Use shell scripts:
+```bash
+cd team_dev_environments/backend-team
+./start.sh            # Linux/Mac
+.\start.ps1           # Windows
+```
+
+**Or use docker compose directly:**
+```bash
+docker compose -f docker-compose.backend-team.yml up -d
+```
+
+**👉 Python scripts are recommended** - they mimic Kubernetes by loading config from `ops/k8s/` automatically. No `.env` files needed!
 
 ### Stopping those services
 ```bash

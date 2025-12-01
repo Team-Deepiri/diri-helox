@@ -11,7 +11,7 @@ data:
   PORT: "5003"
   
   # Database URLs (using Docker service names)
-  MONGO_URI: "mongodb://admin:password@mongodb:27017/deepiri?authSource=admin"
+  DATABASE_URL: "postgresql://deepiri:deepiripassword@postgres:5432/deepiri"
   
   # Redis Configuration
   REDIS_HOST: "redis"

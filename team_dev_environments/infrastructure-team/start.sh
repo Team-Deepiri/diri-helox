@@ -10,7 +10,7 @@ echo "🚀 Starting Infrastructure Team services..."
 
 # Start all services except frontend-dev
 ALL_SERVICES=(
-  mongodb redis influxdb mongo-express etcd minio milvus
+  postgres pgadmin redis influxdb etcd minio milvus
   api-gateway auth-service task-orchestrator engagement-service platform-analytics-service
   notification-service external-bridge-service challenge-service realtime-gateway
   cyrex cyrex-interface mlflow jupyter
@@ -69,8 +69,9 @@ API_GATEWAY_PORT=${API_GATEWAY_PORT:-5100}
 
 echo "✅ Infrastructure Team services started!"
 echo ""
-echo "🗄️  MongoDB: localhost:27017"
-echo "🗄️  Mongo Express: http://localhost:8081"
+echo "🗄️  PostgreSQL: localhost:5432"
+echo "📊 pgAdmin: http://localhost:5050"
+echo "🔍 Adminer: http://localhost:8080"
 echo "💾 Redis: localhost:6380"
 echo "📊 InfluxDB: http://localhost:8086"
 echo "🌐 API Gateway: http://localhost:${API_GATEWAY_PORT}"

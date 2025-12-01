@@ -25,7 +25,7 @@ This protects the `main` and `dev` branches from accidental pushes. See [BRANCH_
 - ✅ **Analytics Service** (Port 5004) - Feature engineering data
 
 **Infrastructure:**
-- ✅ **MongoDB** (Port 27017) - Training datasets
+- ✅ **PostgreSQL** (Port 5432) - Training datasets metadata
 - ✅ **InfluxDB** (Port 8086) - Time-series features, model metrics
 - ✅ **Redis** (Port 6380) - Feature caching
 
@@ -55,7 +55,7 @@ This starts all required infrastructure and services.
 ```bash
 cd ../..
 docker compose -f docker-compose.dev.yml stop \
-  mongodb influxdb redis \
+  postgres influxdb redis \
   cyrex jupyter mlflow platform-analytics-service
 ```
 
@@ -142,4 +142,11 @@ docker compose -f docker-compose.dev.yml logs -f platform-analytics-service
 - **Jupyter**: http://localhost:8888
 - **Cyrex**: http://localhost:8000
 - **Analytics Service**: http://localhost:5004
+- **PostgreSQL**: localhost:5432
+- **pgAdmin**: http://localhost:5050 (email: admin@deepiri.local, password: admin)
+- **Adminer**: http://localhost:8080 (System: PostgreSQL, Server: postgres, Username: deepiri, Password: deepiripassword, Database: deepiri)
+
+## Database Setup
+
+PostgreSQL is automatically initialized with the schema from `scripts/postgres-init.sql` on first startup. The database stores training datasets metadata.
 
