@@ -88,10 +88,23 @@ echo ""
 echo "🔧 Initializing AI Team submodules..."
 echo ""
 
+# Ensure platform-services/backend directory exists
+mkdir -p platform-services/backend
+
 # diri-cyrex - AI/ML service
 echo "  📦 diri-cyrex (AI/ML Service)..."
 git submodule update --init --recursive diri-cyrex
 echo "    ✅ diri-cyrex initialized"
+echo ""
+
+# deepiri-external-bridge-service - External API integrations
+echo "  📦 deepiri-external-bridge-service (External Bridge Service)..."
+git submodule update --init --recursive platform-services/backend/deepiri-external-bridge-service
+if [ ! -d "platform-services/backend/deepiri-external-bridge-service/.git" ]; then
+    echo "    ❌ ERROR: deepiri-external-bridge-service not cloned correctly!"
+    exit 1
+fi
+echo "    ✅ external-bridge-service initialized at: $(pwd)/platform-services/backend/deepiri-external-bridge-service"
 echo ""
 
 # Update to latest and ensure on main branch
@@ -99,19 +112,26 @@ echo "🔄 Updating submodules to latest and ensuring they're on main branch..."
 git submodule update --remote diri-cyrex
 ensure_submodule_on_main "diri-cyrex"
 echo "    ✅ diri-cyrex updated and on main branch"
+git submodule update --remote platform-services/backend/deepiri-external-bridge-service
+ensure_submodule_on_main "platform-services/backend/deepiri-external-bridge-service"
+echo "    ✅ external-bridge-service updated and on main branch"
 echo ""
 
 # Show status
 echo "📊 Submodule Status:"
 echo ""
 git submodule status diri-cyrex
+git submodule status platform-services/backend/deepiri-external-bridge-service
 echo ""
 
 echo "✅ AI Team submodules ready!"
 echo ""
 echo "📋 Quick Commands:"
 echo "  - Check status: git submodule status diri-cyrex"
+echo "  - Check status: git submodule status platform-services/backend/deepiri-external-bridge-service"
 echo "  - Update: git submodule update --remote diri-cyrex"
-echo "  - Work in submodule: cd diri-cyrex"
+echo "  - Update: git submodule update --remote platform-services/backend/deepiri-external-bridge-service"
+echo "  - Work in cyrex: cd diri-cyrex"
+echo "  - Work in external bridge: cd platform-services/backend/deepiri-external-bridge-service"
 echo ""
 
