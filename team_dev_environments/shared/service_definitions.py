@@ -19,7 +19,8 @@ def get_microservice_config(
     additional_env: Dict[str, str] = None,
     depends_on: List[str] = None,
     network_name: str = "deepiri-dev-network",
-    team_suffix: str = "dev"
+    team_suffix: str = "dev",
+    command: str = None
 ) -> Dict[str, Any]:
     """Get configuration for a microservice."""
     # Get unique host port for this team
@@ -55,7 +56,7 @@ def get_microservice_config(
             # Assume it's already a container name
             mapped_deps.append(dep)
     
-    return {
+    config = {
         "name": container_name,
         "build": {
             "path": str(project_root / service_path),
@@ -71,6 +72,17 @@ def get_microservice_config(
         "network": network_name,
         "depends_on": [(dep, 5) for dep in mapped_deps],
     }
+    
+    # Add /shared-utils/node_modules volume for services that use shared-utils
+    if name in ["challenge-service", "auth-service", "engagement-service", "external-bridge-service", 
+                "notification-service", "platform-analytics-service", "task-orchestrator", "realtime-gateway"]:
+        config["volumes"]["/shared-utils/node_modules"] = {}
+    
+    # Add command if provided
+    if command:
+        config["command"] = command
+    
+    return config
 
 
 def get_backend_team_services(project_root: Path, env: dict, network_name: str, team_suffix: str = "backend") -> List[Dict[str, Any]]:
@@ -201,7 +213,8 @@ def get_backend_team_services(project_root: Path, env: dict, network_name: str, 
         None,
         ["postgres"],
         network_name,
-        team_suffix
+        team_suffix,
+        command="sh -c \"cd /shared-utils && rm -rf node_modules/.caniuse-lite* 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps && npm run build && cd /app && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev\""
     ))
     
     # Realtime Gateway
@@ -306,7 +319,8 @@ def get_ai_team_services(project_root: Path, env: dict, network_name: str, team_
         {"CYREX_URL": f"http://deepiri-cyrex-{team_suffix}:8000"},
         ["postgres", f"deepiri-cyrex-{team_suffix}"],
         network_name,
-        team_suffix
+        team_suffix,
+        command="sh -c \"cd /shared-utils && rm -rf node_modules/.caniuse-lite* 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps && npm run build && cd /app && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev\""
     ))
     
     return services

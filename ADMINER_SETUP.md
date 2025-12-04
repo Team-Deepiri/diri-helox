@@ -104,7 +104,7 @@ Database: deepiri
 1. Click "SQL command" in the top menu
 2. Write your query:
    ```sql
-   SELECT * FROM users WHERE email LIKE '%@deepiri.local';
+   SELECT * FROM users WHERE email LIKE '%@deepiri.com';
    ```
 3. Click "Execute"
 

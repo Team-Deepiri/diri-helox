@@ -31,7 +31,7 @@ check_submodule() {
             echo "✅ $submodule_name: All hooks present and updated"
         else
             echo "⚠️  $submodule_name: Hooks present but may not be updated"
-        fi
+    fi
     fi
 }
 

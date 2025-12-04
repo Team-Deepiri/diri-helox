@@ -42,14 +42,16 @@ services:
 
   # pgAdmin - Database Admin UI (optional, can be commented out for production)
   pgadmin:
-    image: dpage/pgadmin4:latest
+    build:
+      context: ./docker/pgadmin
+      dockerfile: Dockerfile
     container_name: deepiri-pgadmin-dev
     restart: unless-stopped
     logging: *minimal-logging
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@deepiri.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@deepiri.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
@@ -230,9 +232,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-auth-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-      - /shared-utils/node_modules
-    command: sh -c "mkdir -p /shared-utils/node_modules && chown -R nodejs:nodejs /shared-utils/node_modules && cd /shared-utils && su -s /bin/sh nodejs -c 'npm cache clean --force && npm install --legacy-peer-deps && npm run build' && cd /app && mkdir -p /app/node_modules && chown -R nodejs:nodejs /app/node_modules && su -s /bin/sh nodejs -c 'npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npx prisma generate && npm run dev'"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npx prisma generate && npm run dev"
     depends_on:
       - postgres
       - influxdb
@@ -257,11 +259,13 @@ services:
       # Override or add docker-specific variables here if needed
       PORT: 5002
       DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
+      PRISMA_CLI_BINARY_TARGETS: "debian-openssl-3.0.x"
     volumes:
       - ./platform-services/backend/deepiri-task-orchestrator:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && rm -rf node_modules/.prisma 2>/dev/null || true && npx prisma generate && cd node_modules/.prisma/client && if [ -f libquery_engine-debian-openssl-3.0.x.so.node ]; then cp libquery_engine-debian-openssl-3.0.x.so.node libquery_engine-linux-musl.so.node; fi && cd /app && npm run dev"
     depends_on:
       - postgres
     networks:
@@ -288,8 +292,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-engagement-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - postgres
       - redis
@@ -317,8 +322,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-platform-analytics-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - postgres
       - influxdb
@@ -346,8 +352,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-notification-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - postgres
     networks:
@@ -374,8 +381,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-external-bridge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - postgres
     networks:
@@ -402,8 +410,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-challenge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - postgres
       - cyrex
@@ -430,8 +439,9 @@ services:
     volumes:
       - ./platform-services/backend/deepiri-realtime-gateway:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     networks:
       - deepiri-dev-network
 
@@ -589,6 +599,8 @@ volumes:
   pgadmin_dev_data:
     driver: local
   redis_dev_data:
+    driver: local
+  shared_utils_node_modules:
     driver: local
   mlflow_dev_data:
     driver: local
