@@ -1,17 +1,26 @@
 #!/bin/bash
 # Frontend Team - Start script
-# Requirements: frontend-dev + api-gateway + all platform-services needed by api-gateway
-# Dependencies: postgres, redis, influxdb, pgadmin (started automatically)
+# Starts ONLY the services needed by the frontend:
+#   - frontend-dev: React frontend application
+#   - api-gateway: Routes REST API calls from frontend
+#   - realtime-gateway: WebSocket for real-time features
+#   - auth-service, task-orchestrator, engagement-service, platform-analytics-service,
+#     notification-service, challenge-service: Dependencies of api-gateway
+#   - Infrastructure: postgres, redis, influxdb, pgadmin, adminer (started automatically)
+#
+# Services NOT started (not needed by frontend):
+#   - external-bridge-service (only needed for integrations)
+#   - core-api / deepiri-core-api (deprecated legacy monolith, replaced by microservices)
+#   - cyrex, jupyter, mlflow (AI/ML services, not needed by frontend)
 
 set -e
 
 cd "$(dirname "$0")/../.." || exit 1
 
-echo "🚀 Starting Frontend Team services..."
+echo "🚀 Starting Frontend Team services (ONLY services needed by frontend)..."
 
 # Start services that exist (skip submodules if not initialized)
-# api-gateway depends on all these services, so we need to start them all
-# Note: external-bridge-service excluded - frontend team doesn't need integrations
+# These are the exact services needed by the frontend - no more, no less
 SERVICES=()
 for service in frontend-dev api-gateway auth-service task-orchestrator engagement-service platform-analytics-service notification-service challenge-service realtime-gateway; do
   case $service in

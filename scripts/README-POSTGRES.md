@@ -38,11 +38,11 @@ psql -h localhost -p 5432 -U deepiri -d deepiri -f scripts/postgres-seed.sql
 
 **Test Users:**
 ```
-admin@deepiri.local - Admin User (full access)
-alice@deepiri.local - Product Manager
-bob@deepiri.local - Senior Developer
-carol@deepiri.local - UX Designer
-dave@deepiri.local - DevOps Engineer
+admin@deepiri.com - Admin User (full access)
+alice@deepiri.com - Product Manager
+bob@deepiri.com - Senior Developer
+carol@deepiri.com - UX Designer
+dave@deepiri.com - DevOps Engineer
 ```
 
 #### 3. **postgres-backup.sh** - Backup Script
@@ -121,7 +121,7 @@ docker exec -i deepiri-postgres-dev psql -U deepiri -d deepiri < scripts/postgre
 
 4. **Access pgAdmin:**
 - URL: http://localhost:5050
-- Email: admin@deepiri.local
+- Email: admin@deepiri.com
 - Password: admin
 
 ---
@@ -213,7 +213,7 @@ FROM public.users u
 LEFT JOIN analytics.momentum m ON m.user_id = u.id
 LEFT JOIN analytics.streaks s ON s.user_id = u.id
 LEFT JOIN analytics.boosts b ON b.user_id = u.id
-WHERE u.email LIKE '%@deepiri.local';
+WHERE u.email LIKE '%@deepiri.com';
 ```
 
 #### **Top Tasks by Momentum**

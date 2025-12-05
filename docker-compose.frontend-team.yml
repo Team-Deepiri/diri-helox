@@ -2,13 +2,30 @@ name: deepiri-frontend-team
 
 # Frontend Team Docker Compose Configuration
 # 
-# This file matches the services referenced in:
+# This file contains ONLY the services needed by the frontend team.
+# It matches the services referenced in:
 # - team_dev_environments/frontend-team/build.sh
 # - team_dev_environments/frontend-team/start.sh
 # - team_dev_environments/frontend-team/stop.sh
 #
-# Primary services: frontend-dev, auth-service
-# Dependencies: postgres, influxdb
+# Services included:
+#   - frontend-dev: React frontend application
+#   - api-gateway: Routes REST API calls from frontend
+#   - realtime-gateway: WebSocket for real-time features
+#   - auth-service: Authentication (dependency of api-gateway)
+#   - task-orchestrator: Task management (dependency of api-gateway)
+#   - engagement-service: Engagement features (dependency of api-gateway)
+#   - platform-analytics-service: Analytics (dependency of api-gateway)
+#   - notification-service: Notifications (dependency of api-gateway)
+#   - challenge-service: Challenges (dependency of api-gateway)
+#   - Infrastructure: postgres, redis, influxdb, pgadmin, adminer
+#
+# Services NOT included (not needed by frontend):
+#   - external-bridge-service (only needed for integrations)
+#   - core-api / deepiri-core-api monolith, replaced by microservices)
+#   - cyrex (AI/ML service, not needed by frontend)
+#   - jupyter (AI/ML service, not needed by frontend)
+#   - mlflow (AI/ML service, not needed by frontend)
 #
 # IMPORTANT: Set DOCKER_BUILDKIT=1 before building to enable layer caching
 # This prevents 50GB+ of dangling images on every build
@@ -59,7 +76,7 @@ services:
     ports:
       - "5050:80"
     environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@deepiri.local}
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@deepiri.com}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
       PGADMIN_CONFIG_SERVER_MODE: 'False'
     volumes:
@@ -316,7 +333,8 @@ services:
       - ./platform-services/backend/deepiri-challenge-service:/app
       - ./platform-services/shared/deepiri-shared-utils:/shared-utils
       - /app/node_modules
-    command: sh -c "cd /shared-utils && npm install --legacy-peer-deps && npm run build && cd /app && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+      - /shared-utils/node_modules
+    command: sh -c "cd /shared-utils && rm -rf node_modules/.caniuse-lite* 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps && npm run build && cd /app && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
     depends_on:
       - postgres
     networks:

@@ -2,7 +2,19 @@
 """
 Frontend Team - Local Environment Runner
 Uses docker_manager to create and run containers programmatically
-Based on SERVICE_TEAM_MAPPING.md: Frontend, API Gateway, Realtime Gateway
+
+Starts ONLY the services needed by the frontend:
+  - frontend-dev: React frontend application
+  - api-gateway: Routes REST API calls from frontend
+  - realtime-gateway: WebSocket for real-time features
+  - auth-service, task-orchestrator, engagement-service, platform-analytics-service,
+    notification-service, challenge-service: Dependencies of api-gateway
+  - Infrastructure: postgres, redis, influxdb, pgadmin, adminer
+
+Services NOT started (not needed by frontend):
+  - external-bridge-service (only needed for integrations)
+  - core-api / deepiri-core-api (deprecated legacy monolith, replaced by microservices)
+  - cyrex, jupyter, mlflow (AI/ML services, not needed by frontend)
 """
 
 import os

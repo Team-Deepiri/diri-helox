@@ -10,9 +10,9 @@ DO $$
 DECLARE
     seed_user_count INT;
 BEGIN
-    SELECT COUNT(*) INTO seed_user_count FROM public.users WHERE email LIKE '%@deepiri.local';
+    SELECT COUNT(*) INTO seed_user_count FROM public.users WHERE email LIKE '%@deepiri.com';
     IF seed_user_count > 0 THEN
-        DELETE FROM public.users WHERE email LIKE '%@deepiri.local';
+        DELETE FROM public.users WHERE email LIKE '%@deepiri.com';
         RAISE NOTICE 'Cleared % existing seed users', seed_user_count;
     END IF;
 END $$;
@@ -24,11 +24,11 @@ END $$;
 -- Password for all seed users: "password123" (bcrypt hashed)
 -- CHANGE THIS IN PRODUCTION!
 INSERT INTO public.users (id, email, password, name, bio, status, email_verified) VALUES
-    ('00000000-0000-0000-0000-000000000001', 'admin@deepiri.local', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Admin User', 'System administrator', 'active', true),
-    ('00000000-0000-0000-0000-000000000002', 'alice@deepiri.local', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Alice Johnson', 'Product manager who loves shipping features', 'active', true),
-    ('00000000-0000-0000-0000-000000000003', 'bob@deepiri.local', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Bob Smith', 'Senior developer and code review champion', 'active', true),
-    ('00000000-0000-0000-0000-000000000004', 'carol@deepiri.local', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Carol Davis', 'UX designer focused on user experience', 'active', true),
-    ('00000000-0000-0000-0000-000000000005', 'dave@deepiri.local', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Dave Wilson', 'DevOps engineer keeping things running', 'active', true)
+    ('00000000-0000-0000-0000-000000000001', 'admin@deepiri.com', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Admin User', 'System administrator', 'active', true),
+    ('00000000-0000-0000-0000-000000000002', 'alice@deepiri.com', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Alice Johnson', 'Product manager who loves shipping features', 'active', true),
+    ('00000000-0000-0000-0000-000000000003', 'bob@deepiri.com', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Bob Smith', 'Senior developer and code review champion', 'active', true),
+    ('00000000-0000-0000-0000-000000000004', 'carol@deepiri.com', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Carol Davis', 'UX designer focused on user experience', 'active', true),
+    ('00000000-0000-0000-0000-000000000005', 'dave@deepiri.com', '$2a$10$rKJ8qD4EZFQhqvJBqC0VXO1YqQqQqQqQqQqQqQqQqQqQqQqQqQ', 'Dave Wilson', 'DevOps engineer keeping things running', 'active', true)
 ON CONFLICT (id) DO UPDATE SET
     email = EXCLUDED.email,
     name = EXCLUDED.name,
@@ -39,14 +39,14 @@ INSERT INTO public.user_roles (user_id, role_id, granted_by)
 SELECT u.id, r.id, '00000000-0000-0000-0000-000000000001'::UUID
 FROM public.users u
 CROSS JOIN public.roles r
-WHERE u.email = 'admin@deepiri.local' AND r.name = 'admin'
+WHERE u.email = 'admin@deepiri.com' AND r.name = 'admin'
 ON CONFLICT (user_id, role_id) DO NOTHING;
 
 INSERT INTO public.user_roles (user_id, role_id, granted_by)
 SELECT u.id, r.id, '00000000-0000-0000-0000-000000000001'::UUID
 FROM public.users u
 CROSS JOIN public.roles r
-WHERE u.email IN ('alice@deepiri.local', 'bob@deepiri.local', 'carol@deepiri.local', 'dave@deepiri.local')
+WHERE u.email IN ('alice@deepiri.com', 'bob@deepiri.com', 'carol@deepiri.com', 'dave@deepiri.com')
 AND r.name = 'user'
 ON CONFLICT (user_id, role_id) DO NOTHING;
 
@@ -54,7 +54,7 @@ INSERT INTO public.user_roles (user_id, role_id, granted_by)
 SELECT u.id, r.id, '00000000-0000-0000-0000-000000000001'::UUID
 FROM public.users u
 CROSS JOIN public.roles r
-WHERE u.email IN ('bob@deepiri.local', 'dave@deepiri.local') AND r.name = 'developer'
+WHERE u.email IN ('bob@deepiri.com', 'dave@deepiri.com') AND r.name = 'developer'
 ON CONFLICT (user_id, role_id) DO NOTHING;
 
 -- ===========================
@@ -145,7 +145,7 @@ SELECT id,
        (RANDOM() * 100)::INT,
        (RANDOM() * 10)::INT
 FROM public.users
-WHERE email LIKE '%@deepiri.local'
+WHERE email LIKE '%@deepiri.com'
 ON CONFLICT (user_id) DO UPDATE SET
     total_momentum = EXCLUDED.total_momentum;
 
@@ -158,7 +158,7 @@ SELECT id,
        (RANDOM() * 4)::INT,
        (RANDOM() * 12)::INT
 FROM public.users
-WHERE email LIKE '%@deepiri.local'
+WHERE email LIKE '%@deepiri.com'
 ON CONFLICT (user_id) DO UPDATE SET
     daily_current = EXCLUDED.daily_current;
 
@@ -166,7 +166,7 @@ ON CONFLICT (user_id) DO UPDATE SET
 INSERT INTO analytics.boosts (user_id, boost_credits)
 SELECT id, (RANDOM() * 100)::INT
 FROM public.users
-WHERE email LIKE '%@deepiri.local'
+WHERE email LIKE '%@deepiri.com'
 ON CONFLICT (user_id) DO UPDATE SET
     boost_credits = EXCLUDED.boost_credits;
 
@@ -191,7 +191,7 @@ SELECT m.id,
        false
 FROM analytics.momentum m
 JOIN public.users u ON m.user_id = u.id
-WHERE u.email IN ('alice@deepiri.local', 'bob@deepiri.local');
+WHERE u.email IN ('alice@deepiri.com', 'bob@deepiri.com');
 
 -- ===========================
 -- SEED AUDIT DATA
@@ -205,7 +205,7 @@ SELECT id,
        (RANDOM() * 500)::INT,
        (RANDOM() * 30)::INT
 FROM public.users
-WHERE email LIKE '%@deepiri.local'
+WHERE email LIKE '%@deepiri.com'
 ON CONFLICT (user_id) DO UPDATE SET
     last_active_at = EXCLUDED.last_active_at;
 
@@ -256,7 +256,7 @@ DECLARE
     task_count INT;
     project_count INT;
 BEGIN
-    SELECT COUNT(*) INTO user_count FROM public.users WHERE email LIKE '%@deepiri.local';
+    SELECT COUNT(*) INTO user_count FROM public.users WHERE email LIKE '%@deepiri.com';
     SELECT COUNT(*) INTO task_count FROM public.tasks;
     SELECT COUNT(*) INTO project_count FROM public.projects;
     
@@ -269,10 +269,10 @@ BEGIN
     RAISE NOTICE '  Password: password123';
     RAISE NOTICE '';
     RAISE NOTICE 'Test users:';
-    RAISE NOTICE '  admin@deepiri.local - Admin User';
-    RAISE NOTICE '  alice@deepiri.local - Alice Johnson (Product Manager)';
-    RAISE NOTICE '  bob@deepiri.local - Bob Smith (Developer)';
-    RAISE NOTICE '  carol@deepiri.local - Carol Davis (Designer)';
-    RAISE NOTICE '  dave@deepiri.local - Dave Wilson (DevOps)';
+    RAISE NOTICE '  admin@deepiri.com - Admin User';
+    RAISE NOTICE '  alice@deepiri.com - Alice Johnson (Product Manager)';
+    RAISE NOTICE '  bob@deepiri.com - Bob Smith (Developer)';
+    RAISE NOTICE '  carol@deepiri.com - Carol Davis (Designer)';
+    RAISE NOTICE '  dave@deepiri.com - Dave Wilson (DevOps)';
 END $$;
 
