@@ -12,7 +12,8 @@ REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 REPO_NAME=$(basename "$REPO_ROOT")
 
 # If repo name ends with -team-dev, also protect that branch name
-if echo "$REPO_NAME" | grep -qE '-team-dev$'; then
+# Use -- to prevent grep from interpreting -t as an option
+if echo "$REPO_NAME" | grep -qE -- '-team-dev$'; then
     protected_branches="$protected_branches $REPO_NAME"
 fi
 

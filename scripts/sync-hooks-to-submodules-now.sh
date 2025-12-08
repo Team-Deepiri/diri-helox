@@ -41,17 +41,22 @@ sync_hooks_to_submodule() {
         fi
     done
     
-    # Install hooks in submodule's .git/hooks
+    # Install hooks in submodule's .git/hooks ONLY if .git is a directory
+    # For submodules, .git is usually a FILE pointing to parent's .git/modules
+    # In that case, we only configure hooksPath, not .git/hooks
     cd "$submodule_path" || return
     
-    mkdir -p .git/hooks
-    for hook in .git-hooks/*; do
-        if [ -f "$hook" ]; then
-            hook_name=$(basename "$hook")
-            cp "$hook" ".git/hooks/$hook_name"
-            chmod +x ".git/hooks/$hook_name"
-        fi
-    done
+    # Only create .git/hooks if .git is actually a directory (not a file)
+    if [ -d ".git" ] && [ ! -f ".git" ]; then
+        mkdir -p .git/hooks
+        for hook in .git-hooks/*; do
+            if [ -f "$hook" ]; then
+                hook_name=$(basename "$hook")
+                cp "$hook" ".git/hooks/$hook_name"
+                chmod +x ".git/hooks/$hook_name"
+            fi
+        done
+    fi
     
     # Configure hooksPath for submodule
     git config core.hooksPath .git-hooks
