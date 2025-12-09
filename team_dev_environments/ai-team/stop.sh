@@ -21,6 +21,8 @@ CONTAINERS=(
     "deepiri-mlflow-ai"
     "deepiri-jupyter-ai"
     "deepiri-challenge-service-ai"
+    "deepiri-external-bridge-service-ai"
+    "deepiri-engagement-service-ai"
 )
 
 # Stop and remove containers

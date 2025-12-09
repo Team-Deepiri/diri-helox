@@ -152,7 +152,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
     volumes:
       - minio_ai_data:/data
-    command: minio server /data --console-address ":9001"
+    # command: minio server /data --console-address ":9001"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
       interval: 30s
@@ -359,6 +359,65 @@ services:
     networks:
       - deepiri-ai-network
 
+  # Engagement Service
+  engagement-service:
+    build:
+      context: ./platform-services
+      dockerfile: backend/deepiri-dev-engagement-service/Dockerfile
+    image: deepiri-dev-engagement-service:latest
+    pull_policy: never
+    container_name: deepiri-engagement-service-ai
+    restart: unless-stopped
+    logging: *minimal-logging
+    ports:
+      - "5003:5003"
+    # Variables loaded from ops/k8s/configmaps/engagement-service-configmap.yaml
+    # Variables loaded from ops/k8s/secrets/secrets.yaml
+    environment:
+      # Override or add docker-specific variables here if needed
+      PORT: 5003
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
+    volumes:
+      - ./platform-services/backend/deepiri-engagement-service:/app
+      - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
+      - /app/node_modules
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - deepiri-ai-network
+
+  # External Bridge Service
+  external-bridge-service:
+    build:
+      context: ./platform-services
+      dockerfile: backend/deepiri-external-bridge-service/Dockerfile
+    image: deepiri-dev-external-bridge-service:latest
+    pull_policy: never
+    container_name: deepiri-engagement-service
+    restart: unless-stopped
+    logging: *minimal-logging
+    ports:
+      - "5006:5006"
+    # Variables loaded from ops/k8s/configmaps/external-bridge-service-configmap.yaml
+    # Variables loaded from ops/k8s/secrets/secrets.yaml
+    environment:
+      # Override or add docker-specific variables here if needed
+      PORT: 5006
+      DATABASE_URL: postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
+    volumes:
+      - ./platform-services/backend/deepiri-external-bridge-service:/app
+      - ./platform-services/shared/deepiri-shared-utils:/shared-utils
+      - shared_utils_node_modules:/shared-utils/node_modules
+      - /app/node_modules
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npm run dev"
+    depends_on:
+      - postgres
+    networks:
+      - deepiri-ai-network
+
 volumes:
   postgres_ai_data:
     driver: local
@@ -381,6 +440,8 @@ volumes:
   cyrex_ai_cache:
     driver: local
   ollama_ai_data:
+    driver: local
+  shared_utils_node_modules:
     driver: local
 
 networks:
