@@ -193,3 +193,14 @@ echo "  - Work in Auth Service: cd platform-services/backend/deepiri-auth-servic
 echo "  - Work in External Bridge: cd platform-services/backend/deepiri-external-bridge-service"
 echo ""
 
+# Automatically run setup-hooks.sh after pulling submodules
+echo "🔧 Setting up Git hooks for pulled submodules..."
+echo ""
+if [ -f "$SCRIPT_DIR/setup-hooks.sh" ]; then
+    bash "$SCRIPT_DIR/setup-hooks.sh"
+else
+    echo "⚠️  Warning: setup-hooks.sh not found at $SCRIPT_DIR/setup-hooks.sh"
+    echo "   Hooks will not be automatically configured."
+fi
+echo ""
+
