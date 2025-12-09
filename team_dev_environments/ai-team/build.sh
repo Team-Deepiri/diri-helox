@@ -20,7 +20,7 @@ docker pull ollama/ollama:latest || echo "⚠️  Failed to pull Ollama image, w
 
 # Build services that exist (skip submodules if not initialized)
 SERVICES=()
-for service in cyrex jupyter mlflow challenge-service; do
+for service in cyrex engagement-service external-bridge-service jupyter mlflow challenge-service; do
   case $service in
     cyrex)
       if [ -f "diri-cyrex/Dockerfile" ]; then
