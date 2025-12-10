@@ -1,6 +1,6 @@
 #!/bin/bash
 # Backend Team - Stop script
-# Stops and removes all containers defined in docker-compose.backend-team.yml
+# Stops backend team services using docker-compose.dev.yml with service selection
 
 set -e
 
@@ -9,18 +9,27 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
+# Backend team services
+SERVICES=(
+  postgres redis influxdb
+  api-gateway auth-service task-orchestrator
+  engagement-service platform-analytics-service
+  notification-service external-bridge-service
+  challenge-service realtime-gateway
+)
+
 echo "🛑 Stopping Backend Team services..."
-echo "   (Matching docker-compose.backend-team.yml)"
+echo "   (Using docker-compose.dev.yml with service selection)"
+echo "   Services: ${SERVICES[*]}"
 echo ""
 
-# Use docker-compose to stop and remove all services
-# This automatically handles all containers defined in the compose file
-docker compose -f docker-compose.backend-team.yml down
+# Stop selected services
+docker compose -f docker-compose.dev.yml stop "${SERVICES[@]}"
 
 echo ""
-echo "✅ Backend Team services stopped and removed!"
+echo "✅ Backend Team services stopped!"
 echo ""
-echo "Note: Volumes are preserved by default."
-echo "To remove volumes as well, run:"
-echo "  docker compose -f docker-compose.backend-team.yml down -v"
+echo "Note: Containers are stopped but not removed."
+echo "To remove containers: docker compose -f docker-compose.dev.yml rm -f ${SERVICES[*]}"
+echo "To remove volumes as well: docker compose -f docker-compose.dev.yml down -v"
 echo ""

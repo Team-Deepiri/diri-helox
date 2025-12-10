@@ -1,20 +1,28 @@
 #!/bin/bash
 # Backend Team - Start Script
-# Starts all backend services with k8s configmaps and secrets
-# Matches docker-compose.backend-team.yml
+# Starts all backend services using docker-compose.dev.yml with service selection
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
+# Backend team services
+SERVICES=(
+  postgres redis influxdb
+  api-gateway auth-service task-orchestrator
+  engagement-service platform-analytics-service
+  notification-service external-bridge-service
+  challenge-service realtime-gateway
+)
+
 echo "🚀 Starting Backend Team Environment..."
-echo "   (Using k8s configmaps and secrets from ops/k8s/)"
-echo "   (Matching docker-compose.backend-team.yml)"
+echo "   (Using docker-compose.dev.yml with service selection)"
+echo "   Services: ${SERVICES[*]}"
 echo ""
 
-# Use wrapper to auto-load k8s config
-./docker-compose-k8s.sh -f docker-compose.backend-team.yml up -d
+# Use wrapper to auto-load k8s config, then start selected services
+./docker-compose-k8s.sh -f docker-compose.dev.yml up -d "${SERVICES[@]}"
 
 echo ""
 echo "✅ Backend Team Environment Started!"
@@ -41,8 +49,8 @@ echo "  - pgAdmin:                http://localhost:5050"
 echo "  - Adminer:                http://localhost:8080"
 echo ""
 echo "Useful commands:"
-echo "  View logs:                docker compose -f docker-compose.backend-team.yml logs -f"
-echo "  View specific service:    docker compose -f docker-compose.backend-team.yml logs -f <service-name>"
-echo "  Stop services:            docker compose -f docker-compose.backend-team.yml down"
-echo "  Restart service:          docker compose -f docker-compose.backend-team.yml restart <service-name>"
+echo "  View logs:                docker compose -f docker-compose.dev.yml logs -f ${SERVICES[*]}"
+echo "  View specific service:    docker compose -f docker-compose.dev.yml logs -f <service-name>"
+echo "  Stop services:            docker compose -f docker-compose.dev.yml stop ${SERVICES[*]}"
+echo "  Restart service:          docker compose -f docker-compose.dev.yml restart <service-name>"
 echo ""

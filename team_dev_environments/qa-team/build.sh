@@ -1,7 +1,6 @@
 #!/bin/bash
 # QA Team - Build script
-# Builds: ALL SERVICES (complete stack for testing)
-# Based on SERVICE_TEAM_MAPPING.md: All services for end-to-end testing
+# Builds ALL services using docker-compose.dev.yml
 
 set -e
 
@@ -12,8 +11,10 @@ export DOCKER_BUILDKIT=1
 export COMPOSE_DOCKER_CLI_BUILD=1
 
 echo "🔨 Building QA Team services (All Services)..."
+echo "   (Using docker-compose.dev.yml)"
+echo ""
 
-# Build all services using team-specific compose file
-docker compose -f docker-compose.qa-team.yml build
+# Build all services using docker-compose.dev.yml
+docker compose -f docker-compose.dev.yml build
 
 echo "✅ QA Team services built successfully!"
