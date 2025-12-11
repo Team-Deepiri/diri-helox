@@ -21,7 +21,7 @@ echo ""
 
 # Use --no-build to prevent automatic building (images should already be built)
 # --no-deps prevents starting dependencies unless specified
-docker compose -f docker-compose.dev.yml up -d --no-build --no-deps "${SERVICES[@]}"
+docker compose -f docker-compose.dev.yml up -d --no-build "${SERVICES[@]}"
 
 echo "✅ AI Team services started!"
 echo ""
