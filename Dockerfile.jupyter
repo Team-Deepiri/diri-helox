@@ -1,0 +1,34 @@
+FROM jupyter/scipy-notebook:latest
+
+WORKDIR /workspace
+
+# Copy deepiri-modelkit first
+COPY deepiri-modelkit /workspace/deepiri-modelkit
+
+# Copy requirements
+COPY diri-helox/requirements.txt /workspace/requirements.txt
+
+# Remove deepiri-modelkit editable install from requirements.txt
+RUN sed -i '/deepiri-modelkit/d' /workspace/requirements.txt && \
+    sed -i '/^-e.*modelkit/d' /workspace/requirements.txt || true
+
+# Install deepiri-modelkit as editable package (before other requirements)
+RUN if [ -d "/workspace/deepiri-modelkit" ] && [ -f "/workspace/deepiri-modelkit/pyproject.toml" ]; then \
+        echo "Installing deepiri-modelkit..." && \
+        pip install --no-cache-dir -e /workspace/deepiri-modelkit || \
+        (echo "Warning: deepiri-modelkit installation failed" && true); \
+    else \
+        echo "Warning: deepiri-modelkit not found, skipping installation"; \
+    fi
+
+# Install other dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy workspace
+COPY diri-helox /workspace
+
+# Expose Jupyter
+EXPOSE 8888
+
+CMD ["jupyter", "lab", "--ip=0.0.0.0", "--port=8888", "--no-browser", "--allow-root"]
+
