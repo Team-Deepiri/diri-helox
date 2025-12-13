@@ -125,10 +125,6 @@ echo ""
 update_submodule "deepiri-modelkit" "deepiri-modelkit (Shared Contracts & Utilities)"
 echo ""
 
-# Update deepiri-synapse
-update_submodule "platform-services/shared/deepiri-synapse" "deepiri-synapse (Central Streaming Service)"
-echo ""
-
 # Also update via git submodule update --remote for consistency (recursive to get nested submodules)
 echo "🔄 Syncing all submodule references (recursive)..."
 git submodule update --remote --recursive 2>/dev/null || true
@@ -151,7 +147,6 @@ echo "  ✅ deepiri-external-bridge-service"
 echo "  ✅ deepiri-web-frontend"
 echo "  ✅ diri-helox"
 echo "  ✅ deepiri-modelkit"
-echo "  ✅ deepiri-synapse"
 echo "  ✅ All nested submodules (recursive)"
 echo ""
 
