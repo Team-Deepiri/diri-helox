@@ -118,8 +118,8 @@ class TaskVersioningService {
           changedByUser: {
             select: {
               id: true,
-              name: true,
-              email: true
+              //name: true,
+              //email: true
             }
           }
         }
@@ -143,8 +143,8 @@ class TaskVersioningService {
           changedByUser: {
             select: {
               id: true,
-              name: true,
-              email: true
+              //name: true,
+              //email: true
             }
           }
         }
