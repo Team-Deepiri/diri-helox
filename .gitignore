@@ -1,0 +1,99 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+*.egg
+*.whl
+
+# Virtual environments
+../.dev_venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Logs
+*.log
+logs/
+.logs
+
+# ML Model Files (never commit models!)
+*.safetensors
+*.bin
+*.pt
+*.pth
+*.ckpt
+*.h5
+*.pb
+*.onnx
+*.pkl
+*.pickle
+*.model
+*.tflite
+*.hdf5
+*.pth.tar
+*.pt.tar
+
+# Model directories
+models/
+checkpoints/
+saved_models/
+trained_models/
+model_cache/
+.cache/
+.huggingface/
+.transformers_cache/
+hf_cache/
+.hf_cache/
+
+# Training data (large files)
+data/
+datasets/
+*.jsonl
+*.parquet
+*.arrow
+*.feather
+*.hdf5
+*.h5
+
+# MLflow artifacts
+mlruns/
+mlflow_artifacts/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.example.*
+
