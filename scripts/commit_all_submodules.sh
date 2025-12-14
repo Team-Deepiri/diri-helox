@@ -20,6 +20,15 @@ if [ ! -f ".gitmodules" ]; then
 fi
 
 # Extract submodule paths from .gitmodules
+# This automatically includes all submodules listed in .gitmodules:
+# - deepiri-core-api
+# - diri-cyrex
+# - diri-helox
+# - deepiri-modelkit
+# - platform-services/backend/deepiri-api-gateway
+# - platform-services/backend/deepiri-auth-service
+# - platform-services/backend/deepiri-external-bridge-service
+# - deepiri-web-frontend
 SUBMODULES=()
 while IFS= read -r submodule_path; do
     [ -z "$submodule_path" ] && continue

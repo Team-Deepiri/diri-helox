@@ -16,8 +16,7 @@ SERVICES=(
   api-gateway auth-service task-orchestrator
   engagement-service platform-analytics-service
   notification-service external-bridge-service
-  challenge-service realtime-gateway
-  cyrex cyrex-interface mlflow jupyter
+  challenge-service realtime-gateway synapse
 )
 
 echo "🔨 Building Infrastructure Team services..."
