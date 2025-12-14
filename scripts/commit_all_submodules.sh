@@ -85,9 +85,9 @@ else
             # Check if it's a valid submodule index
             elif [ "$idx_num" -ge 1 ] && [ "$idx_num" -le ${#SUBMODULES[@]} ]; then
                 array_idx=$((idx_num - 1))
-                SELECTED_SUBMODULES+=("${SUBMODULES[$array_idx]}")
-            else
-                echo "⚠️  Invalid selection: $idx (skipping)"
+            SELECTED_SUBMODULES+=("${SUBMODULES[$array_idx]}")
+        else
+            echo "⚠️  Invalid selection: $idx (skipping)"
             fi
         else
             echo "⚠️  Invalid selection: $idx (skipping - use number, 'main', 'platform', or 'all')"
@@ -126,19 +126,19 @@ if [ "$message_strategy" = "1" ]; then
     USE_SAME_MESSAGE=true
     echo "✅ Using same commit message for all submodules"
     echo "   (Auto-push and auto-upstream enabled for submodules only)"
-    
-    # Prompt for commit message
+
+# Prompt for commit message
     echo ""
-    echo "Enter commit message (or press Enter to use default 'Save WIP before merging main'):"
-    read -r commit_message
-    
-    # Use default if empty
-    if [ -z "$commit_message" ]; then
-        commit_message="Save WIP before merging main"
-    fi
-    
-    echo ""
-    echo "📝 Commit message: $commit_message"
+echo "Enter commit message (or press Enter to use default 'Save WIP before merging main'):"
+read -r commit_message
+
+# Use default if empty
+if [ -z "$commit_message" ]; then
+    commit_message="Save WIP before merging main"
+fi
+
+echo ""
+echo "📝 Commit message: $commit_message"
     echo "   (Will be used for all submodules)"
     echo ""
     
@@ -167,20 +167,20 @@ else
     SUBMODULE_AUTO_PUSH=false
     SUBMODULE_AUTO_UPSTREAM=false
     echo "✅ Using individual commit messages (manual control)"
-    echo ""
-    
+echo ""
+
     # Prompt for push (applies to all repos/submodules in individual mode)
-    echo "Push changes after committing? (y/n, default: n):"
-    read -r push_choice
-    
-    PUSH_AFTER_COMMIT=false
+echo "Push changes after committing? (y/n, default: n):"
+read -r push_choice
+
+PUSH_AFTER_COMMIT=false
     MAIN_REPO_PUSH=false
-    if [ "$push_choice" = "y" ] || [ "$push_choice" = "Y" ] || [ "$push_choice" = "yes" ] || [ "$push_choice" = "YES" ]; then
-        PUSH_AFTER_COMMIT=true
+if [ "$push_choice" = "y" ] || [ "$push_choice" = "Y" ] || [ "$push_choice" = "yes" ] || [ "$push_choice" = "YES" ]; then
+    PUSH_AFTER_COMMIT=true
         MAIN_REPO_PUSH=true
-        echo "✅ Will push after committing"
-    else
-        echo "ℹ️  Will NOT push (commit only)"
+    echo "✅ Will push after committing"
+else
+    echo "ℹ️  Will NOT push (commit only)"
     fi
 fi
 
@@ -361,8 +361,8 @@ for submodule_path in "${SELECTED_SUBMODULES[@]}"; do
                     push_exit_code=$?
                     
                     if [ $push_exit_code -eq 0 ]; then
-                        echo "   ✅ Pushed successfully"
-                    else
+                    echo "   ✅ Pushed successfully"
+                else
                         # Check if it's an upstream issue
                         if echo "$push_output" | grep -q "no upstream branch\|has no upstream branch\|set upstream"; then
                             if [ "$SUBMODULE_AUTO_UPSTREAM" = true ]; then
@@ -395,8 +395,8 @@ for submodule_path in "${SELECTED_SUBMODULES[@]}"; do
                             fi
                         else
                             echo "   ⚠️  Push failed: $push_output"
-                            echo "   ⚠️  Push failed (commit was successful)"
-                            FAILED_SUBMODULES+=("$submodule_path (push failed)")
+                    echo "   ⚠️  Push failed (commit was successful)"
+                    FAILED_SUBMODULES+=("$submodule_path (push failed)")
                         fi
                     fi
                 fi
