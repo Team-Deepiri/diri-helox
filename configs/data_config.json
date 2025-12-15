@@ -1,0 +1,18 @@
+{
+  "raw_data_dir": "data/datasets/raw",
+  "processed_data_dir": "data/datasets/processed",
+  "tokenized_data_dir": "data/datasets/tokenized",
+  "tokenizer_model_path": null,
+  "tokenizer_vocab_size": 50000,
+  "tokenizer_model_type": "bpe",
+  "min_text_length": 50,
+  "max_text_length": 8192,
+  "remove_duplicates": true,
+  "max_urls_per_document": 5,
+  "train_split": 0.9,
+  "val_split": 0.05,
+  "test_split": 0.05,
+  "input_format": "text",
+  "output_format": "arrow"
+}
+
