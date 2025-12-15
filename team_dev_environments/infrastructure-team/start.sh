@@ -8,7 +8,7 @@ cd "$(dirname "$0")/../.." || exit 1
 
 echo "🚀 Starting Infrastructure Team services..."
 
-# Start all services except frontend-dev
+# Start all services except frontend-dev and AI/ML services (cyrex, ollama, mlflow, jupyter, milvus)
 ALL_SERVICES=(
   postgres pgadmin redis influxdb etcd minio
   api-gateway auth-service task-orchestrator engagement-service platform-analytics-service
@@ -75,4 +75,7 @@ echo "💾 Redis: localhost:6380"
 echo "📊 InfluxDB: http://localhost:8086"
 echo "📡 Synapse: http://localhost:8002"
 echo "🌐 API Gateway: http://localhost:${API_GATEWAY_PORT}"
+echo "🔄 Synapse (Streaming): http://localhost:8002"
+echo ""
+echo "ℹ️  AI/ML services excluded: cyrex, ollama, mlflow, jupyter, milvus"
 
