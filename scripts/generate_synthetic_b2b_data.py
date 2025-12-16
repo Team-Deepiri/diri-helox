@@ -87,14 +87,29 @@ This document is maintained internally and reviewed periodically for accuracy.
 
 
 def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
-    if category == "documents":
-        return generate_document_content(artifact_type, tenant_name)
+    if category == "processes":
+        return (
+            f"{artifact_type} — {tenant_name}\n\n"
+            f"Objective\n"
+            f"---------\n"
+            f"Define a repeatable process used by {tenant_name} to ensure consistent execution.\n\n"
+            f"Steps\n"
+            f"-----\n"
+            f"1. Identify required inputs and stakeholders\n"
+            f"2. Execute the defined operational steps\n"
+            f"3. Validate outputs and log results\n"
+            f"4. Escalate issues if criteria are not met\n\n"
+            f"Ownership\n"
+            f"---------\n"
+            f"Owned by the responsible operational team and reviewed periodically."
+        )
 
     return (
         f"{artifact_type} for {tenant_name}. "
         f"This {category[:-1]} defines internal guidance, context, and operational details "
         f"used by the organization."
     )
+
 
 
 
