@@ -59,13 +59,43 @@ def random_governance():
         }
     }
 
+def generate_document_content(artifact_type: str, tenant_name: str) -> str:
+    return f"""
+{artifact_type} — {tenant_name}
+
+Purpose
+-------
+This document defines internal standards and guidance used by {tenant_name}
+to ensure consistent operations and regulatory compliance.
+
+Scope
+-----
+Applies to all relevant teams, systems, and processes operating under {tenant_name}.
+
+Key Sections
+------------
+- Roles and responsibilities
+- Operational requirements
+- Compliance considerations
+- Review and update cadence
+
+Notes
+-----
+This document is maintained internally and reviewed periodically for accuracy.
+""".strip()
+
+
 
 def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
+    if category == "documents":
+        return generate_document_content(artifact_type, tenant_name)
+
     return (
         f"{artifact_type} for {tenant_name}. "
         f"This {category[:-1]} defines internal guidance, context, and operational details "
         f"used by the organization."
     )
+
 
 
 def generate_artifact(tenant_id: str, tenant_name: str, category: str) -> dict:
