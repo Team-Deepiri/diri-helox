@@ -34,6 +34,14 @@ CATEGORIES = {
     "decisions": ["Approval", "Escalation", "Resolution"],
 }
 
+PROCESS_OBJECTIVES = [
+     "Ensure consistent execution of this workflow while reducing operational risk.",
+    "Standardize how this process is performed to improve accountability and traceability.",
+    "Enable teams to execute this process efficiently while ensuring compliance with internal standards.",
+    "Reduce errors and delays by defining clear steps and escalation criteria for this process.",
+    "Support reliable decision-making by ensuring this process is followed consistently."
+]
+
 ACCESS_ROLES = ["employee", "manager", "admin", "legal", "finance"]
 
 RETENTION_POLICIES = [
@@ -41,6 +49,28 @@ RETENTION_POLICIES = [
     {"ttl_days": 365, "legal_hold": False},
     {"ttl_days": 1095, "legal_hold": True},
 ]
+
+PROCESS_STEPS = {
+    "Checklist": [
+        "Condirm prerequisites are met",
+        "Verify required inputs and documentaion",
+        "Complete each required task item",
+        "Record completion status"
+    ],
+    "Runbook": [
+        "Identify the triggering condition",
+        "Execute the prescribed operational actions",
+        "Monitor system behavior and logs",
+        "Escalate if outcomes are not achieved"
+    ],
+    "Workflow": [
+        "Initiate the workflow with required inputs",
+        "Route tasks to appropriate stakeholders",
+        "Valiidate task completion and dependencies",
+        "Close the workflow or escalete as needed exceptions"
+    ],
+}
+
 
 # -----------------------------
 # HELPERS
@@ -84,15 +114,16 @@ Notes
 This document is maintained internally and reviewed periodically for accuracy.
 """.strip()
 
-
-
 def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
+    if category == "documents":
+        return generate_document_content(artifact_type, tenant_name)
+
     if category == "processes":
         return (
             f"{artifact_type} — {tenant_name}\n\n"
             f"Objective\n"
             f"---------\n"
-            f"Define a repeatable process used by {tenant_name} to ensure consistent execution.\n\n"
+            f"Define a repeatable process used by {tenant_name} to ensure consistent execution, accountability, and timely escalation of issues.\n\n"
             f"Steps\n"
             f"-----\n"
             f"1. Identify required inputs and stakeholders\n"
