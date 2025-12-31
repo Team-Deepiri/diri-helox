@@ -1,10 +1,10 @@
-# Training Pipeline - Ready to Use! 🚀
+# Training Pipeline - Ready to Use
 
-## ✅ What's Been Set Up
+## What's Been Set Up
 
 Your complete training pipeline is ready. You can generate synthetic data and train your DeBERTa classifier **right now**.
 
-## 🎯 Quick Start (3 Options)
+## Quick Start (3 Options)
 
 ### Option 1: One Command (Python)
 ```bash
@@ -30,7 +30,7 @@ python app/train/scripts/prepare_training_data.py
 python app/train/scripts/train_intent_classifier.py
 ```
 
-## 📦 What You Get
+## What You Get
 
 ### 1. Synthetic Dataset
 - **5000 examples** (default, customizable)
@@ -44,7 +44,7 @@ python app/train/scripts/train_intent_classifier.py
 - **Output**: `app/train/models/intent_classifier`
 - **Ready for production use**
 
-## 📋 Category System
+## Category System
 
 | ID | Category | Example Tasks |
 |----|----------|---------------|
@@ -57,7 +57,7 @@ python app/train/scripts/train_intent_classifier.py
 | 6 | **administrative** | "Schedule meeting", "Pay bills", "File taxes" |
 | 7 | **social** | "Call friend", "Plan event", "Write thank you" |
 
-## 🔧 Customization Options
+## Customization Options
 
 ### Generate More/Less Data
 ```bash
@@ -87,7 +87,7 @@ python app/train/scripts/train_intent_classifier.py \
     --model microsoft/deberta-v3-large
 ```
 
-## 📁 Files Created
+## Files Created
 
 ### Data Files
 - `app/train/data/classification_train.jsonl` - Training set
@@ -104,7 +104,7 @@ python app/train/scripts/train_intent_classifier.py \
   - `category_map.json` - Category ID mappings
   - `training_info.json` - Training metrics and info
 
-## 💻 Using the Model
+## Using the Model
 
 ```python
 from app.services.command_router import get_command_router
@@ -119,14 +119,14 @@ result = router.classify("Write unit tests for my authentication API")
 # Returns: {"category": "coding", "confidence": 0.95, "label_id": 0}
 ```
 
-## 📊 Expected Results
+## Expected Results
 
 With 5000 examples and 3 epochs:
 - **Training time**: 10-30 minutes (depending on hardware)
 - **Expected accuracy**: 85-95% on validation set
 - **Model size**: ~500MB (DeBERTa-v3-base)
 
-## 🎓 Next Steps
+## Next Steps
 
 1. **Test the model** on your use cases
 2. **Collect real data** from user interactions
@@ -134,13 +134,13 @@ With 5000 examples and 3 epochs:
 4. **Deploy** to production
 5. **Monitor** and retrain periodically
 
-## 📚 Documentation
+## Documentation
 
 - **Quick Start Guide**: `app/train/TRAINING_QUICK_START.md`
 - **Data Collection**: `HOW_TO_COLLECT_TRAINING_DATA.md`
 - **Training Scripts**: `app/train/scripts/`
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "Module not found"
 ```bash
@@ -154,17 +154,17 @@ pip install transformers torch datasets scikit-learn
 ### "No data found"
 - Run: `python app/train/scripts/generate_synthetic_data.py`
 
-## ✨ Features
+## Features
 
-- ✅ **8 task categories** (coding, writing, fitness, etc.)
-- ✅ **Synthetic data generation** (5000+ examples)
-- ✅ **Automatic train/val/test split** (70/15/15)
-- ✅ **DeBERTa fine-tuning** (state-of-the-art classifier)
-- ✅ **Production-ready** model output
-- ✅ **Complete pipeline** (one command to run everything)
-- ✅ **Customizable** (data size, training params, model size)
+- **8 task categories** (coding, writing, fitness, etc.)
+- **Synthetic data generation** (5000+ examples)
+- **Automatic train/val/test split** (70/15/15)
+- **DeBERTa fine-tuning** (state-of-the-art classifier)
+- **Production-ready** model output
+- **Complete pipeline** (one command to run everything)
+- **Customizable** (data size, training params, model size)
 
 ---
 
-**You're all set! Run the pipeline and start training your models right now.** 🎉
+**You're all set! Run the pipeline and start training your models right now.**
 
