@@ -1,27 +1,27 @@
-# 🚀 TRAINING SYSTEM STATUS
+# TRAINING SYSTEM STATUS
 
-## ✅ SYSTEM: FULLY OPERATIONAL
+## SYSTEM: FULLY OPERATIONAL
 
 Your training pipeline is **100% ready** for liftoff. All systems are go!
 
 ---
 
-## 📦 WHAT'S BEEN BUILT
+## WHAT'S BEEN BUILT
 
-### 🎯 Core Pipeline
-- ✅ **Synthetic Data Generator** - Creates 5000+ training examples across 8 categories
-- ✅ **Data Preparation** - Formats data for training (70/15/15 split)
-- ✅ **Model Trainer** - Trains DeBERTa classifier with customizable parameters
-- ✅ **Model Evaluator** - Comprehensive performance metrics and reports
-- ✅ **Interactive Tester** - Test model with custom inputs
-- ✅ **Model Comparator** - Compare multiple trained models
-- ✅ **Environment Setup** - Automated dependency checking and installation
+### Core Pipeline
+- **Synthetic Data Generator** - Creates 5000+ training examples across 8 categories
+- **Data Preparation** - Formats data for training (70/15/15 split)
+- **Model Trainer** - Trains DeBERTa classifier with customizable parameters
+- **Model Evaluator** - Comprehensive performance metrics and reports
+- **Interactive Tester** - Test model with custom inputs
+- **Model Comparator** - Compare multiple trained models
+- **Environment Setup** - Automated dependency checking and installation
 
-### 🛠️ Scripts Available
+### Scripts Available
 
 | Script | Purpose | Command |
 |--------|---------|---------|
-| `run_training_pipeline.py` | Complete end-to-end pipeline | Main entry point ⭐ |
+| `run_training_pipeline.py` | Complete end-to-end pipeline | Main entry point |
 | `generate_synthetic_data.py` | Create training data | Generates 5000 examples |
 | `prepare_training_data.py` | Format data | Splits train/val/test |
 | `train_intent_classifier.py` | Train model | DeBERTa fine-tuning |
@@ -31,7 +31,7 @@ Your training pipeline is **100% ready** for liftoff. All systems are go!
 | `setup_training_env.py` | Environment setup | Dependency checking |
 | `run_training_pipeline.ps1` | PowerShell version | Windows users |
 
-### 📊 Data & Categories
+### Data & Categories
 
 **8 Task Categories:**
 1. **Coding** (ID: 0) - Programming, debugging, refactoring
@@ -50,7 +50,7 @@ Your training pipeline is **100% ready** for liftoff. All systems are go!
 - Configurable output size (default: 5000 examples)
 - Automatic train/val/test split (70/15/15)
 
-### 🧠 Model Architecture
+### Model Architecture
 
 **Base Model:** DeBERTa-v3-base
 - State-of-the-art transformer architecture
@@ -69,21 +69,21 @@ Your training pipeline is **100% ready** for liftoff. All systems are go!
 - F1 Score: 0.85-0.92
 - Inference: ~10ms/prediction (GPU), ~50ms (CPU)
 
-### 📈 Evaluation & Metrics
+### Evaluation & Metrics
 
 **Comprehensive Metrics:**
-- ✅ Accuracy, Precision, Recall, F1
-- ✅ Per-class performance breakdown
-- ✅ Confusion matrix
-- ✅ Confidence statistics
-- ✅ Top misclassifications analysis
+- Accuracy, Precision, Recall, F1
+- Per-class performance breakdown
+- Confusion matrix
+- Confidence statistics
+- Top misclassifications analysis
 
 **Output:**
 - JSON report saved to `evaluation_report.json`
 - Pretty-printed terminal output
 - Actionable insights and recommendations
 
-### 🧪 Testing & Validation
+### Testing & Validation
 
 **Interactive Testing:**
 - Real-time predictions on custom inputs
@@ -102,7 +102,7 @@ Your training pipeline is **100% ready** for liftoff. All systems are go!
 
 ---
 
-## 🚀 HOW TO LAUNCH
+## HOW TO LAUNCH
 
 ### Option 1: One Command (Recommended)
 ```bash
@@ -131,7 +131,7 @@ cd deepiri/diri-cyrex
 ```
 deepiri/diri-cyrex/app/train/
 ├── scripts/                          # All executable scripts
-│   ├── run_training_pipeline.py      # ⭐ Main pipeline
+│   ├── run_training_pipeline.py      # Main pipeline
 │   ├── run_training_pipeline.ps1     # PowerShell version
 │   ├── generate_synthetic_data.py    # Data generation
 │   ├── prepare_training_data.py      # Data preparation
@@ -166,7 +166,7 @@ deepiri/diri-cyrex/app/train/
 
 ---
 
-## ⚡ Performance Specs
+## Performance Specs
 
 ### Training Time
 | Hardware | 5K examples | 10K examples |
@@ -191,7 +191,7 @@ deepiri/diri-cyrex/app/train/
 
 ---
 
-## 🎓 Documentation
+## Documentation
 
 | Document | Purpose | Best For |
 |----------|---------|----------|
@@ -203,7 +203,7 @@ deepiri/diri-cyrex/app/train/
 
 ---
 
-## 🔥 READY TO LAUNCH
+## READY TO LAUNCH
 
 ### Run This Command:
 ```bash
@@ -212,12 +212,12 @@ python app/train/scripts/run_training_pipeline.py
 ```
 
 ### What Happens Next:
-1. ⚡ Generates 5000 synthetic training examples
-2. 📊 Splits data into train/validation/test sets
-3. 🧠 Trains DeBERTa classifier (15-30 min on GPU)
-4. 📈 Evaluates performance on test set
-5. 📄 Saves model + comprehensive metrics report
-6. ✅ Ready for production use!
+1. Generates 5000 synthetic training examples
+2. Splits data into train/validation/test sets
+3. Trains DeBERTa classifier (15-30 min on GPU)
+4. Evaluates performance on test set
+5. Saves model + comprehensive metrics report
+6. Ready for production use!
 
 ### After Training:
 ```bash
@@ -233,9 +233,9 @@ python app/train/scripts/compare_models.py
 
 ---
 
-## 🎯 Next Steps
+## Next Steps
 
-1. **✅ TRAIN THE MODEL** (you're about to do this!)
+1. **TRAIN THE MODEL** (you're about to do this!)
 2. Test it with your real use cases
 3. Collect user data in production
 4. Fine-tune with real data
@@ -244,11 +244,11 @@ python app/train/scripts/compare_models.py
 
 ---
 
-## 💪 YOU'RE READY FOR LIFTOFF!
+## YOU'RE READY FOR LIFTOFF!
 
 Everything is built. Everything works. All systems operational.
 
-**Just run the command and watch it fly.** 🚀
+**Just run the command and watch it fly.**
 
 ```bash
 python app/train/scripts/run_training_pipeline.py
@@ -256,9 +256,9 @@ python app/train/scripts/run_training_pipeline.py
 
 ---
 
-**Status: ✅ FULLY OPERATIONAL**  
-**System: 🔥 READY FOR LIFTOFF**  
-**Mission: 🚀 GO FOR LAUNCH**
+**Status: FULLY OPERATIONAL**  
+**System: READY FOR LIFTOFF**  
+**Mission: GO FOR LAUNCH**
 
 ---
 

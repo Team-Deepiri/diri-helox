@@ -2,7 +2,7 @@
 
 Get your DeBERTa task classifier trained **right now** with synthetic data.
 
-## 🚀 One-Command Training
+## One-Command Training
 
 Run the complete pipeline (generates data, prepares it, and trains):
 
@@ -18,7 +18,7 @@ cd deepiri/diri-cyrex
 ./app/train/scripts/quick_train.sh
 ```
 
-## 📊 What Gets Created
+## What Gets Created
 
 ### 1. Synthetic Dataset (5000 examples by default)
 - **8 categories**: coding, writing, fitness, cleaning, learning, creative, administrative, social
@@ -30,7 +30,7 @@ cd deepiri/diri-cyrex
 - **Output**: `app/train/models/intent_classifier`
 - **Categories**: 8 task categories (0-7)
 
-## 📝 Step-by-Step (Manual)
+## Step-by-Step (Manual)
 
 ### Step 1: Generate Synthetic Data
 
@@ -60,7 +60,7 @@ python app/train/scripts/train_intent_classifier.py \
     --learning-rate 2e-5
 ```
 
-## 🎯 Using the Trained Model
+## Using the Trained Model
 
 ```python
 from app.services.command_router import get_command_router
@@ -74,7 +74,7 @@ result = router.classify("Write unit tests for my API")
 print(result)  # {"category": "coding", "confidence": 0.95}
 ```
 
-## 📋 Category Mapping
+## Category Mapping
 
 | ID | Category | Examples |
 |----|----------|----------|
@@ -87,7 +87,7 @@ print(result)  # {"category": "coding", "confidence": 0.95}
 | 6 | administrative | "Schedule meeting", "Pay bills", "File taxes" |
 | 7 | social | "Call friend", "Plan event", "Write thank you" |
 
-## ⚙️ Customization
+## Customization
 
 ### Generate More Data
 
@@ -113,7 +113,7 @@ python app/train/scripts/train_intent_classifier.py \
     --model microsoft/deberta-v3-large  # Slower, better accuracy
 ```
 
-## 📁 File Structure
+## File Structure
 
 ```
 app/train/
@@ -137,7 +137,7 @@ app/train/
     └── run_training_pipeline.py         # Run everything
 ```
 
-## 🔍 Verify Training
+## Verify Training
 
 After training, check the results:
 
@@ -149,7 +149,7 @@ cat app/train/models/intent_classifier/training_info.json
 cat app/train/models/intent_classifier/category_map.json
 ```
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### "No training data found"
 - Run: `python app/train/scripts/generate_synthetic_data.py`
@@ -167,14 +167,14 @@ cat app/train/models/intent_classifier/category_map.json
 - Reduce epochs: `--epochs 2`
 - Use smaller model: `--model microsoft/deberta-v3-small`
 
-## 📈 Next Steps
+## Next Steps
 
 1. **Collect real data** from user interactions
 2. **Fine-tune** with your collected data
 3. **Evaluate** on test set
 4. **Deploy** to production
 
-## 💡 Tips
+## Tips
 
 - Start with synthetic data to get baseline model
 - Collect real user data over time
