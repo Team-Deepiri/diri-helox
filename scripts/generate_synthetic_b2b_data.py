@@ -114,9 +114,174 @@ Notes
 This document is maintained internally and reviewed periodically for accuracy.
 """.strip()
 
+def generate_structured_record_content(artifact_type: str, tenant_name: str) -> str:
+    if artifact_type == "CRM Entry":
+        return f"""
+CRM Entry — {tenant_name}
+
+Account Status
+--------------
+Active
+
+Last Contact
+------------
+2025-01-12
+
+Notes
+-----
+Customer engagement is stable. Follow up scheduled for next review cycle.
+""".strip()
+
+    if artifact_type == "Invoice":
+        return f"""
+Invoice — {tenant_name}
+
+Invoice ID
+----------
+INV-{random.randint(10000,99999)}
+
+Amount
+------
+$4,250.00
+
+Due Date
+--------
+2025-02-15
+
+Status
+------
+Pending payment
+""".strip()
+
+    if artifact_type == "System Log":
+        return f"""
+System Log — {tenant_name}
+
+Timestamp
+---------
+2025-01-15T14:32:10Z
+
+Severity
+--------
+WARNING
+
+Message
+-------
+Transient failure detected during workflow execution.
+""".strip()
+
+
+def generate_communication_content(artifact_type: str, tenant_name: str) -> str:
+    if artifact_type == "Email":
+        return (
+            f"Subject: Action Required – Operational Update\n\n"
+            f"Hello Team,\n\n"
+            f"This email is to inform you of an operational update affecting {tenant_name}. "
+            f"Please review the details and take any required actions.\n\n"
+            f"Next Steps:\n"
+            f"- Review the update\n"
+            f"- Confirm any required changes\n"
+            f"- Escalate concerns if applicable\n\n"
+            f"Regards,\n"
+            f"{tenant_name} Operations"
+        )
+
+    if artifact_type == "Support Ticket":
+        return (
+            f"Issue Summary:\n"
+            f"A system or process issue has been reported within {tenant_name}.\n\n"
+            f"Current Status:\n"
+            f"- Ticket opened and under review\n\n"
+            f"Next Actions:\n"
+            f"- Investigate root cause\n"
+            f"- Apply remediation if needed\n"
+            f"- Close or escalate based on findings"
+        )
+
+    if artifact_type == "Chat Log":
+        return (
+            f"User: Noticing an issue with the current process.\n"
+            f"Support: Thanks for flagging this. Can you provide more details?\n"
+            f"User: The issue occurs intermittently during execution.\n"
+            f"Support: Acknowledged. We will investigate and follow up."
+        )
+
+    return f"{artifact_type} communication for {tenant_name}."
+
+def generate_decision_content(artifact_type: str, tenant_name: str) -> str:
+    decision_contexts = [
+        "A review was conducted following a reported issue.",
+        "An operational request required management review.",
+        "An exception was raised during a standard workflow.",
+        "A policy threshold was exceeded and required evaluation."
+    ]
+
+    decisions = {
+        "Approval": "The request was approved to proceed as proposed.",
+        "Escalation": "The issue was escalated to senior stakeholders for further review.",
+        "Resolution": "The issue was resolved after corrective actions were applied."
+    }
+
+    return f"""
+{artifact_type} — {tenant_name}
+
+Context
+-------
+{random.choice(decision_contexts)}
+
+Decision
+--------
+{decisions.get(artifact_type, "A decision was recorded.")}
+
+Rationale
+---------
+The decision was made based on risk assessment, operational impact, and compliance considerations.
+
+Outcome
+-------
+Appropriate follow-up actions were initiated and tracked to completion.
+""".strip()
+
+
 def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
     if category == "documents":
         return generate_document_content(artifact_type, tenant_name)
+
+    if category == "communications":
+        return generate_communication_content(artifact_type, tenant_name)
+
+    if category == "processes":
+        return (
+            f"{artifact_type} — {tenant_name}\n\n"
+            f"Objective\n"
+            f"---------\n"
+            f"Define a repeatable process used by {tenant_name} to ensure consistent execution, accountability, and timely escalation of issues.\n\n"
+            f"Steps\n"
+            f"-----\n"
+            f"1. Identify required inputs and stakeholders\n"
+            f"2. Execute the defined operational steps\n"
+            f"3. Validate outputs and log results\n"
+            f"4. Escalate issues if criteria are not met\n\n"
+            f"Ownership\n"
+            f"---------\n"
+            f"Owned by the responsible operational team and reviewed periodically."
+        )
+    if category == "structured_records":
+        return generate_structured_record_content(artifact_type, tenant_name)
+
+
+    return (
+        f"{artifact_type} for {tenant_name}. "
+        f"This {category[:-1]} defines internal guidance, context, and operational details "
+        f"used by the organization."
+    )
+
+def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
+    if category == "documents":
+        return generate_document_content(artifact_type, tenant_name)
+
+    if category == "communications":
+        return generate_communication_content(artifact_type, tenant_name)
 
     if category == "processes":
         return (
@@ -135,13 +300,17 @@ def generate_content(category: str, artifact_type: str, tenant_name: str) -> str
             f"Owned by the responsible operational team and reviewed periodically."
         )
 
+    if category == "structured_records":
+        return generate_structured_record_content(artifact_type, tenant_name)
+
+    if category == "decisions":
+        return generate_decision_content(artifact_type, tenant_name)
+
     return (
         f"{artifact_type} for {tenant_name}. "
         f"This {category[:-1]} defines internal guidance, context, and operational details "
         f"used by the organization."
     )
-
-
 
 
 def generate_artifact(tenant_id: str, tenant_name: str, category: str) -> dict:
