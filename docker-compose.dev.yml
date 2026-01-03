@@ -751,8 +751,8 @@ services:
   # Jupyter Notebook for AI Research
   jupyter:
     build:
-      context: ./diri-cyrex/Dockerfile.jupyter
-      dockerfile: Dockerfile.jupyter
+      context: .
+      dockerfile: ./diri-cyrex/Dockerfile.jupyter
       args:
         BUILD_TYPE: prebuilt
         BASE_IMAGE: python:3.11-slim
