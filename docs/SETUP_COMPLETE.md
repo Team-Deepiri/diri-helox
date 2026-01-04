@@ -1,29 +1,29 @@
-# LLM Training Setup Complete! 🎉
+# LLM Training Setup Complete
 
 Your Helox environment is now ready for training LLMs from scratch.
 
 ## What Was Set Up
 
-### ✅ Core Infrastructure
+### Core Infrastructure
 - **Device Management**: Automatic CPU/GPU detection with fallback
 - **Configuration System**: Structured configs for model, data, and training
 - **Training Pipeline**: Complete pretraining and instruction fine-tuning
 
-### ✅ Data Processing
+### Data Processing
 - **Data Collection**: Automatic collection from directories and files
 - **Text Cleaning**: Robust filtering and cleaning pipeline
 - **Dataset Building**: Tokenized dataset preparation with splits
 
-### ✅ Tokenization
+### Tokenization
 - **Tokenizer Training**: SentencePiece tokenizer training
 - **Tokenizer Management**: Easy encoding/decoding interface
 
-### ✅ Model Architecture
+### Model Architecture
 - **GPT-Style Transformer**: Modern decoder-only architecture
 - **Advanced Components**: RMSNorm, SwiGLU, RoPE embeddings
 - **Gradient Checkpointing**: Memory-efficient training
 
-### ✅ Training
+### Training
 - **Pretraining Trainer**: Full pretraining loop with checkpointing
 - **Instruction Fine-Tuning**: Specialized trainer for instruction following
 - **Evaluation**: Automatic evaluation and metrics tracking
@@ -59,24 +59,24 @@ python scripts/train_llm_from_scratch.py
 
 ## Key Features
 
-### 🚀 Automatic Device Detection
+### Automatic Device Detection
 - Automatically detects and uses available hardware
 - Supports CPU, CUDA (NVIDIA), and MPS (Apple Silicon)
 - Graceful fallback to CPU if GPU unavailable
 
-### 📊 Complete Training Pipeline
+### Complete Training Pipeline
 1. Data collection and cleaning
 2. Tokenizer training
 3. Dataset preparation
 4. Model pretraining
 5. Instruction fine-tuning (optional)
 
-### 💾 Checkpointing & Recovery
+### Checkpointing & Recovery
 - Automatic checkpointing every N steps
 - Resume from any checkpoint
 - Configurable checkpoint retention
 
-### 📈 Monitoring & Logging
+### Monitoring & Logging
 - Console logging with progress bars
 - Weights & Biases integration (optional)
 - Evaluation metrics tracking
@@ -131,5 +131,5 @@ For issues or questions:
 - Review configuration files for settings
 - Check logs in `logs/` directory
 
-Happy training! 🚀
+Happy training!
 
