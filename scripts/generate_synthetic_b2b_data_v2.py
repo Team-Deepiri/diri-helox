@@ -312,15 +312,35 @@ def generate_content(category: str, artifact_type: str, entity_name: str) -> str
         f"used by the organization."
     )
 
+def select_document_type(document_content:str) -> str:
+    length = len(document_content)
+    if length < 300:
+        return "Policy"
+    elif length < 700:
+        return "SOP"
+    else:
+        return
+    
+    
+
 
 def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
-    artifact_type = random.choice(CATEGORIES[category])
+    if category == "documents":
+        # generate content first
+        content = generate_content(category, "", entity_name)
+
+        # deterministically select type based on content
+        artifact_type = select_document_type(content)
+    else:
+        artifact_type = random.choice(CATEGORIES[category])
+        content = generate_content(category, artifact_type, entity_name)
+
     return {
         "id": str(uuid.uuid4()),
         "entity_id": entity_id,
         "category": category,
         "artifact_type": artifact_type,
-        "content": generate_content(category, artifact_type, entity_name),
+        "content": content,
         "governance": random_governance(),
     }
 
