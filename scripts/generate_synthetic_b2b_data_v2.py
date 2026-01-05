@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #!/usr/bin/env python3
 """
 Generate synthetic B2B enterprise artifacts with entity isolation.
@@ -1582,7 +1581,7 @@ if __name__ == "__main__":
             derive_training=args.derive_training,
             training_ratio=args.training_ratio,
         )
-=======
+
 #!/usr/bin/env python3
 """
 Generate synthetic B2B enterprise artifacts with entity isolation.
@@ -2026,4 +2025,3 @@ if __name__ == "__main__":
             derive_training=args.derive_training,
             training_ratio=args.training_ratio,
         )
->>>>>>> 2c9eb311de0f6274e0824ef306a6ef48f1b8d3b1
