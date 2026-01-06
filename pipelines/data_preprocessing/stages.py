@@ -7,7 +7,14 @@ preprocessing components.
 """
 
 from typing import Any, Dict, List, Optional
-from .base import PreprocessingStage, StageResult, ProcessedData, ValidationResult
+from .base import (
+    PreprocessingStage, 
+    StageResult, 
+    ProcessedData, 
+    ValidationResult,
+    DEFAULT_MIN_LABEL_ID,
+    DEFAULT_MAX_LABEL_ID
+)
 
 
 class DataLoadingStage(PreprocessingStage):
@@ -39,9 +46,16 @@ class DataLoadingStage(PreprocessingStage):
             # TODO: Implement actual data loading based on source and format
             # For now, if data is provided, pass it through
             if data is not None:
-                processed_data = ProcessedData(
-                    data=data,
-                    metadata={"source": self.source, "format": self.format}
+                # Extract data and metadata if it's already ProcessedData
+                actual_data, original_metadata = self._extract_data_and_metadata(data)
+                metadata_updates = {
+                    "source": self.source,
+                    "format": self.format
+                }
+                return self._create_result(
+                    processed_data=actual_data,
+                    original_metadata=original_metadata,
+                    metadata_updates=metadata_updates
                 )
             else:
                 # In a real implementation, load from source
@@ -49,17 +63,13 @@ class DataLoadingStage(PreprocessingStage):
                     "Data loading from source not yet implemented. "
                     "Please provide initial_data to the pipeline."
                 )
-            
-            return StageResult(
-                success=True,
-                processed_data=processed_data,
-                stage_name=self.name
-            )
         except Exception as e:
-            return StageResult(
+            return self._create_result(
+                processed_data=None,
+                original_metadata={},
+                metadata_updates={},
                 success=False,
-                error=f"Data loading failed: {str(e)}",
-                stage_name=self.name
+                error=f"Data loading failed: {str(e)}"
             )
     
     def validate(self, data: Any) -> ValidationResult:
@@ -84,11 +94,7 @@ class DataLoadingStage(PreprocessingStage):
         if self.format not in supported_formats:
             errors.append(f"Unsupported format: {self.format}. Supported: {supported_formats}")
         
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
-        )
+        return self._create_validation_result(errors, warnings)
 
 
 class DataCleaningStage(PreprocessingStage):
@@ -114,54 +120,32 @@ class DataCleaningStage(PreprocessingStage):
             StageResult with cleaned data
         """
         try:
-            # Step 1: Extract actual data if it's ProcessedData
-            if isinstance(data, ProcessedData):
-                actual_data = data.data
-                original_metadata = data.metadata
-            else:
-                actual_data = data
-                original_metadata = {}
+            # Extract data and metadata using base class helper
+            actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Step 2: Handle None or empty data
-            if actual_data is None:
-                raise ValueError("Cannot clean None data")
+            # Process items using base class helper
+            cleaned_items = self._process_items(actual_data, self._clean_single_item)
             
-            # Step 3: Process list or single item
-            if isinstance(actual_data, list):
-                # Process each item in the list
-                cleaned_items = []
-                for item in actual_data:
-                    cleaned_item = self._clean_single_item(item)
-                    cleaned_items.append(cleaned_item)
-                
-                # Step 4: Remove duplicates from list
+            # Remove duplicates if it's a list
+            if isinstance(cleaned_items, list):
                 cleaned_data = self._remove_duplicates(cleaned_items)
             else:
-                # Process single item
-                cleaned_data = self._clean_single_item(actual_data)
+                cleaned_data = cleaned_items
             
-            # Step 5: Wrap cleaned data in ProcessedData
-            processed_data = ProcessedData(
-                data=cleaned_data,
-                metadata={
-                    **original_metadata,
-                    "cleaned": True,
-                    "cleaning_stage": self.name
-                }
-            )
-            
-            # Step 6: Return successful result
-            return StageResult(
-                success=True,
-                processed_data=processed_data,
-                stage_name=self.name
+            # Create result using base class helper
+            return self._create_result(
+                processed_data=cleaned_data,
+                original_metadata=original_metadata,
+                metadata_updates={"cleaned": True, "cleaning_stage": self.name}
             )
             
         except Exception as e:
-            return StageResult(
+            return self._create_result(
+                processed_data=None,
+                original_metadata={},
+                metadata_updates={},
                 success=False,
-                error=f"Data cleaning failed: {str(e)}",
-                stage_name=self.name
+                error=f"Data cleaning failed: {str(e)}"
             )
     
     def _clean_single_item(self, item: Dict) -> Dict:
@@ -208,61 +192,57 @@ class DataCleaningStage(PreprocessingStage):
         errors = []
         warnings = []
         
-        # Extract actual data if it's ProcessedData
-        if isinstance(data, ProcessedData):
-            actual_data = data.data
-        else:
-            actual_data = data
+        # Extract actual data using base class helper (no metadata needed for validation)
+        actual_data = self._extract_data(data)
         
-        # Check if data is None
-        if actual_data is None:
-            errors.append("Cannot validate None data")
-            return ValidationResult(
-                is_valid=False,
-                errors=errors,
-                warnings=warnings
-            )
+        # Standard check: None data always fails (consistent with process())
+        try:
+            self._check_data_not_none(actual_data, context="validate")
+        except ValueError as e:
+            errors.append(str(e))
+            return self._create_validation_result(errors, warnings)
         
-        # Check if data is empty
-        if actual_data == [] or actual_data == {}:
-            warnings.append("Data is empty - nothing to clean")
-        
-        # Validate data structure
-        if isinstance(actual_data, list):
-            # Validate list of items
-            if len(actual_data) == 0:
-                warnings.append("List is empty")
-            else:
-                # Check first few items to see if they're valid
-                for i, item in enumerate(actual_data[:5]):  # Check first 5 items
-                    if not isinstance(item, dict):
-                        errors.append(f"Item at index {i} is not a dictionary")
-                    elif "text" not in item:
-                        warnings.append(f"Item at index {i} missing 'text' field")
-        
-        elif isinstance(actual_data, dict):
-            # Validate single dictionary
-            if "text" not in actual_data:
-                warnings.append("Data missing 'text' field - may not be cleanable")
-            
-            # Check if text field is valid
-            if "text" in actual_data:
-                if not isinstance(actual_data["text"], str):
-                    warnings.append("'text' field is not a string")
-                elif actual_data["text"].strip() == "":
-                    warnings.append("'text' field is empty or only whitespace")
-        
-        else:
-            # Data is neither dict nor list
-            errors.append(f"Data must be a dictionary or list, got {type(actual_data).__name__}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
+        # Use base class helper to validate items
+        item_errors, item_warnings = self._validate_items(
+            actual_data,
+            self._validate_cleaning_diagnostics,
+            empty_error=f"Cannot validate empty data in stage '{self.name}'"
         )
+        errors.extend(item_errors)
+        warnings.extend(item_warnings)
         
+        return self._create_validation_result(errors, warnings)
+    
+    def _validate_cleaning_diagnostics(self, item: Dict) -> tuple[List[str], List[str]]:
+        """
+        Validate that an item can be cleaned (non-destructive).
         
+        Args:
+            item: Data item to validate
+            
+        Returns:
+            Tuple of (errors, warnings)
+        """
+        errors = []
+        warnings = []
+        
+        # Check if item is a dictionary
+        if not isinstance(item, dict):
+            errors.append(f"Item must be a dictionary, got {type(item).__name__}")
+            return errors, warnings
+        
+        # Check if text field exists and is valid
+        if "text" not in item:
+            warnings.append("Data missing 'text' field - may not be cleanable")
+        else:
+            if not isinstance(item["text"], str):
+                warnings.append("'text' field is not a string")
+            elif item["text"].strip() == "":
+                warnings.append("'text' field is empty or only whitespace")
+        
+        return errors, warnings
+    
+    
 class DataValidationStage(PreprocessingStage):
     """
     Stage for validating data.
@@ -287,52 +267,26 @@ class DataValidationStage(PreprocessingStage):
             StageResult with validated data
         """
         try:
-            # Step 1: Extract actual data if it's ProcessedData
-            if isinstance(data, ProcessedData):
-                actual_data = data.data
-                original_metadata = data.metadata
-            else:
-                actual_data = data
-                original_metadata = {}
+            # Extract data and metadata using base class helper
+            actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Step 2: Handle None or empty data
-            if actual_data is None:
-                raise ValueError("Cannot validate None data")
+            # Process items using base class helper
+            validated_data = self._process_items(actual_data, self._validate_single_item)
             
-            # Step 3: Validate list or single item
-            if isinstance(actual_data, list):
-                # Validate each item in the list
-                validated_items = []
-                for item in actual_data:
-                    validated_item = self._validate_single_item(item)
-                    validated_items.append(validated_item)
-                validated_data = validated_items
-            else:
-                # Validate single item
-                validated_data = self._validate_single_item(actual_data)
-            
-            # Step 4: Wrap validated data in ProcessedData
-            processed_data = ProcessedData(
-                data=validated_data,
-                metadata={
-                    **original_metadata,
-                    "validated": True,
-                    "validation_stage": self.name
-                }
-            )
-            
-            # Step 5: Return successful result
-            return StageResult(
-                success=True,
-                processed_data=processed_data,
-                stage_name=self.name
+            # Create result using base class helper
+            return self._create_result(
+                processed_data=validated_data,
+                original_metadata=original_metadata,
+                metadata_updates={"validated": True, "validation_stage": self.name}
             )
             
         except Exception as e:
-            return StageResult(
+            return self._create_result(
+                processed_data=None,
+                original_metadata={},
+                metadata_updates={},
                 success=False,
-                error=f"Data validation failed: {str(e)}",
-                stage_name=self.name
+                error=f"Data validation failed: {str(e)}"
             )
     
     def _validate_single_item(self, item: Dict) -> Dict:
@@ -368,60 +322,26 @@ class DataValidationStage(PreprocessingStage):
         errors = []
         warnings = []
         
-        # Extract actual data if it's ProcessedData
-        if isinstance(data, ProcessedData):
-            actual_data = data.data
-        else:
-            actual_data = data
+        # Extract actual data using base class helper (no metadata needed for validation)
+        actual_data = self._extract_data(data)
         
-        # Check if data is None
-        if actual_data is None:
-            errors.append("Cannot validate None data")
-            return ValidationResult(
-                is_valid=False,
-                errors=errors,
-                warnings=warnings
-            )
+        # Standard check: None data always fails (consistent with process())
+        try:
+            self._check_data_not_none(actual_data, context="validate")
+        except ValueError as e:
+            errors.append(str(e))
+            return self._create_validation_result(errors, warnings)
         
-        # Check if data is empty
-        if actual_data == [] or actual_data == {}:
-            warnings.append("Data is empty - nothing to validate")
-            return ValidationResult(
-                is_valid=True,  # Empty is valid but warning-worthy
-                errors=errors,
-                warnings=warnings
-            )
-        
-        # Validate data structure
-        if isinstance(actual_data, list):
-            # Validate list of items
-            if len(actual_data) == 0:
-                warnings.append("List is empty")
-            else:
-                # Check each item for validation issues
-                for i, item in enumerate(actual_data):
-                    item_errors, item_warnings = self._validate_item_diagnostics(item)
-                    # Prefix errors/warnings with item index
-                    for err in item_errors:
-                        errors.append(f"Item at index {i}: {err}")
-                    for warn in item_warnings:
-                        warnings.append(f"Item at index {i}: {warn}")
-        
-        elif isinstance(actual_data, dict):
-            # Validate single dictionary
-            item_errors, item_warnings = self._validate_item_diagnostics(actual_data)
-            errors.extend(item_errors)
-            warnings.extend(item_warnings)
-        
-        else:
-            # Data is neither dict nor list
-            errors.append(f"Data must be a dictionary or list, got {type(actual_data).__name__}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
+        # Use base class helper to validate items
+        item_errors, item_warnings = self._validate_items(
+            actual_data,
+            self._validate_item_diagnostics,
+            empty_error="Data is empty - nothing to validate"
         )
+        errors.extend(item_errors)
+        warnings.extend(item_warnings)
+        
+        return self._create_validation_result(errors, warnings)
     
     def _validate_item_diagnostics(self, item: Dict) -> tuple[List[str], List[str]]:
         """
@@ -489,52 +409,26 @@ class DataRoutingStage(PreprocessingStage):
             StageResult with data containing label_id field
         """
         try:
-            # Step 1: Extract actual data if it's ProcessedData
-            if isinstance(data, ProcessedData):
-                actual_data = data.data
-                original_metadata = data.metadata
-            else:
-                actual_data = data
-                original_metadata = {}
+            # Extract data and metadata using base class helper
+            actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Step 2: Handle None or empty data
-            if actual_data is None:
-                raise ValueError("Cannot route None data")
+            # Process items using base class helper
+            routed_data = self._process_items(actual_data, self._map_label_to_id)
             
-            # Step 3: Process list or single item
-            if isinstance(actual_data, list):
-                # Process each item in the list
-                routed_items = []
-                for item in actual_data:
-                    routed_item = self._map_label_to_id(item)
-                    routed_items.append(routed_item)
-                routed_data = routed_items
-            else:
-                # Process single item
-                routed_data = self._map_label_to_id(actual_data)
-            
-            # Step 4: Wrap routed data in ProcessedData
-            processed_data = ProcessedData(
-                data=routed_data,
-                metadata={
-                    **original_metadata,
-                    "routed": True,
-                    "routing_stage": self.name
-                }
-            )
-            
-            # Step 5: Return successful result
-            return StageResult(
-                success=True,
-                processed_data=processed_data,
-                stage_name=self.name
+            # Create result using base class helper
+            return self._create_result(
+                processed_data=routed_data,
+                original_metadata=original_metadata,
+                metadata_updates={"routed": True, "routing_stage": self.name}
             )
             
         except Exception as e:
-            return StageResult(
+            return self._create_result(
+                processed_data=None,
+                original_metadata={},
+                metadata_updates={},
                 success=False,
-                error=f"Data routing failed: {str(e)}",
-                stage_name=self.name
+                error=f"Data routing failed: {str(e)}"
             )
     
     def _map_label_to_id(self, item: Dict) -> Dict:
@@ -571,9 +465,12 @@ class DataRoutingStage(PreprocessingStage):
         # Handle numeric labels - validate range
         elif isinstance(label, (int, float)):
             label_id = int(label)
-            # Validate range [0, 30]
-            if label_id < 0 or label_id > 30:
-                raise ValueError(f"Label ID {label_id} is out of valid range [0, 30]")
+            # Validate range using constants
+            if label_id < DEFAULT_MIN_LABEL_ID or label_id > DEFAULT_MAX_LABEL_ID:
+                raise ValueError(
+                    f"Label ID {label_id} is out of valid range "
+                    f"[{DEFAULT_MIN_LABEL_ID}, {DEFAULT_MAX_LABEL_ID}]"
+                )
             routed_item["label_id"] = label_id
         
         # Handle invalid label types
@@ -613,64 +510,30 @@ class DataRoutingStage(PreprocessingStage):
         errors = []
         warnings = []
         
-        # Extract actual data if it's ProcessedData
-        if isinstance(data, ProcessedData):
-            actual_data = data.data
-        else:
-            actual_data = data
+        # Extract actual data using base class helper (no metadata needed for validation)
+        actual_data = self._extract_data(data)
         
-        # Check if data is None
-        if actual_data is None:
-            errors.append("Cannot validate None data")
-            return ValidationResult(
-                is_valid=False,
-                errors=errors,
-                warnings=warnings
-            )
+        # Standard check: None data always fails (consistent with process())
+        try:
+            self._check_data_not_none(actual_data, context="validate")
+        except ValueError as e:
+            errors.append(str(e))
+            return self._create_validation_result(errors, warnings)
         
         # Check if label mapping is configured
         if not self.label_mapping:
             warnings.append("Label mapping is empty - string labels cannot be mapped")
         
-        # Check if data is empty
-        if actual_data == [] or actual_data == {}:
-            warnings.append("Data is empty - nothing to route")
-            return ValidationResult(
-                is_valid=True,  # Empty is valid but warning-worthy
-                errors=errors,
-                warnings=warnings
-            )
-        
-        # Validate data structure
-        if isinstance(actual_data, list):
-            # Validate list of items
-            if len(actual_data) == 0:
-                warnings.append("List is empty")
-            else:
-                # Check each item for routing issues
-                for i, item in enumerate(actual_data):
-                    item_errors, item_warnings = self._validate_label_routing(item)
-                    # Prefix errors/warnings with item index
-                    for err in item_errors:
-                        errors.append(f"Item at index {i}: {err}")
-                    for warn in item_warnings:
-                        warnings.append(f"Item at index {i}: {warn}")
-        
-        elif isinstance(actual_data, dict):
-            # Validate single dictionary
-            item_errors, item_warnings = self._validate_label_routing(actual_data)
-            errors.extend(item_errors)
-            warnings.extend(item_warnings)
-        
-        else:
-            # Data is neither dict nor list
-            errors.append(f"Data must be a dictionary or list, got {type(actual_data).__name__}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
+        # Use base class helper to validate items
+        item_errors, item_warnings = self._validate_items(
+            actual_data,
+            self._validate_label_routing,
+            empty_error="Data is empty - nothing to route"
         )
+        errors.extend(item_errors)
+        warnings.extend(item_warnings)
+        
+        return self._create_validation_result(errors, warnings)
     
     def _validate_label_routing(self, item: Dict) -> tuple[List[str], List[str]]:
         """
@@ -711,8 +574,11 @@ class DataRoutingStage(PreprocessingStage):
         # Handle numeric labels - check if in valid range
         elif isinstance(label, (int, float)):
             label_id = int(label)
-            if label_id < 0 or label_id > 30:
-                errors.append(f"Numeric label {label_id} is out of valid range [0, 30]")
+            if label_id < DEFAULT_MIN_LABEL_ID or label_id > DEFAULT_MAX_LABEL_ID:
+                errors.append(
+                    f"Numeric label {label_id} is out of valid range "
+                    f"[{DEFAULT_MIN_LABEL_ID}, {DEFAULT_MAX_LABEL_ID}]"
+                )
             else:
                 warnings.append(f"Label is already numeric ({label_id}) - routing will validate range only")
         
@@ -734,9 +600,9 @@ class LabelValidationStage(PreprocessingStage):
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(name="label_validation", config=config)
-        # Valid label ID range [0, 30] for 31 categories
-        self.min_label_id = config.get("min_label_id", 0) if config else 0
-        self.max_label_id = config.get("max_label_id", 30) if config else 30
+        # Valid label ID range for 31 categories (default 0-30)
+        self.min_label_id = config.get("min_label_id", DEFAULT_MIN_LABEL_ID) if config else DEFAULT_MIN_LABEL_ID
+        self.max_label_id = config.get("max_label_id", DEFAULT_MAX_LABEL_ID) if config else DEFAULT_MAX_LABEL_ID
     
     def get_dependencies(self) -> List[str]:
         return ["data_routing"]
@@ -752,52 +618,26 @@ class LabelValidationStage(PreprocessingStage):
             StageResult with validated data
         """
         try:
-            # Step 1: Extract actual data if it's ProcessedData
-            if isinstance(data, ProcessedData):
-                actual_data = data.data
-                original_metadata = data.metadata
-            else:
-                actual_data = data
-                original_metadata = {}
+            # Extract data and metadata using base class helper
+            actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Step 2: Handle None or empty data
-            if actual_data is None:
-                raise ValueError("Cannot validate None data")
+            # Process items using base class helper
+            validated_data = self._process_items(actual_data, self._validate_label)
             
-            # Step 3: Validate list or single item
-            if isinstance(actual_data, list):
-                # Validate each item in the list
-                validated_items = []
-                for item in actual_data:
-                    validated_item = self._validate_label(item)
-                    validated_items.append(validated_item)
-                validated_data = validated_items
-            else:
-                # Validate single item
-                validated_data = self._validate_label(actual_data)
-            
-            # Step 4: Wrap validated data in ProcessedData
-            processed_data = ProcessedData(
-                data=validated_data,
-                metadata={
-                    **original_metadata,
-                    "label_validated": True,
-                    "label_validation_stage": self.name
-                }
-            )
-            
-            # Step 5: Return successful result
-            return StageResult(
-                success=True,
-                processed_data=processed_data,
-                stage_name=self.name
+            # Create result using base class helper
+            return self._create_result(
+                processed_data=validated_data,
+                original_metadata=original_metadata,
+                metadata_updates={"label_validated": True, "label_validation_stage": self.name}
             )
             
         except Exception as e:
-            return StageResult(
+            return self._create_result(
+                processed_data=None,
+                original_metadata={},
+                metadata_updates={},
                 success=False,
-                error=f"Label validation failed: {str(e)}",
-                stage_name=self.name
+                error=f"Label validation failed: {str(e)}"
             )
     
     def _validate_label(self, item: Dict) -> Dict:
@@ -851,60 +691,26 @@ class LabelValidationStage(PreprocessingStage):
         errors = []
         warnings = []
         
-        # Extract actual data if it's ProcessedData
-        if isinstance(data, ProcessedData):
-            actual_data = data.data
-        else:
-            actual_data = data
+        # Extract actual data using base class helper (no metadata needed for validation)
+        actual_data = self._extract_data(data)
         
-        # Check if data is None
-        if actual_data is None:
-            errors.append("Cannot validate None data")
-            return ValidationResult(
-                is_valid=False,
-                errors=errors,
-                warnings=warnings
-            )
+        # Standard check: None data always fails (consistent with process())
+        try:
+            self._check_data_not_none(actual_data, context="validate")
+        except ValueError as e:
+            errors.append(str(e))
+            return self._create_validation_result(errors, warnings)
         
-        # Check if data is empty
-        if actual_data == [] or actual_data == {}:
-            warnings.append("Data is empty - nothing to validate")
-            return ValidationResult(
-                is_valid=True,
-                errors=errors,
-                warnings=warnings
-            )
-        
-        # Validate data structure
-        if isinstance(actual_data, list):
-            # Validate list of items
-            if len(actual_data) == 0:
-                warnings.append("List is empty")
-            else:
-                # Check each item for validation issues
-                for i, item in enumerate(actual_data):
-                    item_errors, item_warnings = self._validate_label_diagnostics(item)
-                    # Prefix errors/warnings with item index
-                    for err in item_errors:
-                        errors.append(f"Item at index {i}: {err}")
-                    for warn in item_warnings:
-                        warnings.append(f"Item at index {i}: {warn}")
-        
-        elif isinstance(actual_data, dict):
-            # Validate single dictionary
-            item_errors, item_warnings = self._validate_label_diagnostics(actual_data)
-            errors.extend(item_errors)
-            warnings.extend(item_warnings)
-        
-        else:
-            # Data is neither dict nor list
-            errors.append(f"Data must be a dictionary or list, got {type(actual_data).__name__}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
+        # Use base class helper to validate items
+        item_errors, item_warnings = self._validate_items(
+            actual_data,
+            self._validate_label_diagnostics,
+            empty_error="Data is empty - nothing to validate"
         )
+        errors.extend(item_errors)
+        warnings.extend(item_warnings)
+        
+        return self._create_validation_result(errors, warnings)
     
     def _validate_label_diagnostics(self, item: Dict) -> tuple[List[str], List[str]]:
         """
@@ -974,52 +780,26 @@ class DataTransformationStage(PreprocessingStage):
             StageResult with transformed data
         """
         try:
-            # Step 1: Extract actual data if it's ProcessedData
-            if isinstance(data, ProcessedData):
-                actual_data = data.data
-                original_metadata = data.metadata
-            else:
-                actual_data = data
-                original_metadata = {}
+            # Extract data and metadata using base class helper
+            actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Step 2: Handle None or empty data
-            if actual_data is None:
-                raise ValueError("Cannot transform None data")
+            # Process items using base class helper
+            transformed_data = self._process_items(actual_data, self._transform_single_item)
             
-            # Step 3: Process list or single item
-            if isinstance(actual_data, list):
-                # Process each item in the list
-                transformed_items = []
-                for item in actual_data:
-                    transformed_item = self._transform_single_item(item)
-                    transformed_items.append(transformed_item)
-                transformed_data = transformed_items
-            else:
-                # Process single item
-                transformed_data = self._transform_single_item(actual_data)
-            
-            # Step 4: Wrap transformed data in ProcessedData
-            processed_data = ProcessedData(
-                data=transformed_data,
-                metadata={
-                    **original_metadata,
-                    "transformed": True,
-                    "transformation_stage": self.name
-                }
-            )
-            
-            # Step 5: Return successful result
-            return StageResult(
-                success=True,
-                processed_data=processed_data,
-                stage_name=self.name
+            # Create result using base class helper
+            return self._create_result(
+                processed_data=transformed_data,
+                original_metadata=original_metadata,
+                metadata_updates={"transformed": True, "transformation_stage": self.name}
             )
             
         except Exception as e:
-            return StageResult(
+            return self._create_result(
+                processed_data=None,
+                original_metadata={},
+                metadata_updates={},
                 success=False,
-                error=f"Data transformation failed: {str(e)}",
-                stage_name=self.name
+                error=f"Data transformation failed: {str(e)}"
             )
     
     def _transform_single_item(self, item: Dict) -> Dict:
@@ -1066,60 +846,26 @@ class DataTransformationStage(PreprocessingStage):
         errors = []
         warnings = []
         
-        # Extract actual data if it's ProcessedData
-        if isinstance(data, ProcessedData):
-            actual_data = data.data
-        else:
-            actual_data = data
+        # Extract actual data using base class helper (no metadata needed for validation)
+        actual_data = self._extract_data(data)
         
-        # Check if data is None
-        if actual_data is None:
-            errors.append("Cannot validate None data")
-            return ValidationResult(
-                is_valid=False,
-                errors=errors,
-                warnings=warnings
-            )
+        # Standard check: None data always fails (consistent with process())
+        try:
+            self._check_data_not_none(actual_data, context="validate")
+        except ValueError as e:
+            errors.append(str(e))
+            return self._create_validation_result(errors, warnings)
         
-        # Check if data is empty
-        if actual_data == [] or actual_data == {}:
-            warnings.append("Data is empty - nothing to transform")
-            return ValidationResult(
-                is_valid=True,
-                errors=errors,
-                warnings=warnings
-            )
-        
-        # Validate data structure
-        if isinstance(actual_data, list):
-            # Validate list of items
-            if len(actual_data) == 0:
-                warnings.append("List is empty")
-            else:
-                # Check each item for transformation issues
-                for i, item in enumerate(actual_data):
-                    item_errors, item_warnings = self._validate_transformation_diagnostics(item)
-                    # Prefix errors/warnings with item index
-                    for err in item_errors:
-                        errors.append(f"Item at index {i}: {err}")
-                    for warn in item_warnings:
-                        warnings.append(f"Item at index {i}: {warn}")
-        
-        elif isinstance(actual_data, dict):
-            # Validate single dictionary
-            item_errors, item_warnings = self._validate_transformation_diagnostics(actual_data)
-            errors.extend(item_errors)
-            warnings.extend(item_warnings)
-        
-        else:
-            # Data is neither dict nor list
-            errors.append(f"Data must be a dictionary or list, got {type(actual_data).__name__}")
-        
-        return ValidationResult(
-            is_valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings
+        # Use base class helper to validate items
+        item_errors, item_warnings = self._validate_items(
+            actual_data,
+            self._validate_transformation_diagnostics,
+            empty_error="Data is empty - nothing to transform"
         )
+        errors.extend(item_errors)
+        warnings.extend(item_warnings)
+        
+        return self._create_validation_result(errors, warnings)
     
     def _validate_transformation_diagnostics(self, item: Dict) -> tuple[List[str], List[str]]:
         """
@@ -1152,4 +898,5 @@ class DataTransformationStage(PreprocessingStage):
             warnings.append("'text' field is empty or only whitespace")
         
         return errors, warnings
-
+    
+    
