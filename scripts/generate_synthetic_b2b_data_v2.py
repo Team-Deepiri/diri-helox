@@ -101,6 +101,13 @@ BURST_DECAY_RATE = 0.3
 # CONFIG
 # -----------------------------
 
+# Deterministic document type selection based on expected content length
+DOCUMENT_TYPE_BY_SIZE = {
+    "short": ["SOP", "Policy"],
+    "medium": ["Compliance Report", "Purchase Order"],
+    "long": ["Contract", "Audit Report"],
+}
+
 CATEGORIES = {
     "documents": ["Invoice", "Purchase Order", "Contract", "SOP", "Policy", "Compliance Report", "Audit Report"],
     "communications": ["Email", "Support Ticket", "Chat Log", "Escalation Notice"],
@@ -110,6 +117,22 @@ CATEGORIES = {
     "risk_events": ["Suspicious Transaction", "Anomaly Detected", "Compliance Violation", "Pattern Deviation"],
     "compliance_records": ["Regulatory Filing", "Audit Trail", "Compliance Check", "Policy Adherence"],
 }
+
+# -----------------------------
+# CATEGORY FREQUENCY WEIGHTS
+# Relative frequency of artifact categories (config only)
+# -----------------------------
+
+CATEGORY_WEIGHTS = {
+    "structured_records": 4.0,
+    "documents": 3.0,
+    "risk_events": 2.0,
+    "decisions": 2.0,
+    "communications": 1.0,
+    "compliance_records": 1.0,
+    "processes": 0.5,
+}
+
 
 INVOICE_TYPES = [
     "Standard Invoice", "Credit Memo", "Debit Memo", "Recurring Invoice",
@@ -197,6 +220,28 @@ COUNTERPARTY_CATEGORIES = {
     "Manufacturing": {"typical_range": (100000, 2000000), "frequency": "monthly", "risk": 0.25},
     "Logistics": {"typical_range": (50000, 500000), "frequency": "weekly", "risk": 0.2},
     "Raw_Materials": {"typical_range": (200000, 5000000), "frequency": "monthly", "risk": 0.3},
+}
+
+
+NICHE_CATEGORY_WEIGHTS = {
+    "vendor_fraud_protection": {
+        "documents": 3,
+        "structured_records": 4,        
+        "decisions": 2,
+        "communications": 2,
+        "risk_events": 3,
+        "compliance_records": 2,
+        "processes": 1,
+},
+"generic_detection": {
+        "documents": 2,
+        "strucutred_records": 3,
+        "decisions": 2,
+        "communications": 1,
+        "risk_events": 2,
+        "compliance_records": 1,
+        "processes": 1,
+},
 }
 
 # -----------------------------
@@ -874,6 +919,9 @@ def random_governance():
 # (Using entity profiles and correlations for detection-agnostic approach)
 
 def generate_document_content(artifact_type: str, entity_name: str, entity_id: str) -> str:
+
+
+
     if artifact_type == "Invoice":
         # Select a counterparty from entity's relationships
         profile = get_entity_profile(entity_id)
@@ -885,6 +933,8 @@ def generate_document_content(artifact_type: str, entity_name: str, entity_id: s
     
     return f"""
 {artifact_type} — {entity_name}
+
+
 Purpose
 -------
 This document defines internal standards and guidance used by {entity_name}
@@ -1255,26 +1305,52 @@ def generate_content(category: str, artifact_type: str, entity_name: str, entity
 
 def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
     profile = get_entity_profile(entity_id)
-    
-    # Generate temporal metadata first (needed for detection analysis)
+
+    artifact_type = None
+    content = None
+
+    # Generate temporal metadata first
     temporal_data = generate_temporal_metadata(entity_id)
     base_date = datetime.fromisoformat(temporal_data["created_at"].replace("Z", ""))
-    
+
+    # -----------------------------
     # Determine artifact type
+    # -----------------------------
     if category == "documents":
-        if random.random() < 0.5:  # 50% invoices
+        if random.random() < 0.5:
+            # Invoice path
             artifact_type = "Invoice"
-            counterparty_id = random.choice(list(profile.counterparty_relationships.keys())) if profile.counterparty_relationships else None
+            counterparty_id = (
+                random.choice(list(profile.counterparty_relationships.keys()))
+                if profile.counterparty_relationships else None
+            )
             transaction_data = generate_transaction_value(entity_id, counterparty_id)
             transaction_data["entity_id"] = entity_id
-            content = generate_invoice_content(artifact_type, entity_name, transaction_data, counterparty_id, base_date)
+
+            content = generate_invoice_content(
+                artifact_type,
+                entity_name,
+                transaction_data,
+                counterparty_id,
+                base_date
+            )
         else:
-            artifact_type = random.choice([t for t in CATEGORIES[category] if t != "Invoice"])
+            # Deterministic non-invoice document selection
+            if profile.base_risk_level == "high":
+                size_bucket = "long"
+            elif profile.base_risk_level == "medium":
+                size_bucket = "medium"
+            else:
+                size_bucket = "short"
+
+            artifact_type = random.choice(DOCUMENT_TYPE_BY_SIZE[size_bucket])
             content = generate_content(category, artifact_type, entity_name, entity_id)
+
     else:
+        # Non-document categories (unchanged behavior)
         artifact_type = random.choice(CATEGORIES[category])
-        content = None  # Will generate below
-    
+        content = None  # generated later
+
     # Generate transaction data if needed
     transaction_data = None
     if artifact_type in ["Invoice", "Transaction", "Payment Record", "Invoice Record"]:
@@ -1514,13 +1590,17 @@ def generate_b2b_dataset(
         try:
             for entity_id, entity_name in entitys_info:
                 for category in CATEGORIES:
-                    for _ in range(artifacts_per_category):
+                    weight = CATEGORY_WEIGHTS.get(category, 1.0)
+                    category_count = max(1, int(artifacts_per_category * weight))
+
+                    for _ in range(category_count):
                         artifact = generate_artifact(entity_id, entity_name, category)
                         af.write(json.dumps(artifact) + "\n")
 
                         if derive_training and random.random() < training_ratio:
                             training_item = derive_training_item(artifact)
-                            tf.write(json.dumps(training_item) + "\n")
+                            tf.write(json.dumps(training_item) + "\n")  
+
         finally:
             if tf:
                 tf.close()
