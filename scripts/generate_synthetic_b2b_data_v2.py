@@ -1323,6 +1323,9 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
         "detection_indicators": detection_data,
         "compliance_metadata": compliance_data,
         "outcome_prediction": outcome_data,
+        "niche": args.niche,
+        "industry": args.industry,
+
     }
     
     if transaction_data:
@@ -1567,7 +1570,8 @@ if __name__ == "__main__":
     parser.add_argument("--derive-training", action="store_true", help="Generate training items from artifacts")
     parser.add_argument("--training-ratio", type=float, default=0.2, help="Ratio of artifacts to convert to training items")
     parser.add_argument("--purge-entity", type=str, help="Purge all data for a specific entity_id")
-
+    parser.add_argument("--niche", type=str, default="generic_detection", help="Detection niche (fraud, compliance, risk, quality, etc.)")
+    parser.add_argument("--industry", type=str, default="general",help="Industry context for generated data")
     args = parser.parse_args()
     out_dir = Path(args.output_dir)
 
