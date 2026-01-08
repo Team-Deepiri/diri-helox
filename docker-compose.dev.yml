@@ -505,17 +505,20 @@ services:
       - deepiri-dev-network
 
   # ════════════════════════════════════════════════════════════════════════
-  # Ollama - Automatic GPU/CPU Detection
+  # Ollama - CPU Mode (Default)
   # ════════════════════════════════════════════════════════════════════════
-  # Usage: docker compose up -d ollama
+  # Usage (CPU mode - works on all systems):
+  #   docker compose up -d ollama
   #
-  # GPU is automatically used if NVIDIA Container Toolkit is installed.
-  # If GPU not available, automatically falls back to CPU - no errors!
+  # Usage (GPU mode - requires NVIDIA GPU):
+  #   docker compose -f docker-compose.dev.yml -f docker-compose.dev.gpu.yml up -d ollama
   #
-  # One-time host setup for automatic GPU (recommended):
+  # The base configuration runs in CPU mode for maximum compatibility.
+  # For GPU support, use the docker-compose.dev.gpu.yml override file.
+  #
+  # GPU Setup (one-time, if you have NVIDIA GPU):
   #   sudo nvidia-ctk runtime configure --runtime=docker --set-as-default
   #   sudo systemctl restart docker
-  # After this, ALL containers automatically get GPU access!
   # ════════════════════════════════════════════════════════════════════════
   ollama:
     image: ollama/ollama:latest
@@ -528,15 +531,9 @@ services:
       - ollama_dev_data:/root/.ollama
     networks:
       - deepiri-dev-network
-    # GPU support - automatically used if NVIDIA runtime available
-    # Gracefully ignored if GPU not available (runs in CPU mode)
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: [gpu]
+    # GPU support - See docker-compose.dev.gpu.yml for GPU configuration
+    # To use GPU: docker compose -f docker-compose.dev.yml -f docker-compose.dev.gpu.yml up -d ollama
+    # Without GPU override, Ollama runs in CPU mode (works on all systems)
 
   # Python Agent API (AI Service)
   cyrex:
@@ -758,7 +755,6 @@ services:
         BASE_IMAGE: python:3.11-slim
         PYTORCH_VERSION: 2.9.1
         PYTHON_VERSION: 3.11
-        REQUIREMENTS_PATH: diri-cyrex/requirements.txt
     image: deepiri-dev-jupyter:latest
     pull_policy: never
     container_name: deepiri-jupyter-dev
