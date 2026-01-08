@@ -271,6 +271,25 @@ NICHE_CATEGORY_WEIGHTS = {
     },
 }
 
+RISK_LEVEL_CATEGORY_MULTIPLIERS = {
+    "low": {
+        "risk_events": 0.5,
+        "decisions": 0.7,
+        "compliance_records": 0.8,
+    },
+    "medium": {
+        "risk_events": 1.0,
+        "decisions": 1.0,
+        "compliance_records": 1.0,
+    },
+    "high": {
+        "risk_events": 1.8,
+        "decisions": 1.5,
+        "compliance_records": 1.4,
+    },
+}
+
+
 STRUCTURED_RECORD_WEIGHTS_BY_NICHE = {
     "vendor_fraud_protection": {
         "Transaction": 4,
@@ -285,6 +304,27 @@ STRUCTURED_RECORD_WEIGHTS_BY_NICHE = {
         "Payment Record": 2,
         "Risk Event": 2,
         "System Log": 2,
+    },
+}
+
+DOCUMENT_TYPE_WEIGHTS_BY_NICHE = {
+    "vendor_fraud_protection": {
+        "Invoice": 5,
+        "Purchase Order": 3,
+        "Contract": 4,
+        "Compliance Report": 3,
+        "Audit Report": 2,
+        "Policy": 1,
+        "SOP": 1,
+    },
+    "generic_detection": {
+        "Invoice": 3,
+        "Purchase Order": 2,
+        "Contract": 2,
+        "Compliance Report": 2,
+        "Audit Report": 2,
+        "Policy": 2,
+        "SOP": 2,
     },
 }
 
@@ -620,6 +660,11 @@ def generate_correlated_detection_indicators(entity_id: str, transaction_amount:
     detection_score = round(detection_score * random.uniform(0.9, 1.1), 3)
     detection_score = min(1.0, max(0.0, detection_score))
     
+    # Amplify severity during detection bursts
+    if in_detection_burst:
+        detection_score = min(1.0, detection_score * 1.8)
+
+
     # Determine severity level
     if detection_score >= 0.8:
         severity_level = "critical"
@@ -1392,6 +1437,12 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
     artifact_type = None
     content = None
 
+    # ✅ GUARANTEE existence (this fixes your crash)
+    transaction_data = None
+    detection_data = None
+    compliance_data = None
+    outcome_data = None
+
     # Generate temporal metadata first
     temporal_data = generate_temporal_metadata(entity_id)
     base_date = datetime.fromisoformat(temporal_data["created_at"].replace("Z", ""))
@@ -1401,7 +1452,6 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
     # -----------------------------
     if category == "documents":
         if random.random() < 0.5:
-            # Invoice path
             artifact_type = "Invoice"
             counterparty_id = (
                 random.choice(list(profile.counterparty_relationships.keys()))
@@ -1418,7 +1468,6 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
                 base_date
             )
         else:
-            # Deterministic non-invoice document selection
             if profile.base_risk_level == "high":
                 size_bucket = "long"
             elif profile.base_risk_level == "medium":
@@ -1426,24 +1475,21 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
             else:
                 size_bucket = "short"
 
-            artifact_type = random.choice(DOCUMENT_TYPE_BY_SIZE[size_bucket])
+            candidates = DOCUMENT_TYPE_BY_SIZE[size_bucket]
+            niche_weights = DOCUMENT_TYPE_WEIGHTS_BY_NICHE.get(args.niche, {})
+            weights = [niche_weights.get(doc, 1.0) for doc in candidates]
+
+            artifact_type = random.choices(candidates, weights=weights, k=1)[0]
             content = generate_content(category, artifact_type, entity_name, entity_id)
 
     else:
         if category == "structured_records":
-            weights = STRUCTURED_RECORD_WEIGHTS_BY_NICHE.get(
-                args.niche,
-                {}
-            )
-
+            weights = STRUCTURED_RECORD_WEIGHTS_BY_NICHE.get(args.niche, {})
             types = CATEGORIES[category]
             if weights:
-                weighted_types = [
-                    weights.get(t, 1.0) for t in types
-                ]
                 artifact_type = random.choices(
                     types,
-                    weights=weighted_types,
+                    weights=[weights.get(t, 1.0) for t in types],
                     k=1
                 )[0]
             else:
@@ -1451,19 +1497,55 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
         else:
             artifact_type = random.choice(CATEGORIES[category])
 
-    content = None
+    # -----------------------------
+    # Generate detection / compliance / outcome
+    # -----------------------------
+    amount = transaction_data["amount"] if transaction_data else 0
+    detection_data = generate_correlated_detection_indicators(entity_id, amount, temporal_data)
+    compliance_data = generate_compliance_metadata(entity_id, detection_data)
+    outcome_data = generate_outcome_prediction(
+        detection_data,
+        compliance_data,
+        transaction_data or {"amount": 0},
+        entity_id
+    )
 
-    
-    if transaction_data:
+    if content is None:
+        content = generate_content(
+            category,
+            artifact_type,
+            entity_name,
+            entity_id,
+            detection_data,
+            compliance_data,
+            transaction_data,
+            outcome_data
+        )
+
+    artifact = {
+        "id": str(uuid.uuid4()),
+        "entity_id": entity_id,
+        "category": category,
+        "artifact_type": artifact_type,
+        "content": content,
+        "governance": random_governance(),
+        "temporal_metadata": temporal_data,
+        "detection_indicators": detection_data,
+        "compliance_metadata": compliance_data,
+        "outcome_prediction": outcome_data,
+        "niche": args.niche,
+        "industry": args.industry,
+    }
+
+    if transaction_data is not None:
         artifact["transaction_metadata"] = transaction_data
-    
-    # Add relationships
+
     if artifact_type == "Invoice" and transaction_data and transaction_data.get("counterparty_id"):
         artifact["relationships"] = {
             "counterparty_id": transaction_data["counterparty_id"],
             "related_artifacts": []
         }
-    
+
     return artifact
 
 def derive_training_item(artifact: dict) -> dict:
@@ -1643,9 +1725,16 @@ def generate_b2b_dataset(
         try:
             for entity_id, entity_name in entitys_info:
                 for category in CATEGORIES:
-                    # Use niche-adjusted weights here
-                    weight = CATEGORY_WEIGHTS.get(category, 1.0)
-                    category_count = max(1, int(artifacts_per_category * weight))
+                    base_weight = effective_weights.get(category, 1.0)
+                    risk_multiplier = RISK_LEVEL_CATEGORY_MULTIPLIERS.get(
+                        get_entity_profile(entity_id).base_risk_level,
+                        {}
+                    ).get(category, 1.0)
+                    category_count = max(
+                        1,
+                        int(artifacts_per_category * base_weight * risk_multiplier)
+                    )
+                    
 
                     for _ in range(category_count):
                         artifact = generate_artifact(entity_id, entity_name, category)
