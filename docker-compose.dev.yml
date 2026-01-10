@@ -57,11 +57,12 @@ services:
     volumes:
       - pgadmin_dev_data:/var/lib/pgadmin
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:80 || exit 1"]
+      # Use python to check if pgAdmin is responding (more reliable than curl)
+      test: ["CMD-SHELL", "python3 -c \"import urllib.request; urllib.request.urlopen('http://localhost:80').read()\" || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 45s  # pgAdmin can take 30-60s to initialize on first boot
     depends_on:
       - postgres
     networks:
@@ -282,7 +283,7 @@ services:
       - ./ops/k8s/secrets:/k8s-secrets:ro
       - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npx prisma generate && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && (if [ -f /usr/local/bin/prisma-baseline.sh ]; then /usr/local/bin/prisma-baseline.sh; else echo '[Prisma Baseline] Script not found, skipping baseline (rebuild image to enable)'; npx prisma migrate deploy || true; fi) && npx prisma generate && npm run dev"
     depends_on:
       - postgres
       - influxdb
@@ -525,7 +526,7 @@ services:
       - ./platform-services/backend/deepiri-language-intelligence-service/tsconfig.json:/app/tsconfig.json
       - shared_utils_node_modules:/shared-utils/node_modules
       - /app/node_modules
-    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && npx prisma generate && npm run dev"
+    command: sh -c "cd /shared-utils && if [ ! -d node_modules ] || [ -z \"$(ls -A node_modules 2>/dev/null)\" ]; then npm install --legacy-peer-deps --unsafe-perm && npm run build && chown -R nodejs:nodejs node_modules 2>/dev/null || true; fi && cd /app && rm -rf node_modules 2>/dev/null || true && npm cache clean --force && npm install --legacy-peer-deps file:/shared-utils && (if [ -f /usr/local/bin/prisma-baseline.sh ]; then /usr/local/bin/prisma-baseline.sh; else echo '[Prisma Baseline] Script not found, skipping baseline (rebuild image to enable)'; npx prisma migrate deploy || true; fi) && npx prisma generate && npm run dev"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
       interval: 30s
@@ -706,6 +707,16 @@ services:
       - ./diri-cyrex/cyrex-interface:/app
       - /app/node_modules
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port ${VITE_PORT:-5175}"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/usr/local/bin/node -e \"require('net').connect(5175,'127.0.0.1').on('connect',()=>process.exit(0)).on('error',()=>process.exit(1))\""
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     depends_on:
       - cyrex
       - synapse
@@ -783,6 +794,12 @@ services:
       --port 5000
       --backend-store-uri postgresql://${POSTGRES_USER:-deepiri}:${POSTGRES_PASSWORD:-deepiripassword}@postgres:5432/${POSTGRES_DB:-deepiri}
       --default-artifact-root s3://mlflow-artifacts/
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/', timeout=5).read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
     depends_on:
       - postgres
       - minio
