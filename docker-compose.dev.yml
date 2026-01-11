@@ -670,6 +670,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-deepiri}
       POSTGRES_USER: ${POSTGRES_USER:-deepiri}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-deepiripassword}
+      # Node Backend (API Gateway) Configuration
+      NODE_BACKEND_URL: http://api-gateway:5000
       # Local LLM Configuration
       OLLAMA_BASE_URL: ${OLLAMA_BASE_URL:-http://ollama:11434}
       LOCAL_LLM_BACKEND: ${LOCAL_LLM_BACKEND:-ollama}
