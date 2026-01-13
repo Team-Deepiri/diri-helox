@@ -252,22 +252,22 @@ COUNTERPARTY_CATEGORIES = {
 
 NICHE_CATEGORY_WEIGHTS = {
     "vendor_fraud_protection": {
-        "documents": 3,
-        "structured_records": 4,
-        "decisions": 2,
-        "communications": 2,
-        "risk_events": 3,
-        "compliance_records": 2,
-        "processes": 1,
+        "Invoice": 1.000,
+        "Purchase Order": 0.742,
+        "Contract": 0.681,
+        "Compliance Report": 0.537,
+        "Audit Report": 0.412,
+        "SOP": 0.283,
+        "Policy": 0.259,
     },
     "generic_detection": {
-        "documents": 2,
-        "structured_records": 3,
-        "decisions": 2,
-        "communications": 1,
-        "risk_events": 2,
-        "compliance_records": 1,
-        "processes": 1,
+        "Invoice": 0.820,
+        "Purchase Order": 0.801,
+        "Contract": 0.774,
+        "Compliance Report": 0.612,
+        "Audit Report": 0.598,
+        "SOP": 0.566,
+        "Policy": 0.541,
     },
 }
 
@@ -292,39 +292,40 @@ RISK_LEVEL_CATEGORY_MULTIPLIERS = {
 
 STRUCTURED_RECORD_WEIGHTS_BY_NICHE = {
     "vendor_fraud_protection": {
-        "Transaction": 4,
-        "Invoice Record": 3,
-        "Payment Record": 3,
-        "Risk Event": 2,
-        "System Log": 1,
+        "Transaction": 0.34,
+        "Invoice Record": 0.26,
+        "Payment Record": 0.22,
+        "Risk Event": 0.12,
+        "System Log": 0.06,
     },
     "generic_detection": {
-        "Transaction": 2,
-        "Invoice Record": 2,
-        "Payment Record": 2,
-        "Risk Event": 2,
-        "System Log": 2,
+        "Transaction": 0.20,
+        "Invoice Record": 0.20,
+        "Payment Record": 0.20,
+        "Risk Event": 0.20,
+        "System Log": 0.20,
     },
 }
 
+
 DOCUMENT_TYPE_WEIGHTS_BY_NICHE = {
     "vendor_fraud_protection": {
-        "Invoice": 5,
-        "Purchase Order": 3,
-        "Contract": 4,
-        "Compliance Report": 3,
-        "Audit Report": 2,
-        "Policy": 1,
-        "SOP": 1,
+        "Invoice": 0.32,
+        "Contract": 0.20,
+        "Purchase Order": 0.16,
+        "Compliance Report": 0.14,
+        "Audit Report": 0.10,
+        "Policy": 0.04,
+        "SOP": 0.04,
     },
     "generic_detection": {
-        "Invoice": 3,
-        "Purchase Order": 2,
-        "Contract": 2,
-        "Compliance Report": 2,
-        "Audit Report": 2,
-        "Policy": 2,
-        "SOP": 2,
+        "Invoice": 0.18,
+        "Purchase Order": 0.16,
+        "Contract": 0.16,
+        "Compliance Report": 0.14,
+        "Audit Report": 0.14,
+        "Policy": 0.11,
+        "SOP": 0.11,
     },
 }
 
@@ -1475,11 +1476,21 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
             else:
                 size_bucket = "short"
 
-            candidates = DOCUMENT_TYPE_BY_SIZE[size_bucket]
+            all_docs = CATEGORIES["documents"]
             niche_weights = DOCUMENT_TYPE_WEIGHTS_BY_NICHE.get(args.niche, {})
-            weights = [niche_weights.get(doc, 1.0) for doc in candidates]
 
-            artifact_type = random.choices(candidates, weights=weights, k=1)[0]
+            #Apply soft size bias instead of hard filtering. 
+            size_bias = {
+                "short": {"SOP": 1.2, "Policy": 1.2},
+                "medium": {"Purchase Order": 1.2, "Compliance Report": 1.2},
+                "long": {"Contract": 1.2, "Audit Report": 1.2}
+            }
+            weights = []
+            for doc_type in all_docs:
+                base = niche_weights.get(doc_type, 1.0)
+                bias = size_bias.get(size_bucket, {}).get(artifact_type, 1.0)
+                weights.append(base * bias)
+            artifact_type = random.choices(all_docs, weights=weights, k=1)[0]
             content = generate_content(category, artifact_type, entity_name, entity_id)
 
     else:
