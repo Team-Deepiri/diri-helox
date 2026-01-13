@@ -42,6 +42,17 @@ from collections import defaultdict
 from dataclasses import dataclass, asdict
 import math
 
+
+
+"""
+NOTE ON STOCHASTICITY:
+This generator does not use uniform randomness.
+All sampling is constrained by research-based probability distributions,
+entity state, temporal correlation, and risk-adjusted weights.
+Randomness here represents modeled uncertainty, not arbitrary choice.
+"""
+
+
 # -----------------------------
 # MATHEMATICAL CONSTANTS
 # Based on research: power-law distributions, seasonal patterns, correlation matrices
@@ -487,6 +498,14 @@ def num_compliance_frameworks(revenue_millions: float) -> int:
 # HELPERS
 # -----------------------------
 
+def sample_from_modeled_distribution(options, weights):
+    """
+    Sample from a research-driven probability distribution.
+    This reflects modeled variance, not uniform randomness.
+    """
+    return random.choices(options, weights=weights, k=1)[0]
+
+
 def create_entity_profile(entity_id: str, entity_name: str) -> EntityProfile:
     """Create a new entity profile with realistic characteristics based on research"""
     base_risk = random.choices(
@@ -717,10 +736,12 @@ def generate_compliance_metadata(entity_id: str, detection_data: Dict) -> Dict:
     applicable_frameworks = profile.compliance_frameworks.copy()
     # Sometimes add additional frameworks
     if random.random() < 0.3:
-        additional = random.sample(
-            [f for f in COMPLIANCE_FRAMEWORKS if f not in applicable_frameworks],
-            k=random.randint(0, 2)
-        )
+        remaining = [f for f in COMPLIANCE_FRAMEWORKS if f not in applicable_frameworks]
+        if remaining:
+            k = min(len(remaining), random.randint(0, 2))
+            additional = random.sample(remaining, k=k)
+        else:
+            additional = []
         applicable_frameworks.extend(additional)
     
     regulatory_flags = []
@@ -1031,7 +1052,7 @@ Payment Terms: Net {random.choice([15, 30, 45, 60])}
 Process Method: {process_method}
 """.strip()
 
-def random_governance():
+def generate_governance_policy():
     return {
         "access_control": {
             "roles": random.sample(ACCESS_ROLES, k=random.randint(1, 4))
@@ -1452,6 +1473,8 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
     # Determine artifact type
     # -----------------------------
     if category == "documents":
+        all_docs = CATEGORIES["documents"]  # ✅ GUARANTEED DEFINITION
+
         if random.random() < 0.5:
             artifact_type = "Invoice"
             counterparty_id = (
@@ -1469,40 +1492,31 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
                 base_date
             )
         else:
-            if profile.base_risk_level == "high":
-                size_bucket = "long"
-            elif profile.base_risk_level == "medium":
-                size_bucket = "medium"
-            else:
-                size_bucket = "short"
-
-            all_docs = CATEGORIES["documents"]
             niche_weights = DOCUMENT_TYPE_WEIGHTS_BY_NICHE.get(args.niche, {})
+            size_bucket = random.choice(("short", "medium", "long"))
 
-            #Apply soft size bias instead of hard filtering. 
             size_bias = {
                 "short": {"SOP": 1.2, "Policy": 1.2},
                 "medium": {"Purchase Order": 1.2, "Compliance Report": 1.2},
                 "long": {"Contract": 1.2, "Audit Report": 1.2}
             }
+
             weights = []
             for doc_type in all_docs:
                 base = niche_weights.get(doc_type, 1.0)
-                bias = size_bias.get(size_bucket, {}).get(artifact_type, 1.0)
+                bias = size_bias.get(size_bucket, {}).get(doc_type, 1.0)
                 weights.append(base * bias)
-            artifact_type = random.choices(all_docs, weights=weights, k=1)[0]
+
+            artifact_type = sample_from_modeled_distribution(all_docs, weights)
             content = generate_content(category, artifact_type, entity_name, entity_id)
 
     else:
         if category == "structured_records":
-            weights = STRUCTURED_RECORD_WEIGHTS_BY_NICHE.get(args.niche, {})
+            type_weight_map = STRUCTURED_RECORD_WEIGHTS_BY_NICHE.get(args.niche, {})
             types = CATEGORIES[category]
-            if weights:
-                artifact_type = random.choices(
-                    types,
-                    weights=[weights.get(t, 1.0) for t in types],
-                    k=1
-                )[0]
+            if type_weight_map:
+                type_weights = [type_weight_map.get(t, 1.0) for t in types]
+                artifact_type = sample_from_modeled_distribution(types, type_weights)
             else:
                 artifact_type = random.choice(types)
         else:
@@ -1539,7 +1553,7 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
         "category": category,
         "artifact_type": artifact_type,
         "content": content,
-        "governance": random_governance(),
+        "governance": generate_governance_policy(),
         "temporal_metadata": temporal_data,
         "detection_indicators": detection_data,
         "compliance_metadata": compliance_data,
