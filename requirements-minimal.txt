@@ -1,0 +1,10 @@
+# Minimal requirements for data preprocessing pipeline tests
+# This excludes PyTorch and other ML dependencies that may not be needed
+
+# DAG processing (for pipeline orchestration) - REQUIRED
+networkx>=3.0.0
+
+# Optional: Basic data processing utilities (if needed)
+# pandas>=2.0.0
+# numpy>=1.24.0
+

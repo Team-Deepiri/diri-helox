@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: auth-service-config
+  namespace: default
+  annotations:
+    description: "ConfigMap for Auth Service - public configuration"
+data:
+  # Server Configuration
+  NODE_ENV: "development"
+  PORT: "5001"
+  
+  # Database URLs (using Docker service names)
+  DATABASE_URL: "postgresql://deepiri:deepiripassword@postgres:5432/deepiri"
+  
+  # InfluxDB Configuration
+  INFLUXDB_URL: "http://influxdb:8086"
+  INFLUXDB_ORG: "deepiri"
+  INFLUXDB_BUCKET: "analytics"
+  
+  # Streaming Service Configuration (for publishing auth events)
+  SYNAPSE_URL: "http://synapse:8002"
+

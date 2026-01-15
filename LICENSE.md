@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 **Deepiri Proprietary Software License**
+=======
+ **Deepiri Proprietary Software License**
+>>>>>>> a8ba56921692621c7bf5d0d8497711b4082f46c4
 
 Copyright (c) 2026 Joseph Ronald Black. All Rights Reserved.
 
@@ -34,3 +38,7 @@ IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY DAMAGES ARISING FROM SO
 
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> a8ba56921692621c7bf5d0d8497711b4082f46c4

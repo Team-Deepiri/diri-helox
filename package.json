@@ -1,0 +1,48 @@
+{
+  "name": "deepiri",
+  "version": "1.0.0",
+  "description": "Deepiri - AI-Powered Task Management Platform",
+  "private": true,
+  "workspaces": [
+    "platform-services/backend/*",
+    "platform-services/shared/deepiri-shared-utils",
+    "deepiri-core-api",
+    "deepiri-web-frontend"
+  ],
+  "scripts": {
+    "install:all": "npm install",
+    "install:services": "npm install --workspace=platform-services/backend/*",
+    "install:shared": "npm install --workspace=platform-services/shared/deepiri-shared-utils",
+    "fix-deps": "bash scripts/fix-dependencies.sh"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/deepiri.git"
+  },
+  "keywords": [
+    "ai",
+    "task-management",
+    "microservices",
+    "nodejs",
+    "python"
+  ],
+  "author": "",
+  "license": "MIT",
+  "BUILD_TIMESTAMP": "1763293844",
+  "devDependencies": {
+    "node-notifier": "^10.0.1"
+  },
+  "overrides": {
+    "node-notifier": "^10.0.1",
+    "@jest/reporters": {
+      "node-notifier": "^10.0.1"
+    }
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "^4.53.3"
+  }
+}
