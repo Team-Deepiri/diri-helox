@@ -7,7 +7,6 @@ preprocessing components.
 """
 
 from typing import Any, Dict, List, Optional
-from .quality import QualityChecker
 from .base import (
     PreprocessingStage, 
     StageResult, 
@@ -248,28 +247,11 @@ class DataValidationStage(PreprocessingStage):
     """
     Stage for validating data.
     This stage is responsible for validating the data to ensure it is clean and ready for processing.
-    Includes comprehensive quality checks using the QualityChecker framework.
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(name="data_validation", config=config)
         self.required_fields = config.get("required_fields", ["text", "label"]) if config else ["text", "label"]
-        
-        # Initialize quality checker with configurable thresholds
-        self.enable_quality_check = config.get("enable_quality_check", True) if config else True
-        if self.enable_quality_check:
-            self.quality_checker = QualityChecker(
-                completeness_threshold=config.get("completeness_threshold", 0.95) if config else 0.95,
-                consistency_threshold=config.get("consistency_threshold", 0.90) if config else 0.90,
-                validity_threshold=config.get("validity_threshold", 1.0) if config else 1.0,
-                uniqueness_threshold=config.get("uniqueness_threshold", 0.98) if config else 0.98,
-                accuracy_threshold=config.get("accuracy_threshold", 0.90) if config else 0.90,
-                integrity_threshold=config.get("integrity_threshold", 1.0) if config else 1.0
-            )
-            self.quality_threshold = config.get("quality_threshold", 0.8) if config else 0.8
-            self.fail_on_low_quality = config.get("fail_on_low_quality", False) if config else False
-        else:
-            self.quality_checker = None
     
     def get_dependencies(self) -> List[str]:
         return ["data_cleaning"]
@@ -277,89 +259,25 @@ class DataValidationStage(PreprocessingStage):
     def process(self, data: Any) -> StageResult:
         """
         Validate the input data by checking structure and required fields.
-        Optionally performs comprehensive quality checks using QualityChecker.
         
         Args:
             data: Data from previous stage (usually ProcessedData or dict/list)
             
         Returns:
-            StageResult with validated data and quality metrics
+            StageResult with validated data
         """
         try:
             # Extract data and metadata using base class helper
             actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Process items using base class helper (basic validation)
+            # Process items using base class helper
             validated_data = self._process_items(actual_data, self._validate_single_item)
             
-            # Prepare metadata updates
-            metadata_updates = {"validated": True, "validation_stage": self.name}
-            quality_scores = {}
-            validation_result = None
-            
-            # Run quality checks if enabled
-            if self.enable_quality_check and self.quality_checker:
-                try:
-                    # Get dataset ID from metadata or use default
-                    dataset_id = original_metadata.get("dataset_id", f"validation_{self.name}")
-                    
-                    # Run comprehensive quality check
-                    quality_report = self.quality_checker.check_quali(
-                        data=validated_data,
-                        dataset_id=dataset_id,
-                        schema=self.config.get("schema") if self.config else None,
-                        reference_data=self.config.get("reference_data") if self.config else None
-                    )
-                    
-                    # Extract quality scores
-                    quality_scores = quality_report.dimension_scores
-                    
-                    # Store quality report in metadata
-                    metadata_updates["quality_report"] = quality_report.to_dict()
-                    metadata_updates["quality_scores"] = quality_scores
-                    metadata_updates["quality_overall_score"] = quality_report.overall_score
-                    
-                    # Create validation result with quality information
-                    failed_metrics = [m.metric_name for m in quality_report.metrics if not m.passed]
-                    validation_result = ValidationResult(
-                        is_valid=quality_report.overall_score >= self.quality_threshold,
-                        errors=failed_metrics if failed_metrics else [],
-                        warnings=quality_report.recommendations,
-                        quality_scores=quality_scores
-                    )
-                    
-                    # Optionally fail the pipeline if quality is too low
-                    if self.fail_on_low_quality and quality_report.overall_score < self.quality_threshold:
-                        return StageResult(
-                            success=False,
-                            error=f"Data quality too low: {quality_report.overall_score:.2%} (threshold: {self.quality_threshold:.2%})",
-                            validation_result=validation_result,
-                            stage_name=self.name
-                        )
-                    
-                except Exception as quality_error:
-                    # If quality check fails, log warning but don't fail the stage
-                    metadata_updates["quality_check_error"] = str(quality_error)
-                    warnings = [f"Quality check failed: {str(quality_error)}"]
-                    validation_result = ValidationResult(
-                        is_valid=True,  # Basic validation passed
-                        warnings=warnings,
-                        quality_scores={}
-                    )
-            
-            # Create ProcessedData with quality metrics
-            processed_data_obj = ProcessedData(
-                data=validated_data,
-                metadata={**original_metadata, **metadata_updates},
-                quality_metrics=quality_scores
-            )
-            
-            # Create result with validation result
-            return StageResult(
-                success=True,
-                processed_data=processed_data_obj,
-                validation_result=validation_result,
-                stage_name=self.name
+            # Create result using base class helper
+            return self._create_result(
+                processed_data=validated_data,
+                original_metadata=original_metadata,
+                metadata_updates={"validated": True, "validation_stage": self.name}
             )
             
         except Exception as e:
