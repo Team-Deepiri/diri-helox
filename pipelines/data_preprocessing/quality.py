@@ -11,6 +11,49 @@ This module provides comprehensive data quality checks across 7 dimensions:
 7. Integrity - Referential, constraints
 
 Integrates with the preprocessing pipeline's ValidationResult and ProcessedData classes.
+
+Usage Examples:
+    Basic Usage:
+        ```python
+        from pipelines.data_preprocessing.quality import QualityChecker
+        
+        checker = QualityChecker()
+        report = checker.check_quality(data, dataset_id="my_dataset")
+        print(f"Overall score: {report.overall_score}")
+        ```
+    
+    Custom Configuration:
+        ```python
+        from pipelines.data_preprocessing.quality import QualityChecker, QualityConfig
+        
+        config = QualityConfig(
+            completeness_threshold=0.98,
+            iqr_multiplier=2.0,
+            freshness_decay_days=14.0
+        )
+        checker = QualityChecker(config=config)
+        report = checker.check_quality(data, dataset_id="my_dataset", schema=schema)
+        ```
+    
+    Pipeline Integration:
+        ```python
+        from pipelines.data_preprocessing.quality import QualityCheckStage
+        
+        quality_stage = QualityCheckStage(config={"completeness_threshold": 0.95})
+        result = quality_stage.process(data)
+        
+        if result.success:
+            validation_result = result.validation_result
+            processed_data = result.processed_data
+            quality_metrics = processed_data.quality_metrics
+        ```
+    
+    Convert to ValidationResult:
+        ```python
+        report = checker.check_quality(data)
+        validation_result = report.to_validation_result()
+        # Use validation_result.errors, validation_result.warnings, validation_result.quality_scores
+        ```
 """
 
 from typing import Any, Dict, List, Optional, Union, Tuple
@@ -26,6 +69,68 @@ from .base import ValidationResult
 
 
 @dataclass
+class QualityConfig:
+    """
+    Configuration class for data quality checks.
+    
+    This class centralizes all configurable thresholds and parameters,
+    eliminating hardcoded values throughout the quality framework.
+    
+    Schema Format Documentation:
+    The schema parameter should be a dictionary with the following structure:
+    {
+        "fields": {
+            "field_name": {
+                "type": "int|float|string|bool",
+                "constraints": {
+                    "min": <min_value>,
+                    "max": <max_value>
+                }
+            }
+        },
+        "required_fields": ["field1", "field2"],
+        "primary_keys": ["id", "key"],
+        "foreign_keys": {
+            "fk_name": {
+                "references": "table.column"
+            }
+        }
+    }
+    """
+    # Dimension thresholds (0.0 to 1.0)
+    completeness_threshold: float = 0.95
+    consistency_threshold: float = 0.90
+    validity_threshold: float = 1.0
+    uniqueness_threshold: float = 0.98
+    timeliness_threshold: float = 0.70
+    accuracy_threshold: float = 0.90
+    integrity_threshold: float = 1.0
+    
+    # Statistical method parameters
+    iqr_multiplier: float = 1.5  # IQR outlier detection multiplier
+    zscore_threshold: float = 3.0  # Z-score threshold for outliers
+    isolation_forest_contamination: float = 0.1  # Expected proportion of outliers
+    random_state: int = 42  # Random seed for reproducibility
+    
+    # Timeliness parameters
+    freshness_decay_days: float = 30.0  # Days over which freshness decays to 0
+    
+    # Uniqueness parameters
+    key_uniqueness_threshold: float = 0.95  # Threshold for key column uniqueness
+    
+    # Recommendation threshold
+    recommendation_threshold: float = 0.8  # Score below which recommendations are generated
+    
+    # Validity scoring parameters
+    validity_error_penalty: float = 0.1  # Penalty per validation error (0.0 to 1.0)
+    
+    # Performance parameters
+    shapiro_wilk_sample_size: int = 5000  # Max sample size for Shapiro-Wilk test
+    min_samples_for_outlier_detection: int = 4  # Minimum samples needed for outlier detection
+    min_samples_for_statistical_tests: int = 30  # Minimum samples for statistical tests
+
+
+@dataclass
 class QualityMetric:
     """Individual quality metric result."""
     dimension: str  # One of the 7 quality dimensions
@@ -38,7 +143,11 @@ class QualityMetric:
 
 @dataclass
 class QualityReport:
-    """Comprehensive quality report for a dataset."""
+    """
+    Comprehensive quality report for a dataset.
+    
+    This class can be converted to ValidationResult for pipeline integration.
+    """
     dataset_id: str  # Identifier for the dataset
     timestamp: datetime  # When the quality check was performed
     overall_score: float  # Overall quality score (0.0 to 1.0)
@@ -68,6 +177,41 @@ class QualityReport:
             "summary": self.summary,
             "recommendations": self.recommendations
         }
+    
+    def to_validation_result(self) -> ValidationResult:
+        """
+        Convert QualityReport to ValidationResult for pipeline integration.
+        
+        Returns:
+            ValidationResult with quality_scores from dimension_scores,
+            errors from failed metrics, and warnings from recommendations.
+        """
+        errors = [
+            f"{m.dimension}.{m.metric_name}: {m.value:.2f} < {m.threshold}"
+            for m in self.metrics if not m.passed
+        ]
+        
+        warnings = self.recommendations.copy()
+        
+        # Add quality_scores from dimension_scores
+        quality_scores = self.dimension_scores.copy()
+        quality_scores["overall"] = self.overall_score
+        
+        return ValidationResult(
+            is_valid=len(errors) == 0 and self.overall_score >= 0.8,
+            errors=errors,
+            warnings=warnings,
+            quality_scores=quality_scores
+        )
+    
+    def get_quality_metrics_for_processed_data(self) -> Dict[str, float]:
+        """
+        Get quality metrics in the format expected by ProcessedData.
+        
+        Returns:
+            Dictionary mapping dimension names to scores (0.0 to 1.0)
+        """
+        return self.dimension_scores.copy()
 
 
 class StatisticalValidator:
@@ -75,10 +219,12 @@ class StatisticalValidator:
     Statistical validation methods for data quality checks.
     
     Provides statistical tests and calculations for:
-    - Outlier detection
-    - Distribution tests
+    - Outlier detection (IQR, Z-score, Isolation Forest)
+    - Distribution tests (Kolmogorov-Smirnov, Shapiro-Wilk)
     - Correlation analysis
     - Hypothesis testing
+    
+    All methods are static and stateless, making them safe for concurrent use.
     """
     
     @staticmethod
@@ -141,7 +287,7 @@ class StatisticalValidator:
     def detect_outliers_isolation_forest(
         data: np.ndarray, 
         contamination: float = 0.1,
-        random_state: int = 42
+        random_state: Optional[int] = 42
     ) -> Tuple[np.ndarray, Dict[str, Any]]:
         """
         Detect outliers using Isolation Forest (ML-based).
@@ -205,20 +351,32 @@ class StatisticalValidator:
         return statistic, p_value, details
     
     @staticmethod
-    def shapiro_wilk_test(data: np.ndarray) -> Tuple[float, float, Dict[str, Any]]:
+    def shapiro_wilk_test(
+        data: np.ndarray, 
+        max_sample_size: int = 5000,
+        random_state: Optional[int] = None
+    ) -> Tuple[float, float, Dict[str, Any]]:
         """
-        Perform Shapiro-Wilk test for normality (limited to 5000 samples).
+        Perform Shapiro-Wilk test for normality (limited to max_sample_size samples).
         
         Args:
             data: Numeric data array
+            max_sample_size: Maximum sample size for the test (default: 5000)
+            random_state: Random seed for sampling (default: None)
             
         Returns:
             Tuple of (statistic, p_value, details_dict)
         """
         # Limit sample size for Shapiro-Wilk
-        if len(data) > 5000:
-            sample_data = np.random.choice(data, 5000, replace=False)
-            details = {"note": "Test performed on 5000 sample subset"}
+        if len(data) > max_sample_size:
+            if random_state is not None:
+                np.random.seed(random_state)
+            sample_data = np.random.choice(data, max_sample_size, replace=False)
+            details = {
+                "note": f"Test performed on {max_sample_size} sample subset",
+                "original_size": len(data),
+                "sample_size": max_sample_size
+            }
         else:
             sample_data = data
             details = {}
@@ -239,34 +397,70 @@ class QualityChecker:
     Main class for performing comprehensive data quality checks.
     
     Implements all 7 quality dimensions and generates quality reports.
+    All configurable parameters are provided via QualityConfig to avoid hardcoded values.
+    
+    Example Usage:
+        ```python
+        from pipelines.data_preprocessing.quality import QualityChecker, QualityConfig
+        
+        # Use default config
+        checker = QualityChecker()
+        report = checker.check_quality(data, dataset_id="my_dataset")
+        
+        # Use custom config
+        config = QualityConfig(
+            completeness_threshold=0.98,
+            iqr_multiplier=2.0,
+            freshness_decay_days=14.0
+        )
+        checker = QualityChecker(config=config)
+        report = checker.check_quality(data, dataset_id="my_dataset", schema=schema)
+        
+        # Convert to ValidationResult for pipeline integration
+        validation_result = report.to_validation_result()
+        ```
     """
     
     def __init__(
         self,
-        completeness_threshold: float = 0.95,
-        consistency_threshold: float = 0.90,
-        validity_threshold: float = 1.0,
-        uniqueness_threshold: float = 0.98,
-        accuracy_threshold: float = 0.90,
-        integrity_threshold: float = 1.0
+        config: Optional[QualityConfig] = None,
+        # Legacy parameter support (deprecated, use config instead)
+        completeness_threshold: Optional[float] = None,
+        consistency_threshold: Optional[float] = None,
+        validity_threshold: Optional[float] = None,
+        uniqueness_threshold: Optional[float] = None,
+        accuracy_threshold: Optional[float] = None,
+        integrity_threshold: Optional[float] = None
     ):
         """
-        Initialize quality checker with thresholds.
+        Initialize quality checker with configuration.
         
         Args:
-            completeness_threshold: Minimum acceptable completeness score (0-1)
-            consistency_threshold: Minimum acceptable consistency score (0-1)
-            validity_threshold: Minimum acceptable validity score (0-1)
-            uniqueness_threshold: Minimum acceptable uniqueness score (0-1)
-            accuracy_threshold: Minimum acceptable accuracy score (0-1)
-            integrity_threshold: Minimum acceptable integrity score (0-1)
+            config: QualityConfig instance with all parameters (recommended)
+            completeness_threshold: (Legacy) Override completeness threshold
+            consistency_threshold: (Legacy) Override consistency threshold
+            validity_threshold: (Legacy) Override validity threshold
+            uniqueness_threshold: (Legacy) Override uniqueness threshold
+            accuracy_threshold: (Legacy) Override accuracy threshold
+            integrity_threshold: (Legacy) Override integrity threshold
         """
-        self.completeness_threshold = completeness_threshold
-        self.consistency_threshold = consistency_threshold
-        self.validity_threshold = validity_threshold
-        self.uniqueness_threshold = uniqueness_threshold
-        self.accuracy_threshold = accuracy_threshold
-        self.integrity_threshold = integrity_threshold
+        # Use provided config or create default
+        self.config = config or QualityConfig()
+        
+        # Support legacy parameters for backward compatibility
+        if completeness_threshold is not None:
+            self.config.completeness_threshold = completeness_threshold
+        if consistency_threshold is not None:
+            self.config.consistency_threshold = consistency_threshold
+        if validity_threshold is not None:
+            self.config.validity_threshold = validity_threshold
+        if uniqueness_threshold is not None:
+            self.config.uniqueness_threshold = uniqueness_threshold
+        if accuracy_threshold is not None:
+            self.config.accuracy_threshold = accuracy_threshold
+        if integrity_threshold is not None:
+            self.config.integrity_threshold = integrity_threshold
+        
         self.stat_validator = StatisticalValidator()
     
     def check_quality(
@@ -289,36 +483,126 @@ class QualityChecker:
             QualityReport with all quality metrics
         """
         # Convert to DataFrame for easier analysis
-        df = self._to_dataframe(data)
+        try:
+            df = self._to_dataframe(data)
+        except Exception as e:
+            # Return error report if conversion fails
+            return QualityReport(
+                dataset_id=dataset_id,
+                timestamp=datetime.now(),
+                overall_score=0.0,
+                dimension_scores={},
+                metrics=[QualityMetric(
+                    dimension="validity",
+                    metric_name="data_conversion_error",
+                    value=0.0,
+                    threshold=self.config.validity_threshold,
+                    passed=False,
+                    details={"error": str(e)}
+                )],
+                summary={"error": "Failed to convert data to DataFrame"},
+                recommendations=[f"Data conversion failed: {str(e)}"]
+            )
         
         metrics = []
         
         # 1. Completeness checks
-        completeness_metrics = self._check_completeness(df)
+        try:
+            completeness_metrics = self._check_completeness(df)
+            metrics.extend(completeness_metrics)  # FIX: Was missing this line
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="completeness",
+                metric_name="completeness_check_error",
+                value=0.0,
+                threshold=self.config.completeness_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
        
         # 2. Consistency checks
-        consistency_metrics = self._check_consistency(df)
-        metrics.extend(consistency_metrics)
+        try:
+            consistency_metrics = self._check_consistency(df)
+            metrics.extend(consistency_metrics)
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="consistency",
+                metric_name="consistency_check_error",
+                value=0.0,
+                threshold=self.config.consistency_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
         
         # 3. Validity checks
-        validity_metrics = self._check_validity(df, schema)
-        metrics.extend(validity_metrics)
+        try:
+            validity_metrics = self._check_validity(df, schema)
+            metrics.extend(validity_metrics)
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="validity",
+                metric_name="validity_check_error",
+                value=0.0,
+                threshold=self.config.validity_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
         
         # 4. Uniqueness checks
-        uniqueness_metrics = self._check_uniqueness(df)
-        metrics.extend(uniqueness_metrics)
+        try:
+            uniqueness_metrics = self._check_uniqueness(df)
+            metrics.extend(uniqueness_metrics)
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="uniqueness",
+                metric_name="uniqueness_check_error",
+                value=0.0,
+                threshold=self.config.uniqueness_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
         
         # 5. Timeliness checks
-        timeliness_metrics = self._check_timeliness(df)
-        metrics.extend(timeliness_metrics)
+        try:
+            timeliness_metrics = self._check_timeliness(df)
+            metrics.extend(timeliness_metrics)
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="timeliness",
+                metric_name="timeliness_check_error",
+                value=0.0,
+                threshold=self.config.timeliness_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
         
         # 6. Accuracy checks
-        accuracy_metrics = self._check_accuracy(df, reference_data)
-        metrics.extend(accuracy_metrics)
+        try:
+            accuracy_metrics = self._check_accuracy(df, reference_data)
+            metrics.extend(accuracy_metrics)
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="accuracy",
+                metric_name="accuracy_check_error",
+                value=0.0,
+                threshold=self.config.accuracy_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
         
         # 7. Integrity checks
-        integrity_metrics = self._check_integrity(df, schema)
-        metrics.extend(integrity_metrics)
+        try:
+            integrity_metrics = self._check_integrity(df, schema)
+            metrics.extend(integrity_metrics)
+        except Exception as e:
+            metrics.append(QualityMetric(
+                dimension="integrity",
+                metric_name="integrity_check_error",
+                value=0.0,
+                threshold=self.config.integrity_threshold,
+                passed=False,
+                details={"error": str(e)}
+            ))
         
         # Calculate dimension scores
         dimension_scores = self._calculate_dimension_scores(metrics)
@@ -340,20 +624,35 @@ class QualityChecker:
             recommendations=recommendations
         )
     def _to_dataframe(self, data: Union[pd.DataFrame, List[Dict], Dict]) -> pd.DataFrame:
-        """Convert various data formats to DataFrame."""
-        if isinstance(data, pd.DataFrame):
-            return data.copy()
-        elif isinstance(data, list):
-            if len(data) == 0:
-                return pd.DataFrame()
-            if isinstance(data[0], dict):
-                return pd.DataFrame(data)
+        """
+        Convert various data formats to DataFrame.
+        
+        Args:
+            data: Input data in various formats
+            
+        Returns:
+            pandas DataFrame
+            
+        Raises:
+            ValueError: If data format is unsupported or conversion fails
+            TypeError: If data type cannot be converted
+        """
+        try:
+            if isinstance(data, pd.DataFrame):
+                return data.copy()
+            elif isinstance(data, list):
+                if len(data) == 0:
+                    return pd.DataFrame()
+                if isinstance(data[0], dict):
+                    return pd.DataFrame(data)
+                else:
+                    raise ValueError(f"List data must contain dictionaries, got {type(data[0])}")
+            elif isinstance(data, dict):
+                return pd.DataFrame([data])
             else:
-                raise ValueError("List data must contain dictionaries")
-        elif isinstance(data, dict):
-            return pd.DataFrame([data])
-        else:
-            raise ValueError(f"Unsupported data type: {type(data)}")
+                raise ValueError(f"Unsupported data type: {type(data)}")
+        except Exception as e:
+            raise ValueError(f"Failed to convert data to DataFrame: {str(e)}") from e
     
     def _check_completeness(self, df: pd.DataFrame) -> List[QualityMetric]:
         """Check completeness dimension (missing values, coverage)."""
@@ -364,7 +663,7 @@ class QualityChecker:
                 dimension="completeness",
                 metric_name="empty_dataset",
                 value=0.0,
-                threshold=self.completeness_threshold,
+                threshold=self.config.completeness_threshold,
                 passed=False,
                 details={"message": "Dataset is empty"}
             ))
@@ -378,8 +677,8 @@ class QualityChecker:
             dimension="completeness",
             metric_name="overall_completeness",
             value=completeness_score,
-            threshold=self.completeness_threshold,
-            passed=completeness_score >= self.completeness_threshold,
+            threshold=self.config.completeness_threshold,
+            passed=completeness_score >= self.config.completeness_threshold,
             details={
                 "total_cells": int(total_cells),
                 "missing_cells": int(missing_cells),
@@ -394,8 +693,8 @@ class QualityChecker:
                 dimension="completeness",
                 metric_name=f"column_{col}_completeness",
                 value=col_completeness,
-                threshold=self.completeness_threshold,
-                passed=col_completeness >= self.completeness_threshold,
+                threshold=self.config.completeness_threshold,
+                passed=col_completeness >= self.config.completeness_threshold,
                 details={
                     "column": col,
                     "missing_count": int(df[col].isnull().sum()),
@@ -410,8 +709,8 @@ class QualityChecker:
             dimension="completeness",
             metric_name="row_completeness",
             value=row_completeness,
-            threshold=self.completeness_threshold,
-            passed=row_completeness >= self.completeness_threshold,
+            threshold=self.config.completeness_threshold,
+            passed=row_completeness >= self.config.completeness_threshold,
             details={
                 "rows_with_missing": int(rows_with_missing),
                 "complete_rows": int(len(df) - rows_with_missing),
@@ -446,8 +745,8 @@ class QualityChecker:
             dimension="consistency",
             metric_name="type_consistency",
             value=max(0.0, type_consistency_score),
-            threshold=self.consistency_threshold,
-            passed=type_consistency_score >= self.consistency_threshold,
+            threshold=self.config.consistency_threshold,
+            passed=type_consistency_score >= self.config.consistency_threshold,
             details={"type_issues": type_issues}
         ))
         
@@ -463,7 +762,7 @@ class QualityChecker:
                     dimension="consistency",
                     metric_name=f"column_{col}_range_check",
                     value=0.8,
-                    threshold=self.consistency_threshold,
+                    threshold=self.config.consistency_threshold,
                     passed=False,
                     details={
                         "column": col,
@@ -486,7 +785,7 @@ class QualityChecker:
                     dimension="consistency",
                     metric_name=f"column_{col}_format_variance",
                     value=0.85,
-                    threshold=self.consistency_threshold,
+                    threshold=self.config.consistency_threshold,
                     passed=True,  # Warning, not failure
                     details={
                         "column": col,
@@ -519,7 +818,7 @@ class QualityChecker:
                     dimension="validity",
                     metric_name="required_fields_check",
                     value=0.0,
-                    threshold=self.validity_threshold,
+                    threshold=self.config.validity_threshold,
                     passed=False,
                     details={
                         "missing_required_fields": list(missing_required),
@@ -531,7 +830,7 @@ class QualityChecker:
                     dimension="validity",
                     metric_name="required_fields_check",
                     value=1.0,
-                    threshold=self.validity_threshold,
+                    threshold=self.config.validity_threshold,
                     passed=True,
                     details={"required_fields": required_fields}
                 ))
@@ -567,29 +866,64 @@ class QualityChecker:
                         if df[field_name].max() > constraints["max"]:
                             errors.append(f"Value above maximum for {field_name}")
         
-        validity_score = 1.0 if len(errors) == 0 else max(0.0, 1.0 - len(errors) * 0.1)
+        # Use configurable error penalty instead of hardcoded 0.1
+        validity_score = 1.0 if len(errors) == 0 else max(0.0, 1.0 - len(errors) * self.config.validity_error_penalty)
         
         return QualityMetric(
             dimension="validity",
             metric_name="schema_validation",
             value=validity_score,
-            threshold=self.validity_threshold,
-            passed=validity_score >= self.validity_threshold,
+            threshold=self.config.validity_threshold,
+            passed=validity_score >= self.config.validity_threshold,
             details={"errors": errors} if errors else {"status": "valid"}
         )
     
     def _type_matches(self, expected: str, actual: str) -> bool:
-        """Check if expected type matches actual dtype."""
+        """
+        Check if expected type matches actual dtype using robust type checking.
+        
+        Uses pandas dtype checking utilities for more reliable type matching.
+        
+        Args:
+            expected: Expected type name (e.g., "int", "float", "string", "bool")
+            actual: Actual pandas dtype string (e.g., "int64", "float32", "object")
+            
+        Returns:
+            True if types match, False otherwise
+        """
+        # Normalize inputs
+        expected_lower = expected.lower().strip()
+        actual_lower = str(actual).lower().strip()
+        
+        # Comprehensive type mapping
         type_mapping = {
-            "int": ["int64", "int32", "int"],
-            "float": ["float64", "float32", "float"],
-            "string": ["object", "string"],
-            "bool": ["bool", "boolean"]
+            "int": ["int64", "int32", "int16", "int8", "int", "integer", "int_", "uint64", "uint32", "uint16", "uint8"],
+            "float": ["float64", "float32", "float16", "float", "double"],
+            "string": ["object", "string", "str", "unicode"],
+            "bool": ["bool", "boolean", "bool_"],
+            "datetime": ["datetime64[ns]", "datetime64", "datetime", "timedelta64[ns]"],
+            "category": ["category"],
         }
         
+        # Direct match
+        if expected_lower == actual_lower:
+            return True
+        
+        # Check mapping
         for key, variants in type_mapping.items():
-            if expected.lower() in key and any(v in actual.lower() for v in variants):
-                return True
+            if key in expected_lower:
+                if any(v in actual_lower for v in variants):
+                    return True
+        
+        # Additional pandas-specific checks
+        if "int" in expected_lower and pd.api.types.is_integer_dtype(actual):
+            return True
+        if "float" in expected_lower and pd.api.types.is_float_dtype(actual):
+            return True
+        if "bool" in expected_lower and pd.api.types.is_bool_dtype(actual):
+            return True
+        if "datetime" in expected_lower and pd.api.types.is_datetime64_any_dtype(actual):
+            return True
         
         return False
     
@@ -608,8 +942,8 @@ class QualityChecker:
             dimension="uniqueness",
             metric_name="row_uniqueness",
             value=uniqueness_score,
-            threshold=self.uniqueness_threshold,
-            passed=uniqueness_score >= self.uniqueness_threshold,
+            threshold=self.config.uniqueness_threshold,
+            passed=uniqueness_score >= self.config.uniqueness_threshold,
             details={
                 "duplicate_rows": int(duplicate_rows),
                 "unique_rows": int(len(df) - duplicate_rows),
@@ -628,8 +962,8 @@ class QualityChecker:
                     dimension="uniqueness",
                     metric_name=f"column_{col}_uniqueness",
                     value=col_uniqueness,
-                    threshold=0.95,  # Keys should be highly unique
-                    passed=col_uniqueness >= 0.95,
+                    threshold=self.config.key_uniqueness_threshold,  # Configurable threshold
+                    passed=col_uniqueness >= self.config.key_uniqueness_threshold,
                     details={
                         "column": col,
                         "unique_values": int(unique_values),
@@ -659,7 +993,7 @@ class QualityChecker:
                 dimension="timeliness",
                 metric_name="no_timestamps",
                 value=1.0,
-                threshold=1.0,
+                threshold=self.config.timeliness_threshold,
                 passed=True,
                 details={"message": "No timestamp columns found - timeliness check skipped"}
             ))
@@ -669,10 +1003,7 @@ class QualityChecker:
         for col in timestamp_cols:
             try:
                 # Try to convert to datetime
-                if df[col].dtype == 'object':
-                    timestamps = pd.to_datetime(df[col], errors='coerce')
-                else:
-                    timestamps = pd.to_datetime(df[col], errors='coerce')
+                timestamps = pd.to_datetime(df[col], errors='coerce')
                 
                 valid_timestamps = timestamps.dropna()
                 if len(valid_timestamps) == 0:
@@ -683,15 +1014,15 @@ class QualityChecker:
                 age_days = (now - most_recent).days
                 
                 # Freshness score (inversely related to age)
-                # Consider data "fresh" if less than 7 days old
-                freshness_score = max(0.0, 1.0 - (age_days / 30.0))  # Decay over 30 days
+                # Configurable decay period from config
+                freshness_score = max(0.0, 1.0 - (age_days / self.config.freshness_decay_days))
                 
                 metrics.append(QualityMetric(
                     dimension="timeliness",
                     metric_name=f"column_{col}_freshness",
                     value=freshness_score,
-                    threshold=0.7,  # Data should be less than 7 days old
-                    passed=freshness_score >= 0.7,
+                    threshold=self.config.timeliness_threshold,  # Configurable threshold
+                    passed=freshness_score >= self.config.timeliness_threshold,
                     details={
                         "column": col,
                         "most_recent": most_recent.isoformat(),
@@ -721,13 +1052,16 @@ class QualityChecker:
         
         for col in numeric_cols:
             col_data = df[col].dropna()
-            if len(col_data) < 4:  # Need at least 4 points for outlier detection
+            if len(col_data) < self.config.min_samples_for_outlier_detection:
                 continue
             
             col_array = col_data.values
             
-            # IQR-based outlier detection
-            outliers_iqr, iqr_details = self.stat_validator.detect_outliers_iqr(col_array)
+            # IQR-based outlier detection with configurable multiplier
+            outliers_iqr, iqr_details = self.stat_validator.detect_outliers_iqr(
+                col_array, 
+                multiplier=self.config.iqr_multiplier
+            )
             outlier_percentage = iqr_details["outlier_percentage"]
             accuracy_score = max(0.0, 1.0 - (outlier_percentage / 100.0))
             
@@ -735,8 +1069,8 @@ class QualityChecker:
                 dimension="accuracy",
                 metric_name=f"column_{col}_outliers_iqr",
                 value=accuracy_score,
-                threshold=self.accuracy_threshold,
-                passed=accuracy_score >= self.accuracy_threshold,
+                threshold=self.config.accuracy_threshold,
+                passed=accuracy_score >= self.config.accuracy_threshold,
                 details={
                     "column": col,
                     "outlier_count": iqr_details["outlier_count"],
@@ -745,8 +1079,11 @@ class QualityChecker:
                 }
             ))
             
-            # Z-score outlier detection
-            outliers_zscore, zscore_details = self.stat_validator.detect_outliers_zscore(col_array)
+            # Z-score outlier detection with configurable threshold
+            outliers_zscore, zscore_details = self.stat_validator.detect_outliers_zscore(
+                col_array,
+                threshold=self.config.zscore_threshold
+            )
             outlier_percentage_z = zscore_details["outlier_percentage"]
             accuracy_score_z = max(0.0, 1.0 - (outlier_percentage_z / 100.0))
             
@@ -754,8 +1091,8 @@ class QualityChecker:
                 dimension="accuracy",
                 metric_name=f"column_{col}_outliers_zscore",
                 value=accuracy_score_z,
-                threshold=self.accuracy_threshold,
-                passed=accuracy_score_z >= self.accuracy_threshold,
+                threshold=self.config.accuracy_threshold,
+                passed=accuracy_score_z >= self.config.accuracy_threshold,
                 details={
                     "column": col,
                     "outlier_count": zscore_details["outlier_count"],
@@ -767,21 +1104,29 @@ class QualityChecker:
         # Statistical distribution tests (for numeric columns with sufficient data)
         for col in numeric_cols:
             col_data = df[col].dropna()
-            if len(col_data) < 30:  # Need sufficient data for statistical tests
+            if len(col_data) < self.config.min_samples_for_statistical_tests:
                 continue
             
             col_array = col_data.values
             
-            # Normality test (Shapiro-Wilk for smaller samples)
+            # Normality test (Shapiro-Wilk for smaller samples) with configurable sample size
             try:
-                _, p_value, sw_details = self.stat_validator.shapiro_wilk_test(col_array)
+                _, p_value, sw_details = self.stat_validator.shapiro_wilk_test(
+                    col_array,
+                    max_sample_size=self.config.shapiro_wilk_sample_size,
+                    random_state=self.config.random_state
+                )
                 is_normal = sw_details["is_normal"]
+                
+                # Warn if sample was truncated
+                if sw_details.get("original_size", len(col_data)) > self.config.shapiro_wilk_sample_size:
+                    sw_details["warning"] = f"Test limited to {self.config.shapiro_wilk_sample_size} samples"
                 
                 metrics.append(QualityMetric(
                     dimension="accuracy",
                     metric_name=f"column_{col}_normality",
                     value=1.0 if is_normal else 0.8,
-                    threshold=0.7,
+                    threshold=self.config.accuracy_threshold,  # Use configurable threshold
                     passed=True,  # Informational, not a failure
                     details={
                         "column": col,
@@ -813,8 +1158,8 @@ class QualityChecker:
                         dimension="integrity",
                         metric_name=f"primary_key_{key}_nulls",
                         value=integrity_score,
-                        threshold=self.integrity_threshold,
-                        passed=integrity_score >= self.integrity_threshold,
+                        threshold=self.config.integrity_threshold,
+                        passed=integrity_score >= self.config.integrity_threshold,
                         details={
                             "key": key,
                             "null_count": int(null_count),
@@ -835,8 +1180,8 @@ class QualityChecker:
                         dimension="integrity",
                         metric_name=f"foreign_key_{fk_name}_integrity",
                         value=integrity_score,
-                        threshold=self.integrity_threshold,
-                        passed=integrity_score >= self.integrity_threshold,
+                        threshold=self.config.integrity_threshold,
+                        passed=integrity_score >= self.config.integrity_threshold,
                         details={
                             "foreign_key": fk_name,
                             "null_count": int(null_count),
@@ -847,34 +1192,59 @@ class QualityChecker:
         return metrics
     
     def _calculate_dimension_scores(self, metrics: List[QualityMetric]) -> Dict[str, float]:
-        """Calculate average score for each dimension."""
+        """
+        Calculate average score for each dimension.
+        
+        Uses standardized scoring: all scores are normalized to 0.0-1.0 range.
+        Averages all metric values within each dimension.
+        
+        Args:
+            metrics: List of QualityMetric instances
+            
+        Returns:
+            Dictionary mapping dimension names to average scores (0.0 to 1.0)
+        """
         dimension_scores = {}
         
         for dimension in ["completeness", "consistency", "validity", "uniqueness", "timeliness", "accuracy", "integrity"]:
-            dimension_metrics = [m for m in metrics if m.dimension == dimension]
+            dimension_metrics = [m for m in metrics if m.dimension == dimension and not m.metric_name.endswith("_error")]
             if dimension_metrics:
-                # Weighted average (can be customized)
-                dimension_scores[dimension] = np.mean([m.value for m in dimension_metrics])
+                # Standardized: mean of all metric values (all should be 0.0-1.0)
+                dimension_scores[dimension] = float(np.mean([m.value for m in dimension_metrics]))
             else:
-                dimension_scores[dimension] = 1.0  # Default if no metrics
+                # Default to 1.0 if no metrics (dimension not checked or all metrics errored)
+                dimension_scores[dimension] = 1.0
         
         return dimension_scores
     
     def _generate_summary(self, df: pd.DataFrame, metrics: List[QualityMetric]) -> Dict[str, Any]:
-        """Generate summary statistics."""
+        """
+        Generate summary statistics for the quality report.
+        
+        Args:
+            df: DataFrame that was checked
+            metrics: List of all quality metrics
+            
+        Returns:
+            Dictionary containing summary statistics
+        """
         summary = {
             "total_rows": len(df),
             "total_columns": len(df.columns),
             "total_metrics": len(metrics),
             "passed_metrics": sum(1 for m in metrics if m.passed),
             "failed_metrics": sum(1 for m in metrics if not m.passed),
+            "error_metrics": sum(1 for m in metrics if m.metric_name.endswith("_error")),
             "dimensions_checked": len(set(m.dimension for m in metrics))
         }
         
         if not df.empty:
-            summary["memory_usage_mb"] = float(df.memory_usage(deep=True).sum() / 1024 / 1024)
-            summary["numeric_columns"] = len(df.select_dtypes(include=[np.number]).columns)
-            summary["text_columns"] = len(df.select_dtypes(include=['object']).columns)
+            try:
+                summary["memory_usage_mb"] = float(df.memory_usage(deep=True).sum() / 1024 / 1024)
+                summary["numeric_columns"] = len(df.select_dtypes(include=[np.number]).columns)
+                summary["text_columns"] = len(df.select_dtypes(include=['object']).columns)
+            except Exception:
+                pass  # Skip if memory calculation fails
         
         return summary
     
@@ -883,12 +1253,23 @@ class QualityChecker:
         dimension_scores: Dict[str, float], 
         metrics: List[QualityMetric]
     ) -> List[str]:
-        """Generate recommendations based on quality scores."""
+        """
+        Generate recommendations based on quality scores.
+        
+        Uses configurable recommendation_threshold to determine when to generate recommendations.
+        
+        Args:
+            dimension_scores: Dictionary mapping dimension names to scores
+            metrics: List of all quality metrics
+            
+        Returns:
+            List of recommendation strings
+        """
         recommendations = []
         
-        # Check each dimension and provide recommendations
+        # Check each dimension and provide recommendations using configurable threshold
         for dimension, score in dimension_scores.items():
-            if score < 0.8:
+            if score < self.config.recommendation_threshold:
                 if dimension == "completeness":
                     recommendations.append(
                         f"Completeness score is {score:.2%}. Consider imputing missing values or investigating data collection process."
@@ -939,6 +1320,7 @@ def check_data_quality(
     data: Union[pd.DataFrame, List[Dict], Dict],
     dataset_id: str = "dataset",
     schema: Optional[Dict[str, Any]] = None,
+    config: Optional[QualityConfig] = None,
     **kwargs
 ) -> QualityReport:
     """
@@ -947,12 +1329,194 @@ def check_data_quality(
     Args:
         data: Data to check
         dataset_id: Identifier for the dataset
-        schema: Optional schema definition
-        **kwargs: Additional arguments passed to QualityChecker
+        schema: Optional schema definition (see QualityConfig docstring for format)
+        config: Optional QualityConfig instance (recommended)
+        **kwargs: Additional arguments passed to QualityChecker (legacy support)
         
     Returns:
         QualityReport
+        
+    Example:
+        ```python
+        from pipelines.data_preprocessing.quality import check_data_quality, QualityConfig
+        
+        # Use default config
+        report = check_data_quality(data, dataset_id="my_dataset")
+        
+        # Use custom config
+        config = QualityConfig(completeness_threshold=0.98)
+        report = check_data_quality(data, dataset_id="my_dataset", config=config)
+        ```
     """
-    checker = QualityChecker(**kwargs)
+    checker = QualityChecker(config=config, **kwargs)
     return checker.check_quality(data, dataset_id, schema)
+
+
+class QualityCheckStage:
+    """
+    Pipeline stage wrapper for QualityChecker.
+    
+    This class makes QualityChecker compatible with the PreprocessingStage interface,
+    allowing it to be used in pipeline orchestration.
+    
+    Note: This is a lightweight wrapper. For full PreprocessingStage inheritance,
+    consider creating a proper subclass in stages.py.
+    
+    Example:
+        ```python
+        from pipelines.data_preprocessing.quality import QualityCheckStage
+        
+        quality_stage = QualityCheckStage(config={
+            "completeness_threshold": 0.95,
+            "dataset_id": "my_dataset"
+        })
+        result = quality_stage.process(data)
+        
+        if result.success:
+            validation_result = result.validation_result
+            processed_data = result.processed_data
+            quality_metrics = processed_data.quality_metrics
+        ```
+    """
+    
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
+        """
+        Initialize quality check stage.
+        
+        Args:
+            config: Configuration dictionary. Can include:
+                - quality_config: QualityConfig instance (recommended)
+                - Or individual threshold parameters (legacy)
+                - dataset_id: Optional dataset identifier
+                - schema: Optional schema definition (see QualityConfig docstring for format)
+        """
+        # Store config for later use
+        self.config = config or {}
+        
+        # Extract quality-specific config
+        quality_config = self.config.get("quality_config")
+        if quality_config is None:
+            # Create QualityConfig from individual parameters if provided
+            quality_kwargs = {
+                k: v for k, v in self.config.items()
+                if k in ["completeness_threshold", "consistency_threshold", 
+                        "validity_threshold", "uniqueness_threshold",
+                        "accuracy_threshold", "integrity_threshold",
+                        "iqr_multiplier", "zscore_threshold",
+                        "isolation_forest_contamination", "random_state",
+                        "freshness_decay_days", "key_uniqueness_threshold",
+                        "recommendation_threshold", "validity_error_penalty",
+                        "shapiro_wilk_sample_size",
+                        "min_samples_for_outlier_detection", "min_samples_for_statistical_tests"]
+            }
+            if quality_kwargs:
+                quality_config = QualityConfig(**quality_kwargs)
+        
+        self.quality_checker = QualityChecker(config=quality_config)
+        self.dataset_id = self.config.get("dataset_id", "quality_check")
+        self.schema = self.config.get("schema")
+    
+    def process(self, data: Any) -> Any:  # Returns StageResult from base module
+        """
+        Process data through quality checks.
+        
+        Args:
+            data: Input data (ProcessedData, DataFrame, list, or dict)
+            
+        Returns:
+            StageResult with processed_data containing quality metrics and validation_result
+        """
+        from .base import StageResult, ProcessedData, ValidationResult
+        
+        try:
+            # Extract actual data if it's ProcessedData
+            if hasattr(data, 'data'):
+                actual_data = data.data
+                original_metadata = getattr(data, 'metadata', {})
+            else:
+                actual_data = data
+                original_metadata = {}
+            
+            # Run quality check
+            quality_report = self.quality_checker.check_quality(
+                data=actual_data,
+                dataset_id=self.dataset_id,
+                schema=self.schema or original_metadata.get("schema")
+            )
+            
+            # Convert to ValidationResult
+            validation_result = quality_report.to_validation_result()
+            
+            # Create ProcessedData with quality metrics
+            processed_data = ProcessedData(
+                data=actual_data,
+                metadata={
+                    **original_metadata,
+                    "quality_check_timestamp": quality_report.timestamp.isoformat(),
+                    "overall_quality_score": quality_report.overall_score,
+                    "schema": self.schema or original_metadata.get("schema")
+                },
+                quality_metrics=quality_report.get_quality_metrics_for_processed_data(),
+                schema_version=original_metadata.get("schema_version")
+            )
+            
+            return StageResult(
+                success=True,
+                processed_data=processed_data,
+                validation_result=validation_result,
+                stage_name="quality_check"
+            )
+            
+        except Exception as e:
+            from .base import StageResult
+            return StageResult(
+                success=False,
+                error=f"Quality check failed: {str(e)}",
+                stage_name="quality_check"
+            )
+    
+    def validate(self, data: Any) -> Any:  # Returns ValidationResult from base module
+        """
+        Validate data quality.
+        
+        Args:
+            data: Input data to validate
+            
+        Returns:
+            ValidationResult with quality scores, errors, and warnings
+        """
+        from .base import ValidationResult
+        
+        try:
+            # Extract actual data if it's ProcessedData
+            if hasattr(data, 'data'):
+                actual_data = data.data
+            else:
+                actual_data = data
+            
+            # Run quality check
+            quality_report = self.quality_checker.check_quality(
+                data=actual_data,
+                dataset_id=self.dataset_id,
+                schema=self.schema
+            )
+            
+            # Convert to ValidationResult
+            return quality_report.to_validation_result()
+            
+        except Exception as e:
+            return ValidationResult(
+                is_valid=False,
+                errors=[f"Quality check failed: {str(e)}"],
+                warnings=[],
+                quality_scores={}
+            )
+    
+    def get_dependencies(self) -> List[str]:
+        """Get list of stage names this stage depends on."""
+        return []  # Quality check can run at any point
+    
+    def get_name(self) -> str:
+        """Get the name of this stage."""
+        return "quality_check"
 
