@@ -263,22 +263,22 @@ COUNTERPARTY_CATEGORIES = {
 
 NICHE_CATEGORY_WEIGHTS = {
     "vendor_fraud_protection": {
-        "Invoice": 1.000,
-        "Purchase Order": 0.742,
-        "Contract": 0.681,
-        "Compliance Report": 0.537,
-        "Audit Report": 0.412,
-        "SOP": 0.283,
-        "Policy": 0.259,
+        "structured_records": 1.4,      # Higher focus on transactions, invoices, payments
+        "documents": 1.3,               # Higher focus on invoices, contracts, POs
+        "risk_events": 1.2,             # More risk events in fraud scenarios
+        "decisions": 1.1,               # More fraud-related decisions
+        "communications": 0.8,          # Less emphasis on general communications
+        "compliance_records": 1.0,      # Baseline compliance
+        "processes": 0.7,               # Less emphasis on process artifacts
     },
     "generic_detection": {
-        "Invoice": 0.820,
-        "Purchase Order": 0.801,
-        "Contract": 0.774,
-        "Compliance Report": 0.612,
-        "Audit Report": 0.598,
-        "SOP": 0.566,
-        "Policy": 0.541,
+        "structured_records": 1.0,      # Balanced distribution
+        "documents": 1.0,               # Balanced distribution
+        "risk_events": 1.0,             # Balanced distribution
+        "decisions": 1.0,               # Balanced distribution
+        "communications": 1.0,          # Balanced distribution
+        "compliance_records": 1.0,      # Balanced distribution
+        "processes": 1.0,               # Balanced distribution
     },
 }
 
@@ -340,24 +340,6 @@ DOCUMENT_TYPE_WEIGHTS_BY_NICHE = {
     },
 }
 
-
-def get_effective_category_weights(niche: str) -> Dict[str, float]:
-    """
-    Return category weights adjusted by niche.
-    Falls back to base CATEGORY_WEIGHTS if niche is unknown.
-    """
-    niche_weights = NICHE_CATEGORY_WEIGHTS.get(niche)
-
-    if not niche_weights:
-        return CATEGORY_WEIGHTS
-
-    effective = CATEGORY_WEIGHTS.copy()
-
-    for category, multiplier in niche_weights.items():
-        if category in effective:
-            effective[category] *= multiplier
-
-    return effective
 
 def get_effective_category_weights(niche: str) -> Dict[str, float]:
     """
