@@ -1435,7 +1435,7 @@ def generate_content(category: str, artifact_type: str, entity_name: str, entity
 
     return f"{artifact_type} for {entity_name}."
 
-def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
+def generate_artifact(entity_id: str, entity_name: str, category: str, niche: str, industry: str) -> dict:
     profile = get_entity_profile(entity_id)
 
     artifact_type = None
@@ -1474,7 +1474,7 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
                 base_date
             )
         else:
-            niche_weights = DOCUMENT_TYPE_WEIGHTS_BY_NICHE.get(args.niche, {})
+            niche_weights = DOCUMENT_TYPE_WEIGHTS_BY_NICHE.get(niche, {})
             size_bucket = random.choice(("short", "medium", "long"))
 
             size_bias = {
@@ -1540,8 +1540,8 @@ def generate_artifact(entity_id: str, entity_name: str, category: str) -> dict:
         "detection_indicators": detection_data,
         "compliance_metadata": compliance_data,
         "outcome_prediction": outcome_data,
-        "niche": args.niche,
-        "industry": args.industry,
+        "niche": niche,
+        "industry": industry,
     }
 
     if transaction_data is not None:
@@ -1702,7 +1702,10 @@ def generate_b2b_dataset(
     output_dir: Path,
     derive_training: bool,
     training_ratio: float,
+    niche: str,
+    industry: str,
 ):
+
     # Reset global state
     global entity_profiles, entity_detection_bursts, entity_compliance_issues
     entity_profiles = {}
@@ -1724,7 +1727,7 @@ def generate_b2b_dataset(
         get_entity_profile(entity_id)
     
     # Get niche-adjusted category weights ONCE
-    effective_weights = get_effective_category_weights(args.niche)
+    effective_weights = get_effective_category_weights(niche)
 
     print(f"Generating artifacts using mathematical models...")
     with open(artifacts_file, "w") as af:
@@ -1744,7 +1747,7 @@ def generate_b2b_dataset(
                     
 
                     for _ in range(category_count):
-                        artifact = generate_artifact(entity_id, entity_name, category)
+                        artifact = generate_artifact(entity_id, entity_name, category, niche, industry)
                         af.write(json.dumps(artifact) + "\n")
 
                         if derive_training and random.random() < training_ratio:
@@ -1814,4 +1817,6 @@ if __name__ == "__main__":
             output_dir=out_dir,
             derive_training=args.derive_training,
             training_ratio=args.training_ratio,
-        )
+            niche=args.niche,
+    industry=args.industry,
+)
