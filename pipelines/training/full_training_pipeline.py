@@ -21,7 +21,10 @@ from peft import (
 )
 from datasets import load_dataset, Dataset
 from accelerate import Accelerator
-from deepspeed import init_distributed
+try:
+    from deepspeed import init_distributed
+except ModuleNotFoundError:
+    init_distributed = None
 import mlflow
 import wandb
 import json
@@ -29,9 +32,19 @@ from pathlib import Path
 import os
 from typing import Dict, Optional
 import argparse
-from ...mlops.infrastructure.lora_training import LoRATrainer, QLoRATrainingPipeline
-from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
-from deepiri_modelkit.logging import get_logger
+from mlops.infrastructure.lora_training import LoRATrainer, QLoRATrainingPipeline
+from mlops.infrastructure.experiment_tracker import ExperimentTracker
+import logging
+
+def get_logger(name: str):
+    logger = logging.getLogger(name)
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+    return logger
 
 logger = get_logger("helox.pipeline")
 
@@ -50,17 +63,18 @@ class FullTrainingPipeline:
         """Setup MLflow and W&B tracking."""
         self.tracker = ExperimentTracker(
             experiment_name=self.config.get("experiment_name", "deepiri_training"),
-            tracking_uri=self.config.get("mlflow_uri", "http://localhost:5000"),
+            tracking_uri=self.config.get("mlflow_uri", "file:./mlruns"),
+
             use_wandb=self.config.get("use_wandb", False),
             wandb_project=self.config.get("wandb_project", "deepiri")
         )
         self.tracker.start_run()
-        self.tracker.log_git_info()
+        #self.tracker.log_git_info()
         
     def load_and_prepare_data(self):
         """Load and prepare training dataset."""
         dataset_path = self.config["train_dataset_path"]
-        logger.info("Loading dataset", path=dataset_path)
+        logger.info(f"Loading dataset: {dataset_path}")
         
         if dataset_path.endswith('.jsonl'):
             dataset = load_dataset('json', data_files=dataset_path, split='train')
@@ -96,7 +110,7 @@ class FullTrainingPipeline:
         model_name = self.config.get("base_model", "mistralai/Mistral-7B-v0.1")
         use_qlora = self.config.get("use_qlora", True)
         
-        logger.info("Loading model", model=model_name, qlora=use_qlora)
+        logger.info(f"Loading model: model={model_name} qlora={use_qlora}")
         
         if use_qlora:
             bnb_config = BitsAndBytesConfig(
@@ -161,7 +175,7 @@ class FullTrainingPipeline:
             fp16=True,
             logging_steps=self.config.get("logging_steps", 10),
             save_steps=self.config.get("save_steps", 500),
-            evaluation_strategy="steps",
+            eval_strategy="steps",
             eval_steps=self.config.get("eval_steps", 500),
             save_total_limit=3,
             load_best_model_at_end=True,
@@ -192,11 +206,14 @@ class FullTrainingPipeline:
         self.tokenizer.save_pretrained(output_dir)
         
         if self.tracker:
-            self.tracker.log_model(self.model, "model")
+            # Log the saved adapter/tokenizer folder instead of pickling the in-memory model
+            self.tracker.log_model(output_dir, "lora_adapter")
             eval_results = trainer.evaluate()
             self.tracker.log_metrics(eval_results)
-        
-        logger.info("Training complete", output_dir=output_dir)
+
+
+
+        logger.info("Training complete: output_dir=%s", output_dir)
         return output_dir
     
     def run(self):

@@ -1,0 +1,14 @@
+{
+  "base_model": "mistralai/Mistral-7B-v0.1",
+  "mlflow_uri": "file:./mlruns",
+  "train_dataset_path": "data/datasets/raw/tiny_train.jsonl",
+  "output_dir": "models/tiny_lora",
+  "use_qlora": true,
+  "use_deepspeed": false,
+  "num_epochs": 1,
+  "batch_size": 1,
+  "gradient_accumulation_steps": 1,
+  "learning_rate": 2e-4,
+  "lora_rank": 8,
+  "lora_alpha": 16
+}

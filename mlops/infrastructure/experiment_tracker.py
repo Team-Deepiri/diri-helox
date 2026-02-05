@@ -3,7 +3,6 @@ Advanced Experiment Tracking with MLflow and W&B Integration
 Reproducibility, dataset versioning, model registry
 """
 import mlflow
-import mlflow.pytorch
 from mlflow.tracking import MlflowClient
 from pathlib import Path
 import json
@@ -11,7 +10,19 @@ import yaml
 import hashlib
 from datetime import datetime
 from typing import Dict, Optional, List
-from deepiri_modelkit.logging import get_logger
+import logging
+
+def get_logger(name: str):
+    logger = logging.getLogger(name)
+    if not logger.handlers:
+        handler = logging.StreamHandler()
+        formatter = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+    return logger
+
+
 
 logger = get_logger("experiment.tracker")
 
@@ -60,7 +71,7 @@ class ExperimentTracker:
         if self.use_wandb and HAS_WANDB:
             wandb.run.name = run_name
         
-        logger.info("Experiment run started", run_name=run_name)
+        logger.info(f"Experiment run started: run_name={run_name}")
         return self.current_run
     
     def log_params(self, params: Dict):
@@ -86,10 +97,23 @@ class ExperimentTracker:
         if self.use_wandb and HAS_WANDB:
             wandb.config.update({"dataset_path": dataset_path, "dataset_hash": dataset_hash})
     
-    def log_model(self, model, artifact_path: str = "model"):
-        """Log model artifact."""
-        mlflow.pytorch.log_model(model, artifact_path)
-        logger.info("Model logged", artifact_path=artifact_path)
+    def log_model(self, model_or_dir, artifact_path: str = "model"):
+        """
+        For LoRA/QLoRA we should not pickle the in-memory model (can fail with Accelerate/AMP).
+        Instead, log the saved adapter/tokenizer directory as MLflow artifacts.
+        """
+        import os
+
+        if isinstance(model_or_dir, (str, os.PathLike)) and os.path.isdir(model_or_dir):
+            mlflow.log_artifacts(str(model_or_dir), artifact_path=artifact_path)
+            return
+
+        raise ValueError(
+            "ExperimentTracker.log_model expected a directory path (e.g., output_dir). "
+            "Pass the folder where save_pretrained() wrote adapter/tokenizer files."
+        )
+
+
     
     def log_code(self, code_path: str = "."):
         """Log code snapshot."""
@@ -104,7 +128,8 @@ class ExperimentTracker:
             mlflow.end_run(status=status)
             if self.use_wandb and HAS_WANDB:
                 wandb.finish()
-            logger.info("Experiment run ended", status=status)
+            logger.info(f"Experiment run ended: status={status}")
+
     
     def _compute_dataset_hash(self, dataset_path: str) -> str:
         """Compute SHA256 hash of dataset."""

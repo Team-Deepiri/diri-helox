@@ -8,9 +8,9 @@ from pathlib import Path
 from typing import Dict, Optional
 from .full_training_pipeline import FullTrainingPipeline
 from .data_collection_pipeline import get_data_collector
-from ...mlops.infrastructure.lora_training import QLoRATrainingPipeline
+from mlops.infrastructure.lora_training import QLoRATrainingPipeline
 from .bandit_training import train_bandit_from_data
-from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
+from mlops.infrastructure.experiment_tracker import ExperimentTracker
 from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("helox.ml_pipeline")
