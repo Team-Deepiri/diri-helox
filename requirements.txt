@@ -46,8 +46,17 @@ sentence-transformers>=2.2.0  # Optional, for semantic deduplication
 # deepiri-modelkit: Installed from /workspace/deepiri-modelkit in Dockerfile
 # For local development: pip install -e ../deepiri-modelkit
 
+# Dataset Versioning Dependencies
+dvc>=3.0.0
+dvc-s3>=3.0.0
+pydantic>=2.0.0
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# CLI Interface
+click>=8.1.0
+
 # Utilities
 tqdm>=4.66.0
 pyyaml>=6.0
 python-dotenv>=1.0.0
-
