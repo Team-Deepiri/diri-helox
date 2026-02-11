@@ -26,29 +26,34 @@ def check_package(package_name, import_name=None):
     spec = importlib.util.find_spec(import_name)
     return spec is not None
 
+def check_poetry():
+    """Check if Poetry is installed"""
+    try:
+        subprocess.run(["poetry", "--version"], capture_output=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
+
 def install_requirements():
-    """Install requirements from requirements.txt"""
-    # Try root requirements.txt first, fallback to train-specific if needed
-    requirements_file = Path("requirements.txt")
-    
-    if not requirements_file.exists():
-        # Fallback to train-specific requirements if root doesn't exist
-        requirements_file = Path("app/train/requirements.txt")
-        if not requirements_file.exists():
-            print(f"❌ Requirements file not found: {requirements_file}")
-            return False
-    
-    print(f"\nInstalling dependencies from {requirements_file}...")
+    """Install dependencies using Poetry"""
+    print("\nInstalling dependencies with Poetry...")
     print("This may take a few minutes...\n")
     
+    # Check if Poetry is installed
+    if not check_poetry():
+        print("❌ Poetry is not installed")
+        print("   Install it with: curl -sSL https://install.python-poetry.org | python3 -")
+        print("   Or visit: https://python-poetry.org/docs/#installation")
+        return False
+    
     try:
-        subprocess.check_call([
-            sys.executable, "-m", "pip", "install", "-r", str(requirements_file)
-        ])
+        # Install dependencies (without dev dependencies by default)
+        subprocess.check_call(["poetry", "install", "--no-dev"])
         print("\n✓ All dependencies installed")
         return True
     except subprocess.CalledProcessError as e:
         print(f"\n❌ Failed to install dependencies: {e}")
+        print("   Try running: poetry install")
         return False
 
 def check_dependencies():
@@ -140,7 +145,7 @@ def main():
                 return False
         else:
             print("\n❌ Setup cancelled: Dependencies required")
-            print(f"   Run: pip install -r requirements.txt")
+            print("   Run: poetry install")
             return False
     
     # Check CUDA
