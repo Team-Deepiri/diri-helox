@@ -1,6 +1,11 @@
 """Training infrastructure package"""
-from .rag_pipeline import RAGPipeline, RAGDataPipeline, initialize_rag_system
-from ...mlops.infrastructure.lora_training import LoRATrainer, QLoRATrainingPipeline, create_deepspeed_config
+try:
+    from .rag_pipeline import RAGPipeline, RAGDataPipeline, initialize_rag_system
+except ModuleNotFoundError:
+    RAGPipeline = None
+    RAGDataPipeline = None
+    initialize_rag_system = None
+from .lora_training import LoRATrainer, QLoRATrainingPipeline, create_deepspeed_config
 from .experiment_tracker import ExperimentTracker, DatasetVersioning, ModelRegistry
 
 __all__ = [
