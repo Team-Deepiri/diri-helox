@@ -79,7 +79,7 @@ def validate_environment():
     
     if missing:
         logger.error(f"Missing packages: {', '.join(missing)}")
-        logger.error("Install with: pip install -r requirements.txt")
+        logger.error("Install with: poetry install")
         return False
     
     return True
