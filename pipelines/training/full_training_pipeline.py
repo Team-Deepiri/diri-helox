@@ -19,6 +19,7 @@ from peft import (
     TaskType,
     PeftModel
 )
+from mlops.infrastructure import LayeredModelAdapter, LayerConfig, LayerType
 from datasets import load_dataset, Dataset
 from accelerate import Accelerator
 try:
@@ -139,26 +140,47 @@ class FullTrainingPipeline:
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
-        
-        lora_config = LoraConfig(
-            r=self.config.get("lora_rank", 16),
-            lora_alpha=self.config.get("lora_alpha", 32),
+
+        # --- Layered adapter attach (Phase 1) ---
+        mgr = LayeredModelAdapter(self.model)
+
+        layer_type_str = self.config.get("layer_type", "task")   # "domain" | "task" | "user" | "tenant"
+        layer_name = self.config.get("layer_name", "default")    # e.g., "b2b", "classification", "user_123"
+
+        layer_cfg = LayerConfig(
+            layer_type=LayerType(layer_type_str),
+            name=layer_name,
+            rank=self.config.get("lora_rank", 16),
+            alpha=self.config.get("lora_alpha", 32),
+            dropout=self.config.get("lora_dropout", 0.05),
+            bias=self.config.get("lora_bias", "none"),
             target_modules=self.config.get("target_modules", ["q_proj", "v_proj", "k_proj", "o_proj"]),
-            lora_dropout=self.config.get("lora_dropout", 0.05),
-            bias="none",
-            task_type=TaskType.CAUSAL_LM
         )
-        
-        self.model = get_peft_model(self.model, lora_config)
-        self.model.print_trainable_parameters()
+
+        adapter_name = mgr.attach_new_lora_layer(layer_cfg)
+        mgr.freeze_all_adapters_except(adapter_name)
+
+        self.model = mgr.model
+        self._layer_mgr = mgr  # keep for saving later
+
+        try:
+            self.model.print_trainable_parameters()
+        except Exception:
+            pass
         
         if self.tracker:
             self.tracker.log_params({
-                "model": model_name,
-                "lora_rank": lora_config.r,
-                "lora_alpha": lora_config.lora_alpha,
-                "use_qlora": use_qlora
-            })
+        "model": model_name,
+        "use_qlora": use_qlora,
+        "layer_type": layer_cfg.layer_type.value,
+        "layer_name": layer_cfg.name,
+        "adapter_name": adapter_name,
+        "lora_rank": layer_cfg.rank,
+        "lora_alpha": layer_cfg.alpha,
+        "lora_dropout": layer_cfg.dropout,
+        "lora_bias": layer_cfg.bias,
+        "target_modules": layer_cfg.target_modules,
+    })
     
     def train(self, train_dataset, val_dataset):
         """Train the model."""
@@ -202,8 +224,11 @@ class FullTrainingPipeline:
         logger.info("Starting training")
         trainer.train()
         
-        self.model.save_pretrained(output_dir)
-        self.tokenizer.save_pretrained(output_dir)
+                # Save only the trained adapter if we used the layered manager
+        if hasattr(self, "_layer_mgr") and self._layer_mgr is not None:
+            self._layer_mgr.save_active_adapter(output_dir)
+        else:
+            self.model.save_pretrained(output_dir)
         
         if self.tracker:
             # Log the saved adapter/tokenizer folder instead of pickling the in-memory model
