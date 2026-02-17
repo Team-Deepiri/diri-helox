@@ -59,6 +59,8 @@ class FullTrainingPipeline:
         self.tracker = None
         self.model = None
         self.tokenizer = None
+        self._layer_mgr: Optional[LayeredModelAdapter] = None
+
         
     def setup_experiment_tracking(self):
         """Setup MLflow and W&B tracking."""
@@ -223,12 +225,13 @@ class FullTrainingPipeline:
         
         logger.info("Starting training")
         trainer.train()
-        
-                # Save only the trained adapter if we used the layered manager
-        if hasattr(self, "_layer_mgr") and self._layer_mgr is not None:
+
+        # Save only the trained adapter if we used the layered manager
+        if self._layer_mgr is not None:
             self._layer_mgr.save_active_adapter(output_dir)
         else:
             self.model.save_pretrained(output_dir)
+
         
         if self.tracker:
             # Log the saved adapter/tokenizer folder instead of pickling the in-memory model

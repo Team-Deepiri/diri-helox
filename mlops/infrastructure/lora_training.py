@@ -48,10 +48,48 @@ class LoRATrainer:
         self.target_modules = target_modules or ["q_proj", "v_proj", "k_proj", "o_proj"]
         self.model = None
         self.tokenizer = None
+
+    def load_base_model_and_tokenizer(self):
+        """Load the base model + tokenizer. If QLoRA, load 4-bit and prep for k-bit training."""
+        logger.info(f"Setting up base model: {self.base_model} (qlora={self.use_qlora})")
+
+        if self.use_qlora:
+            bnb_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.bfloat16,
+                bnb_4bit_use_double_quant=True
+            )
+
+            model = AutoModelForCausalLM.from_pretrained(
+                self.base_model,
+                quantization_config=bnb_config,
+                device_map="auto",
+                trust_remote_code=True
+            )
+
+            model = prepare_model_for_kbit_training(model)
+
+        else:
+            model = AutoModelForCausalLM.from_pretrained(
+                self.base_model,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+                trust_remote_code=True
+            )
+
+        tokenizer = AutoTokenizer.from_pretrained(
+            self.base_model,
+            trust_remote_code=True
+        )
+        tokenizer.pad_token = tokenizer.eos_token
+
+        logger.info("Base model + tokenizer loaded")
+        return model, tokenizer
     
     def setup_model(self):
         """Setup model with quantization and LoRA."""
-        logger.info("Setting up model", model=self.base_model, qlora=self.use_qlora)
+        logger.info(f"Setting up model: {self.base_model} (qlora={self.use_qlora})")
         
         if self.use_qlora:
             bnb_config = BitsAndBytesConfig(
@@ -106,7 +144,6 @@ class LoRATrainer:
                 truncation=True,
                 padding="max_length",
                 max_length=max_length,
-                return_tensors="pt"
             )
         
         tokenized = dataset.map(
