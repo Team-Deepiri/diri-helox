@@ -6,7 +6,21 @@ data preprocessing operations. These stages wrap and extend the existing
 preprocessing components.
 """
 
+import json
+import csv
+import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+
+# Optional pandas import for CSV/Parquet support
+try:
+    import pandas as pd
+    HAS_PANDAS = True
+except ImportError:
+    HAS_PANDAS = False
+    pd = None
+
+from .quality import QualityChecker
 from .base import (
     PreprocessingStage, 
     StageResult, 
@@ -32,6 +46,104 @@ class DataLoadingStage(PreprocessingStage):
         """Data loading has no dependencies - it's the first stage."""
         return []
     
+    def _validate_source(self, source: str) -> None:
+        """
+        Validate that the source file exists and is readable.
+        
+        Args:
+            source: Path to the source file
+            
+        Raises:
+            ValueError: If source is empty or invalid
+            FileNotFoundError: If source file doesn't exist
+            PermissionError: If source file is not readable
+        """
+        if not source:
+            raise ValueError("Source path is empty")
+        
+        # Convert to Path object for easier handling
+        path = Path(source)
+        
+        # Check if file exists
+        if not path.exists():
+            raise FileNotFoundError(f"Source file not found: {source}")
+        
+        # Check if it's a file (not directory)
+        if not path.is_file():
+            raise ValueError(f"Source path is not a file: {source}")
+        
+        # Check if readable
+        if not os.access(path, os.R_OK):
+            raise PermissionError(f"Cannot read source file: {source}")
+    
+    def _load_jsonl(self, file_path: str) -> List[Dict]:
+        """Load JSONL file (one JSON object per line)."""
+        data = []
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line_num, line in enumerate(f, 1):
+                line = line.strip()
+                if not line:  # Skip empty lines
+                    continue
+                try:
+                    data.append(json.loads(line))
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON on line {line_num} in {file_path}: {e}")
+        return data
+    
+    def _load_json(self, file_path: str) -> List[Dict]:
+        """Load JSON file (single array or object)."""
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = json.load(f)
+        
+        # Normalize: always return list of dicts
+        if isinstance(content, list):
+            return content
+        elif isinstance(content, dict):
+            return [content]  # Single object becomes list with one item
+        else:
+            raise ValueError(f"JSON file must contain array or object, got {type(content).__name__}")
+    
+    def _load_csv(self, file_path: str) -> List[Dict]:
+        """Load CSV file."""
+        if HAS_PANDAS:
+            # Using pandas (handles encoding, headers automatically)
+            df = pd.read_csv(file_path)
+            return df.to_dict('records')  # Convert DataFrame to list of dicts
+        else:
+            # Fallback to standard library
+            data = []
+            with open(file_path, 'r', encoding='utf-8') as f:
+                reader = csv.DictReader(f)
+                for row in reader:
+                    data.append(dict(row))
+            return data
+    
+    def _load_parquet(self, file_path: str) -> List[Dict]:
+        """Load Parquet file."""
+        if not HAS_PANDAS:
+            raise ImportError("pandas is required to load Parquet files. Install with: pip install pandas")
+        
+        df = pd.read_parquet(file_path)
+        return df.to_dict('records')  # Convert DataFrame to list of dicts
+    
+    def _load_from_source(self, source: str, format: str) -> List[Dict]:
+        """Load data from source based on format."""
+        # Validate source first
+        self._validate_source(source)
+        
+        # Dispatch to format-specific loader
+        format_lower = format.lower()
+        if format_lower == "jsonl":
+            return self._load_jsonl(source)
+        elif format_lower == "json":
+            return self._load_json(source)
+        elif format_lower == "csv":
+            return self._load_csv(source)
+        elif format_lower == "parquet":
+            return self._load_parquet(source)
+        else:
+            raise ValueError(f"Unsupported format: {format}")
+    
     def process(self, data: Any) -> StageResult:
         """
         Load data from the configured source.
@@ -43,13 +155,11 @@ class DataLoadingStage(PreprocessingStage):
             StageResult with loaded data
         """
         try:
-            # TODO: Implement actual data loading based on source and format
-            # For now, if data is provided, pass it through
+            # If data is provided, pass it through (existing behavior)
             if data is not None:
-                # Extract data and metadata if it's already ProcessedData
                 actual_data, original_metadata = self._extract_data_and_metadata(data)
                 metadata_updates = {
-                    "source": self.source,
+                    "source": self.source or "provided",
                     "format": self.format
                 }
                 return self._create_result(
@@ -57,12 +167,32 @@ class DataLoadingStage(PreprocessingStage):
                     original_metadata=original_metadata,
                     metadata_updates=metadata_updates
                 )
-            else:
-                # In a real implementation, load from source
-                raise NotImplementedError(
-                    "Data loading from source not yet implemented. "
-                    "Please provide initial_data to the pipeline."
-                )
+            
+            # Otherwise, load from source
+            if not self.source:
+                raise ValueError("No data source configured. Provide 'source' in config or pass data directly.")
+            
+            # Load data from source
+            loaded_data = self._load_from_source(self.source, self.format)
+            
+            # Validate we got data
+            if not loaded_data:
+                raise ValueError(f"Source file is empty: {self.source}")
+            
+            # Create metadata
+            source_path = Path(self.source)
+            metadata_updates = {
+                "source": str(source_path.absolute()),  # Store absolute path
+                "format": self.format,
+                "num_items": len(loaded_data),
+                "file_size": source_path.stat().st_size if source_path.exists() else 0
+            }
+            
+            return self._create_result(
+                processed_data=loaded_data,
+                original_metadata={},
+                metadata_updates=metadata_updates
+            )
         except Exception as e:
             return self._create_result(
                 processed_data=None,
@@ -88,6 +218,12 @@ class DataLoadingStage(PreprocessingStage):
         # Check if source is configured
         if not self.source:
             warnings.append("No data source configured")
+        else:
+            # Validate source file exists and is accessible
+            try:
+                self._validate_source(self.source)
+            except (FileNotFoundError, ValueError, PermissionError) as e:
+                errors.append(str(e))
         
         # Validate format
         supported_formats = ["jsonl", "json", "csv", "parquet"]
@@ -247,11 +383,28 @@ class DataValidationStage(PreprocessingStage):
     """
     Stage for validating data.
     This stage is responsible for validating the data to ensure it is clean and ready for processing.
+    Includes comprehensive quality checks using the QualityChecker framework.
     """
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         super().__init__(name="data_validation", config=config)
         self.required_fields = config.get("required_fields", ["text", "label"]) if config else ["text", "label"]
+        
+        # Initialize quality checker with configurable thresholds
+        self.enable_quality_check = config.get("enable_quality_check", True) if config else True
+        if self.enable_quality_check:
+            self.quality_checker = QualityChecker(
+                completeness_threshold=config.get("completeness_threshold", 0.95) if config else 0.95,
+                consistency_threshold=config.get("consistency_threshold", 0.90) if config else 0.90,
+                validity_threshold=config.get("validity_threshold", 1.0) if config else 1.0,
+                uniqueness_threshold=config.get("uniqueness_threshold", 0.98) if config else 0.98,
+                accuracy_threshold=config.get("accuracy_threshold", 0.90) if config else 0.90,
+                integrity_threshold=config.get("integrity_threshold", 1.0) if config else 1.0
+            )
+            self.quality_threshold = config.get("quality_threshold", 0.8) if config else 0.8
+            self.fail_on_low_quality = config.get("fail_on_low_quality", False) if config else False
+        else:
+            self.quality_checker = None
     
     def get_dependencies(self) -> List[str]:
         return ["data_cleaning"]
@@ -259,25 +412,89 @@ class DataValidationStage(PreprocessingStage):
     def process(self, data: Any) -> StageResult:
         """
         Validate the input data by checking structure and required fields.
+        Optionally performs comprehensive quality checks using QualityChecker.
         
         Args:
             data: Data from previous stage (usually ProcessedData or dict/list)
             
         Returns:
-            StageResult with validated data
+            StageResult with validated data and quality metrics
         """
         try:
             # Extract data and metadata using base class helper
             actual_data, original_metadata = self._extract_data_and_metadata(data)
             
-            # Process items using base class helper
+            # Process items using base class helper (basic validation)
             validated_data = self._process_items(actual_data, self._validate_single_item)
             
-            # Create result using base class helper
-            return self._create_result(
-                processed_data=validated_data,
-                original_metadata=original_metadata,
-                metadata_updates={"validated": True, "validation_stage": self.name}
+            # Prepare metadata updates
+            metadata_updates = {"validated": True, "validation_stage": self.name}
+            quality_scores = {}
+            validation_result = None
+            
+            # Run quality checks if enabled
+            if self.enable_quality_check and self.quality_checker:
+                try:
+                    # Get dataset ID from metadata or use default
+                    dataset_id = original_metadata.get("dataset_id", f"validation_{self.name}")
+                    
+                    # Run comprehensive quality check
+                    quality_report = self.quality_checker.check_quality(
+                        data=validated_data,
+                        dataset_id=dataset_id,
+                        schema=self.config.get("schema") if self.config else None,
+                        reference_data=self.config.get("reference_data") if self.config else None
+                    )
+                    
+                    # Extract quality scores
+                    quality_scores = quality_report.dimension_scores
+                    
+                    # Store quality report in metadata
+                    metadata_updates["quality_report"] = quality_report.to_dict()
+                    metadata_updates["quality_scores"] = quality_scores
+                    metadata_updates["quality_overall_score"] = quality_report.overall_score
+                    
+                    # Create validation result with quality information
+                    failed_metrics = [m.metric_name for m in quality_report.metrics if not m.passed]
+                    validation_result = ValidationResult(
+                        is_valid=quality_report.overall_score >= self.quality_threshold,
+                        errors=failed_metrics if failed_metrics else [],
+                        warnings=quality_report.recommendations,
+                        quality_scores=quality_scores
+                    )
+                    
+                    # Optionally fail the pipeline if quality is too low
+                    if self.fail_on_low_quality and quality_report.overall_score < self.quality_threshold:
+                        return StageResult(
+                            success=False,
+                            error=f"Data quality too low: {quality_report.overall_score:.2%} (threshold: {self.quality_threshold:.2%})",
+                            validation_result=validation_result,
+                            stage_name=self.name
+                        )
+                    
+                except Exception as quality_error:
+                    # If quality check fails, log warning but don't fail the stage
+                    metadata_updates["quality_check_error"] = str(quality_error)
+                    warnings = [f"Quality check failed: {str(quality_error)}"]
+                    validation_result = ValidationResult(
+                        is_valid=True,  # Basic validation passed
+                        warnings=warnings,
+                        quality_scores={}
+                    )
+            
+            # Create ProcessedData with quality metrics
+            processed_data_obj = ProcessedData(
+                data=validated_data,
+                metadata={**original_metadata, **metadata_updates},
+                quality_metrics=quality_scores
+            )
+            
+            # Create result with validation result
+            return StageResult(
+                success=True,
+                processed_data=processed_data_obj,
+                validation_result=validation_result,
+                stage_name=self.name
             )
             
         except Exception as e:
