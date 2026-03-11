@@ -1,6 +1,4 @@
-# Diri-Helox: ML Training & Research
-
-**Purpose**: ML training pipelines, model development, and research
+# Diri-Helox:
 
 ## Structure
 
@@ -94,4 +92,5 @@ python scripts/train_task_classifier.py
 - `diri-cyrex`: Runtime AI services (consumes models)
 - `deepiri-modelkit`: Shared contracts and utilities
 - `deepiri-synapse`: Streaming service
+
 
