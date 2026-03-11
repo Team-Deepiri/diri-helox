@@ -15,7 +15,7 @@ import numpy as np
 from datetime import datetime, timedelta
 
 # Import quality framework using absolute imports
-from .quality import (
+from pipelines.data_preprocessing.quality import (
     QualityChecker,
     QualityConfig,
     QualityCheckStage,
