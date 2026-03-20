@@ -1,0 +1,3 @@
+[submodule "deepiri-dataset-processor"]
+	path = deepiri-dataset-processor
+	url = git@github.com:Team-Deepiri/deepiri-dataset-processor.git
