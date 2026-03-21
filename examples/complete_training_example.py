@@ -21,8 +21,8 @@ from core.training_config import TrainingConfig, ModelConfig, DataConfig
 from training.unified_training_orchestrator import UnifiedTrainingOrchestrator
 from integrations.cyrex_rag_bridge import create_cyrex_rag_bridge
 from tokenization.tokenizer_manager import TokenizerManager
-from data_management.dataset_versioning_system import DatasetVersioningSystem
-from data_safety.data_leakage_detector import DataLeakageDetector
+from deepiri_dataset_processor.versioning.filesystem import DatasetVersioningSystem
+from deepiri_dataset_processor.safety.leakage_detector import DataLeakageDetector
 
 logging.basicConfig(
     level=logging.INFO,
