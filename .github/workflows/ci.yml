@@ -1,0 +1,54 @@
+name: Deepiri CI - diri-helox
+
+on:
+  push:
+    branches: [main, dev]
+  pull_request:
+    branches: [main, dev]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    name: Lint, Type Check, Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Configure Poetry
+        run: |
+          poetry config virtualenvs.create true
+          poetry config virtualenvs.in-project true
+
+      - name: Install dependencies
+        run: poetry install --with dev
+
+      - name: Lint (ruff)
+        run: poetry run ruff check .
+
+      - name: Format check (black)
+        run: poetry run black --check .
+
+      - name: Type check (mypy)
+        run: poetry run mypy .
+
+      - name: Unit tests (pytest)
+        run: poetry run pytest -m "not integration"
+
+      - name: Integration tests (pytest)
+        run: poetry run pytest -m integration
+
+      - name: Build package
+        run: poetry build
