@@ -57,7 +57,7 @@ jupyter = "^1.0.0"
 notebook = "^7.0.0"
 ipython = "^8.0.0"
 pytest = "^7.0.0"
-black = "^23.0.0"
+black = "^26.0.0"
 mypy = "^1.0.0"
 ruff = "^0.1.0"
 
@@ -85,11 +85,13 @@ build-backend = "poetry.core.masonry.api"
 line-length = 100
 target-version = ['py311']
 extend-exclude = '''
-/(
-    deepiri-dataset-processor
-    | docker_test_versioning\.py
-    | scripts/generate_synthetic_b2b_data_v2\.py
-)/
+(
+  /(
+      deepiri-dataset-processor
+  )/
+  | docker_test_versioning\.py
+  | scripts/generate_synthetic_b2b_data_v2\.py
+)
 '''
 
 [tool.mypy]
