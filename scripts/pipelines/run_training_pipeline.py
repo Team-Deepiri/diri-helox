@@ -7,7 +7,6 @@ import sys
 import subprocess
 from pathlib import Path
 import argparse
-import os
 
 # Get the directory where this script is located
 SCRIPT_DIR = Path(__file__).parent.absolute()
@@ -124,7 +123,7 @@ def main(
     print()
     print("📈 Use in production:")
     print("   from training.intent_classifier_trainer import IntentClassifierTrainer")
-    print(f"   router = get_command_router(")
+    print("   router = get_command_router(")
     print(f"       model_path='{model_dir}'")
     print("   )")
     print()

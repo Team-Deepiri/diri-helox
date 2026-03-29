@@ -5,8 +5,6 @@ Run: pytest tests/test_dynamic_pipeline.py -v
 import json
 import sys
 from pathlib import Path
-from unittest.mock import patch
-
 import pytest
 
 _HELOX_ROOT = Path(__file__).parent.parent

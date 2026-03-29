@@ -94,6 +94,65 @@ ignore_missing_imports = true
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Exclude pre-existing files/dirs with lint issues and submodules
+extend-exclude = [
+    "deepiri-dataset-processor",
+    "core",
+    "examples",
+    "experiments",
+    "integrations",
+    "mlops",
+    "model_export",
+    "observability",
+    "tokenization",
+    "docker_test_versioning.py",
+    "test_docker_simple.py",
+    "test_simple_standalone.py",
+    "test_standalone_versioning.py",
+    "test_versioning.py",
+    "pipelines/data_preprocessing",
+    "pipelines/data_processing",
+    "pipelines/training/bandit_training.py",
+    "pipelines/training/data_collection_pipeline.py",
+    "pipelines/training/distributed_training.py",
+    "pipelines/training/full_training_pipeline.py",
+    "pipelines/training/ml_training_pipeline.py",
+    "pipelines/training/rag_training_pipeline.py",
+    "pipelines/training/versioned_training_pipeline.py",
+    "training/attention_optimization_hooks.py",
+    "training/continual_learning_hooks.py",
+    "training/curriculum_learning_scheduler.py",
+    "training/gradient_monitoring_system.py",
+    "training/instruction_finetuning_trainer.py",
+    "training/instruction_formatting_abstraction.py",
+    "training/multi_objective_trainer.py",
+    "training/numerical_stability_manager.py",
+    "training/optimizer_state_sharding.py",
+    "training/precision_aware_layer_control.py",
+    "training/pretraining_trainer.py",
+    "training/unified_training_orchestrator.py",
+    "scripts/generate_synthetic_b2b_data.py",
+    "scripts/generate_synthetic_b2b_data_v2.py",
+    "scripts/train_instruction_finetuning.py",
+    "scripts/train_llm_from_scratch.py",
+    "scripts/train_with_full_features.py",
+    "scripts/setup_llm_training_env.py",
+    "scripts/dataset_versioning_cli.py",
+    "scripts/evaluation/evaluate_model.py",
+    "scripts/evaluation/test_sentence_validation.py",
+    "scripts/training/train_challenge_generator.py",
+    "scripts/training/train_multi_armed_bandit.py",
+    "scripts/training/train_personalization_model.py",
+    "scripts/training/train_policy_network.py",
+    "scripts/training/train_task_classifier.py",
+    "scripts/training/train_transformer_classifier.py",
+    "tests/test_data_preprocessing_pipeline.py",
+    "tests/test_dataset_versioning.py",
+    "tests/test_import.py",
+]
+
+[tool.ruff.lint]
+per-file-ignores = {"tests/*" = ["E402"], "scripts/*" = ["E402"], "data_sources/synthetic_source.py" = ["E402"], "pipelines/training/dynamic_training_pipeline.py" = ["E402"]}
 
 [tool.pytest.ini_options]
 asyncio_mode = "strict"

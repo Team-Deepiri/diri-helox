@@ -67,7 +67,7 @@ def main() -> int:
         samples = pipeline.load_data()
         samples = pipeline.preprocess(samples)
         train, val, test = pipeline.split_data(samples)
-        print(f"\nDry run complete.")
+        print("\nDry run complete.")
         print(f"  Total samples : {len(samples)}")
         print(f"  Train / Val / Test : {len(train)} / {len(val)} / {len(test)}")
         label_counts = {}
