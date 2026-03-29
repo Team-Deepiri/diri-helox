@@ -5,8 +5,7 @@ description = "ML training pipelines, model development, and research for Deepir
 readme = "README.md"
 authors = ["Deepiri Team"]
 license = "MIT"
-# Note: This is a script-based project, not a package
-# Packages are organized as modules in the root directory
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"

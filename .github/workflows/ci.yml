@@ -55,5 +55,3 @@ jobs:
       - name: Integration tests (pytest)
         run: poetry run pytest -m integration
 
-      - name: Build package
-        run: poetry build
