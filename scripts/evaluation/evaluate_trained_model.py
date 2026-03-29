@@ -6,9 +6,8 @@ Tests the trained model and generates detailed performance reports
 import sys
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List
 import numpy as np
-from collections import Counter, defaultdict
 
 # Add helox root to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -18,7 +17,7 @@ try:
     import torch
     from sklearn.metrics import (
         accuracy_score, precision_recall_fscore_support,
-        confusion_matrix, classification_report
+        confusion_matrix,
     )
     IMPORTS_AVAILABLE = True
 except ImportError as e:
@@ -312,7 +311,7 @@ def evaluate_model(
     print("✅ EVALUATION COMPLETE")
     print("=" * 80)
     print(f"\nReport saved to: {output_file}")
-    print(f"\n🎯 Model Performance Summary:")
+    print("\n🎯 Model Performance Summary:")
     print(f"   Accuracy: {metrics['overall']['accuracy']:.2%}")
     print(f"   F1 Score: {metrics['overall']['f1']:.4f}")
     print(f"   Confidence: {metrics['overall']['avg_confidence']:.2%}")

@@ -84,7 +84,7 @@ def check_cuda():
     try:
         import torch
         if torch.cuda.is_available():
-            print(f"✓ CUDA available")
+            print("✓ CUDA available")
             print(f"  Device: {torch.cuda.get_device_name(0)}")
             print(f"  CUDA Version: {torch.version.cuda}")
             print(f"  Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")

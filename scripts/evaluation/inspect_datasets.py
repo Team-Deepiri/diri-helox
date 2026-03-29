@@ -6,8 +6,8 @@ Comprehensive analysis and visualization of training datasets
 import json
 import sys
 from pathlib import Path
-from collections import Counter, defaultdict
-from typing import Dict, List, Optional
+from collections import Counter
+from typing import Dict, List
 import argparse
 
 # Add parent to path
@@ -88,32 +88,32 @@ class DatasetInspector:
         }
         
         # Print summary
-        print(f"\n📊 Summary:")
+        print("\n📊 Summary:")
         print(f"  Total examples: {stats['total_examples']}")
         print(f"  Unique labels: {len(label_counts)}")
         print(f"  Errors: {len(errors)}")
         
-        print(f"\n📏 Text Length Statistics:")
+        print("\n📏 Text Length Statistics:")
         print(f"  Min: {stats['text_length']['min']} chars")
         print(f"  Max: {stats['text_length']['max']} chars")
         print(f"  Mean: {stats['text_length']['mean']:.1f} chars")
         print(f"  Median: {stats['text_length']['median']:.1f} chars")
         
-        print(f"\n🏷️  Label Distribution:")
+        print("\n🏷️  Label Distribution:")
         for label_id, count in label_counts.most_common():
             label_name = self._get_label_name(label_id)
             percentage = (count / len(data)) * 100
             print(f"  {label_id} ({label_name}): {count} ({percentage:.1f}%)")
         
         if errors:
-            print(f"\n⚠️  Errors:")
+            print("\n⚠️  Errors:")
             for error in errors[:10]:  # Show first 10 errors
                 print(f"  {error}")
             if len(errors) > 10:
                 print(f"  ... and {len(errors) - 10} more errors")
         
         # Sample examples
-        print(f"\n📝 Sample Examples:")
+        print("\n📝 Sample Examples:")
         for i, item in enumerate(data[:5], 1):
             label = item.get('label', item.get('label_id', 'unknown'))
             text = item.get('text', '')[:80]
@@ -208,11 +208,11 @@ class DatasetInspector:
         print(f"Quality Score: {quality_score}/100")
         
         if quality_issues:
-            print(f"\n⚠️  Issues Found:")
+            print("\n⚠️  Issues Found:")
             for issue in quality_issues:
                 print(f"  - {issue}")
         else:
-            print(f"\n✅ No major quality issues detected")
+            print("\n✅ No major quality issues detected")
         
         return {
             "quality_score": quality_score,
@@ -305,7 +305,7 @@ def main():
         
         if not found_files:
             print("No dataset files found!")
-            print(f"\nUsage:")
+            print("\nUsage:")
             print(f"  python {sys.argv[0]} --file <filename>")
             print(f"  python {sys.argv[0]} --all")
             print(f"  python {sys.argv[0]} --compare file1.jsonl file2.jsonl")

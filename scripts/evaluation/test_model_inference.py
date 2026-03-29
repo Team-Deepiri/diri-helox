@@ -4,7 +4,6 @@ Interactive Model Testing Script
 Test your trained model with custom inputs
 """
 import sys
-import json
 from pathlib import Path
 
 # Add parent to path
@@ -153,7 +152,7 @@ def interactive_test(model_path: str = "models/intent_classifier"):
                 key=lambda x: x[1],
                 reverse=True
             )
-            print(f"\nTop 3 predictions:")
+            print("\nTop 3 predictions:")
             for i, (cat, prob) in enumerate(probs_sorted[:3], 1):
                 bar = "█" * int(prob * 40)
                 print(f"  {i}. {cat:<15} {prob:>6.2%} {bar}")

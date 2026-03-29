@@ -149,6 +149,8 @@ extend-exclude = [
     "tests/test_data_preprocessing_pipeline.py",
     "tests/test_dataset_versioning.py",
     "tests/test_import.py",
+    "evaluation/automatic_evaluation_harness.py",
+    "evaluation/inference_parity_tester.py",
 ]
 
 [tool.ruff.lint]

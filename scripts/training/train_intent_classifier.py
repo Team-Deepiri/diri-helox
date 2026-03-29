@@ -6,7 +6,6 @@ Fine-tunes DeBERTa for maximum reliability
 import os
 import sys
 import json
-import types
 import importlib.util
 from pathlib import Path
 
@@ -188,12 +187,12 @@ def train_intent_classifier(
     print("=" * 60)
     print(f"Model: {model_name}")
     print(f"Categories: {num_abilities}")
-    print(f"  Coding: debugging, refactoring, writing_code, programming, running_code, inspecting")
-    print(f"  Core: writing, learning_research, learning_study, learning_training, learning_practice")
-    print(f"  Team: creative, administrative, team_organization, team_collaboration, team_planning")
-    print(f"  Work: research, planning, communication, big_data_analytics, data_processing, design")
-    print(f"  Quality: qa, testing, validation, reporting, documentation, system_admin")
-    print(f"  Specialized: ux_ui, security, data_privacy")
+    print("  Coding: debugging, refactoring, writing_code, programming, running_code, inspecting")
+    print("  Core: writing, learning_research, learning_study, learning_training, learning_practice")
+    print("  Team: creative, administrative, team_organization, team_collaboration, team_planning")
+    print("  Work: research, planning, communication, big_data_analytics, data_processing, design")
+    print("  Quality: qa, testing, validation, reporting, documentation, system_admin")
+    print("  Specialized: ux_ui, security, data_privacy")
     print(f"Epochs: {num_epochs}")
     print()
     
@@ -331,7 +330,7 @@ def train_intent_classifier(
     # Evaluate
     print("\n📊 Evaluating...")
     eval_results = trainer.evaluate()
-    print(f"\nResults:")
+    print("\nResults:")
     print(f"  Validation Accuracy: {eval_results['eval_accuracy']:.4f}")
     print(f"  Validation F1: {eval_results['eval_f1']:.4f}")
     print(f"  Validation Precision: {eval_results['eval_precision']:.4f}")
@@ -378,8 +377,8 @@ def train_intent_classifier(
     print("\n✅ Training complete!")
     print(f"   Model saved to: {output_dir}")
     print(f"   Use this path in CommandRouter: {output_dir}")
-    print(f"\n   To use in production:")
-    print(f"   from app.services.command_router import get_command_router")
+    print("\n   To use in production:")
+    print("   from app.services.command_router import get_command_router")
     print(f"   router = get_command_router(model_path='{output_dir}')")
 
 if __name__ == "__main__":

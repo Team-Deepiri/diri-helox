@@ -12,9 +12,8 @@ import json
 import random
 from pathlib import Path
 from collections import Counter
-from typing import List, Dict, Optional
+from typing import List, Dict
 import sys
-import os
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -1069,7 +1068,7 @@ def generate_variations(
                     for paraphrase in paraphrases:
                         if is_valid_sentence(paraphrase):
                             variations.append(paraphrase)
-                except Exception as e:
+                except Exception:
                     pass  # Skip paraphrases if Ollama fails, continue with what we have
             
             # Use semantic verb extraction for additional variations (cached per category)
@@ -1087,7 +1086,7 @@ def generate_variations(
                                     if len(variations) >= num_variations:
                                         break
             
-        except Exception as e:
+        except Exception:
             # Silently fall back to default templates (don't spam errors)
             use_ollama = False
     
@@ -1261,7 +1260,7 @@ def generate_synthetic_dataset(
     print(f"Categories: {len(LABEL_MAPPING)} total")
     print(f"Semantic augmentation: {'Enabled (slower)' if use_ollama else 'Disabled (fast, template-based)'}")
     if use_ollama:
-        print(f"⚠️  Note: Ollama will be used selectively (every 20th template) for speed")
+        print("⚠️  Note: Ollama will be used selectively (every 20th template) for speed")
     print()
     
     # Initialize semantic analyzer if requested
@@ -1305,11 +1304,11 @@ def generate_synthetic_dataset(
                 sample_template = templates[0] if templates else ""
                 print(f"    Pre-caching semantic data for '{category}'...")
                 _ = semantic_analyzer.generate_semantic_prefixes(sample_template, category)
-                print(f"      ✓ Prefixes cached")
+                print("      ✓ Prefixes cached")
                 _ = semantic_analyzer.generate_semantic_suffixes(sample_template, category)
-                print(f"      ✓ Suffixes cached")
+                print("      ✓ Suffixes cached")
                 _ = semantic_analyzer.extract_semantic_verbs(sample_template, category)
-                print(f"      ✓ Verbs cached")
+                print("      ✓ Verbs cached")
             except Exception as e:
                 print(f"      ⚠ Pre-caching failed: {e}")
                 pass  # Continue even if pre-caching fails
@@ -1384,7 +1383,7 @@ def generate_synthetic_dataset(
     val_file = output_path / "classification_val.jsonl"
     test_file = output_path / "classification_test.jsonl"
     
-    print(f"\nSaving datasets...")
+    print("\nSaving datasets...")
     print(f"  Train: {len(train_data)} examples -> {train_file}")
     print(f"  Val: {len(val_data)} examples -> {val_file}")
     print(f"  Test: {len(test_data)} examples -> {test_file}")
@@ -1436,23 +1435,23 @@ def generate_synthetic_dataset(
     with open(metadata_file, 'w') as f:
         json.dump(metadata, f, indent=2)
     
-    print(f"\n✅ Dataset generation complete!")
-    print(f"\nDataset Statistics:")
+    print("\n✅ Dataset generation complete!")
+    print("\nDataset Statistics:")
     print(f"  Total examples: {total}")
     print(f"  Train: {len(train_data)} ({len(train_data)/total*100:.1f}%)")
     print(f"  Validation: {len(val_data)} ({len(val_data)/total*100:.1f}%)")
     print(f"  Test: {len(test_data)} ({len(test_data)/total*100:.1f}%)")
-    print(f"\nLabel Distribution:")
+    print("\nLabel Distribution:")
     for label, count in label_counts.most_common():
         print(f"  {label}: {count} examples")
-    print(f"\nFiles saved:")
+    print("\nFiles saved:")
     print(f"  Training data: {train_file}")
     print(f"  Validation data: {val_file}")
     print(f"  Test data: {test_file}")
     print(f"  Label mapping: {label_map_file}")
     print(f"  Metadata: {metadata_file}")
-    print(f"\nNext step: Run training")
-    print(f"  python scripts/training/train_intent_classifier.py")
+    print("\nNext step: Run training")
+    print("  python scripts/training/train_intent_classifier.py")
     
     return {
         "train": train_data,
