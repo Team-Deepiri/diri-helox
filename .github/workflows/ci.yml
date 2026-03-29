@@ -38,7 +38,9 @@ jobs:
           poetry config virtualenvs.in-project true
 
       - name: Install dependencies
-        run: poetry install --with dev
+        run: |
+          poetry install --with dev
+          poetry run pip install "transformers[torch]" --upgrade
 
       - name: Lint (ruff)
         run: poetry run ruff check .
