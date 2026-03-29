@@ -3,7 +3,7 @@ Factory function for creating DataSource instances from config dicts.
 """
 from __future__ import annotations
 
-from typing import Any, Dict
+from typing import Dict
 
 from .base import DataSource, DataSourceConfig
 from .static_source import StaticDataSource

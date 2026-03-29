@@ -5,14 +5,14 @@ Run: pytest tests/test_dynamic_pipeline.py -v
 import json
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
 _HELOX_ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(_HELOX_ROOT))
 
-from data_sources.base import DataSample, DataSourceConfig
+from data_sources.base import DataSample
 from pipelines.training.dynamic_training_pipeline import DynamicTrainingPipeline
 
 

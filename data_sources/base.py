@@ -37,17 +37,17 @@ class DataSource(ABC):
     @abstractmethod
     def load(self) -> List[DataSample]:
         """Load all data samples at once."""
-        ...
+        pass
 
     @abstractmethod
     def stream(self) -> Iterator[DataSample]:
         """Yield data samples one at a time."""
-        ...
+        pass
 
     @abstractmethod
     def get_info(self) -> Dict[str, Any]:
         """Return metadata about this source (count, categories, etc.)."""
-        ...
+        pass
 
     @property
     def name(self) -> str:

@@ -18,7 +18,7 @@ sys.path.insert(0, str(_HELOX_ROOT))
 
 # Skip the entire module if ML deps are unavailable
 try:
-    import torch
+    import torch  # noqa: F401
     import transformers  # noqa: F401
     import datasets  # noqa: F401
     _ML_AVAILABLE = True
