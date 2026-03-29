@@ -187,8 +187,11 @@ extend-exclude = [
 per-file-ignores = {"tests/*" = ["E402"], "scripts/*" = ["E402"], "data_sources/synthetic_source.py" = ["E402"], "pipelines/training/dynamic_training_pipeline.py" = ["E402"]}
 
 [tool.pytest.ini_options]
-asyncio_mode = "strict"
 testpaths = ["tests"]
 # Use importlib mode so the root __init__.py is not treated as a package init
 addopts = "--import-mode=importlib"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
 
