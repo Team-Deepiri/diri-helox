@@ -13,7 +13,7 @@ from transformers import (
     DataCollatorForLanguageModeling,
     BitsAndBytesConfig,
 )
-from peft import get_peft_model, prepare_model_for_kbit_training, TaskType, PeftModel
+from peft import prepare_model_for_kbit_training
 from mlops.infrastructure import LayeredModelAdapter, LayerConfig, LayerType
 from datasets import load_dataset, Dataset
 from accelerate import Accelerator
