@@ -11,7 +11,7 @@ from typing import Dict, List, Optional
 import argparse
 
 # Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 class DatasetInspector:
@@ -227,7 +227,7 @@ def main():
         "--data-dir",
         type=str,
         default="data",
-        help="Data directory (default: app/train/data)"
+        help="Data directory (default: data/datasets/raw)"
     )
     parser.add_argument(
         "--file",

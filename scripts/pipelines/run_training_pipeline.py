@@ -11,7 +11,7 @@ import os
 
 # Get the directory where this script is located
 SCRIPT_DIR = Path(__file__).parent.absolute()
-PROJECT_ROOT = SCRIPT_DIR.parent.parent.parent.parent.absolute()
+PROJECT_ROOT = SCRIPT_DIR.parent.parent.absolute()
 
 # Add parent to path
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -56,15 +56,14 @@ def main(
     print()
     print("This will:")
     print("  1. Generate synthetic training data")
-    print("  2. Prepare the dataset")
-    print("  3. Train the DeBERTa classifier")
+    print("  2. Train the intent classifier")
+    print("  3. Evaluate the model")
     print()
     
     # Get absolute paths to scripts
-    generate_script = SCRIPT_DIR / "generate_synthetic_data.py"
-    prepare_script = SCRIPT_DIR / "prepare_training_data.py"
-    train_script = SCRIPT_DIR / "train_intent_classifier.py"
-    evaluate_script = SCRIPT_DIR / "evaluate_trained_model.py"
+    generate_script = SCRIPT_DIR.parent / "generate_synthetic_data.py"
+    train_script = SCRIPT_DIR.parent / "training" / "train_intent_classifier.py"
+    evaluate_script = SCRIPT_DIR.parent / "evaluation" / "evaluate_trained_model.py"
     
     # Step 1: Generate synthetic data
     if generate_data:
@@ -78,15 +77,7 @@ def main(
             print("\n❌ Failed to generate synthetic data")
             return False
     
-    # Step 2: Prepare training data
-    cmd = f'python "{prepare_script}"'
-    if not run_command(cmd, "Prepare Training Data"):
-        print("\n❌ Failed to prepare training data")
-        print("   Note: If data was already generated, this might be okay")
-        data_path = PROJECT_ROOT / "app" / "train" / "data" / "classification_train.jsonl"
-        print(f"   Check if {data_path} exists")
-    
-    # Step 3: Train the model
+    # Step 2: Train the model
     if not skip_training:
         cmd = f'python "{train_script}"'
         cmd += f" --epochs {epochs}"
@@ -112,7 +103,7 @@ def main(
     print()
     print("✅ Model trained and evaluated successfully!")
     print()
-    model_dir = PROJECT_ROOT / "app" / "train" / "models" / "intent_classifier"
+    model_dir = PROJECT_ROOT / "models" / "intent_classifier"
     print(f"📁 Model location: {model_dir}")
     print(f"📊 Evaluation report: {model_dir / 'evaluation_report.json'}")
     print()
@@ -132,7 +123,7 @@ def main(
     print(f"   python \"{test_script}\"")
     print()
     print("📈 Use in production:")
-    print("   from app.services.command_router import get_command_router")
+    print("   from training.intent_classifier_trainer import IntentClassifierTrainer")
     print(f"   router = get_command_router(")
     print(f"       model_path='{model_dir}'")
     print("   )")

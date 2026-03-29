@@ -102,10 +102,11 @@ def create_directories():
     print("\nCreating directories...")
     
     directories = [
-        "app/train/data",
-        "app/train/data/exported",
-        "app/train/models",
-        "app/train/models/intent_classifier",
+        "data/datasets/raw",
+        "data/datasets/processed",
+        "data/datasets/pipeline",
+        "models",
+        "models/intent_classifier",
     ]
     
     for dir_path in directories:
@@ -162,13 +163,12 @@ def main():
     print("=" * 80)
     print()
     print("You're ready to train! Run:")
-    print("  python3 app/train/scripts/run_training_pipeline.py")
+    print("  python3 scripts/pipelines/run_training_pipeline.py")
     print()
     print("Or step by step:")
-    print("  1. python3 app/train/scripts/generate_synthetic_data.py")
-    print("  2. python3 app/train/scripts/prepare_training_data.py")
-    print("  3. python3 app/train/scripts/train_intent_classifier.py")
-    print("  4. python3 app/train/scripts/evaluate_trained_model.py")
+    print("  1. python3 scripts/generate_synthetic_data.py")
+    print("  2. python3 scripts/training/train_intent_classifier.py")
+    print("  3. python3 scripts/evaluation/evaluate_trained_model.py")
     print()
     
     return True

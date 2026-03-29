@@ -203,8 +203,8 @@ def train_intent_classifier(
     
     if not train_path.exists():
         print(f"❌ Training file not found: {train_file}")
-        print("   Run: python app/train/scripts/prepare_training_data.py")
-        print("   Or generate synthetic data first")
+        print("   Run: python scripts/generate_synthetic_data.py")
+        print("   Or: python scripts/pipelines/run_dynamic_pipeline.py --config configs/dynamic_pipeline_config.json")
         return
     
     if not val_path.exists():
