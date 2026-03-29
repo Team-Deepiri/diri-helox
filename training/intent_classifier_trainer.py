@@ -4,6 +4,7 @@ for 31-category task classification.
 
 Extracts and wraps the logic from scripts/training/train_intent_classifier.py.
 """
+
 from __future__ import annotations
 
 import importlib.util
@@ -70,15 +71,37 @@ from data_sources.base import DataSample  # noqa: E402
 
 # 31-category mapping shared across train / evaluate
 CATEGORY_MAP: Dict[int, str] = {
-    0: "debugging", 1: "refactoring", 2: "writing_code", 3: "programming",
-    4: "running_code", 5: "inspecting", 6: "writing", 7: "learning_research",
-    8: "learning_study", 9: "learning_training", 10: "learning_practice",
-    11: "creative", 12: "administrative", 13: "team_organization",
-    14: "team_collaboration", 15: "team_planning", 16: "research",
-    17: "planning", 18: "communication", 19: "big_data_analytics",
-    20: "data_processing", 21: "design", 22: "qa", 23: "testing",
-    24: "validation", 25: "reporting", 26: "documentation", 27: "system_admin",
-    28: "ux_ui", 29: "security", 30: "data_privacy",
+    0: "debugging",
+    1: "refactoring",
+    2: "writing_code",
+    3: "programming",
+    4: "running_code",
+    5: "inspecting",
+    6: "writing",
+    7: "learning_research",
+    8: "learning_study",
+    9: "learning_training",
+    10: "learning_practice",
+    11: "creative",
+    12: "administrative",
+    13: "team_organization",
+    14: "team_collaboration",
+    15: "team_planning",
+    16: "research",
+    17: "planning",
+    18: "communication",
+    19: "big_data_analytics",
+    20: "data_processing",
+    21: "design",
+    22: "qa",
+    23: "testing",
+    24: "validation",
+    25: "reporting",
+    26: "documentation",
+    27: "system_admin",
+    28: "ux_ui",
+    29: "security",
+    30: "data_privacy",
 }
 
 
@@ -97,7 +120,9 @@ def _prepare_device(force_cpu: bool = False) -> Dict[str, Any]:
         _ = test * 2
         del test
         torch.cuda.empty_cache()
-        info.update({"device": "cuda", "use_gpu": True, "gpu_name": gpu_name, "reason": "gpu_compatible"})
+        info.update(
+            {"device": "cuda", "use_gpu": True, "gpu_name": gpu_name, "reason": "gpu_compatible"}
+        )
     except Exception as e:
         info["reason"] = f"gpu_error:{e}"
     if not info["use_gpu"]:
@@ -108,7 +133,9 @@ def _prepare_device(force_cpu: bool = False) -> Dict[str, Any]:
 class _DeviceAwareTrainer(Trainer):
     """HuggingFace Trainer that respects detected device config."""
 
-    def __init__(self, *args, device_info: Optional[Dict] = None, force_cpu: bool = False, **kwargs):
+    def __init__(
+        self, *args, device_info: Optional[Dict] = None, force_cpu: bool = False, **kwargs
+    ):
         self.device_info = device_info or _prepare_device(force_cpu=force_cpu)
         training_args = kwargs.get("args")
         if training_args is not None:
@@ -252,15 +279,19 @@ class IntentClassifierTrainer:
 
         eval_res = self._trainer.evaluate() if self._trainer else {}
         with open(out / "training_info.json", "w") as f:
-            json.dump({
-                "model_name": self.model_name,
-                "num_labels": self.num_labels,
-                "num_epochs": self.num_epochs,
-                "batch_size": self.batch_size,
-                "learning_rate": self.learning_rate,
-                "eval_accuracy": float(eval_res.get("eval_accuracy", 0)),
-                "eval_f1": float(eval_res.get("eval_f1", 0)),
-            }, f, indent=2)
+            json.dump(
+                {
+                    "model_name": self.model_name,
+                    "num_labels": self.num_labels,
+                    "num_epochs": self.num_epochs,
+                    "batch_size": self.batch_size,
+                    "learning_rate": self.learning_rate,
+                    "eval_accuracy": float(eval_res.get("eval_accuracy", 0)),
+                    "eval_f1": float(eval_res.get("eval_f1", 0)),
+                },
+                f,
+                indent=2,
+            )
 
         print(f"Model saved to: {out}")
 

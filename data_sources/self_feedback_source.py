@@ -5,6 +5,7 @@ as training data. This enables the "pointed at its own output" requirement.
 It reads an inference log (JSONL with text + predicted_label + confidence)
 and returns only samples above the confidence threshold.
 """
+
 from __future__ import annotations
 
 import json

@@ -17,6 +17,7 @@ Usage:
 
 Run from the diri-helox root directory.
 """
+
 import argparse
 import json
 import sys

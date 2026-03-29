@@ -2,6 +2,7 @@
 Tests for the data source abstraction layer.
 Run: pytest tests/test_data_sources.py -v
 """
+
 import json
 import sys
 from pathlib import Path
@@ -18,10 +19,10 @@ from data_sources.static_source import StaticDataSource
 from data_sources.stream_source import StreamDataSource
 from data_sources.factory import create_data_source, create_data_sources_from_config
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _write_jsonl(path: Path, records: list) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -33,6 +34,7 @@ def _write_jsonl(path: Path, records: list) -> None:
 # ---------------------------------------------------------------------------
 # StaticDataSource
 # ---------------------------------------------------------------------------
+
 
 class TestStaticDataSource:
     def test_load_basic(self, tmp_path):
@@ -88,19 +90,21 @@ class TestStaticDataSource:
 # StreamDataSource (file mode)
 # ---------------------------------------------------------------------------
 
+
 class TestStreamDataSource:
     def test_load_raw_file(self, tmp_path):
-        records = [
-            {"text": f"agent said {i}", "quality_score": 0.8}
-            for i in range(5)
-        ]
+        records = [{"text": f"agent said {i}", "quality_score": 0.8} for i in range(5)]
         _write_jsonl(tmp_path / "raw_data.jsonl", records)
 
-        cfg = DataSourceConfig("stream", "s", {
-            "mode": "file",
-            "pipeline_dir": str(tmp_path),
-            "stream_type": "raw",
-        })
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "raw",
+            },
+        )
         src = StreamDataSource(cfg)
         samples = src.load()
         assert len(samples) == 5
@@ -113,12 +117,16 @@ class TestStreamDataSource:
         ]
         _write_jsonl(tmp_path / "raw_x.jsonl", records)
 
-        cfg = DataSourceConfig("stream", "s", {
-            "mode": "file",
-            "pipeline_dir": str(tmp_path),
-            "stream_type": "raw",
-            "min_quality": 0.4,
-        })
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "raw",
+                "min_quality": 0.4,
+            },
+        )
         samples = StreamDataSource(cfg).load()
         assert len(samples) == 1
         assert samples[0].text == "good data"
@@ -134,20 +142,28 @@ class TestStreamDataSource:
         ]
         _write_jsonl(tmp_path / "structured_data.jsonl", records)
 
-        cfg = DataSourceConfig("stream", "s", {
-            "mode": "file",
-            "pipeline_dir": str(tmp_path),
-            "stream_type": "structured",
-        })
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "structured",
+            },
+        )
         samples = StreamDataSource(cfg).load()
         assert len(samples) == 1
         assert "write unit tests" in samples[0].text
 
     def test_empty_pipeline_dir_returns_empty(self, tmp_path):
-        cfg = DataSourceConfig("stream", "s", {
-            "mode": "file",
-            "pipeline_dir": str(tmp_path / "nonexistent"),
-        })
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path / "nonexistent"),
+            },
+        )
         samples = StreamDataSource(cfg).load()
         assert samples == []
 
@@ -155,6 +171,7 @@ class TestStreamDataSource:
 # ---------------------------------------------------------------------------
 # SelfFeedbackDataSource
 # ---------------------------------------------------------------------------
+
 
 class TestSelfFeedbackDataSource:
     def test_filters_by_confidence(self, tmp_path):
@@ -166,10 +183,14 @@ class TestSelfFeedbackDataSource:
         p = tmp_path / "inference_log.jsonl"
         _write_jsonl(p, log)
 
-        cfg = DataSourceConfig("self_feedback", "sf", {
-            "inference_log_path": str(p),
-            "confidence_threshold": 0.90,
-        })
+        cfg = DataSourceConfig(
+            "self_feedback",
+            "sf",
+            {
+                "inference_log_path": str(p),
+                "confidence_threshold": 0.90,
+            },
+        )
         samples = SelfFeedbackDataSource(cfg).load()
         assert len(samples) == 1
         assert samples[0].text == "high conf"
@@ -177,9 +198,13 @@ class TestSelfFeedbackDataSource:
         assert samples[0].metadata["confidence"] == 0.95
 
     def test_missing_log_returns_empty(self, tmp_path):
-        cfg = DataSourceConfig("self_feedback", "sf", {
-            "inference_log_path": str(tmp_path / "no_file.jsonl"),
-        })
+        cfg = DataSourceConfig(
+            "self_feedback",
+            "sf",
+            {
+                "inference_log_path": str(tmp_path / "no_file.jsonl"),
+            },
+        )
         assert SelfFeedbackDataSource(cfg).load() == []
 
     def test_max_samples(self, tmp_path):
@@ -187,17 +212,22 @@ class TestSelfFeedbackDataSource:
         p = tmp_path / "log.jsonl"
         _write_jsonl(p, log)
 
-        cfg = DataSourceConfig("self_feedback", "sf", {
-            "inference_log_path": str(p),
-            "confidence_threshold": 0.0,
-            "max_samples": 3,
-        })
+        cfg = DataSourceConfig(
+            "self_feedback",
+            "sf",
+            {
+                "inference_log_path": str(p),
+                "confidence_threshold": 0.0,
+                "max_samples": 3,
+            },
+        )
         assert len(SelfFeedbackDataSource(cfg).load()) == 3
 
 
 # ---------------------------------------------------------------------------
 # CompositeDataSource
 # ---------------------------------------------------------------------------
+
 
 class TestCompositeDataSource:
     def _make_static(self, tmp_path: Path, n: int, label: int, weight: float) -> StaticDataSource:
@@ -234,6 +264,7 @@ class TestCompositeDataSource:
 # ---------------------------------------------------------------------------
 # Factory
 # ---------------------------------------------------------------------------
+
 
 class TestFactory:
     def test_create_static(self, tmp_path):

@@ -2,6 +2,7 @@
 Pytest configuration for diri-helox.
 Ensures the helox root is on sys.path so all modules can be imported directly.
 """
+
 import sys
 from pathlib import Path
 

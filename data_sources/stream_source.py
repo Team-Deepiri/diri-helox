@@ -9,6 +9,7 @@ Cyrex publishes to two streams:
   - pipeline.helox-training.raw        -> {id, text, source, quality_score, timestamp}
   - pipeline.helox-training.structured -> {id, instruction, input, output, category, ...}
 """
+
 from __future__ import annotations
 
 import json
@@ -133,9 +134,7 @@ class StreamDataSource(DataSource):
         try:
             import redis
         except ImportError:
-            raise ImportError(
-                "StreamDataSource live mode requires redis-py: pip install redis"
-            )
+            raise ImportError("StreamDataSource live mode requires redis-py: pip install redis")
 
         r = redis.from_url(self._redis_url)
         streams = []
@@ -153,8 +152,9 @@ class StreamDataSource(DataSource):
             for _msg_id, data in messages:
                 # Redis returns bytes; decode
                 decoded = {
-                    k.decode() if isinstance(k, bytes) else k:
-                    v.decode() if isinstance(v, bytes) else v
+                    k.decode() if isinstance(k, bytes) else k: (
+                        v.decode() if isinstance(v, bytes) else v
+                    )
                     for k, v in data.items()
                 }
                 # The payload may be JSON-encoded inside a 'payload' key

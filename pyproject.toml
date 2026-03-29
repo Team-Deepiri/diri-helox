@@ -84,6 +84,13 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 100
 target-version = ['py311']
+extend-exclude = '''
+/(
+    deepiri-dataset-processor
+    | docker_test_versioning\.py
+    | scripts/generate_synthetic_b2b_data_v2\.py
+)/
+'''
 
 [tool.mypy]
 python_version = "3.11"

@@ -1,6 +1,7 @@
 """
 StaticDataSource: reads JSONL files from disk.
 """
+
 from __future__ import annotations
 
 import json
@@ -47,14 +48,19 @@ class StaticDataSource(DataSource):
                 item = json.loads(line)
                 text = item.get(self._text_field, "")
                 label = item.get(self._label_field)
-                samples.append(DataSample(
-                    text=text,
-                    label=label if isinstance(label, int) else None,
-                    label_name=item.get("label_name"),
-                    metadata={k: v for k, v in item.items()
-                               if k not in (self._text_field, self._label_field, "label_name")},
-                    source=str(path),
-                ))
+                samples.append(
+                    DataSample(
+                        text=text,
+                        label=label if isinstance(label, int) else None,
+                        label_name=item.get("label_name"),
+                        metadata={
+                            k: v
+                            for k, v in item.items()
+                            if k not in (self._text_field, self._label_field, "label_name")
+                        },
+                        source=str(path),
+                    )
+                )
         return samples
 
     def load(self) -> List[DataSample]:
@@ -86,8 +92,11 @@ class StaticDataSource(DataSource):
                         text=text,
                         label=label if isinstance(label, int) else None,
                         label_name=item.get("label_name"),
-                        metadata={k: v for k, v in item.items()
-                                   if k not in (self._text_field, self._label_field, "label_name")},
+                        metadata={
+                            k: v
+                            for k, v in item.items()
+                            if k not in (self._text_field, self._label_field, "label_name")
+                        },
                         source=str(path),
                     )
                     count += 1

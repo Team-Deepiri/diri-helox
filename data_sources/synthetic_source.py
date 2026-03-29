@@ -3,6 +3,7 @@ SyntheticDataSource: generates synthetic training samples using the existing
 generate_synthetic_dataset logic from scripts/generate_synthetic_data.py.
 Does NOT duplicate code — imports the generator directly.
 """
+
 from __future__ import annotations
 
 import sys
@@ -25,6 +26,7 @@ def _get_generator():
     global _generator_module
     if _generator_module is None:
         import importlib.util
+
         spec = importlib.util.spec_from_file_location(
             "generate_synthetic_data",
             str(_HELOX_ROOT / "scripts" / "generate_synthetic_data.py"),
@@ -74,13 +76,15 @@ class SyntheticDataSource(DataSource):
                 if self._categories and label_name not in self._categories:
                     continue
 
-                samples.append(DataSample(
-                    text=item["text"],
-                    label=label_id,
-                    label_name=label_name,
-                    metadata={"split": split},
-                    source=f"synthetic:{self.name}",
-                ))
+                samples.append(
+                    DataSample(
+                        text=item["text"],
+                        label=label_id,
+                        label_name=label_name,
+                        metadata={"split": split},
+                        source=f"synthetic:{self.name}",
+                    )
+                )
 
         self._cached = samples
         return samples

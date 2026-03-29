@@ -11,6 +11,7 @@ Pipeline flow:
   5. Evaluate (ModelEvaluator)
   6. Export to MLflow + publish model-ready event (graceful if unavailable)
 """
+
 from __future__ import annotations
 
 import json
@@ -64,9 +65,7 @@ class DynamicTrainingPipeline:
 
     def setup_data_sources(self) -> None:
         """Instantiate all configured data sources."""
-        self._sources = create_data_sources_from_config(
-            self.config.get("data_sources", [])
-        )
+        self._sources = create_data_sources_from_config(self.config.get("data_sources", []))
 
     def load_data(self) -> List[DataSample]:
         """Collect samples from all sources."""
@@ -93,17 +92,20 @@ class DynamicTrainingPipeline:
         if cfg.get("use_text_cleaner", True):
             try:
                 from deepiri_dataset_processor.cleaning.text_cleaner import TextCleaner
+
                 cleaner = TextCleaner(min_length=min_len, remove_boilerplate=False)
                 cleaned = []
                 for s in samples:
                     text = cleaner.clean(s.text) or s.text.strip()
-                    cleaned.append(DataSample(
-                        text=text,
-                        label=s.label,
-                        label_name=s.label_name,
-                        metadata=s.metadata,
-                        source=s.source,
-                    ))
+                    cleaned.append(
+                        DataSample(
+                            text=text,
+                            label=s.label,
+                            label_name=s.label_name,
+                            metadata=s.metadata,
+                            source=s.source,
+                        )
+                    )
                 samples = cleaned
                 print(f"  Text cleaning applied: {len(samples)} samples remain")
             except ImportError:
@@ -112,6 +114,7 @@ class DynamicTrainingPipeline:
         if cfg.get("use_deduplication", True):
             try:
                 from deepiri_dataset_processor.deduplication.exact_dedup import ExactDeduplicator
+
                 dedup = ExactDeduplicator()
                 texts = [s.text for s in samples]
                 unique_texts = set(dedup.filter_duplicates(texts))
@@ -141,8 +144,8 @@ class DynamicTrainingPipeline:
         n_val = int(n * val_ratio)
 
         train = shuffled[:n_train]
-        val = shuffled[n_train: n_train + n_val]
-        test = shuffled[n_train + n_val:]
+        val = shuffled[n_train : n_train + n_val]
+        test = shuffled[n_train + n_val :]
 
         print(f"  Split: {len(train)} train / {len(val)} val / {len(test)} test")
         return train, val, test
@@ -156,6 +159,7 @@ class DynamicTrainingPipeline:
 
         if trainer_type == "intent_classifier":
             from training.intent_classifier_trainer import IntentClassifierTrainer
+
             self._trainer = IntentClassifierTrainer(**training_cfg)
         else:
             raise ValueError(f"Unknown trainer_type: '{trainer_type}'")
@@ -168,8 +172,11 @@ class DynamicTrainingPipeline:
         """Evaluate the trained model on test samples."""
         from evaluation.model_evaluator import ModelEvaluator
 
-        model_path = self._trainer.get_model_path() if self._trainer else \
-            self.config.get("training", {}).get("output_dir", "models/intent_classifier")
+        model_path = (
+            self._trainer.get_model_path()
+            if self._trainer
+            else self.config.get("training", {}).get("output_dir", "models/intent_classifier")
+        )
 
         self._evaluator = ModelEvaluator(model_path=model_path)
         metrics = self._evaluator.evaluate(test_samples)
@@ -192,6 +199,7 @@ class DynamicTrainingPipeline:
         if mlflow_cfg.get("enabled", False):
             try:
                 from mlops.infrastructure.experiment_tracker import ExperimentTracker
+
                 tracker = ExperimentTracker(
                     experiment_name=mlflow_cfg.get("experiment_name", pipeline_name),
                     tracking_uri=mlflow_cfg.get("tracking_uri", "http://localhost:5000"),
@@ -199,14 +207,17 @@ class DynamicTrainingPipeline:
                 tracker.start_run(run_name=pipeline_name)
                 # Log training params (filter non-serialisable values)
                 safe_params = {
-                    k: str(v) for k, v in self.config.get("training", {}).items()
+                    k: str(v)
+                    for k, v in self.config.get("training", {}).items()
                     if k != "trainer_type"
                 }
                 tracker.log_params(safe_params)
                 # Log overall metrics
                 overall = metrics.get("overall", {})
                 if overall:
-                    tracker.log_metrics({k: v for k, v in overall.items() if isinstance(v, (int, float))})
+                    tracker.log_metrics(
+                        {k: v for k, v in overall.items() if isinstance(v, (int, float))}
+                    )
                 if model_path:
                     tracker.log_model(model_path)
                 if mlflow_cfg.get("register_model", False) and tracker.current_run:
@@ -223,18 +234,21 @@ class DynamicTrainingPipeline:
             try:
                 import asyncio
                 from mlops.model_registry.model_registrar import ModelRegistrar
+
                 registrar = ModelRegistrar()
                 version = datetime.now().strftime("%Y%m%d_%H%M%S")
-                asyncio.run(registrar.register_and_publish(
-                    model_name=mlflow_cfg.get("model_name", "intent-classifier"),
-                    version=version,
-                    model_path=model_path,
-                    metadata={
-                        "accuracy": metrics.get("overall", {}).get("accuracy"),
-                        "f1": metrics.get("overall", {}).get("f1"),
-                        "pipeline_name": pipeline_name,
-                    },
-                ))
+                asyncio.run(
+                    registrar.register_and_publish(
+                        model_name=mlflow_cfg.get("model_name", "intent-classifier"),
+                        version=version,
+                        model_path=model_path,
+                        metadata={
+                            "accuracy": metrics.get("overall", {}).get("accuracy"),
+                            "f1": metrics.get("overall", {}).get("f1"),
+                            "pipeline_name": pipeline_name,
+                        },
+                    )
+                )
                 print("  Model-ready event published")
             except Exception as exc:
                 print(f"  Warning: model-ready event failed ({exc}) — continuing")

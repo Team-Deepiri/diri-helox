@@ -1,6 +1,7 @@
 """
 Factory function for creating DataSource instances from config dicts.
 """
+
 from __future__ import annotations
 
 from typing import Dict
@@ -31,9 +32,7 @@ def create_data_source(config: DataSourceConfig, child_sources=None) -> DataSour
 
     if source_type == "composite":
         if child_sources is None:
-            raise ValueError(
-                "CompositeDataSource requires child_sources to be provided"
-            )
+            raise ValueError("CompositeDataSource requires child_sources to be provided")
         return CompositeDataSource(config, child_sources)
 
     cls = _REGISTRY.get(source_type)

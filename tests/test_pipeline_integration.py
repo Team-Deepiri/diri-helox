@@ -7,6 +7,7 @@ Run slow tests:  pytest tests/test_pipeline_integration.py -v -m slow
 
 Requirements: torch, transformers, datasets, scikit-learn, numpy
 """
+
 import json
 import sys
 from pathlib import Path
@@ -21,6 +22,7 @@ try:
     import torch  # noqa: F401
     import transformers  # noqa: F401
     import datasets  # noqa: F401
+
     _ML_AVAILABLE = True
 except ImportError:
     _ML_AVAILABLE = False
@@ -33,10 +35,10 @@ pytestmark = pytest.mark.skipif(
 
 from pipelines.training.dynamic_training_pipeline import DynamicTrainingPipeline
 
-
 # ---------------------------------------------------------------------------
 # Full end-to-end pipeline (slow)
 # ---------------------------------------------------------------------------
+
 
 @pytest.mark.slow
 class TestEndToEndPipeline:
