@@ -26,7 +26,7 @@ try:
     print("✅ Successfully imported monitoring")
 
     # Test basic functionality
-    manager = DatasetVersionManager(db_url="sqlite:////tmp/docker_test.db", storage_backend="local")
+    DatasetVersionManager(db_url="sqlite:////tmp/docker_test.db", storage_backend="local")
     print("✅ DatasetVersionManager initialized")
 
     # Test dataset types

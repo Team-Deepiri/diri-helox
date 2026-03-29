@@ -60,7 +60,6 @@ class DatasetInspector:
                         label_id = self._get_label_id(label)
                     else:
                         label_id = "unknown"
-                        label_name = "unknown"
 
                     label_counts[label_id] += 1
 

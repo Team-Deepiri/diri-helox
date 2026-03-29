@@ -84,7 +84,6 @@ class ModelEvaluator:
 
         for example in dataset:
             prompt = example["prompt"]
-            reference = example["reference"]
 
             inputs = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model(**inputs, labels=inputs["input_ids"])

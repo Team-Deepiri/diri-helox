@@ -25,13 +25,10 @@ class ContextualBandit:
 
     def select_challenge(self, context: np.ndarray) -> str:
         """Select challenge using Thompson sampling."""
-        if context.shape[0] != self.context_dim:
-            context = np.pad(context, (0, max(0, self.context_dim - context.shape[0])))
-            context = context[: self.context_dim]
-
         samples = {}
         for ct in self.challenge_types:
-            samples[ct] = np.random.beta(self.alpha[ct], self.beta[ct])
+            theta = np.random.beta(self.alpha[ct], self.beta[ct])
+            samples[ct] = float(np.dot(theta, context[: self.context_dim]))
 
         return max(samples, key=samples.get)
 
