@@ -239,10 +239,8 @@ class IntentClassifierTrainer:
             greater_is_better=True,
             push_to_hub=False,
             report_to="none",
-            no_cuda=not use_gpu,
+            use_cpu=not use_gpu,
         )
-        if hasattr(training_args, "use_cpu"):
-            training_args.use_cpu = not use_gpu
 
         data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
         self._trainer = _DeviceAwareTrainer(
