@@ -41,6 +41,7 @@ from pipelines.training.dynamic_training_pipeline import DynamicTrainingPipeline
 
 
 @pytest.mark.slow
+@pytest.mark.integration
 class TestEndToEndPipeline:
     def test_synthetic_100_full_pipeline(self, tmp_path):
         """
