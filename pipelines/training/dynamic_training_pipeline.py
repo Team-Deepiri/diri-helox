@@ -50,9 +50,9 @@ class DynamicTrainingPipeline:
 
     def __init__(self, config: Dict[str, Any]) -> None:
         self.config = config
-        self._sources = []
-        self._trainer = None
-        self._evaluator = None
+        self._sources: List[Any] = []
+        self._trainer: Any = None
+        self._evaluator: Any = None
 
     @classmethod
     def from_file(cls, path: str) -> "DynamicTrainingPipeline":
@@ -164,7 +164,7 @@ class DynamicTrainingPipeline:
         else:
             raise ValueError(f"Unknown trainer_type: '{trainer_type}'")
 
-        metrics = self._trainer.train(train_samples, val_samples)
+        metrics: Dict[str, Any] = self._trainer.train(train_samples, val_samples)
         self._trainer.save()
         return metrics
 
@@ -179,7 +179,7 @@ class DynamicTrainingPipeline:
         )
 
         self._evaluator = ModelEvaluator(model_path=model_path)
-        metrics = self._evaluator.evaluate(test_samples)
+        metrics: Dict[str, Any] = self._evaluator.evaluate(test_samples)
 
         eval_cfg = self.config.get("evaluation", {})
         report_path = eval_cfg.get(

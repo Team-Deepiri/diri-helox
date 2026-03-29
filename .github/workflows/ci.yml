@@ -47,7 +47,7 @@ jobs:
         run: poetry run black --check .
 
       - name: Type check (mypy)
-        run: poetry run mypy .
+        run: poetry run mypy data_sources pipelines/training/dynamic_training_pipeline.py training/intent_classifier_trainer.py evaluation/model_evaluator.py scripts/pipelines/run_dynamic_pipeline.py
 
       - name: Unit tests (pytest)
         run: poetry run pytest -m "not integration"

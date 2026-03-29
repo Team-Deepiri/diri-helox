@@ -22,6 +22,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Dict
 
 # Ensure helox root is on the path
 _HELOX_ROOT = Path(__file__).parent.parent.parent
@@ -71,7 +72,7 @@ def main() -> int:
         print("\nDry run complete.")
         print(f"  Total samples : {len(samples)}")
         print(f"  Train / Val / Test : {len(train)} / {len(val)} / {len(test)}")
-        label_counts = {}
+        label_counts: Dict[str, int] = {}
         for s in samples:
             if s.label_name:
                 label_counts[s.label_name] = label_counts.get(s.label_name, 0) + 1

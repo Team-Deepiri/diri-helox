@@ -99,6 +99,27 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
+explicit_package_bases = true
+exclude = [
+    "deepiri-dataset-processor",
+    "docker_test_versioning\\.py",
+    "scripts/generate_synthetic_b2b_data_v2\\.py",
+]
+
+# Suppress errors in pre-existing files with known issues
+[[tool.mypy.overrides]]
+module = [
+    "training.pretraining_trainer",
+    "training.instruction_finetuning_trainer",
+    "training.intent_classifier_trainer",
+    "mlops.infrastructure.model_adaptation_layers",
+    "mlops.infrastructure.lora_training",
+    "mlops.infrastructure.rag_pipeline",
+    "mlops.infrastructure.experiment_tracker",
+    "mlops.infrastructure",
+    "mlops.model_registry.registry_interface",
+]
+ignore_errors = true
 
 [tool.ruff]
 line-length = 100

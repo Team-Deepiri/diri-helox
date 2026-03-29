@@ -13,7 +13,7 @@ from .synthetic_source import SyntheticDataSource
 from .self_feedback_source import SelfFeedbackDataSource
 from .composite_source import CompositeDataSource
 
-_REGISTRY: Dict[str, type] = {
+_REGISTRY: Dict[str, type[DataSource]] = {
     "static": StaticDataSource,
     "stream": StreamDataSource,
     "synthetic": SyntheticDataSource,
@@ -58,6 +58,7 @@ def create_data_sources_from_config(source_configs: list) -> list:
             weight=cfg.get("weight", 1.0),
         )
 
+        source: DataSource
         if config.source_type == "composite":
             child_cfgs = cfg.get("sources", [])
             children = create_data_sources_from_config(child_cfgs)

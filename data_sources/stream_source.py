@@ -149,7 +149,7 @@ class StreamDataSource(DataSource):
                 messages = r.xrange(stream_name, count=self._batch_size)
             except Exception:
                 continue
-            for _msg_id, data in messages:
+            for _msg_id, data in messages:  # type: ignore[union-attr]
                 # Redis returns bytes; decode
                 decoded = {
                     k.decode() if isinstance(k, bytes) else k: (
