@@ -139,7 +139,7 @@ def check_pipeline_dry_run(redis_url: str) -> None:
     samples = pipeline.preprocess(samples)
     train, val, test = pipeline.split_data(samples)
 
-    print(f"\n  Results:")
+    print("\n  Results:")
     print(f"  Loaded    : {len(samples)} samples")
     print(f"  Train     : {len(train)}")
     print(f"  Val       : {len(val)}")
@@ -173,7 +173,7 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    print(f"\nStream Endpoint Diagnostic")
+    print("\nStream Endpoint Diagnostic")
     print(f"Redis: {args.redis_url}")
 
     connected = check_redis_connection(args.redis_url)

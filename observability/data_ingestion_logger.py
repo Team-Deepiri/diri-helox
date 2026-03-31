@@ -112,6 +112,8 @@ class DataIngestionLogger:
             print(f"  Log written to: {self._log_path}")
 
     def _append_jsonl(self, entry: Dict[str, Any]) -> None:
+        if self._log_path is None:
+            return
         self._log_path.parent.mkdir(parents=True, exist_ok=True)
         with open(self._log_path, "a", encoding="utf-8") as f:
             f.write(json.dumps(entry) + "\n")

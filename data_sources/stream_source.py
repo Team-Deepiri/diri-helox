@@ -119,7 +119,7 @@ class StreamDataSource(DataSource):
         payload_str = decoded.get("payload", "")
         if payload_str:
             try:
-                return json.loads(payload_str)
+                return json.loads(payload_str)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
                 pass
         return decoded
