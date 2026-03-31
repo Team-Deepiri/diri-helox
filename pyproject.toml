@@ -60,6 +60,7 @@ pytest = "^7.0.0"
 black = "^26.0.0"
 mypy = "^1.0.0"
 ruff = "^0.1.0"
+fakeredis = ">=2.20.0"
 
 [tool.poetry.group.optional.dependencies]
 # Privacy & security (optional)

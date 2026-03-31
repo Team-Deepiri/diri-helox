@@ -15,6 +15,7 @@ Pipeline flow:
 from __future__ import annotations
 
 import json
+import os
 import random
 import sys
 from datetime import datetime
@@ -53,11 +54,25 @@ class DynamicTrainingPipeline:
         self._sources: List[Any] = []
         self._trainer: Any = None
         self._evaluator: Any = None
+        self._ingestion_logger: Any = None
 
     @classmethod
     def from_file(cls, path: str) -> "DynamicTrainingPipeline":
         with open(path) as f:
-            return cls(json.load(f))
+            config = json.load(f)
+        config = cls._expand_env_vars(config)
+        return cls(config)
+
+    @staticmethod
+    def _expand_env_vars(obj: Any) -> Any:
+        """Recursively expand ${VAR} environment variables in config string values."""
+        if isinstance(obj, str):
+            return os.path.expandvars(obj)
+        if isinstance(obj, dict):
+            return {k: DynamicTrainingPipeline._expand_env_vars(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [DynamicTrainingPipeline._expand_env_vars(v) for v in obj]
+        return obj
 
     # ------------------------------------------------------------------
     # Public API
@@ -69,13 +84,33 @@ class DynamicTrainingPipeline:
 
     def load_data(self) -> List[DataSample]:
         """Collect samples from all sources."""
+        pipeline_name = self.config.get("pipeline_name", "pipeline")
+        log_cfg = self.config.get("observability", {})
+        log_path = log_cfg.get("ingestion_log_path")
+        try:
+            from observability.data_ingestion_logger import DataIngestionLogger
+
+            self._ingestion_logger = DataIngestionLogger(
+                log_path=log_path, pipeline_name=pipeline_name
+            )
+        except ImportError:
+            self._ingestion_logger = None
+
         all_samples: List[DataSample] = []
         for source in self._sources:
-            print(f"  Loading source '{source.name}' ({source.source_type})...")
+            info = source.get_info()
+            mode = info.get("mode", "")
+            print(
+                f"  Loading source '{source.name}' ({source.source_type}{', ' + mode if mode else ''})..."
+            )
             samples = source.load()
             print(f"    -> {len(samples)} samples")
             all_samples.extend(samples)
         print(f"  Total loaded: {len(all_samples)} samples")
+
+        if self._ingestion_logger:
+            self._ingestion_logger.record("ingest", all_samples)
+
         return all_samples
 
     def preprocess(self, samples: List[DataSample]) -> List[DataSample]:
@@ -124,6 +159,9 @@ class DynamicTrainingPipeline:
             except ImportError:
                 print("  Warning: deepiri-dataset-processor not available, skipping deduplication")
 
+        if self._ingestion_logger:
+            self._ingestion_logger.record("preprocess", samples)
+
         return samples
 
     def split_data(
@@ -148,6 +186,11 @@ class DynamicTrainingPipeline:
         test = shuffled[n_train + n_val :]
 
         print(f"  Split: {len(train)} train / {len(val)} val / {len(test)} test")
+        if self._ingestion_logger:
+            self._ingestion_logger.record("split_train", train)
+            self._ingestion_logger.record("split_val", val)
+            self._ingestion_logger.record("split_test", test)
+            self._ingestion_logger.print_summary()
         return train, val, test
 
     def train(
