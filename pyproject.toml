@@ -11,6 +11,9 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.11"
 
+# Shared internal libraries
+deepiri-dataset-processor = { path = "../../deepiri-dataset-processor", develop = true }
+
 # ML Training Dependencies
 torch = "^2.0.0"
 transformers = "^4.35.0"
