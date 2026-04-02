@@ -1,7 +1,21 @@
+"""Export shim for preprocessing stages.
+"""
+
 from deepiri_dataset_processor.pipeline.stages import (  # noqa: F401
     DataCleaningStage,
-    DataValidationStage,
+    DataLoadingStage,
+    DataRoutingStage,
     DataTransformationStage,
+    DataValidationStage,
+    LabelValidationStage,
 )
 
-__all__ = ["DataCleaningStage", "DataValidationStage", "DataTransformationStage"]
+__all__ = [
+    "DataLoadingStage",
+    "DataCleaningStage",
+    "DataValidationStage",
+    "DataRoutingStage",
+    "LabelValidationStage",
+    "DataTransformationStage",
+]
+
