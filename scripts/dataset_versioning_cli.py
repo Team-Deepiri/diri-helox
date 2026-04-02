@@ -9,10 +9,8 @@ from pathlib import Path
 # Add the parent directory to the path so we can import utils
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from utils.dataset_versioning import (
-    DatasetVersionManager,
-    DatasetType,
-)
+from deepiri_dataset_processor.versioning.database import DatasetVersionManager
+from deepiri_dataset_processor.versioning.models import DatasetType
 
 @click.group()
 def dataset():
