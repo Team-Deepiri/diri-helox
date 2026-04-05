@@ -18,8 +18,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Path deps live in Poetry group "monorepo" (sibling repos). GITHUB_TOKEN cannot clone other private
-      # org repos without a PAT. CI installs without that group; tests that need dataset_processor skip.
+      # Sibling libs: pip install -e locally only (pyproject.toml); not declared in Poetry (path validation breaks CI).
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -35,7 +34,7 @@ jobs:
           poetry config virtualenvs.in-project true
 
       - name: Install dependencies
-        run: poetry install --with dev --without monorepo
+        run: poetry install --with dev
 
       - name: Lint (ruff)
         run: poetry run ruff check .
