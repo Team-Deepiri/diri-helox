@@ -1,16 +1,11 @@
 """
 Shared objective for HPO: run one training trial and return the metric to optimize.
 
-Used by both Optuna and Hyperopt. Run from project root (diri-helox) so that
-pipelines and mlops are importable.
+VersionedTrainingPipeline is imported lazily so `from mlops.hpo import ...` works
+without peft/torch until you actually run a trial.
 """
 
-from pathlib import Path
-from typing import Dict, Any, Optional
-
-# Assume project root (diri-helox) is on sys.path
-from pipelines.training.versioned_training_pipeline import VersionedTrainingPipeline
-
+from typing import Dict, Any
 
 # Default metric key to minimize (from Trainer.evaluate())
 DEFAULT_METRIC = "eval_loss"
@@ -34,6 +29,8 @@ def run_one_trial(
     Returns:
         The value to minimize (e.g. eval_loss). Raises if the metric is missing.
     """
+    from pipelines.training.versioned_training_pipeline import VersionedTrainingPipeline
+
     config = dict(config)
     if disable_tracking:
         config["mlflow_uri"] = ""
