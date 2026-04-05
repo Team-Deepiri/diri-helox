@@ -19,13 +19,18 @@ jobs:
         uses: actions/checkout@v4
 
       # pyproject.toml uses path = "../../deepiri-gpu-utils" and "../../deepiri-dataset-processor"
-      # (resolved from .../work/diri-helox/diri-helox → .../work/<name>). CI only checked out diri-helox,
-      # so Poetry could not resolve those paths. Clone siblings under the same parent as GHA's work root.
+      # (resolved from .../work/diri-helox/diri-helox → .../work/<name>). GITHUB_TOKEN cannot read other
+      # private org repos (clone returns "Repository not found"). Use org/repo secret DEEPIRI_CI_CLONE_PAT:
+      # fine-grained PAT with Contents: Read on deepiri-gpu-utils + deepiri-dataset-processor (or classic repo scope).
       - name: Checkout path dependencies (monorepo siblings)
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CLONE_TOKEN: ${{ secrets.DEEPIRI_CI_CLONE_PAT }}
         run: |
           set -euo pipefail
+          if [ -z "${CLONE_TOKEN}" ]; then
+            echo "::error::Secret DEEPIRI_CI_CLONE_PAT is not set. Add it (org or repo) with read access to Team-Deepiri/deepiri-gpu-utils and Team-Deepiri/deepiri-dataset-processor."
+            exit 1
+          fi
           ROOT="$(cd "${GITHUB_WORKSPACE}/../.." && pwd)"
           echo "Sibling root: ${ROOT}"
           clone() {
@@ -36,7 +41,7 @@ jobs:
               echo "Already present: ${dest}"
               return 0
             fi
-            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${org_repo}.git" "${dest}"
+            git clone --depth 1 "https://x-access-token:${CLONE_TOKEN}@github.com/${org_repo}.git" "${dest}"
           }
           clone "Team-Deepiri/deepiri-gpu-utils" "deepiri-gpu-utils"
           clone "Team-Deepiri/deepiri-dataset-processor" "deepiri-dataset-processor"
