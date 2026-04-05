@@ -18,6 +18,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # pyproject.toml uses path = "../../deepiri-gpu-utils" and "../../deepiri-dataset-processor"
+      # (resolved from .../work/diri-helox/diri-helox → .../work/<name>). CI only checked out diri-helox,
+      # so Poetry could not resolve those paths. Clone siblings under the same parent as GHA's work root.
+      - name: Checkout path dependencies (monorepo siblings)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          ROOT="$(cd "${GITHUB_WORKSPACE}/../.." && pwd)"
+          echo "Sibling root: ${ROOT}"
+          clone() {
+            local org_repo="$1"
+            local dest_name="$2"
+            local dest="${ROOT}/${dest_name}"
+            if [ -d "${dest}/.git" ]; then
+              echo "Already present: ${dest}"
+              return 0
+            fi
+            git clone --depth 1 "https://x-access-token:${GH_TOKEN}@github.com/${org_repo}.git" "${dest}"
+          }
+          clone "Team-Deepiri/deepiri-gpu-utils" "deepiri-gpu-utils"
+          clone "Team-Deepiri/deepiri-dataset-processor" "deepiri-dataset-processor"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
