@@ -6,9 +6,14 @@ automatically detecting and utilizing available hardware resources.
 """
 
 import logging
-import os
-from typing import Optional, Tuple
+from typing import Optional
+
 import torch
+
+try:
+    from deepiri_gpu_utils.torch_device import resolve_torch_device
+except ImportError:  # pragma: no cover - optional until env installs gpu-utils
+    resolve_torch_device = None  # type: ignore[misc, assignment]
 
 logger = logging.getLogger(__name__)
 
@@ -59,18 +64,32 @@ class DeviceManager:
                 logger.warning(
                     f"Forced device '{device_str}' not available, falling back to auto-detection"
                 )
-        
-        # Auto-detection
+
+        # Auto-detection (aligned with deepiri-gpu-utils torch_device + host detect)
+        if resolve_torch_device is not None:
+            decision = resolve_torch_device("auto")
+            for note in decision.notes:
+                logger.debug("deepiri_gpu_utils: %s", note)
+            dev = torch.device(decision.device)
+            if dev.type == "cuda":
+                logger.info("CUDA selected: %s", torch.cuda.get_device_name(0))
+            elif dev.type == "mps":
+                logger.info("Apple Silicon (MPS) selected")
+            else:
+                logger.info("Using CPU (auto fallback)")
+            return dev
+
+        logger.warning("deepiri-gpu-utils not installed; using legacy torch-only auto device detection")
         if torch.cuda.is_available():
             device = torch.device("cuda")
             logger.info(f"CUDA available: {torch.cuda.get_device_name(0)}")
             return device
-        
+
         if torch.backends.mps.is_available():
             device = torch.device("mps")
             logger.info("Apple Silicon (MPS) available")
             return device
-        
+
         logger.info("Using CPU (no GPU detected)")
         return torch.device("cpu")
     

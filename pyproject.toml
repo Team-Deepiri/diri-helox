@@ -11,6 +11,7 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.11"
 deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
+deepiri-gpu-utils = {path = "../../deepiri-gpu-utils", develop = true}
 
 # Shared internal libraries
 deepiri-dataset-processor = { path = "../../deepiri-dataset-processor", develop = true }

@@ -60,3 +60,8 @@ click>=8.1.0
 tqdm>=4.66.0
 pyyaml>=6.0
 python-dotenv>=1.0.0
+
+# GPU / device policy (shared with Cyrex detect scripts via deepiri-gpu-utils).
+# Poetry users: deepiri-gpu-utils is in pyproject.toml (path ../../deepiri-gpu-utils).
+# pip-only: pip install -e "../../deepiri-gpu-utils" or:
+# deepiri-gpu-utils @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git
