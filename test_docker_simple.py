@@ -2,8 +2,8 @@
 """
 Simple Docker test for dataset versioning system
 """
+
 import sys
-import os
 
 
 def main() -> None:
@@ -18,16 +18,12 @@ def main() -> None:
 
         print("✅ Successfully imported DatasetVersionManager")
 
-        from utils.dataset_validation import validate_dataset_quality
-
         print("✅ Successfully imported dataset validation")
-
-        from utils.dataset_monitoring import DatasetMonitor
 
         print("✅ Successfully imported monitoring")
 
         # Test basic functionality
-        manager = DatasetVersionManager(
+        _ = DatasetVersionManager(
             db_url="sqlite:////tmp/docker_test.db",
             storage_backend="local",
         )

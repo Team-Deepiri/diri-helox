@@ -35,11 +35,11 @@ CATEGORIES = {
 }
 
 PROCESS_OBJECTIVES = [
-     "Ensure consistent execution of this workflow while reducing operational risk.",
+    "Ensure consistent execution of this workflow while reducing operational risk.",
     "Standardize how this process is performed to improve accountability and traceability.",
     "Enable teams to execute this process efficiently while ensuring compliance with internal standards.",
     "Reduce errors and delays by defining clear steps and escalation criteria for this process.",
-    "Support reliable decision-making by ensuring this process is followed consistently."
+    "Support reliable decision-making by ensuring this process is followed consistently.",
 ]
 
 ACCESS_ROLES = ["employee", "manager", "admin", "legal", "finance"]
@@ -55,19 +55,19 @@ PROCESS_STEPS = {
         "Condirm prerequisites are met",
         "Verify required inputs and documentaion",
         "Complete each required task item",
-        "Record completion status"
+        "Record completion status",
     ],
     "Runbook": [
         "Identify the triggering condition",
         "Execute the prescribed operational actions",
         "Monitor system behavior and logs",
-        "Escalate if outcomes are not achieved"
+        "Escalate if outcomes are not achieved",
     ],
     "Workflow": [
         "Initiate the workflow with required inputs",
         "Route tasks to appropriate stakeholders",
         "Valiidate task completion and dependencies",
-        "Close the workflow or escalete as needed exceptions"
+        "Close the workflow or escalete as needed exceptions",
     ],
 }
 
@@ -76,18 +76,18 @@ PROCESS_STEPS = {
 # HELPERS
 # -----------------------------
 
+
 def random_governance():
     return {
-        "access_control": {
-            "roles": random.sample(ACCESS_ROLES, k=random.randint(1, 3))
-        },
+        "access_control": {"roles": random.sample(ACCESS_ROLES, k=random.randint(1, 3))},
         "retention_rules": random.choice(RETENTION_POLICIES),
         "deletion_capability": {
             "deletable": True,
             "method": random.choice(["soft_delete", "hard_delete"]),
-            "requires_approval": random.choice([True, False])
-        }
+            "requires_approval": random.choice([True, False]),
+        },
     }
+
 
 def generate_document_content(artifact_type: str, tenant_name: str) -> str:
     return f"""
@@ -113,6 +113,7 @@ Notes
 -----
 This document is maintained internally and reviewed periodically for accuracy.
 """.strip()
+
 
 def generate_structured_record_content(artifact_type: str, tenant_name: str) -> str:
     if artifact_type == "CRM Entry":
@@ -200,26 +201,27 @@ def generate_communication_content(artifact_type: str, tenant_name: str) -> str:
 
     if artifact_type == "Chat Log":
         return (
-            f"User: Noticing an issue with the current process.\n"
-            f"Support: Thanks for flagging this. Can you provide more details?\n"
-            f"User: The issue occurs intermittently during execution.\n"
-            f"Support: Acknowledged. We will investigate and follow up."
+            "User: Noticing an issue with the current process.\n"
+            "Support: Thanks for flagging this. Can you provide more details?\n"
+            "User: The issue occurs intermittently during execution.\n"
+            "Support: Acknowledged. We will investigate and follow up."
         )
 
     return f"{artifact_type} communication for {tenant_name}."
+
 
 def generate_decision_content(artifact_type: str, tenant_name: str) -> str:
     decision_contexts = [
         "A review was conducted following a reported issue.",
         "An operational request required management review.",
         "An exception was raised during a standard workflow.",
-        "A policy threshold was exceeded and required evaluation."
+        "A policy threshold was exceeded and required evaluation.",
     ]
 
     decisions = {
         "Approval": "The request was approved to proceed as proposed.",
         "Escalation": "The issue was escalated to senior stakeholders for further review.",
-        "Resolution": "The issue was resolved after corrective actions were applied."
+        "Resolution": "The issue was resolved after corrective actions were applied.",
     }
 
     return f"""
@@ -242,39 +244,6 @@ Outcome
 Appropriate follow-up actions were initiated and tracked to completion.
 """.strip()
 
-
-def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
-    if category == "documents":
-        return generate_document_content(artifact_type, tenant_name)
-
-    if category == "communications":
-        return generate_communication_content(artifact_type, tenant_name)
-
-    if category == "processes":
-        return (
-            f"{artifact_type} — {tenant_name}\n\n"
-            f"Objective\n"
-            f"---------\n"
-            f"Define a repeatable process used by {tenant_name} to ensure consistent execution, accountability, and timely escalation of issues.\n\n"
-            f"Steps\n"
-            f"-----\n"
-            f"1. Identify required inputs and stakeholders\n"
-            f"2. Execute the defined operational steps\n"
-            f"3. Validate outputs and log results\n"
-            f"4. Escalate issues if criteria are not met\n\n"
-            f"Ownership\n"
-            f"---------\n"
-            f"Owned by the responsible operational team and reviewed periodically."
-        )
-    if category == "structured_records":
-        return generate_structured_record_content(artifact_type, tenant_name)
-
-
-    return (
-        f"{artifact_type} for {tenant_name}. "
-        f"This {category[:-1]} defines internal guidance, context, and operational details "
-        f"used by the organization."
-    )
 
 def generate_content(category: str, artifact_type: str, tenant_name: str) -> str:
     if category == "documents":
@@ -338,9 +307,11 @@ def derive_training_item(artifact: dict) -> dict:
         "governance": artifact["governance"],
     }
 
+
 # -----------------------------
 # MAIN GENERATOR
 # -----------------------------
+
 
 def generate_b2b_dataset(
     tenants: int,
@@ -354,11 +325,12 @@ def generate_b2b_dataset(
     artifacts_file = output_dir / "b2b_artifacts.jsonl"
     training_file = output_dir / "b2b_training_items.jsonl"
 
-    tenants_info = [
-        (f"tenant-{i:03d}", f"TenantCorp{i:03d}") for i in range(1, tenants + 1)
-    ]
+    tenants_info = [(f"tenant-{i:03d}", f"TenantCorp{i:03d}") for i in range(1, tenants + 1)]
 
-    with open(artifacts_file, "w") as af, open(training_file, "w") if derive_training else open(artifacts_file, "a") as tf:
+    with (
+        open(artifacts_file, "w") as af,
+        open(training_file, "w") if derive_training else open(artifacts_file, "a") as tf,
+    ):
         for tenant_id, tenant_name in tenants_info:
             for category in CATEGORIES:
                 for _ in range(artifacts_per_category):
@@ -374,9 +346,11 @@ def generate_b2b_dataset(
     if derive_training:
         print(f"Training items saved to: {training_file}")
 
+
 # -----------------------------
 # PURGE UTILITY
 # -----------------------------
+
 
 def purge_tenant_data(output_dir: Path, tenant_id: str):
     for file_name in ["b2b_artifacts.jsonl", "b2b_training_items.jsonl"]:
@@ -394,6 +368,7 @@ def purge_tenant_data(output_dir: Path, tenant_id: str):
             f.writelines(remaining)
 
         print(f"🧹 Purged {tenant_id} from {file_name}")
+
 
 # -----------------------------
 # CLI

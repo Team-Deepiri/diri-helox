@@ -3,10 +3,12 @@
 Setup Training Environment
 Checks dependencies and prepares everything for training
 """
+
 import sys
 import subprocess
 from pathlib import Path
 import importlib.util
+
 
 def check_python_version():
     """Check Python version"""
@@ -18,13 +20,15 @@ def check_python_version():
     print(f"✓ Python {version.major}.{version.minor}.{version.micro}")
     return True
 
+
 def check_package(package_name, import_name=None):
     """Check if a package is installed"""
     if import_name is None:
         import_name = package_name
-    
+
     spec = importlib.util.find_spec(import_name)
     return spec is not None
+
 
 def check_poetry():
     """Check if Poetry is installed"""
@@ -34,18 +38,19 @@ def check_poetry():
     except (subprocess.CalledProcessError, FileNotFoundError):
         return False
 
+
 def install_requirements():
     """Install dependencies using Poetry"""
     print("\nInstalling dependencies with Poetry...")
     print("This may take a few minutes...\n")
-    
+
     # Check if Poetry is installed
     if not check_poetry():
         print("❌ Poetry is not installed")
         print("   Install it with: curl -sSL https://install.python-poetry.org | python3 -")
         print("   Or visit: https://python-poetry.org/docs/#installation")
         return False
-    
+
     try:
         # Install dependencies (without dev dependencies by default)
         subprocess.check_call(["poetry", "install", "--no-dev"])
@@ -56,10 +61,11 @@ def install_requirements():
         print("   Try running: poetry install")
         return False
 
+
 def check_dependencies():
     """Check if required packages are installed"""
     print("\nChecking dependencies...")
-    
+
     required_packages = [
         ("torch", "torch"),
         ("transformers", "transformers"),
@@ -67,7 +73,7 @@ def check_dependencies():
         ("numpy", "numpy"),
         ("scikit-learn", "sklearn"),
     ]
-    
+
     missing = []
     for package_name, import_name in required_packages:
         if check_package(package_name, import_name):
@@ -75,16 +81,18 @@ def check_dependencies():
         else:
             print(f"❌ {package_name} (missing)")
             missing.append(package_name)
-    
+
     return missing
+
 
 def check_cuda():
     """Check if CUDA is available"""
     print("\nChecking CUDA availability...")
     try:
         import torch
+
         if torch.cuda.is_available():
-            print(f"✓ CUDA available")
+            print("✓ CUDA available")
             print(f"  Device: {torch.cuda.get_device_name(0)}")
             print(f"  CUDA Version: {torch.version.cuda}")
             print(f"  Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.2f} GB")
@@ -97,22 +105,24 @@ def check_cuda():
         print("⚠️  PyTorch not installed yet")
         return False
 
+
 def create_directories():
     """Create necessary directories"""
     print("\nCreating directories...")
-    
+
     directories = [
         "app/train/data",
         "app/train/data/exported",
         "app/train/models",
         "app/train/models/intent_classifier",
     ]
-    
+
     for dir_path in directories:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
         print(f"✓ {dir_path}")
-    
+
     return True
+
 
 def main():
     """Main setup function"""
@@ -120,24 +130,24 @@ def main():
     print("🔧 TRAINING ENVIRONMENT SETUP")
     print("=" * 80)
     print()
-    
+
     # Check Python version
     if not check_python_version():
         print("\n❌ Setup failed: Python version too old")
         return False
-    
+
     # Check dependencies
     missing = check_dependencies()
-    
+
     if missing:
         print(f"\n⚠️  Missing {len(missing)} required package(s)")
         response = input("\nInstall missing dependencies? (y/n): ").strip().lower()
-        
-        if response == 'y':
+
+        if response == "y":
             if not install_requirements():
                 print("\n❌ Setup failed: Could not install dependencies")
                 return False
-            
+
             # Re-check
             missing = check_dependencies()
             if missing:
@@ -147,15 +157,15 @@ def main():
             print("\n❌ Setup cancelled: Dependencies required")
             print("   Run: poetry install")
             return False
-    
+
     # Check CUDA
     check_cuda()
-    
+
     # Create directories
     if not create_directories():
         print("\n❌ Setup failed: Could not create directories")
         return False
-    
+
     # Success
     print("\n" + "=" * 80)
     print("✅ SETUP COMPLETE!")
@@ -170,10 +180,10 @@ def main():
     print("  3. python3 app/train/scripts/train_intent_classifier.py")
     print("  4. python3 app/train/scripts/evaluate_trained_model.py")
     print()
-    
+
     return True
+
 
 if __name__ == "__main__":
     success = main()
     sys.exit(0 if success else 1)
-

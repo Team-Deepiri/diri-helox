@@ -6,15 +6,15 @@ and format abstraction for fine-tuning once, deploying many personas.
 """
 
 import logging
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, List, Optional
 from enum import Enum
-import json
 
 logger = logging.getLogger(__name__)
 
 
 class MessageRole(Enum):
     """Message roles in conversation."""
+
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
@@ -23,32 +23,32 @@ class MessageRole(Enum):
 
 class PromptFormat:
     """Base class for prompt formats."""
-    
+
     def format_messages(
         self,
         messages: List[Dict[str, str]],
     ) -> str:
         """
         Format messages into prompt string.
-        
+
         Args:
             messages: List of message dicts with 'role' and 'content'
-            
+
         Returns:
             Formatted prompt string
         """
         raise NotImplementedError
-    
+
     def parse_response(
         self,
         generated_text: str,
     ) -> str:
         """
         Parse response from generated text.
-        
+
         Args:
             generated_text: Generated text
-            
+
         Returns:
             Extracted response
         """
@@ -57,21 +57,21 @@ class PromptFormat:
 
 class ChatMLFormat(PromptFormat):
     """ChatML format (OpenAI-style)."""
-    
+
     def format_messages(
         self,
         messages: List[Dict[str, str]],
     ) -> str:
         """Format messages in ChatML format."""
         formatted = []
-        
+
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
             formatted.append(f"<|im_start|>{role}\n{content}<|im_end|>")
-        
+
         return "\n".join(formatted)
-    
+
     def parse_response(self, generated_text: str) -> str:
         """Parse response from ChatML format."""
         # Extract content after last assistant tag
@@ -85,7 +85,7 @@ class ChatMLFormat(PromptFormat):
 
 class AlpacaFormat(PromptFormat):
     """Alpaca instruction format."""
-    
+
     def format_messages(
         self,
         messages: List[Dict[str, str]],
@@ -94,19 +94,19 @@ class AlpacaFormat(PromptFormat):
         # Alpaca format: instruction + response
         instruction = ""
         response = ""
-        
+
         for msg in messages:
             role = msg.get("role", "user")
             content = msg.get("content", "")
-            
+
             if role == "user" or role == "system":
                 instruction += content + "\n"
             elif role == "assistant":
                 response = content
-        
+
         formatted = f"### Instruction:\n{instruction.strip()}\n\n### Response:\n{response}"
         return formatted
-    
+
     def parse_response(self, generated_text: str) -> str:
         """Parse response from Alpaca format."""
         if "### Response:" in generated_text:
@@ -119,10 +119,10 @@ class AlpacaFormat(PromptFormat):
 class InstructionFormatter:
     """
     Pluggable instruction formatter.
-    
+
     Supports multiple prompt formats and role-based handling.
     """
-    
+
     def __init__(
         self,
         format_type: str = "chatml",
@@ -130,7 +130,7 @@ class InstructionFormatter:
     ):
         """
         Initialize instruction formatter.
-        
+
         Args:
             format_type: Format type (chatml, alpaca, custom)
             custom_format: Custom format implementation
@@ -143,7 +143,7 @@ class InstructionFormatter:
             self.format = AlpacaFormat()
         else:
             raise ValueError(f"Unknown format type: {format_type}")
-    
+
     def format_instruction(
         self,
         instruction: str,
@@ -152,60 +152,68 @@ class InstructionFormatter:
     ) -> str:
         """
         Format instruction with optional context and examples.
-        
+
         Args:
             instruction: Instruction text
             context: Optional context
             examples: Optional few-shot examples
-            
+
         Returns:
             Formatted prompt
         """
         messages = []
-        
+
         if context:
-            messages.append({
-                "role": "system",
-                "content": context,
-            })
-        
+            messages.append(
+                {
+                    "role": "system",
+                    "content": context,
+                }
+            )
+
         if examples:
             for example in examples:
-                messages.append({
-                    "role": "user",
-                    "content": example.get("input", ""),
-                })
-                messages.append({
-                    "role": "assistant",
-                    "content": example.get("output", ""),
-                })
-        
-        messages.append({
-            "role": "user",
-            "content": instruction,
-        })
-        
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": example.get("input", ""),
+                    }
+                )
+                messages.append(
+                    {
+                        "role": "assistant",
+                        "content": example.get("output", ""),
+                    }
+                )
+
+        messages.append(
+            {
+                "role": "user",
+                "content": instruction,
+            }
+        )
+
         return self.format.format_messages(messages)
-    
+
     def format_conversation(
         self,
         messages: List[Dict[str, str]],
     ) -> str:
         """
         Format conversation history.
-        
+
         Args:
             messages: List of message dicts
-            
+
         Returns:
             Formatted conversation
         """
         return self.format.format_messages(messages)
-    
+
     def parse_response(self, generated_text: str) -> str:
         """Parse response from generated text."""
         return self.format.parse_response(generated_text)
-    
+
     def create_instruction_mask(
         self,
         formatted_text: str,
@@ -213,11 +221,11 @@ class InstructionFormatter:
     ) -> List[int]:
         """
         Create mask for instruction vs response tokens.
-        
+
         Args:
             formatted_text: Formatted text
             tokenizer_manager: Tokenizer manager
-            
+
         Returns:
             List of 0 (instruction) or 1 (response) for each token
         """
@@ -231,13 +239,12 @@ class InstructionFormatter:
         else:
             # Assume all instruction
             instruction_text = formatted_text
-        
+
         # Tokenize
         instruction_tokens = tokenizer_manager.encode(instruction_text, add_bos=True, add_eos=False)
         all_tokens = tokenizer_manager.encode(formatted_text, add_bos=True, add_eos=True)
-        
+
         # Create mask
         mask = [0] * len(instruction_tokens) + [1] * (len(all_tokens) - len(instruction_tokens))
-        
-        return mask[:len(all_tokens)]
 
+        return mask[: len(all_tokens)]

@@ -96,10 +96,47 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
+# Shim tree mirrors top-level ``data_processing``; mypy would see duplicate module names
+exclude = [
+    "pipelines/data_processing/",
+]
+
+# Legacy / script-heavy trees: type-check incrementally; core + utils stay checked
+[[tool.mypy.overrides]]
+module = [
+    "configs.*",
+    "data_management.*",
+    "data_processing.*",
+    "evaluation.*",
+    "examples.*",
+    "experiments.*",
+    "integrations.*",
+    "mlops.*",
+    "model_export.*",
+    "model_management.*",
+    "observability.*",
+    "pipelines.*",
+    "scripts.*",
+    "tests.*",
+    "tokenization.*",
+    "train.*",
+    "training.*",
+]
+ignore_errors = true
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+
+[tool.ruff.lint.per-file-ignores]
+# Imports after sys.path / importlib hacks (examples/scripts/tests)
+"examples/**/*.py" = ["E402"]
+"scripts/**/*.py" = ["E402"]
+"pipelines/data_preprocessing/test_quality.py" = ["E402"]
+"test_versioning.py" = ["E402"]
+"tests/**/*.py" = ["E402"]
+# Smoke script: imports exist only to verify the environment
+"tests/test_import.py" = ["F401"]
 
 [tool.pytest.ini_options]
 markers = [

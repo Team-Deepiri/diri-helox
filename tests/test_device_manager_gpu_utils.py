@@ -1,4 +1,5 @@
 """DeviceManager uses deepiri_gpu_utils.torch_device when installed."""
+
 from __future__ import annotations
 
 import unittest

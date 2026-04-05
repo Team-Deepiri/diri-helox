@@ -12,6 +12,7 @@ Run from diri-cyrex/app/train/utils:
 The script is intentionally simple so it can be used as a smoke test or as
 an example for integrating these utilities into pipelines.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -87,7 +88,7 @@ def run_demo(force_mock: bool = False) -> None:
         training_coverage=0.8,
         feature_quality=0.9,
         context_match=0.7,
-        historical_accuracy={1: 0.85}
+        historical_accuracy={1: 0.85},
     )
 
     print("Confidence attributes:")

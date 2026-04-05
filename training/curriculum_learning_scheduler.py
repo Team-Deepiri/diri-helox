@@ -7,9 +7,8 @@ and difficulty-based sample progression for improved convergence.
 
 import logging
 import numpy as np
-from typing import Dict, Any, List, Optional
+from typing import Optional
 from collections import deque
-import torch
 
 logger = logging.getLogger(__name__)
 
@@ -17,14 +16,14 @@ logger = logging.getLogger(__name__)
 class CurriculumLearningScheduler:
     """
     Implements curriculum learning for training.
-    
+
     Features:
     - Difficulty scoring per sample
     - Easy → hard progression
     - Topic balancing
     - Dynamic sequence length
     """
-    
+
     def __init__(
         self,
         initial_seq_len: int = 512,
@@ -34,7 +33,7 @@ class CurriculumLearningScheduler:
     ):
         """
         Initialize curriculum scheduler.
-        
+
         Args:
             initial_seq_len: Initial sequence length
             max_seq_len: Maximum sequence length
@@ -45,32 +44,32 @@ class CurriculumLearningScheduler:
         self.max_seq_len = max_seq_len
         self.growth_rate = growth_rate
         self.difficulty_window = difficulty_window
-        
+
         self.current_seq_len = initial_seq_len
         self.step = 0
         self.difficulty_scores: deque = deque(maxlen=difficulty_window)
-    
+
     def get_current_sequence_length(self, step: int) -> int:
         """
         Get current sequence length based on curriculum.
-        
+
         Args:
             step: Current training step
-            
+
         Returns:
             Current sequence length
         """
         self.step = step
-        
+
         # Gradually increase sequence length
         growth_steps = 1000
         if step % growth_steps == 0 and step > 0:
             new_len = int(self.current_seq_len * self.growth_rate)
             self.current_seq_len = min(new_len, self.max_seq_len)
             logger.info(f"Step {step}: Increased sequence length to {self.current_seq_len}")
-        
+
         return self.current_seq_len
-    
+
     def score_difficulty(
         self,
         text: str,
@@ -78,33 +77,33 @@ class CurriculumLearningScheduler:
     ) -> float:
         """
         Score difficulty of a sample.
-        
+
         Args:
             text: Sample text
             loss: Optional loss value for this sample
-            
+
         Returns:
             Difficulty score (0-1)
         """
         # Base difficulty on text characteristics
         word_count = len(text.split())
         char_count = len(text)
-        
+
         # Normalize
         word_score = min(word_count / 1000, 1.0)
         char_score = min(char_count / 5000, 1.0)
-        
+
         # Combine with loss if available
         if loss is not None:
             loss_score = min(loss / 10.0, 1.0)
             difficulty = (word_score + char_score + loss_score) / 3.0
         else:
             difficulty = (word_score + char_score) / 2.0
-        
+
         self.difficulty_scores.append(difficulty)
-        
+
         return difficulty
-    
+
     def should_include_sample(
         self,
         difficulty: float,
@@ -112,11 +111,11 @@ class CurriculumLearningScheduler:
     ) -> bool:
         """
         Determine if sample should be included based on curriculum.
-        
+
         Args:
             difficulty: Sample difficulty
             step: Current step
-            
+
         Returns:
             True if sample should be included
         """
@@ -124,14 +123,14 @@ class CurriculumLearningScheduler:
         initial_threshold = 0.3
         final_threshold = 1.0
         total_steps = 100000
-        
+
         threshold = initial_threshold + (final_threshold - initial_threshold) * min(
             step / total_steps,
             1.0,
         )
-        
+
         return difficulty <= threshold
-    
+
     def get_adaptive_batch_size(
         self,
         base_batch_size: int,
@@ -140,12 +139,12 @@ class CurriculumLearningScheduler:
     ) -> int:
         """
         Get adaptive batch size based on training progress.
-        
+
         Args:
             base_batch_size: Base batch size
             step: Current step
             memory_usage: Optional current memory usage (0-1)
-            
+
         Returns:
             Adaptive batch size
         """
@@ -164,14 +163,14 @@ class CurriculumLearningScheduler:
 class AdaptiveBatchScheduler:
     """
     Adaptive batch size scheduling.
-    
+
     Adjusts batch size based on:
     - Training progress
     - Memory usage
     - Gradient norms
     - Loss stability
     """
-    
+
     def __init__(
         self,
         initial_batch_size: int = 2,
@@ -180,7 +179,7 @@ class AdaptiveBatchScheduler:
     ):
         """
         Initialize adaptive batch scheduler.
-        
+
         Args:
             initial_batch_size: Initial batch size
             max_batch_size: Maximum batch size
@@ -189,10 +188,10 @@ class AdaptiveBatchScheduler:
         self.initial_batch_size = initial_batch_size
         self.max_batch_size = max_batch_size
         self.min_batch_size = min_batch_size
-        
+
         self.current_batch_size = initial_batch_size
         self.gradient_history: deque = deque(maxlen=100)
-    
+
     def update_batch_size(
         self,
         gradient_norm: float,
@@ -201,21 +200,21 @@ class AdaptiveBatchScheduler:
     ) -> int:
         """
         Update batch size based on metrics.
-        
+
         Args:
             gradient_norm: Current gradient norm
             memory_usage: Current memory usage (0-1)
             step: Current step
-            
+
         Returns:
             New batch size
         """
         self.gradient_history.append(gradient_norm)
-        
+
         # Increase if gradients are stable and memory allows
         if len(self.gradient_history) > 10:
             recent_stability = np.std(list(self.gradient_history)[-10:])
-            
+
             if recent_stability < 0.1 and memory_usage < 0.8:
                 new_size = min(self.current_batch_size * 2, self.max_batch_size)
                 if new_size != self.current_batch_size:
@@ -226,6 +225,5 @@ class AdaptiveBatchScheduler:
                 if new_size != self.current_batch_size:
                     logger.warning(f"Step {step}: Decreased batch size to {new_size} (memory)")
                     self.current_batch_size = new_size
-        
-        return self.current_batch_size
 
+        return self.current_batch_size

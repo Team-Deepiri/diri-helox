@@ -2,16 +2,17 @@
 Personalization Model Training Script
 Trains RL models for personalized challenge adaptation
 """
-import os
+
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
+
 def train_personalization_model():
     """
     Train reinforcement learning models for personalization.
-    
+
     This script should be implemented by ML Engineers to:
     1. Load user behavior data
     2. Train multi-armed bandit for challenge selection
@@ -37,6 +38,6 @@ def train_personalization_model():
     print("- Data Engineers: Prepare user behavior datasets")
     return
 
+
 if __name__ == "__main__":
     train_personalization_model()
-

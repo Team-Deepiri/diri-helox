@@ -12,10 +12,10 @@ class TrainingExample:
 
 def load_dataset(path: str) -> List[TrainingExample]:
     examples: List[TrainingExample] = []
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         for line in f:
             row = json.loads(line)
-            examples.append(TrainingExample(prompt=row['prompt'], completion=row['completion']))
+            examples.append(TrainingExample(prompt=row["prompt"], completion=row["completion"]))
     return examples
 
 
@@ -23,25 +23,27 @@ def to_openai_format(examples: List[TrainingExample]) -> Dict[str, Any]:
     # Converts to OpenAI fine-tuning JSONL messages format
     records = []
     for ex in examples:
-        records.append({
-            "messages": [
-                {"role": "system", "content": "You are tripblip Agent."},
-                {"role": "user", "content": ex.prompt},
-                {"role": "assistant", "content": ex.completion},
-            ]
-        })
+        records.append(
+            {
+                "messages": [
+                    {"role": "system", "content": "You are tripblip Agent."},
+                    {"role": "user", "content": ex.prompt},
+                    {"role": "assistant", "content": ex.completion},
+                ]
+            }
+        )
     return {"records": records}
 
 
 def save_records_jsonl(records: List[Dict[str, Any]], out_path: str):
-    with open(out_path, 'w', encoding='utf-8') as f:
+    with open(out_path, "w", encoding="utf-8") as f:
         for r in records:
             f.write(json.dumps(r, ensure_ascii=False) + "\n")
 
 
 def main():
-    dataset_path = os.getenv('TRAIN_DATASET', 'diri-cyrex/train/sample_dataset.jsonl')
-    output_jsonl = os.getenv('TRAIN_OUT', 'diri-cyrex/train/ft_records.jsonl')
+    dataset_path = os.getenv("TRAIN_DATASET", "diri-cyrex/train/sample_dataset.jsonl")
+    output_jsonl = os.getenv("TRAIN_OUT", "diri-cyrex/train/ft_records.jsonl")
 
     examples = load_dataset(dataset_path)
     formatted = to_openai_format(examples)
@@ -50,8 +52,5 @@ def main():
     print("Next steps: upload JSONL to OpenAI and start a fine-tune job.")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
-
-

@@ -9,6 +9,7 @@ Run from repo root (diri-helox):
   pytest tests/test_dataset_versioning.py -v
   python tests/test_dataset_versioning.py
 """
+
 import os
 import sys
 import tempfile
@@ -29,6 +30,7 @@ if str(_REPO_ROOT) not in sys.path:
 
 # Load dataset_versioning without importing the rest of utils (e.g. avoids numpy from confidence_classes)
 import importlib.util
+
 _spec = importlib.util.spec_from_file_location(
     "dataset_versioning",
     _REPO_ROOT / "utils" / "dataset_versioning.py",
