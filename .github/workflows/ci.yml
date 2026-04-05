@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   ci:
-    name: Lint, Type Check, Test & Build
+    name: Lint, Type Check, Test & Validate
     runs-on: ubuntu-latest
 
     steps:
@@ -52,5 +52,6 @@ jobs:
         run: |
           poetry run pytest -m integration || { code=$?; [ "$code" -eq 5 ] && exit 0 || exit "$code"; }
 
-      - name: Build package
-        run: poetry build
+      # package-mode = false: no sdist/wheel; validate pyproject + lock instead.
+      - name: Validate Poetry project
+        run: poetry check

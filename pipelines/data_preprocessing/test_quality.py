@@ -10,6 +10,13 @@ import os
 # Add parent directories to path to allow proper imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 
+import pytest
+
+pytest.importorskip(
+    "deepiri_dataset_processor",
+    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
+)
+
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta

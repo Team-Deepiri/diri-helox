@@ -19,7 +19,7 @@ import pytest
 
 pytest.importorskip(
     "deepiri_dataset_processor",
-    reason="Install Poetry group monorepo (path deps to sibling deepiri-dataset-processor)",
+    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
 )
 
 from pipelines.data_preprocessing import (

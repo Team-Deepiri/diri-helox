@@ -15,6 +15,13 @@ import tempfile
 import json
 from pathlib import Path
 
+import pytest
+
+pytest.importorskip(
+    "deepiri_dataset_processor",
+    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
+)
+
 # Ensure diri-helox is on path when run as script or from project root
 _REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(_REPO_ROOT) not in sys.path:

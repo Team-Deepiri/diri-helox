@@ -9,6 +9,13 @@ from pathlib import Path
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
+import pytest
+
+pytest.importorskip(
+    "deepiri_dataset_processor",
+    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
+)
+
 from utils.dataset_versioning import DatasetVersionManager, DatasetType
 
 def test_versioning():
