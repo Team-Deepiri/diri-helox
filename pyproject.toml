@@ -10,10 +10,6 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-deepiri-gpu-utils = {path = "../../deepiri-gpu-utils", develop = true}
-
-# Shared internal libraries
-deepiri-dataset-processor = { path = "../../deepiri-dataset-processor", extras = ["all"], develop = true }
 
 # ML Training Dependencies
 torch = "^2.0.0"
@@ -54,6 +50,12 @@ sentence-transformers = "^2.2.0"
 tqdm = "^4.66.0"
 pyyaml = "^6.0"
 python-dotenv = "^1.0.0"
+
+# Path deps to sibling clones (not available on GitHub Actions without PAT). CI uses: poetry install --with dev --without monorepo
+# Local monorepo: poetry install --with dev,monorepo
+[tool.poetry.group.monorepo.dependencies]
+deepiri-gpu-utils = { path = "../../deepiri-gpu-utils", develop = true }
+deepiri-dataset-processor = { path = "../../deepiri-dataset-processor", extras = ["all"], develop = true }
 
 [tool.poetry.group.dev.dependencies]
 # Development tools

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import unittest
+from types import SimpleNamespace
 from unittest.mock import patch
 
 try:
@@ -15,9 +16,8 @@ class TestDeviceManagerGpuUtils(unittest.TestCase):
     @patch("core.device_manager.resolve_torch_device")
     def test_auto_uses_resolve_torch_device(self, mock_resolve) -> None:
         from core.device_manager import DeviceManager
-        from deepiri_gpu_utils.torch_device import DeviceDecision
 
-        mock_resolve.return_value = DeviceDecision(
+        mock_resolve.return_value = SimpleNamespace(
             device="cpu", notes=["detect backend=cpu"], torch_available=True
         )
         dm = DeviceManager()

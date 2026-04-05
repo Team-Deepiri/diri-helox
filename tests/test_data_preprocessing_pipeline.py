@@ -15,6 +15,13 @@ import os
 # Add parent directory to path to import pipeline modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
+import pytest
+
+pytest.importorskip(
+    "deepiri_dataset_processor",
+    reason="Install Poetry group monorepo (path deps to sibling deepiri-dataset-processor)",
+)
+
 from pipelines.data_preprocessing import (
     PipelineOrchestrator,
     DataLoadingStage,
