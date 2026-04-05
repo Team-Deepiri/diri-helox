@@ -13,14 +13,14 @@ from .objective import run_one_trial, DEFAULT_METRIC
 
 # Default search space (ranges) for the versioned training pipeline
 DEFAULT_OPTUNA_SPACE = {
-    "learning_rate": (1e-5, 1e-2),  # log scale
-    "batch_size": (2, 16),           # int
-    "weight_decay": (0.0, 0.2),
-    "warmup_steps": (50, 500),
-    "num_epochs": (1, 5),
-    "lora_rank": (8, 32),
-    "lora_alpha": (16, 64),
-    "lora_dropout": (0.02, 0.15),
+    "learning_rate": (1e-5, 5e-4),      # log scale, QLoRA sweet spot
+    "batch_size": (2, 8),                # bounded by GPU memory
+    "weight_decay": (0.01, 0.1),         # AdamW standard range
+    "warmup_steps": (50, 200),           # ~5-10% of typical total steps
+    "num_epochs": (1, 3),                # QLoRA overfits fast on small data
+    "lora_rank": [8, 16, 32],            # categorical instead of range
+    "lora_alpha": [16, 32, 64],          # categorical, usually 2x rank
+    "lora_dropout": (0.03, 0.1),         # tight range around common values
 }
 
 
