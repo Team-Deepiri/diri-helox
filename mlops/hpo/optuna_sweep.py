@@ -4,7 +4,7 @@ Optuna-based hyperparameter sweeps for Helox.
 Runs trials in parallel via n_jobs. Minimizes eval_loss by default.
 """
 
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional
 import optuna
 from optuna.samplers import TPESampler
 
