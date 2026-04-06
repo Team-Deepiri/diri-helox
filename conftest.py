@@ -11,11 +11,7 @@ _HELOX_ROOT = Path(__file__).parent
 if str(_HELOX_ROOT) not in sys.path:
     sys.path.insert(0, str(_HELOX_ROOT))
 
-# Prevent pytest from collecting the root __init__.py which has relative imports
-# that can't be resolved when pytest treats the root as a standalone module.
 collect_ignore = [
-    "__init__.py",
-    # Pre-existing tests with broken imports or missing implementation
-    "tests/test_data_preprocessing_pipeline.py",
+    # Pre-existing test with broken/missing implementation
     "tests/test_dataset_versioning.py",
 ]

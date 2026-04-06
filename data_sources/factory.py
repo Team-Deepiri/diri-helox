@@ -7,17 +7,24 @@ from __future__ import annotations
 from typing import Dict
 
 from .base import DataSource, DataSourceConfig
-from .static_source import StaticDataSource
 from .stream_source import StreamDataSource
+from .postgres_source import PostgresDataSource
+from .milvus_source import MilvusDataSource
 from .synthetic_source import SyntheticDataSource
 from .self_feedback_source import SelfFeedbackDataSource
 from .composite_source import CompositeDataSource
+from .static_source import StaticDataSource
 
 _REGISTRY: Dict[str, type[DataSource]] = {
-    "static": StaticDataSource,
+    # Live data sources (primary)
     "stream": StreamDataSource,
+    "postgres": PostgresDataSource,
+    "milvus": MilvusDataSource,
+    # Supplementary / fallback
     "synthetic": SyntheticDataSource,
     "self_feedback": SelfFeedbackDataSource,
+    # Legacy file-based (for local testing / offline runs)
+    "static": StaticDataSource,
 }
 
 

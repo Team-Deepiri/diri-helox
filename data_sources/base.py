@@ -25,7 +25,7 @@ class DataSample:
 class DataSourceConfig:
     """Configuration for a single data source."""
 
-    source_type: str  # "static", "stream", "synthetic", "self_feedback", "composite"
+    source_type: str  # "stream", "postgres", "milvus", "synthetic", "self_feedback", "composite"
     name: str
     params: Dict[str, Any] = field(default_factory=dict)
     weight: float = 1.0
@@ -42,10 +42,16 @@ class DataSource(ABC):
         """Load all data samples at once."""
         pass
 
-    @abstractmethod
     def stream(self) -> Iterator[DataSample]:
-        """Yield data samples one at a time."""
-        pass
+        """
+        Yield data samples one at a time without buffering all in memory.
+
+        Subclasses should override this with a true lazy generator when the
+        underlying source supports it (e.g. Redis xread, Postgres server-side
+        cursor, Milvus paginated query). The default falls back to load() for
+        sources where the full dataset fits in memory.
+        """
+        yield from self.load()
 
     @abstractmethod
     def get_info(self) -> Dict[str, Any]:
