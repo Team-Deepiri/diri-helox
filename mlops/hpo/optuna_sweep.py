@@ -4,7 +4,7 @@ Optuna-based hyperparameter sweeps for Helox.
 Runs trials in parallel via n_jobs. Minimizes eval_loss by default.
 """
 
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Callable, List
 import optuna
 from optuna.samplers import TPESampler
 
@@ -24,8 +24,10 @@ DEFAULT_OPTUNA_SPACE = {
 }
 
 
-def _suggest_value(trial: optuna.Trial, key: str, space: tuple, log_scale: bool = False) -> Any:
-    """Suggest one value from the trial. space = (low, high) for float/int."""
+def _suggest_value(trial: optuna.Trial, key: str, space: Any, log_scale: bool = False) -> Any:
+    """Suggest one value from the trial. Handles tuples (range) and lists (categorical)."""
+    if isinstance(space, list):
+        return trial.suggest_categorical(key, space)
     low, high = space[0], space[1]
     if isinstance(low, int) and isinstance(high, int):
         return trial.suggest_int(key, low, high)
@@ -44,6 +46,7 @@ def run_optuna_sweep(
     log_scale_keys: Optional[set] = None,
     seed: Optional[int] = None,
     disable_tracking: bool = True,
+    callbacks: Optional[List[Callable]] = None,
 ) -> optuna.Study:
     """
     Run an Optuna study to minimize the given metric (e.g. eval_loss).
@@ -59,6 +62,7 @@ def run_optuna_sweep(
         log_scale_keys: Param names that use log scale (e.g. {"learning_rate"}).
         seed: Random seed for reproducibility.
         disable_tracking: If True, do not log each trial to MLflow/W&B.
+        callbacks: Optional list of callables(study, trial) invoked after each trial.
 
     Returns:
         The completed Optuna Study (study.best_params, study.best_value).
@@ -68,9 +72,9 @@ def run_optuna_sweep(
 
     def objective(trial: optuna.Trial) -> float:
         overrides = {}
-        for key, (low, high) in space.items():
+        for key, spec in space.items():
             overrides[key] = _suggest_value(
-                trial, key, (low, high), log_scale=(key in log_scale_keys)
+                trial, key, spec, log_scale=(key in log_scale_keys)
             )
         config = {**base_config, **overrides}
         return run_one_trial(
@@ -85,5 +89,10 @@ def run_optuna_sweep(
         study_name=study_name or "helox_hpo",
         sampler=sampler,
     )
-    study.optimize(objective, n_trials=n_trials, n_jobs=n_jobs)
+    study.optimize(
+        objective,
+        n_trials=n_trials,
+        n_jobs=n_jobs,
+        callbacks=callbacks or [],
+    )
     return study

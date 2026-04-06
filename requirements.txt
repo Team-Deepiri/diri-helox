@@ -56,6 +56,7 @@ alembic>=1.12.0
 
 # CLI Interface
 click>=8.1.0
+rich>=13.0.0
 
 # Utilities
 tqdm>=4.66.0
