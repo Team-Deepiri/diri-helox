@@ -1,5 +1,4 @@
-"""Export shim for preprocessing stages.
-"""
+"""Export shim for preprocessing stages."""
 
 from deepiri_dataset_processor.pipeline.stages import (  # noqa: F401
     DataCleaningStage,
@@ -18,4 +17,3 @@ __all__ = [
     "LabelValidationStage",
     "DataTransformationStage",
 ]
-

@@ -90,8 +90,8 @@ class PostgresDataSource(DataSource):
         finally:
             try:
                 conn.close()  # type: ignore[possibly-undefined]
-            except Exception:
-                pass
+            except Exception as exc:
+                print(f"  Warning: failed to close Postgres connection ({exc})")
         return samples
 
     def stream(self) -> Iterator[DataSample]:
@@ -114,8 +114,8 @@ class PostgresDataSource(DataSource):
         finally:
             try:
                 conn.close()  # type: ignore[possibly-undefined]
-            except Exception:
-                pass
+            except Exception as exc:
+                print(f"  Warning: failed to close Postgres connection ({exc})")
 
     def get_info(self) -> Dict[str, Any]:
         return {

@@ -9,4 +9,3 @@ from deepiri_dataset_processor.pipeline.orchestrator import (  # noqa: F401
 )
 
 __all__ = ["DatasetPipeline", "PipelineOrchestrator"]
-
