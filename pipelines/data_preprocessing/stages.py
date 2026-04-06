@@ -4,7 +4,7 @@ The canonical implementations live in ``deepiri_dataset_processor``.
 This file exists to keep legacy imports from ``pipelines.data_preprocessing`` working.
 """
 
-from deepiri_dataset_processor.pipeline.stages import (  # noqa: F401
+from deepiri_dataset_processor.pipeline import (  # noqa: F401
     DataCleaningStage,
     DataLoadingStage,
     DataRoutingStage,

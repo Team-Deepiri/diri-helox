@@ -18,14 +18,14 @@ from deepiri_dataset_processor.pipeline.base import (  # noqa: F401
     ValidationResult,
 )
 
-from deepiri_dataset_processor.pipeline.orchestrator import PipelineOrchestrator
-from deepiri_dataset_processor.pipeline.stages import (
+from deepiri_dataset_processor.pipeline import (
     DataCleaningStage,
     DataLoadingStage,
     DataRoutingStage,
     DataTransformationStage,
     DataValidationStage,
     LabelValidationStage,
+    PipelineOrchestrator,
 )
 
 
