@@ -12,9 +12,6 @@ license = "MIT"
 python = "^3.11"
 deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
 
-# Shared internal libraries
-deepiri-dataset-processor = { path = "../../deepiri-dataset-processor", develop = true }
-
 # ML Training Dependencies
 torch = "^2.0.0"
 transformers = "^4.35.0"
@@ -46,6 +43,8 @@ onnxruntime = "^1.15.0"
 # Event streaming (Synapse integration)
 redis = "^5.0.0"
 hiredis = "^2.2.0"
+grpcio = "^1.66.0"
+protobuf = "^5.27.0"
 
 # Embeddings for semantic deduplication
 sentence-transformers = "^2.2.0"
