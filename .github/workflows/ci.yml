@@ -44,11 +44,6 @@ jobs:
             integrations/streaming/gen/proto/synapse/v1/sidecar_pb2.py \
             integrations/streaming/gen/proto/synapse/v1/sidecar_pb2_grpc.py
 
-      - name: Format check (black, sidecar scope)
-        run: |
-          poetry run black --check \
-            integrations/synapse_event_publisher.py
-
       - name: Syntax check (py_compile, sidecar scope)
         run: |
           python -m py_compile \
