@@ -31,6 +31,16 @@ def _env_float(name: str, default: float) -> float:
     raw = os.getenv(name)
     if raw is None:
         return default
+    try:
+        return float(raw)
+    except ValueError:
+        logger.warning(
+            "Invalid float for %s=%r; using default=%s",
+            name,
+            raw,
+            default,
+        )
+        return default
 
 
 def _derive_grpc_addr(sidecar_url: str) -> str:
@@ -54,16 +64,6 @@ def _derive_grpc_addr(sidecar_url: str) -> str:
         pass
 
     return sidecar_url or "localhost:50051"
-    try:
-        return float(raw)
-    except ValueError:
-        logger.warning(
-            "Invalid float for %s=%r; using default=%s",
-            name,
-            raw,
-            default,
-        )
-        return default
 
 
 class SynapseEventPublisher:
