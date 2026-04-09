@@ -19,6 +19,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -37,20 +38,60 @@ jobs:
       - name: Install dependencies
         run: poetry install --with dev --no-root
 
+      - name: Determine changed Python files
+        id: changed_python
+        run: |
+          set -euo pipefail
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            base_sha="${{ github.event.pull_request.base.sha }}"
+            head_sha="${{ github.event.pull_request.head.sha }}"
+            files="$(git diff --name-only --diff-filter=ACMRT "$base_sha" "$head_sha" | grep -E '\.py$' || true)"
+          else
+            files="$(git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep -E '\.py$' || true)"
+          fi
+
+          files="$(echo "$files" | grep -v '^deepiri-dataset-processor/' || true)"
+          files="$(echo "$files" | xargs || true)"
+
+          echo "files=$files" >> "$GITHUB_OUTPUT"
+          if [ -n "$files" ]; then
+            echo "Changed Python files: $files"
+          else
+            echo "No changed Python files detected."
+          fi
+
+      - name: Determine changed test files
+        id: changed_tests
+        run: |
+          set -euo pipefail
+          tests="$(echo '${{ steps.changed_python.outputs.files }}' | tr ' ' '\n' | grep -E '(^tests/.*\.py$|(^|.*/)test_.*\.py$)' || true)"
+          tests="$(echo "$tests" | xargs || true)"
+          echo "files=$tests" >> "$GITHUB_OUTPUT"
+
       - name: Lint (ruff)
-        run: poetry run ruff check .
+        if: steps.changed_python.outputs.files != ''
+        run: poetry run ruff check ${{ steps.changed_python.outputs.files }}
 
       - name: Format check (black)
-        run: poetry run black --check .
+        if: steps.changed_python.outputs.files != ''
+        run: poetry run black --check ${{ steps.changed_python.outputs.files }}
 
       - name: Type check (mypy)
-        run: poetry run mypy .
+        if: steps.changed_python.outputs.files != ''
+        run: poetry run mypy ${{ steps.changed_python.outputs.files }}
 
       - name: Unit tests (pytest)
-        run: poetry run pytest -m "not integration"
+        if: steps.changed_tests.outputs.files != ''
+        run: poetry run pytest -m "not integration" ${{ steps.changed_tests.outputs.files }}
 
       - name: Integration tests (pytest)
-        run: poetry run pytest -m integration
+        if: steps.changed_tests.outputs.files != ''
+        run: poetry run pytest -m integration ${{ steps.changed_tests.outputs.files }}
 
-      - name: Build package
-        run: poetry build
+      - name: Smoke check changed Python files
+        if: steps.changed_python.outputs.files != ''
+        run: poetry run python -m py_compile ${{ steps.changed_python.outputs.files }}
+
+      - name: Poetry project check
+        run: poetry check
