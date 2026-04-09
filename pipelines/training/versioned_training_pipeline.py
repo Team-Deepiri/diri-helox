@@ -310,20 +310,21 @@ class VersionedTrainingPipeline:
         with open(metadata_path, "w") as f:
             json.dump(training_metadata, f, indent=2, default=str)
 
+        eval_results = trainer.evaluate()
         if self.tracker:
             self.tracker.log_model(self.model, "model")
-            eval_results = trainer.evaluate()
             self.tracker.log_metrics(eval_results)
 
             # Log dataset version as artifact
             if self.dataset_version:
                 self.tracker.log_artifact(str(metadata_path))
 
-        logger.info(
-            "Versioned training complete",
-            output_dir=output_dir,
-            dataset_version=self.dataset_version.version if self.dataset_version else "unknown",
-        )
+        # Include eval metric for HPO (e.g. minimize eval_loss)
+        training_metadata["eval_results"] = eval_results
+
+        logger.info("Versioned training complete",
+                   output_dir=output_dir,
+                   dataset_version=self.dataset_version.version if self.dataset_version else "unknown")
 
         return output_dir, training_metadata
 

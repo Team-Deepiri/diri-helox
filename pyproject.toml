@@ -9,10 +9,10 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
-
-# ML Training Dependencies
+deepiri-dataset-processor = { path = "./deepiri-dataset-processor", extras = ["all"], develop = true }
+# Training Dependencies
 torch = "^2.0.0"
+peft = "^0.7.0"
 transformers = ">=4.40.0,<5.0.0"
 accelerate = ">=0.34.0,<2.0.0"
 datasets = ">=2.14.0,<4.0.0"
@@ -45,6 +45,9 @@ hiredis = "^2.2.0"
 
 # Embeddings for semantic deduplication
 sentence-transformers = "^2.2.0"
+
+# TUI / CLI display
+rich = "^13.0.0"
 
 # Utilities
 tqdm = "^4.66.0"
