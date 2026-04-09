@@ -1,0 +1,47 @@
+name: diri-helox-codeql-config
+
+# Focus analysis on maintained Python modules, pipelines, and tests.
+paths:
+  - core
+  - data_management
+  - data_processing
+  - data_safety
+  - evaluation
+  - examples
+  - experiments
+  - integrations
+  - mlops
+  - model_export
+  - model_management
+  - observability
+  - pipelines
+  - scripts
+  - tests
+  - tokenization
+  - train
+  - training
+  - utils
+  - docker_test_versioning.py
+  - test_docker_simple.py
+  - test_simple_standalone.py
+  - test_standalone_versioning.py
+  - test_versioning.py
+
+# Exclude generated/build/cache/runtime and heavy data artifacts.
+paths-ignore:
+  - '**/__pycache__/**'
+  - '**/.pytest_cache/**'
+  - '**/.mypy_cache/**'
+  - '**/.venv/**'
+  - '**/venv/**'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/htmlcov/**'
+  - '**/.tox/**'
+  - '**/notebooks/**'
+  - '**/tmp/**'
+  - '**/data/**'
+  - '**/datasets/**'
+  - '**/mlruns/**'
+  - '**/*.ipynb'
+  - '**/*.min.js'
