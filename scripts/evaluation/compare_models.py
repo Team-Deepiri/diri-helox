@@ -7,7 +7,7 @@ import json
 import shutil
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
@@ -19,7 +19,10 @@ def load_json_if_exists(path: Path) -> Dict[str, Any]:
         return {}
     try:
         with open(path, encoding="utf-8") as handle:
-            return json.load(handle)
+            parsed = json.load(handle)
+            if isinstance(parsed, dict):
+                return cast(Dict[str, Any], parsed)
+            return {}
     except (json.JSONDecodeError, OSError) as exc:
         print(f"⚠️  Failed to parse {path}: {exc}")
         return {}
