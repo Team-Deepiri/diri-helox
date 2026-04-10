@@ -60,7 +60,9 @@ def extract_metrics(training_info: Dict[str, Any], eval_report: Dict[str, Any]) 
 
     avg_latency_ms = pick_number(benchmark.get("avg_latency_ms"), eval_report.get("avg_latency_ms"))
     p95_latency_ms = pick_number(benchmark.get("p95_latency_ms"), eval_report.get("p95_latency_ms"))
-    throughput_per_sec = pick_number(benchmark.get("throughput_per_sec"), eval_report.get("throughput_per_sec"))
+    throughput_per_sec = pick_number(
+        benchmark.get("throughput_per_sec"), eval_report.get("throughput_per_sec")
+    )
 
     quality = pick_number(f1, accuracy)
 
@@ -110,10 +112,15 @@ def build_model_record(model_path: Path) -> Dict[str, Any]:
 
 def rank_models(models: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Rank models by efficiency first, then quality metrics."""
+
     def score(record: Dict[str, Any]) -> Any:
         metrics = record["metrics"]
         return (
-            metrics.get("efficiency_score") if metrics.get("efficiency_score") is not None else -1.0,
+            (
+                metrics.get("efficiency_score")
+                if metrics.get("efficiency_score") is not None
+                else -1.0
+            ),
             metrics.get("f1") if metrics.get("f1") is not None else -1.0,
             metrics.get("accuracy") if metrics.get("accuracy") is not None else -1.0,
             record["name"],
