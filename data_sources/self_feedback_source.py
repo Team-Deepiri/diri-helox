@@ -13,10 +13,13 @@ ModelRegistry and use its co-located inference log.
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
 from .base import DataSample, DataSource, DataSourceConfig
+
+logger = logging.getLogger(__name__)
 
 
 class SelfFeedbackDataSource(DataSource):
@@ -71,8 +74,12 @@ class SelfFeedbackDataSource(DataSource):
                 candidate = Path(model_dir) / "inference_log.jsonl"
                 if candidate.exists():
                     return candidate
-        except Exception:
-            pass
+        except Exception as exc:
+            # Best-effort lookup: if registry access fails, fall back to configured path.
+            logger.debug(
+                "SelfFeedbackDataSource: failed to resolve log path from model registry",
+                exc_info=exc,
+            )
 
         return None
 
