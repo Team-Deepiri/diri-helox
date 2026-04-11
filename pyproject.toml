@@ -9,8 +9,11 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-deepiri-dataset-processor = {git = "git@github.com:Team-Deepiri/deepiri-dataset-processor.git", rev = "be9468892691a51a7590628c0cc4875bc3093f5d", extras = ["all"]}
-deepiri-modelkit = {git = "git@github.com:Team-Deepiri/deepiri-modelkit.git", rev = "6e931b1d346b2ad84a7912eb912bd576e620ce39"}
+# Submodule pinned to rev be94688 (see .gitmodules + git submodule status).
+# Using path dep so CI can install from the already-checked-out submodule
+# without requiring a separate git clone with cross-repo credentials.
+# deepiri-modelkit is imported via try/except in core/gpu_utils.py — no hard dep needed.
+deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
 
 # ML Training Dependencies
 torch = "^2.0.0"
