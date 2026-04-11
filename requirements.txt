@@ -61,7 +61,7 @@ tqdm>=4.66.0
 pyyaml>=6.0
 python-dotenv>=1.0.0
 
-# GPU / device policy (shared with Cyrex detect scripts via deepiri-gpu-utils).
-# Poetry users: deepiri-gpu-utils is in pyproject.toml (path ../../deepiri-gpu-utils).
-# pip-only: pip install -e "../../deepiri-gpu-utils" or:
-# deepiri-gpu-utils @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git
+# GPU / device policy (shared with Cyrex via deepiri-gpu-utils). Poetry pins git revs in pyproject.toml.
+# pip-only (match pyproject revs when bumping):
+deepiri-gpu-utils @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git@98dc2f239ac585301024bcb538aa92c994034465
+deepiri-dataset-processor[all] @ git+https://github.com/Team-Deepiri/deepiri-dataset-processor.git@main

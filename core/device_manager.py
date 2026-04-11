@@ -1,8 +1,11 @@
 """
 Device management utilities with automatic CPU/GPU detection.
 
-This module provides intelligent device selection and management for training,
-automatically detecting and utilizing available hardware resources.
+Training selects a torch device using ``deepiri_gpu_utils`` when installed:
+NVIDIA (CUDA), AMD (ROCm stacks expose a CUDA-compatible device to PyTorch, which
+gpu-utils resolves via ``detect`` / ``torch_device``), Apple Silicon (MPS), or CPU.
+Driver installation and vendor-specific setup live in ``deepiri-gpu-utils`` (CLI
+``detect`` / ``setup``), not in Helox.
 """
 
 import logging
@@ -22,8 +25,9 @@ class DeviceManager:
     """
     Manages device selection and configuration for training.
 
-    Automatically detects available hardware and selects optimal device.
-    Supports both CPU and GPU (CUDA/MPS) training with fallback logic.
+    Uses ``deepiri_gpu_utils.resolve_torch_device`` when available (NVIDIA CUDA,
+    AMD ROCm mapped to PyTorch CUDA, MPS, CPU). Falls back to plain torch heuristics
+    if gpu-utils is not installed.
     """
 
     def __init__(self, force_device: Optional[str] = None):
@@ -31,7 +35,7 @@ class DeviceManager:
         Initialize device manager.
 
         Args:
-            force_device: Optional device override ('cpu', 'cuda', 'mps')
+            force_device: Optional device override ('cpu', 'cuda', 'mps').
         """
         self.force_device = force_device
         self.device = self._detect_optimal_device()
@@ -45,9 +49,9 @@ class DeviceManager:
 
         Priority:
         1. Forced device (if specified)
-        2. CUDA (if available)
-        3. MPS (Apple Silicon, if available)
-        4. CPU (fallback)
+        2. When gpu-utils is installed: ``resolve_torch_device('auto')`` (includes
+           ROCm hosts where PyTorch reports CUDA)
+        3. Legacy: CUDA, then MPS, then CPU
 
         Returns:
             torch.device: Selected device

@@ -18,7 +18,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Sibling libs: pip install -e locally only (pyproject.toml); not declared in Poetry (path validation breaks CI).
+      # Allow Poetry to clone private Team-Deepiri git dependencies from pyproject.toml.
+      - name: Authenticate git for GitHub dependencies
+        run: git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

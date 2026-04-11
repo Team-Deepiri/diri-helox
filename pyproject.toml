@@ -12,6 +12,10 @@ package-mode = false
 [tool.poetry.dependencies]
 python = "^3.11"
 
+# Internal Deepiri libs (git). gpu-utils pinned to rev; dataset-processor tracks main (pin a SHA for stricter reproducibility).
+deepiri-gpu-utils = { git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", rev = "98dc2f239ac585301024bcb538aa92c994034465" }
+deepiri-dataset-processor = { git = "https://github.com/Team-Deepiri/deepiri-dataset-processor.git", branch = "main", extras = ["all"] }
+
 # ML Training Dependencies
 torch = "^2.0.0"
 transformers = "^4.35.0"
@@ -51,11 +55,6 @@ sentence-transformers = "^2.2.0"
 tqdm = "^4.66.0"
 pyyaml = "^6.0"
 python-dotenv = "^1.0.0"
-
-# Sibling packages are not declared here: Poetry validates path deps in every group on any command,
-# so CI would fail without those directories. After `poetry install --with dev`, install locally:
-#   poetry run pip install -e ../../deepiri-gpu-utils
-#   poetry run pip install -e "../../deepiri-dataset-processor[all]"
 
 [tool.poetry.group.dev.dependencies]
 # Development tools
