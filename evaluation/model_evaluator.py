@@ -67,6 +67,7 @@ CATEGORIES: Dict[int, str] = {
     29: "security",
     30: "data_privacy",
 }
+LABEL_TO_ID: Dict[str, int] = {name: idx for idx, name in CATEGORIES.items()}
 
 
 class ModelEvaluator:
@@ -107,12 +108,37 @@ class ModelEvaluator:
         if not test_samples:
             return {"overall": {}, "per_class": {}, "confusion_matrix": []}
 
+        labeled_samples: List[DataSample] = []
+        skipped_unlabeled = 0
+        for sample in test_samples:
+            if sample.label is not None:
+                labeled_samples.append(sample)
+                continue
+            if sample.label_name and sample.label_name in LABEL_TO_ID:
+                labeled_samples.append(
+                    DataSample(
+                        text=sample.text,
+                        label=LABEL_TO_ID[sample.label_name],
+                        label_name=sample.label_name,
+                        metadata=sample.metadata,
+                        source=sample.source,
+                    )
+                )
+                continue
+            skipped_unlabeled += 1
+
+        if not labeled_samples:
+            print("Warning: all evaluation samples are unlabeled; returning empty metrics")
+            return {"overall": {}, "per_class": {}, "confusion_matrix": []}
+
         model, tokenizer, device = self._load_model()
-        texts = [s.text for s in test_samples]
-        true_labels = [s.label if s.label is not None else 0 for s in test_samples]
+        texts = [s.text for s in labeled_samples]
+        true_labels = [int(s.label) for s in labeled_samples if s.label is not None]
 
         predictions, confidences = self._predict_batch(model, tokenizer, device, texts)
         metrics = self._calculate_metrics(true_labels, predictions, confidences)
+        if skipped_unlabeled:
+            metrics["_skipped_unlabeled"] = skipped_unlabeled
         return metrics
 
     def save_report(self, metrics: Dict[str, Any], output_path: str) -> None:

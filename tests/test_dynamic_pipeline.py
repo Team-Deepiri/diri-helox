@@ -71,6 +71,16 @@ class TestConfigLoading:
         with pytest.raises(FileNotFoundError):
             DynamicTrainingPipeline.from_file(str(tmp_path / "no_file.json"))
 
+    def test_from_file_expands_env_vars(self, tmp_path, monkeypatch):
+        monkeypatch.setenv("TEST_MODEL_DIR", "/tmp/env_model_dir")
+        cfg = _minimal_config()
+        cfg["training"]["output_dir"] = "${TEST_MODEL_DIR}"
+        p = tmp_path / "cfg_env.json"
+        p.write_text(json.dumps(cfg))
+
+        pipeline = DynamicTrainingPipeline.from_file(str(p))
+        assert pipeline.config["training"]["output_dir"] == "/tmp/env_model_dir"
+
 
 # ---------------------------------------------------------------------------
 # Preprocessing
@@ -111,12 +121,8 @@ class TestPreprocessing:
                 }
             }
         )
-        try:
-            result = pipeline.preprocess(samples)
-            # With dedup, should have fewer samples
-            assert len(result) <= 3
-        except ImportError:
-            pytest.skip("deepiri-dataset-processor not installed")
+        result = pipeline.preprocess(samples)
+        assert len(result) == 2
 
     def test_empty_samples_handled(self):
         pipeline = DynamicTrainingPipeline(
@@ -198,6 +204,34 @@ class TestDryRun:
         pipeline.setup_data_sources()
         assert len(pipeline._sources) == 1
         assert pipeline._sources[0].source_type == "synthetic"
+
+    def test_setup_wraps_weighted_top_level_sources(self, tmp_path):
+        p1 = tmp_path / "source_a.jsonl"
+        p2 = tmp_path / "source_b.jsonl"
+        p1.write_text('{"text":"alpha task","label":1}\n')
+        p2.write_text('{"text":"beta task","label":2}\n')
+
+        pipeline = DynamicTrainingPipeline(
+            {
+                "data_sources": [
+                    {
+                        "source_type": "static",
+                        "name": "a",
+                        "weight": 0.8,
+                        "params": {"file_paths": [str(p1)]},
+                    },
+                    {
+                        "source_type": "static",
+                        "name": "b",
+                        "weight": 0.2,
+                        "params": {"file_paths": [str(p2)]},
+                    },
+                ],
+            }
+        )
+        pipeline.setup_data_sources()
+        assert len(pipeline._sources) == 1
+        assert pipeline._sources[0].source_type == "composite"
 
 
 # ---------------------------------------------------------------------------

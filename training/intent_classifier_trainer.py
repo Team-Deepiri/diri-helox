@@ -183,9 +183,8 @@ class _OrchestratorCallbackAdapter(TrainerCallback):
         if not metrics:
             return control
         self._ctx.step = state.global_step
-        # Strip the "eval_" prefix so EarlyStoppingCallback(monitor="eval_f1") matches
         eval_metrics = {
-            k.removeprefix("eval_") if k.startswith("eval_") else k: float(v)
+            k: float(v)
             for k, v in metrics.items()
             if isinstance(v, (int, float))
         }
@@ -218,7 +217,7 @@ class IntentClassifierTrainer:
     Reusable fine-tuning wrapper for BERT/DeBERTa intent classification.
 
     Device selection is determined at train() time using core.gpu_utils.detect_device(),
-    which delegates to deepiri-modelkit for consistent behaviour across all services.
+    which delegates to deepiri-gpu-utils for consistent behaviour across all services.
     Pass force_device="cpu" to override (e.g. for CI/CD or low-memory environments).
 
     Usage:
@@ -324,7 +323,7 @@ class IntentClassifierTrainer:
             use_cpu=not use_gpu,
         )
 
-        hf_callbacks = []
+        hf_callbacks: List[TrainerCallback] = []
         if self.orchestrator_callbacks:
             hf_callbacks.append(
                 _OrchestratorCallbackAdapter(self.orchestrator_callbacks, pipeline=self)
@@ -405,8 +404,27 @@ class IntentClassifierTrainer:
 
     def _to_hf_dataset(self, samples: List[DataSample], tokenizer) -> Dataset:
         """Convert DataSample list to a tokenized HuggingFace Dataset."""
-        texts = [s.text for s in samples]
-        labels = [s.label if s.label is not None else 0 for s in samples]
+        label2id = {name: idx for idx, name in CATEGORY_MAP.items()}
+        texts: List[str] = []
+        labels: List[int] = []
+        dropped = 0
+        for sample in samples:
+            label: Optional[int] = sample.label
+            if label is None and sample.label_name:
+                label = label2id.get(sample.label_name)
+            if label is None or label < 0 or label >= self.num_labels:
+                dropped += 1
+                continue
+            texts.append(sample.text)
+            labels.append(int(label))
+
+        if dropped:
+            print(
+                f"  Warning: dropped {dropped} unlabeled/out-of-range samples "
+                "during dataset conversion"
+            )
+        if not texts:
+            raise ValueError("No labeled samples available for intent classifier training")
 
         raw = Dataset.from_dict({"text": texts, "label": labels})
 

@@ -90,8 +90,30 @@ class DynamicTrainingPipeline:
     # ------------------------------------------------------------------
 
     def setup_data_sources(self) -> None:
-        """Instantiate all configured data sources."""
+        """
+        Instantiate all configured data sources.
+
+        If multiple top-level sources are configured with non-default weights,
+        automatically wrap them in a CompositeDataSource so weights are applied.
+        """
         self._sources = create_data_sources_from_config(self.config.get("data_sources", []))
+        if len(self._sources) <= 1:
+            return
+
+        has_weighted_sources = any(abs(float(s.config.weight) - 1.0) > 1e-9 for s in self._sources)
+        if not has_weighted_sources:
+            return
+
+        from data_sources.base import DataSourceConfig
+        from data_sources.composite_source import CompositeDataSource
+
+        seed = self.config.get("split", {}).get("seed", 42)
+        composite_cfg = DataSourceConfig(
+            source_type="composite",
+            name="auto_weighted_sources",
+            params={"seed": seed},
+        )
+        self._sources = [CompositeDataSource(composite_cfg, self._sources)]
 
     def load_data(self) -> List[DataSample]:
         """Collect samples from all sources."""
@@ -159,13 +181,22 @@ class DynamicTrainingPipeline:
 
         if cfg.get("use_deduplication", True):
             try:
+                from collections import Counter
+
                 from deepiri_dataset_processor.deduplication.exact_dedup import ExactDeduplicator
 
                 dedup = ExactDeduplicator()
                 texts = [s.text for s in samples]
-                unique_texts = set(dedup.filter_duplicates(texts))
+                deduped_texts = dedup.filter_duplicates(texts)
+                keep_budget = Counter(deduped_texts)
                 before = len(samples)
-                samples = [s for s in samples if s.text in unique_texts]
+                filtered_samples: List[DataSample] = []
+                for sample in samples:
+                    if keep_budget[sample.text] <= 0:
+                        continue
+                    filtered_samples.append(sample)
+                    keep_budget[sample.text] -= 1
+                samples = filtered_samples
                 print(f"  Deduplication: {before} -> {len(samples)} samples")
             except ImportError:
                 print("  Warning: deepiri-dataset-processor not available, skipping deduplication")
@@ -236,18 +267,20 @@ class DynamicTrainingPipeline:
         training_cfg = dict(self.config.get("training", {}))
         trainer_type = training_cfg.pop("trainer_type", "intent_classifier")
 
-        # Build orchestrator callbacks — wired into HF Trainer via _OrchestratorCallbackAdapter
-        # so on_step_end / on_eval_end / on_train_end all fire at the correct times.
         model_output_dir = Path(training_cfg.get("output_dir", "models/intent_classifier"))
-        _callbacks = [
-            LoggingCallback(every=10),
-            CheckpointCallback(directory=model_output_dir / "orchestrator_checkpoints", every=50),
-            EarlyStoppingCallback(monitor="eval_f1", patience=3, mode="max"),
-        ]
 
         if trainer_type == "intent_classifier":
             from training.intent_classifier_trainer import IntentClassifierTrainer
 
+            # HF evaluate metrics keep the "eval_" prefix in the callback adapter.
+            _callbacks = [
+                LoggingCallback(every=10),
+                CheckpointCallback(
+                    directory=model_output_dir / "orchestrator_checkpoints",
+                    every=50,
+                ),
+                EarlyStoppingCallback(monitor="eval_f1", patience=3, mode="max"),
+            ]
             self._trainer = IntentClassifierTrainer(
                 orchestrator_callbacks=_callbacks, **training_cfg
             )
@@ -261,6 +294,14 @@ class DynamicTrainingPipeline:
             # to using text as the full sequence if not present.
             from training.hf_instruction_finetuning_trainer import HFInstructionFinetuningTrainer
 
+            _callbacks = [
+                LoggingCallback(every=10),
+                CheckpointCallback(
+                    directory=model_output_dir / "orchestrator_checkpoints",
+                    every=50,
+                ),
+                EarlyStoppingCallback(monitor="eval_loss", patience=3, mode="min"),
+            ]
             self._trainer = HFInstructionFinetuningTrainer(
                 orchestrator_callbacks=_callbacks, **training_cfg
             )
