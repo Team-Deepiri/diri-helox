@@ -113,11 +113,7 @@ class _OrchestratorCallbackAdapter(TrainerCallback):
         if not metrics:
             return control
         self._ctx.step = state.global_step
-        eval_metrics = {
-            k: float(v)
-            for k, v in metrics.items()
-            if isinstance(v, (int, float))
-        }
+        eval_metrics = {k: float(v) for k, v in metrics.items() if isinstance(v, (int, float))}
         for cb in self._cbs:
             cb.on_eval_end(self._pipeline, self._ctx, eval_metrics)
         if self._ctx.extra.get("stop_training"):
