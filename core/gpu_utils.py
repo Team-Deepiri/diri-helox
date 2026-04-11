@@ -55,7 +55,7 @@ try:
     def is_gpu_available() -> bool:
         """Return True if any GPU (CUDA, ROCm, or MPS) is available."""
         decision = resolve_torch_device("auto")
-        return decision.device != "cpu"
+        return str(decision.device) != "cpu"
 
 except ImportError:
     logger.warning(

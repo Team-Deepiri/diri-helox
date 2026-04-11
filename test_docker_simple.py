@@ -3,6 +3,7 @@
 Simple Docker test for dataset versioning system
 """
 
+import importlib
 import sys
 
 sys.path.insert(0, "/app/diri-helox")
@@ -16,11 +17,11 @@ try:
 
     print("✅ Successfully imported DatasetVersionManager")
 
-    import utils.dataset_validation
+    importlib.import_module("utils.dataset_validation")
 
     print("✅ Successfully imported dataset validation")
 
-    import utils.dataset_monitoring  # noqa: F401
+    importlib.import_module("utils.dataset_monitoring")
 
     print("✅ Successfully imported monitoring")
 
