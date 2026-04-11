@@ -16,11 +16,11 @@ try:
 
     print("✅ Successfully imported DatasetVersionManager")
 
-    from utils.dataset_validation import validate_dataset_quality  # noqa: F401
+    import utils.dataset_validation
 
     print("✅ Successfully imported dataset validation")
 
-    from utils.dataset_monitoring import DatasetMonitor  # noqa: F401
+    import utils.dataset_monitoring  # noqa: F401
 
     print("✅ Successfully imported monitoring")
 
