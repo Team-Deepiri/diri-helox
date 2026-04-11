@@ -1,7 +1,15 @@
 """
-GPU detection and memory utilities — single source of truth for all hardware logic.
+GPU detection and memory utilities for diri-helox.
 
-Import from here in any module that needs device/GPU information:
+Device detection delegates to deepiri-modelkit (the shared platform library),
+which is the single source of truth for GPU/CUDA/MPS detection across all
+Deepiri services (cyrex, helox, etc.).
+
+Helox-specific helpers (batch size recommendation, cache clearing, detailed
+GPU info) are defined here because they are training-specific and do not
+belong in the shared contract library.
+
+Usage:
     from core.gpu_utils import detect_device, get_gpu_info, is_gpu_available
 """
 
@@ -14,56 +22,88 @@ import torch
 
 logger = logging.getLogger(__name__)
 
+# ---------------------------------------------------------------------------
+# Core device detection — delegates to deepiri-modelkit
+# ---------------------------------------------------------------------------
 
-def detect_device(force: Optional[str] = None) -> torch.device:
-    """
-    Detect the optimal compute device.
+try:
+    from deepiri_modelkit.utils.device import get_torch_device as _modelkit_get_torch_device
+    from deepiri_modelkit.utils.device import get_device as _modelkit_get_device
 
-    Priority: forced override → CUDA → MPS (Apple Silicon) → CPU
+    def detect_device(force: Optional[str] = None) -> torch.device:
+        """
+        Detect the optimal compute device.
 
-    Args:
-        force: Optional override string — "cpu", "cuda", or "mps"
+        Delegates to deepiri-modelkit for consistent device detection across
+        all Deepiri services.  Priority: CUDA → MPS (Apple Silicon) → CPU.
 
-    Returns:
-        torch.device
-    """
-    if force:
-        key = force.lower()
-        if key == "cpu":
-            return torch.device("cpu")
-        if key == "cuda" and torch.cuda.is_available():
+        Args:
+            force: Optional override string — "cpu", "cuda", or "mps".
+                   When set, attempts to use that device only.
+
+        Returns:
+            torch.device
+        """
+        if force:
+            key = force.lower()
+            if key == "cpu":
+                return torch.device("cpu")
+            if key == "cuda" and torch.cuda.is_available():
+                return torch.device("cuda")
+            if key == "mps" and torch.backends.mps.is_available():
+                return torch.device("mps")
+            logger.warning(
+                "Forced device '%s' not available — falling back to auto-detection", force
+            )
+        return _modelkit_get_torch_device()  # type: ignore[no-any-return]
+
+    def is_gpu_available() -> bool:
+        """Return True if any GPU (CUDA or MPS) is available."""
+        return _modelkit_get_device() != "cpu"  # type: ignore[no-any-return]
+
+except ImportError:
+    logger.warning(
+        "deepiri-modelkit not installed — falling back to local GPU detection. "
+        "Install with: pip install git+git@github.com:Team-Deepiri/deepiri-modelkit.git"
+    )
+
+    def detect_device(force: Optional[str] = None) -> torch.device:  # type: ignore[misc]
+        if force:
+            key = force.lower()
+            if key == "cpu":
+                return torch.device("cpu")
+            if key == "cuda" and torch.cuda.is_available():
+                return torch.device("cuda")
+            if key == "mps" and torch.backends.mps.is_available():
+                return torch.device("mps")
+            logger.warning(
+                "Forced device '%s' not available — falling back to auto-detection", force
+            )
+        if torch.cuda.is_available():
             return torch.device("cuda")
-        if key == "mps" and torch.backends.mps.is_available():
+        if torch.backends.mps.is_available():
             return torch.device("mps")
-        logger.warning("Forced device '%s' not available — falling back to auto-detection", force)
+        return torch.device("cpu")
 
-    if torch.cuda.is_available():
-        logger.info("CUDA available: %s", torch.cuda.get_device_name(0))
-        return torch.device("cuda")
-
-    if torch.backends.mps.is_available():
-        logger.info("Apple Silicon (MPS) available")
-        return torch.device("mps")
-
-    logger.info("No GPU detected — using CPU")
-    return torch.device("cpu")
+    def is_gpu_available() -> bool:  # type: ignore[misc]
+        return torch.cuda.is_available() or torch.backends.mps.is_available()
 
 
-def is_gpu_available() -> bool:
-    """Return True if any GPU (CUDA or MPS) is available."""
-    return torch.cuda.is_available() or torch.backends.mps.is_available()
+# ---------------------------------------------------------------------------
+# Helox-specific training utilities (not in modelkit)
+# ---------------------------------------------------------------------------
 
 
 def get_gpu_info(device: Optional[torch.device] = None) -> dict:
     """
-    Return a dict of hardware info for the given device (or the auto-detected one).
+    Return training-relevant hardware info for the given device.
 
     Args:
         device: torch.device to describe. If None, auto-detects.
 
     Returns:
         dict with keys: device, device_type, is_cuda, is_mps, is_cpu,
-        and CUDA-specific keys when device_type == "cuda".
+        and CUDA-specific memory/capability keys when applicable.
     """
     if device is None:
         device = detect_device()
@@ -94,7 +134,7 @@ def get_gpu_info(device: Optional[torch.device] = None) -> dict:
 
 
 def clear_device_cache(device: torch.device) -> None:
-    """Free GPU memory cache for the given device."""
+    """Free GPU memory cache for the given device (call after each training epoch)."""
     if device.type == "cuda":
         torch.cuda.empty_cache()
         logger.debug("CUDA cache cleared")
@@ -112,17 +152,23 @@ def recommend_batch_size(
     """
     Suggest a batch size based on available device memory.
 
+    Heuristic for intent classifier training (~110 MB BERT-base):
+    - GPU ≥ 40 GB  → 4× base
+    - GPU ≥ 24 GB  → 2× base
+    - GPU < 24 GB  → base
+    - CPU/MPS      → ½ base (conservative)
+
     Args:
         device: The compute device.
-        model_size_mb: Model size in megabytes.
-        sequence_length: Sequence length for training.
+        model_size_mb: Approximate model size in megabytes.
+        sequence_length: Max sequence length for training.
         base_batch_size: Starting batch size.
 
     Returns:
-        Recommended batch size.
+        Recommended batch size (always ≥ 1).
     """
     if device.type == "cpu":
-        return max(1, base_batch_size // 4)
+        return max(1, base_batch_size // 2)
 
     if device.type == "cuda":
         info = get_gpu_info(device)
@@ -134,4 +180,4 @@ def recommend_batch_size(
         return base_batch_size
 
     # MPS or other
-    return base_batch_size
+    return max(1, base_batch_size // 2)

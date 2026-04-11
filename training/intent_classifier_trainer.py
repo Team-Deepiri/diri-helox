@@ -7,59 +7,16 @@ Extracts and wraps the logic from scripts/training/train_intent_classifier.py.
 
 from __future__ import annotations
 
-import importlib.util
 import json
 import os
-import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-_HELOX_ROOT = Path(__file__).parent.parent
-if str(_HELOX_ROOT) not in sys.path:
-    sys.path.insert(0, str(_HELOX_ROOT))
-
-# Must happen before importing torch/transformers when falling back to CPU
-_force_cpu = os.environ.get("FORCE_CPU", "").lower() == "true"
-
-
-def _disable_deepspeed_features() -> None:
-    """Prevent DeepSpeed from being imported (avoids CUDA compilation errors on CPU)."""
-    os.environ["ACCELERATE_USE_CPU"] = "true"
-    os.environ["CUDA_VISIBLE_DEVICES"] = ""
-    os.environ["DS_SKIP_CUDA_CHECK"] = "1"
-    os.environ["ACCELERATE_USE_DEEPSPEED"] = "false"
-    os.environ.setdefault("CUDA_HOME", "")
-
-    original_find_spec = importlib.util.find_spec
-
-    def patched_find_spec(name, package=None):
-        if name == "deepspeed" or (isinstance(name, str) and name.startswith("deepspeed.")):
-            return None
-        return original_find_spec(name, package)
-
-    if importlib.util.find_spec is not patched_find_spec:
-        importlib.util.find_spec = patched_find_spec
-
-
-import torch  # noqa: E402 (must be after env setup above)
-
-if torch.cuda.is_available() and not _force_cpu:
-    try:
-        cap = torch.cuda.get_device_capability(0)
-        if cap[0] < 7:
-            _force_cpu = True
-            _disable_deepspeed_features()
-    except Exception:
-        _force_cpu = True
-        _disable_deepspeed_features()
-else:
-    _disable_deepspeed_features()
-
-from datasets import Dataset  # noqa: E402
-from sklearn.metrics import accuracy_score, precision_recall_fscore_support  # noqa: E402
-from transformers import (  # noqa: E402
+from datasets import Dataset
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from transformers import (
     AutoModelForSequenceClassification,
     AutoTokenizer,
     DataCollatorWithPadding,
@@ -67,7 +24,8 @@ from transformers import (  # noqa: E402
     TrainingArguments,
 )
 
-from data_sources.base import DataSample  # noqa: E402
+from core.gpu_utils import detect_device
+from data_sources.base import DataSample
 
 # 31-category mapping shared across train / evaluate
 CATEGORY_MAP: Dict[int, str] = {
@@ -105,44 +63,59 @@ CATEGORY_MAP: Dict[int, str] = {
 }
 
 
-def _prepare_device(force_cpu: bool = False) -> Dict[str, Any]:
-    info: Dict[str, Any] = {"device": "cpu", "use_gpu": False, "gpu_name": None, "reason": ""}
-    if force_cpu or not torch.cuda.is_available():
-        info["reason"] = "forced_cpu" if force_cpu else "cuda_unavailable"
-        return info
+def _disable_deepspeed_features() -> None:
+    """
+    Prevent DeepSpeed from being imported.
+
+    DeepSpeed requires CUDA compilation headers that are not present on CPU-only
+    or low-capability GPU machines.  Setting these env vars tells Accelerate and
+    DeepSpeed to skip CUDA compilation checks entirely.
+    """
+    import importlib.util
+
+    os.environ["ACCELERATE_USE_CPU"] = "true"
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
+    os.environ["DS_SKIP_CUDA_CHECK"] = "1"
+    os.environ["ACCELERATE_USE_DEEPSPEED"] = "false"
+    os.environ.setdefault("CUDA_HOME", "")
+
+    original_find_spec = importlib.util.find_spec
+
+    def patched_find_spec(name, package=None):
+        if name == "deepspeed" or (isinstance(name, str) and name.startswith("deepspeed.")):
+            return None
+        return original_find_spec(name, package)
+
+    if importlib.util.find_spec is not patched_find_spec:
+        importlib.util.find_spec = patched_find_spec
+
+
+def _check_gpu_capability() -> bool:
+    """
+    Check whether the available GPU meets the minimum compute capability.
+
+    BERT training requires CUDA compute capability ≥ 7.0 (Volta+) to run
+    efficiently with mixed precision.  Older GPUs (e.g. Kepler/Maxwell) fall
+    back to CPU to avoid silent numerical errors.
+
+    Returns True if a usable GPU is available, False otherwise.
+    """
+    import torch
+
+    if not torch.cuda.is_available():
+        return False
     try:
-        gpu_name = torch.cuda.get_device_name(0)
         cap = torch.cuda.get_device_capability(0)
         if cap[0] < 7:
-            info["reason"] = "capability_too_low"
-            return info
+            return False
+        # Sanity-check: run a small tensor op to confirm the GPU works
         test = torch.tensor([1.0]).cuda()
         _ = test * 2
         del test
         torch.cuda.empty_cache()
-        info.update(
-            {"device": "cuda", "use_gpu": True, "gpu_name": gpu_name, "reason": "gpu_compatible"}
-        )
-    except Exception as e:
-        info["reason"] = f"gpu_error:{e}"
-    if not info["use_gpu"]:
-        _disable_deepspeed_features()
-    return info
-
-
-class _DeviceAwareTrainer(Trainer):
-    """HuggingFace Trainer that respects detected device config."""
-
-    def __init__(
-        self, *args, device_info: Optional[Dict] = None, force_cpu: bool = False, **kwargs
-    ):
-        self.device_info = device_info or _prepare_device(force_cpu=force_cpu)
-        training_args = kwargs.get("args")
-        if training_args is not None:
-            training_args.no_cuda = not self.device_info["use_gpu"]
-            if hasattr(training_args, "use_cpu"):
-                training_args.use_cpu = not self.device_info["use_gpu"]
-        super().__init__(*args, **kwargs)
+        return True
+    except Exception:
+        return False
 
 
 def _compute_metrics(eval_pred):
@@ -155,9 +128,23 @@ def _compute_metrics(eval_pred):
     return {"accuracy": accuracy, "f1": f1, "precision": precision, "recall": recall}
 
 
+class _DeviceAwareTrainer(Trainer):
+    """HuggingFace Trainer that applies the correct device configuration."""
+
+    def __init__(self, *args, use_gpu: bool = False, **kwargs):
+        training_args = kwargs.get("args")
+        if training_args is not None:
+            training_args.use_cpu = not use_gpu
+        super().__init__(*args, **kwargs)
+
+
 class IntentClassifierTrainer:
     """
     Reusable fine-tuning wrapper for BERT/DeBERTa intent classification.
+
+    Device selection is determined at train() time using core.gpu_utils.detect_device(),
+    which delegates to deepiri-modelkit for consistent behaviour across all services.
+    Pass force_device="cpu" to override (e.g. for CI/CD or low-memory environments).
 
     Usage:
         trainer = IntentClassifierTrainer(model_name="bert-base-uncased")
@@ -175,6 +162,7 @@ class IntentClassifierTrainer:
         batch_size: int = 16,
         learning_rate: float = 1e-5,
         max_length: int = 128,
+        force_device: Optional[str] = None,
         **kwargs,  # absorbs extra config keys like "trainer_type"
     ) -> None:
         self.model_name = model_name
@@ -184,6 +172,7 @@ class IntentClassifierTrainer:
         self.batch_size = batch_size
         self.learning_rate = learning_rate
         self.max_length = max_length
+        self.force_device = force_device
 
         self._tokenizer = None
         self._model = None
@@ -208,15 +197,26 @@ class IntentClassifierTrainer:
         print(f"  Epochs : {self.num_epochs} | Batch: {self.batch_size} | LR: {self.learning_rate}")
         print("=" * 60)
 
+        # Determine device at train time (not import time)
+        device = detect_device(force=self.force_device)
+        use_gpu = device.type in ("cuda", "mps")
+
+        # Check GPU compute capability for CUDA; disable DeepSpeed if using CPU
+        if device.type == "cuda" and not _check_gpu_capability():
+            print("  Warning: GPU compute capability < 7.0 — falling back to CPU")
+            device = detect_device(force="cpu")
+            use_gpu = False
+
+        if not use_gpu:
+            _disable_deepspeed_features()
+
+        print(f"  Device : {device}")
+
         tokenizer = self._load_tokenizer()
         model = self._load_model()
 
         train_hf = self._to_hf_dataset(train_samples, tokenizer)
         val_hf = self._to_hf_dataset(val_samples, tokenizer)
-
-        device_info = _prepare_device(force_cpu=_force_cpu)
-        use_gpu = device_info["use_gpu"]
-        print(f"  Device : {'CUDA – ' + str(device_info.get('gpu_name')) if use_gpu else 'CPU'}")
 
         self.output_dir.mkdir(parents=True, exist_ok=True)
         eval_steps = max(1, min(100, len(train_samples) // max(self.batch_size, 1)))
@@ -244,7 +244,7 @@ class IntentClassifierTrainer:
 
         data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
         self._trainer = _DeviceAwareTrainer(
-            device_info=device_info,
+            use_gpu=use_gpu,
             model=model,
             args=training_args,
             train_dataset=train_hf,
