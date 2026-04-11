@@ -332,6 +332,13 @@ class HFInstructionFinetuningTrainer:
 
         Returns input_ids, attention_mask, and labels with instruction positions set
         to -100 so cross-entropy loss is only computed on response tokens.
+
+        Instruction length is measured by tokenising the instruction *within* the
+        full sequence (not separately) to avoid BOS-token boundary misalignment.
+        Tokenisers like Llama/Mistral add a BOS token only at the very start of the
+        sequence; tokenising the instruction alone would yield a different token ID
+        list (with a leading BOS) than what appears in the full tokenised sequence,
+        causing the mask to cover the wrong tokens.
         """
         instruction, response = self._build_sequence(sample)
         full_text = instruction + response
@@ -348,14 +355,20 @@ class HFInstructionFinetuningTrainer:
         # Build labels: mask instruction prefix
         labels = list(input_ids)
         if instruction:
-            inst_enc = tokenizer(
-                instruction,
+            # Tokenise just the response to find where it starts in the full sequence.
+            # Using add_special_tokens=False ensures no BOS is prepended, so the
+            # response tokens match exactly what appears at the end of the full encoding.
+            resp_enc = tokenizer(
+                response,
                 truncation=True,
                 max_length=self.max_length,
                 return_tensors=None,
+                add_special_tokens=False,
             )
-            inst_len = len(inst_enc["input_ids"])
-            for i in range(min(inst_len, len(labels))):
+            resp_len = len(resp_enc["input_ids"])
+            # Mask everything before the response tokens
+            inst_len = len(input_ids) - resp_len
+            for i in range(max(0, inst_len)):
                 labels[i] = _IGNORE_INDEX
 
         return {
