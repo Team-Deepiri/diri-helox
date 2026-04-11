@@ -21,6 +21,9 @@ from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
     Trainer,
+    TrainerCallback,
+    TrainerControl,
+    TrainerState,
     TrainingArguments,
 )
 
@@ -128,6 +131,78 @@ def _compute_metrics(eval_pred):
     return {"accuracy": accuracy, "f1": f1, "precision": precision, "recall": recall}
 
 
+class _OrchestratorCallbackAdapter(TrainerCallback):
+    """
+    Bridges HuggingFace Trainer events to deepiri-training-orchestrator callbacks.
+
+    HF fires on_log every ``logging_steps`` and on_evaluate after each eval pass.
+    We translate those events into on_step_end / on_eval_end so that
+    CheckpointCallback, LoggingCallback, and EarlyStoppingCallback actually fire.
+    When EarlyStoppingCallback sets ctx.extra["stop_training"], we propagate that
+    back to HF via TrainerControl.should_training_stop.
+    """
+
+    def __init__(self, orchestrator_callbacks: list, pipeline: Any = None) -> None:
+        from deepiri_training_orchestrator import TrainingContext
+
+        self._cbs = orchestrator_callbacks
+        self._pipeline = pipeline
+        self._ctx = TrainingContext()
+
+    def on_train_begin(
+        self, args: Any, state: TrainerState, control: TrainerControl, **kwargs: Any
+    ) -> None:
+        self._ctx.max_steps = state.max_steps
+        for cb in self._cbs:
+            cb.on_train_begin(self._pipeline, self._ctx)
+
+    def on_log(
+        self,
+        args: Any,
+        state: TrainerState,
+        control: TrainerControl,
+        logs: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> None:
+        if not logs:
+            return
+        self._ctx.step = state.global_step
+        self._ctx.epoch = int(state.epoch or 0)
+        metrics = {k: float(v) for k, v in logs.items() if isinstance(v, (int, float))}
+        for cb in self._cbs:
+            cb.on_step_end(self._pipeline, self._ctx, metrics)
+
+    def on_evaluate(
+        self,
+        args: Any,
+        state: TrainerState,
+        control: TrainerControl,
+        metrics: Optional[Dict[str, Any]] = None,
+        **kwargs: Any,
+    ) -> TrainerControl:
+        if not metrics:
+            return control
+        self._ctx.step = state.global_step
+        # Strip the "eval_" prefix so EarlyStoppingCallback(monitor="eval_f1") matches
+        eval_metrics = {
+            k.removeprefix("eval_") if k.startswith("eval_") else k: float(v)
+            for k, v in metrics.items()
+            if isinstance(v, (int, float))
+        }
+        for cb in self._cbs:
+            cb.on_eval_end(self._pipeline, self._ctx, eval_metrics)
+        if self._ctx.extra.get("stop_training"):
+            control.should_training_stop = True
+        return control
+
+    def on_train_end(
+        self, args: Any, state: TrainerState, control: TrainerControl, **kwargs: Any
+    ) -> None:
+        self._ctx.step = state.global_step
+        for cb in self._cbs:
+            cb.on_train_end(self._pipeline, self._ctx)
+
+
 class _DeviceAwareTrainer(Trainer):
     """HuggingFace Trainer that applies the correct device configuration."""
 
@@ -163,6 +238,7 @@ class IntentClassifierTrainer:
         learning_rate: float = 1e-5,
         max_length: int = 128,
         force_device: Optional[str] = None,
+        orchestrator_callbacks: Optional[List[Any]] = None,
         **kwargs,  # absorbs extra config keys like "trainer_type"
     ) -> None:
         self.model_name = model_name
@@ -173,6 +249,7 @@ class IntentClassifierTrainer:
         self.learning_rate = learning_rate
         self.max_length = max_length
         self.force_device = force_device
+        self.orchestrator_callbacks = orchestrator_callbacks or []
 
         self._tokenizer = None
         self._model = None
@@ -242,6 +319,12 @@ class IntentClassifierTrainer:
             use_cpu=not use_gpu,
         )
 
+        hf_callbacks = []
+        if self.orchestrator_callbacks:
+            hf_callbacks.append(
+                _OrchestratorCallbackAdapter(self.orchestrator_callbacks, pipeline=self)
+            )
+
         data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
         self._trainer = _DeviceAwareTrainer(
             use_gpu=use_gpu,
@@ -251,6 +334,7 @@ class IntentClassifierTrainer:
             eval_dataset=val_hf,
             data_collator=data_collator,
             compute_metrics=_compute_metrics,
+            callbacks=hf_callbacks or None,
         )
 
         print("\nStarting training...")

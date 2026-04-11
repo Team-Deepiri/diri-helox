@@ -229,15 +229,8 @@ class DynamicTrainingPipeline:
         training_cfg = dict(self.config.get("training", {}))
         trainer_type = training_cfg.pop("trainer_type", "intent_classifier")
 
-        if trainer_type == "intent_classifier":
-            from training.intent_classifier_trainer import IntentClassifierTrainer
-
-            self._trainer = IntentClassifierTrainer(**training_cfg)
-        else:
-            raise ValueError(f"Unknown trainer_type: '{trainer_type}'")
-
-        # Register callbacks — CheckpointCallback writes lightweight JSON checkpoints
-        # (not model weights) alongside the HuggingFace checkpoint directory.
+        # Build orchestrator callbacks — wired into HF Trainer via _OrchestratorCallbackAdapter
+        # so on_step_end / on_eval_end / on_train_end all fire at the correct times.
         model_output_dir = Path(training_cfg.get("output_dir", "models/intent_classifier"))
         _callbacks = [
             LoggingCallback(every=10),
@@ -245,16 +238,17 @@ class DynamicTrainingPipeline:
             EarlyStoppingCallback(monitor="eval_f1", patience=3, mode="max"),
         ]
 
+        if trainer_type == "intent_classifier":
+            from training.intent_classifier_trainer import IntentClassifierTrainer
+
+            self._trainer = IntentClassifierTrainer(
+                orchestrator_callbacks=_callbacks, **training_cfg
+            )
+        else:
+            raise ValueError(f"Unknown trainer_type: '{trainer_type}'")
+
         metrics: Dict[str, Any] = self._trainer.train(train_samples, val_samples)
         self._trainer.save()
-
-        # Run on_train_end hooks so callbacks can flush state
-        from deepiri_training_orchestrator import TrainingContext
-
-        ctx = TrainingContext()
-        for cb in _callbacks:
-            cb.on_train_end(self, ctx)
-
         return metrics
 
     def evaluate(self, test_samples: List[DataSample]) -> Dict[str, Any]:
