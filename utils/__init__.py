@@ -1,12 +1,16 @@
 """
 Utility modules for Helox training pipelines.
-Re-exported from deepiri_modelkit.
+
+Submodules such as ``utils.dataset_versioning`` import without ``deepiri_modelkit``.
+When that package is installed, semantic helpers are re-exported here.
 """
 
-from deepiri_modelkit.ml.semantic import get_semantic_analyzer
-from deepiri_modelkit.ml.confidence import ConfidenceLevel
+__all__: list[str] = []
 
-__all__ = [
-    "get_semantic_analyzer",
-    "ConfidenceLevel",
-]
+try:
+    from deepiri_modelkit.ml.confidence import ConfidenceLevel
+    from deepiri_modelkit.ml.semantic import get_semantic_analyzer
+except ImportError:
+    pass
+else:
+    __all__ = ["get_semantic_analyzer", "ConfidenceLevel"]

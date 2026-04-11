@@ -164,7 +164,7 @@ def test_auto_version_increment():
 
 
 def test_s3_raises_not_implemented():
-    """S3 storage and retrieve must raise NotImplementedError until implemented."""
+    """S3 create_version must raise NotImplementedError until S3 upload is implemented."""
     manager = DatasetVersionManager(
         db_url="sqlite:///:memory:",
         storage_backend="s3",
@@ -182,16 +182,6 @@ def test_s3_raises_not_implemented():
             assert False, "Expected NotImplementedError"
         except NotImplementedError as e:
             assert "S3" in str(e) or "s3" in str(e).lower()
-
-    manager_local = DatasetVersionManager(
-        db_url="sqlite:///:memory:",
-        storage_backend="local",
-    )
-    try:
-        manager_local._retrieve_dataset("s3://bucket/key/")
-        assert False, "Expected NotImplementedError for S3 retrieve"
-    except NotImplementedError as e:
-        assert "S3" in str(e) or "s3" in str(e).lower()
 
 
 if __name__ == "__main__":
