@@ -322,9 +322,11 @@ class VersionedTrainingPipeline:
         # Include eval metric for HPO (e.g. minimize eval_loss)
         training_metadata["eval_results"] = eval_results
 
-        logger.info("Versioned training complete",
-                   output_dir=output_dir,
-                   dataset_version=self.dataset_version.version if self.dataset_version else "unknown")
+        logger.info(
+            "Versioned training complete",
+            output_dir=output_dir,
+            dataset_version=self.dataset_version.version if self.dataset_version else "unknown",
+        )
 
         return output_dir, training_metadata
 

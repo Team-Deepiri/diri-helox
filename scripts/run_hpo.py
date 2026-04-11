@@ -21,6 +21,7 @@ if str(_project_root) not in sys.path:
 # Interactive TUI helpers (Rich)
 # ---------------------------------------------------------------------------
 
+
 def _pick_config() -> Path:
     """Prompt user to pick a training config JSON from configs/.
 
@@ -107,8 +108,7 @@ def _build_trial_callback():
         for t in study.trials:
             is_best = t.number == study.best_trial.number
             params_str = ", ".join(
-                f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}"
-                for k, v in t.params.items()
+                f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}" for k, v in t.params.items()
             )
             marker = "[bold green]best[/]" if is_best else ""
             value_str = f"{t.value:.6f}" if t.value is not None else "failed"
@@ -130,15 +130,16 @@ def _print_results(study):
 
     best = study.best_params
     params_text = "\n".join(
-        f"  {k} = {v:.6g}" if isinstance(v, float) else f"  {k} = {v}"
-        for k, v in best.items()
+        f"  {k} = {v:.6g}" if isinstance(v, float) else f"  {k} = {v}" for k, v in best.items()
     )
     console.print()
-    console.print(Panel(
-        f"[bold green]Best value:[/] {study.best_value:.6f}\n\n{params_text}",
-        title="HPO Results",
-        expand=False,
-    ))
+    console.print(
+        Panel(
+            f"[bold green]Best value:[/] {study.best_value:.6f}\n\n{params_text}",
+            title="HPO Results",
+            expand=False,
+        )
+    )
     console.print()
 
     table = Table(title="All Trials", show_lines=True)
@@ -148,8 +149,7 @@ def _print_results(study):
 
     for t in sorted(study.trials, key=lambda t: t.value if t.value is not None else float("inf")):
         params_str = ", ".join(
-            f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}"
-            for k, v in t.params.items()
+            f"{k}={v:.4g}" if isinstance(v, float) else f"{k}={v}" for k, v in t.params.items()
         )
         value_str = f"{t.value:.6f}" if t.value is not None else "failed"
         table.add_row(str(t.number), value_str, params_str)
@@ -160,6 +160,7 @@ def _print_results(study):
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
+
 
 def main():
     parser = argparse.ArgumentParser(

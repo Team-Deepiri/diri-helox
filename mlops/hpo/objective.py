@@ -24,9 +24,7 @@ def _load_versioned_pipeline():
     if root_str not in sys.path:
         sys.path.insert(0, root_str)
 
-    spec = importlib.util.spec_from_file_location(
-        "versioned_training_pipeline", module_path
-    )
+    spec = importlib.util.spec_from_file_location("versioned_training_pipeline", module_path)
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
     return mod.VersionedTrainingPipeline
