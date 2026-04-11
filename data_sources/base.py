@@ -10,9 +10,15 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, Iterator, List, Optional
 
 
-@dataclass
+@dataclass(slots=True)
 class DataSample:
-    """Universal data sample across all sources."""
+    """
+    Universal data sample across all sources.
+
+    Uses __slots__ (via slots=True, Python 3.10+) to reduce per-instance
+    memory overhead — important when thousands of samples are held in memory
+    during preprocessing and splitting.
+    """
 
     text: str
     label: Optional[int] = None
@@ -21,7 +27,7 @@ class DataSample:
     source: str = "unknown"
 
 
-@dataclass
+@dataclass(slots=True)
 class DataSourceConfig:
     """Configuration for a single data source."""
 
@@ -38,25 +44,27 @@ class DataSource(ABC):
         self.config = config
 
     @abstractmethod
-    def load(self) -> List[DataSample]:
-        """Load all data samples at once."""
-        pass
-
     def stream(self) -> Iterator[DataSample]:
         """
         Yield data samples one at a time without buffering all in memory.
 
-        Subclasses should override this with a true lazy generator when the
-        underlying source supports it (e.g. Redis xread, Postgres server-side
-        cursor, Milvus paginated query). The default falls back to load() for
-        sources where the full dataset fits in memory.
+        This is the primary method. Subclasses implement a true lazy generator
+        (Redis XREAD, Postgres server-side cursor, Milvus paginated query, etc.).
         """
-        yield from self.load()
+
+    def load(self) -> List[DataSample]:
+        """
+        Load all samples into a list.
+
+        Default collects from stream() so subclasses only need to implement
+        stream() to get both interfaces for free. Override when bulk loading
+        is meaningfully faster than streaming (e.g. small static files).
+        """
+        return list(self.stream())
 
     @abstractmethod
     def get_info(self) -> Dict[str, Any]:
         """Return metadata about this source (count, categories, etc.)."""
-        pass
 
     @property
     def name(self) -> str:
