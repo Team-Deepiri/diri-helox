@@ -1,14 +1,21 @@
 """
-StreamDataSource: reads data published by Cyrex via Redis Streams.
+StreamDataSource: reads training data published by the Language Intelligence Service.
 
-Three modes:
-  - "file"      (default): reads pre-ingested JSONL files from data/datasets/pipeline/
+Data flow:
+  Language Intelligence Service (Cyrex)
+    → parses/cleans documents via deepiri-dataset-processor
+    → stores structured data in Postgres / Milvus
+    → publishes cleaned samples to Redis Streams (realtime_data_pipeline.py)
+  Helox (this source) subscribes to those Redis channels for training.
+
+Two Redis Streams (published by Cyrex's HeloxRealtimeIngestion pipeline):
+  - pipeline.helox-training.raw        → {id, text, source, quality_score, timestamp}
+  - pipeline.helox-training.structured → {id, instruction, input, output, category, ...}
+
+Three reading modes:
+  - "file"      (default): reads pre-ingested JSONL snapshots from data/datasets/pipeline/
   - "live":     one-shot snapshot via xrange (reads current messages in stream)
   - "subscribe": blocking xread loop — continuously listens for new messages
-
-Cyrex publishes to two streams:
-  - pipeline.helox-training.raw        -> {id, text, source, quality_score, timestamp}
-  - pipeline.helox-training.structured -> {id, instruction, input, output, category, ...}
 
 Fallback: if Redis is unavailable in live/subscribe mode, automatically falls back
 to "file" mode (or "synthetic" if configured).
