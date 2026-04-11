@@ -4,7 +4,7 @@ Train contextual bandit for challenge selection
 """
 
 import numpy as np
-from typing import List, Dict, Optional
+from typing import List, Dict
 import json
 from pathlib import Path
 import pickle
