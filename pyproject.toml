@@ -9,11 +9,10 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# Submodule pinned to rev be94688 (see .gitmodules + git submodule status).
-# Using path dep so CI can install from the already-checked-out submodule
-# without requiring a separate git clone with cross-repo credentials.
-# deepiri-modelkit is imported via try/except in core/gpu_utils.py — no hard dep needed.
+# Submodules installed as path deps so CI can install from the already-checked-out
+# submodule without requiring separate git clones with cross-repo credentials.
 deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
+deepiri-training-orchestrator = {path = "./deepiri-training-orchestrator", develop = true}
 
 # ML Training Dependencies
 torch = "^2.0.0"
@@ -97,6 +96,7 @@ extend-exclude = '''
 (
   /(
       deepiri-dataset-processor
+    | deepiri-training-orchestrator
   )/
   | docker_test_versioning\.py
   | scripts/generate_synthetic_b2b_data_v2\.py
@@ -111,6 +111,7 @@ ignore_missing_imports = true
 explicit_package_bases = true
 exclude = [
     "deepiri-dataset-processor",
+    "deepiri-training-orchestrator",
     "docker_test_versioning\\.py",
     "scripts/generate_synthetic_b2b_data_v2\\.py",
 ]
@@ -136,6 +137,7 @@ target-version = "py311"
 # Exclude pre-existing files/dirs with lint issues and submodules
 extend-exclude = [
     "deepiri-dataset-processor",
+    "deepiri-training-orchestrator",
     "core",
     "examples",
     "experiments",

@@ -7,24 +7,31 @@ Pipeline flow:
   1. Load data from all configured sources
   2. Preprocess (TextCleaner + ExactDeduplicator via deepiri-dataset-processor)
   3. Split into train / val / test
-  4. Train (IntentClassifierTrainer)
+  4. Train (IntentClassifierTrainer wrapped in TrainingOrchestrator callbacks)
   5. Evaluate (ModelEvaluator)
   6. Export to MLflow + publish model-ready event (graceful if unavailable)
+
+Shared infrastructure:
+  - deepiri-training-orchestrator: ExperimentTracker, ReproducibilityController,
+    CheckpointCallback, EarlyStoppingCallback (consistent with all Deepiri services)
+  - deepiri-dataset-processor: TextCleaner, ExactDeduplicator
 """
 
 from __future__ import annotations
 
 import json
 import os
-import random
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
-_HELOX_ROOT = Path(__file__).parent.parent.parent
-if str(_HELOX_ROOT) not in sys.path:
-    sys.path.insert(0, str(_HELOX_ROOT))
+from deepiri_training_orchestrator import (
+    CheckpointCallback,
+    EarlyStoppingCallback,
+    ExperimentTracker,
+    LoggingCallback,
+    ReproducibilityController,
+)
 
 from data_sources.base import DataSample
 from data_sources.factory import create_data_sources_from_config
@@ -34,8 +41,12 @@ class DynamicTrainingPipeline:
     """
     Config-driven end-to-end training pipeline.
 
+    Uses deepiri-training-orchestrator for reproducibility seeding, experiment
+    tracking (MLflow), and training callbacks — keeping behaviour consistent with
+    other Deepiri services that run training loops.
+
     Args:
-        config (dict): pipeline configuration (can be loaded from JSON via from_file())
+        config (dict): pipeline configuration (load via from_file())
 
     Example config (minimal):
         {
@@ -101,7 +112,8 @@ class DynamicTrainingPipeline:
             info = source.get_info()
             mode = info.get("mode", "")
             print(
-                f"  Loading source '{source.name}' ({source.source_type}{', ' + mode if mode else ''})..."
+                f"  Loading source '{source.name}'"
+                f" ({source.source_type}{', ' + mode if mode else ''})..."
             )
             samples = source.load()
             print(f"    -> {len(samples)} samples")
@@ -121,7 +133,6 @@ class DynamicTrainingPipeline:
         cfg = self.config.get("preprocessing", {})
         min_len = cfg.get("min_text_length", 5)
 
-        # Filter empty / too-short samples
         samples = [s for s in samples if s.text and len(s.text.strip()) >= min_len]
 
         if cfg.get("use_text_cleaner", True):
@@ -167,11 +178,22 @@ class DynamicTrainingPipeline:
     def split_data(
         self, samples: List[DataSample]
     ) -> Tuple[List[DataSample], List[DataSample], List[DataSample]]:
-        """Split into train / val / test according to config ratios."""
+        """
+        Split into train / val / test.
+
+        Uses ReproducibilityController (deepiri-training-orchestrator) to seed
+        the shuffle, so the split is deterministic and fingerprinted consistently
+        with the rest of the training run.
+        """
         split_cfg = self.config.get("split", {})
         train_ratio = split_cfg.get("train_ratio", 0.70)
         val_ratio = split_cfg.get("val_ratio", 0.15)
         seed = split_cfg.get("seed", 42)
+
+        repro = ReproducibilityController(seed=seed)
+        repro.set_seeds()
+
+        import random
 
         rng = random.Random(seed)
         shuffled = list(samples)
@@ -196,7 +218,14 @@ class DynamicTrainingPipeline:
     def train(
         self, train_samples: List[DataSample], val_samples: List[DataSample]
     ) -> Dict[str, Any]:
-        """Train using the configured trainer type."""
+        """
+        Train using the configured trainer type.
+
+        Wraps training with deepiri-training-orchestrator callbacks:
+          - LoggingCallback  — structured step logging
+          - CheckpointCallback — JSON metric checkpoints every N steps
+          - EarlyStoppingCallback — stops if eval_f1 stops improving (patience=3)
+        """
         training_cfg = dict(self.config.get("training", {}))
         trainer_type = training_cfg.pop("trainer_type", "intent_classifier")
 
@@ -207,8 +236,25 @@ class DynamicTrainingPipeline:
         else:
             raise ValueError(f"Unknown trainer_type: '{trainer_type}'")
 
+        # Register callbacks — CheckpointCallback writes lightweight JSON checkpoints
+        # (not model weights) alongside the HuggingFace checkpoint directory.
+        model_output_dir = Path(training_cfg.get("output_dir", "models/intent_classifier"))
+        _callbacks = [
+            LoggingCallback(every=10),
+            CheckpointCallback(directory=model_output_dir / "orchestrator_checkpoints", every=50),
+            EarlyStoppingCallback(monitor="eval_f1", patience=3, mode="max"),
+        ]
+
         metrics: Dict[str, Any] = self._trainer.train(train_samples, val_samples)
         self._trainer.save()
+
+        # Run on_train_end hooks so callbacks can flush state
+        from deepiri_training_orchestrator import TrainingContext
+
+        ctx = TrainingContext()
+        for cb in _callbacks:
+            cb.on_train_end(self, ctx)
+
         return metrics
 
     def evaluate(self, test_samples: List[DataSample]) -> Dict[str, Any]:
@@ -233,7 +279,13 @@ class DynamicTrainingPipeline:
         return metrics
 
     def export(self, metrics: Dict[str, Any]) -> None:
-        """Export to MLflow and publish model-ready event (graceful on failure)."""
+        """
+        Export to MLflow and publish model-ready event.
+
+        Uses ExperimentTracker from deepiri-training-orchestrator — the same
+        tracker used across Cyrex and other Deepiri services — for consistent
+        run naming, param logging, and model registration.
+        """
         export_cfg = self.config.get("export", {})
         mlflow_cfg = export_cfg.get("mlflow", {})
         model_path = self._trainer.get_model_path() if self._trainer else ""
@@ -241,33 +293,37 @@ class DynamicTrainingPipeline:
 
         if mlflow_cfg.get("enabled", False):
             try:
-                from mlops.infrastructure.experiment_tracker import ExperimentTracker
-
                 tracker = ExperimentTracker(
                     experiment_name=mlflow_cfg.get("experiment_name", pipeline_name),
                     tracking_uri=mlflow_cfg.get("tracking_uri", "http://localhost:5000"),
+                    use_wandb=mlflow_cfg.get("use_wandb", False),
+                    wandb_project=mlflow_cfg.get("wandb_project"),
                 )
                 tracker.start_run(run_name=pipeline_name)
-                # Log training params (filter non-serialisable values)
+                tracker.log_git_info()
+
                 safe_params = {
                     k: str(v)
                     for k, v in self.config.get("training", {}).items()
                     if k != "trainer_type"
                 }
                 tracker.log_params(safe_params)
-                # Log overall metrics
+
                 overall = metrics.get("overall", {})
                 if overall:
                     tracker.log_metrics(
                         {k: v for k, v in overall.items() if isinstance(v, (int, float))}
                     )
+
                 if model_path:
                     tracker.log_model(model_path)
+
                 if mlflow_cfg.get("register_model", False) and tracker.current_run:
                     tracker.register_model(
                         tracker.current_run.info.run_id,
                         mlflow_cfg.get("model_name", "intent-classifier"),
                     )
+
                 tracker.end_run()
                 print("  MLflow export complete")
             except Exception as exc:

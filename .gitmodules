@@ -1,3 +1,6 @@
 [submodule "deepiri-dataset-processor"]
 	path = deepiri-dataset-processor
 	url = git@github.com:Team-Deepiri/deepiri-dataset-processor.git
+[submodule "deepiri-training-orchestrator"]
+	path = deepiri-training-orchestrator
+	url = git@github.com:Team-Deepiri/deepiri-training-orchestrator.git
