@@ -7,10 +7,12 @@ after cleaning. This source reads from those tables and yields DataSamples.
 Config params:
     dsn           (str):  PostgreSQL DSN, e.g. "postgresql://user:pass@host:5432/db"
                           Falls back to POSTGRES_DSN env var if not set.
-    table         (str):  Table to read from (default: "training_samples")
+    table         (str):  Table to read from (default: "cyrex.helox_training_samples")
     label_column  (str):  Column containing the label/category (default: "category")
     text_column   (str):  Column containing the text (default: "text")
     min_quality   (float): Minimum quality score (default: 0.4)
+    stream_type   (str):  Optional stream filter: "raw" or "structured"
+    producer      (str):  Optional producer filter (e.g. "language_intelligence")
     max_samples   (int):  Cap on rows to load (default: None = no cap)
     where         (str):  Optional extra WHERE clause, e.g. "status = 'approved'"
 """
@@ -22,7 +24,7 @@ from typing import Any, Dict, Iterator, List, Optional
 
 from .base import DataSample, DataSource, DataSourceConfig
 
-DEFAULT_TABLE = "training_samples"
+DEFAULT_TABLE = "cyrex.helox_training_samples"
 
 
 class PostgresDataSource(DataSource):
@@ -40,18 +42,31 @@ class PostgresDataSource(DataSource):
         self._text_col: str = config.params.get("text_column", "text")
         self._label_col: str = config.params.get("label_column", "category")
         self._min_quality: float = float(config.params.get("min_quality", 0.4))
+        self._stream_type: Optional[str] = config.params.get("stream_type", None)
+        self._producer: Optional[str] = config.params.get("producer", None)
         self._max_samples: Optional[int] = config.params.get("max_samples", None)
         self._where: Optional[str] = config.params.get("where", None)
 
+    @staticmethod
+    def _sql_quote(value: str) -> str:
+        """Return a SQL single-quoted string literal with simple escaping."""
+        return "'" + value.replace("'", "''") + "'"
+
     def _build_query(self) -> str:
         where_parts = [f"quality_score >= {self._min_quality}"]
+        if self._stream_type:
+            where_parts.append(f"stream_type = {self._sql_quote(self._stream_type)}")
+        if self._producer:
+            where_parts.append(f"producer = {self._sql_quote(self._producer)}")
         if self._where:
             where_parts.append(f"({self._where})")
         where_clause = " AND ".join(where_parts)
         limit_clause = f" LIMIT {self._max_samples}" if self._max_samples else ""
         return (
-            f"SELECT {self._text_col}, {self._label_col}, quality_score, id "
-            f"FROM {self._table} WHERE {where_clause}{limit_clause}"
+            f"SELECT {self._text_col}, {self._label_col}, quality_score, "
+            f"record_id, stream_type, producer "
+            f"FROM {self._table} WHERE {where_clause} "
+            f"ORDER BY created_at DESC{limit_clause}"
         )
 
     def _row_to_sample(self, row: Any) -> Optional[DataSample]:
@@ -65,7 +80,9 @@ class PostgresDataSource(DataSource):
             metadata={
                 "source_stream": "postgres",
                 "quality_score": float(row[2]) if row[2] is not None else 1.0,
-                "id": str(row[3]) if row[3] is not None else None,
+                "record_id": str(row[3]) if row[3] is not None else None,
+                "stream_type": str(row[4]) if row[4] is not None else None,
+                "producer": str(row[5]) if row[5] is not None else None,
             },
             source=f"postgres:{self.name}",
         )
@@ -124,5 +141,7 @@ class PostgresDataSource(DataSource):
             "table": self._table,
             "dsn": self._dsn.split("@")[-1] if "@" in self._dsn else self._dsn,
             "min_quality": self._min_quality,
+            "stream_type": self._stream_type,
+            "producer": self._producer,
             "max_samples": self._max_samples,
         }

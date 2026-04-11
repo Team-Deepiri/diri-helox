@@ -14,6 +14,7 @@ sys.path.insert(0, str(_HELOX_ROOT))
 
 from data_sources.base import DataSample, DataSourceConfig
 from data_sources.composite_source import CompositeDataSource
+from data_sources.postgres_source import PostgresDataSource
 from data_sources.self_feedback_source import SelfFeedbackDataSource
 from data_sources.static_source import StaticDataSource
 from data_sources.stream_source import StreamDataSource
@@ -222,6 +223,56 @@ class TestSelfFeedbackDataSource:
             },
         )
         assert len(SelfFeedbackDataSource(cfg).load()) == 3
+
+
+# ---------------------------------------------------------------------------
+# PostgresDataSource
+# ---------------------------------------------------------------------------
+
+
+class TestPostgresDataSource:
+    def test_build_query_defaults_to_durable_table(self):
+        cfg = DataSourceConfig("postgres", "pg", {})
+        src = PostgresDataSource(cfg)
+        query = src._build_query()
+        assert "FROM cyrex.helox_training_samples" in query
+        assert "quality_score >= 0.4" in query
+        assert "ORDER BY created_at DESC" in query
+
+    def test_build_query_with_stream_and_producer_filters(self):
+        cfg = DataSourceConfig(
+            "postgres",
+            "pg",
+            {
+                "stream_type": "structured",
+                "producer": "language_intelligence",
+                "max_samples": 50,
+            },
+        )
+        src = PostgresDataSource(cfg)
+        query = src._build_query()
+        assert "stream_type = 'structured'" in query
+        assert "producer = 'language_intelligence'" in query
+        assert "LIMIT 50" in query
+
+    def test_row_to_sample_maps_metadata(self):
+        cfg = DataSourceConfig("postgres", "pg", {})
+        src = PostgresDataSource(cfg)
+        row = (
+            "Write unit tests for stream ingestion",
+            "testing",
+            0.91,
+            "rec-123",
+            "structured",
+            "language_intelligence",
+        )
+        sample = src._row_to_sample(row)
+        assert sample is not None
+        assert sample.text.startswith("Write unit tests")
+        assert sample.label_name == "testing"
+        assert sample.metadata["record_id"] == "rec-123"
+        assert sample.metadata["stream_type"] == "structured"
+        assert sample.metadata["producer"] == "language_intelligence"
 
 
 # ---------------------------------------------------------------------------
