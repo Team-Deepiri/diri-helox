@@ -30,7 +30,7 @@ from deepiri_training_orchestrator import (
     EarlyStoppingCallback,
     ExperimentTracker,
     LoggingCallback,
-    ReproducibilityController,
+    initialize_deterministic_training,
 )
 
 from data_sources.base import DataSample
@@ -190,8 +190,7 @@ class DynamicTrainingPipeline:
         val_ratio = split_cfg.get("val_ratio", 0.15)
         seed = split_cfg.get("seed", 42)
 
-        repro = ReproducibilityController(seed=seed)
-        repro.set_seeds()
+        initialize_deterministic_training(seed=seed)
 
         import random
 
@@ -296,11 +295,18 @@ class DynamicTrainingPipeline:
                 tracker.start_run(run_name=pipeline_name)
                 tracker.log_git_info()
 
-                safe_params = {
-                    k: str(v)
-                    for k, v in self.config.get("training", {}).items()
-                    if k != "trainer_type"
+                training_params = {
+                    k: v for k, v in self.config.get("training", {}).items() if k != "trainer_type"
                 }
+                safe_params = {k: str(v) for k, v in training_params.items()}
+
+                # Generate a config fingerprint for reproducibility tracing
+                from deepiri_training_orchestrator import ReproducibilityController
+
+                repro = ReproducibilityController(seed=self.config.get("split", {}).get("seed", 42))
+                fingerprint = repro.generate_training_fingerprint(training_params)
+                safe_params["training_fingerprint"] = fingerprint
+
                 tracker.log_params(safe_params)
 
                 overall = metrics.get("overall", {})

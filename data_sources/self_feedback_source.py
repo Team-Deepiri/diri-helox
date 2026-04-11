@@ -4,13 +4,17 @@ as training data. This enables the "pointed at its own output" requirement.
 
 It reads an inference log (JSONL with text + predicted_label + confidence)
 and returns only samples above the confidence threshold.
+
+If inference_log_path is not supplied, the source can optionally look up the
+latest Production model path from MLflow via deepiri-training-orchestrator's
+ModelRegistry and use its co-located inference log.
 """
 
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, Iterator, List
+from typing import Any, Dict, Iterator, List, Optional
 
 from .base import DataSample, DataSource, DataSourceConfig
 
@@ -20,7 +24,11 @@ class SelfFeedbackDataSource(DataSource):
     Loads high-confidence model predictions as training samples.
 
     Config params:
-        inference_log_path   (str): path to JSONL inference log
+        inference_log_path   (str): path to JSONL inference log. If omitted, the source
+                                    queries MLflow ModelRegistry for the latest Production
+                                    model and looks for an inference_log.jsonl beside it.
+        model_name           (str): MLflow registered model name (default: "intent-classifier")
+        mlflow_tracking_uri  (str): MLflow tracking URI (default: "http://localhost:5000")
         confidence_threshold (float): minimum confidence to accept (default: 0.90)
         text_field           (str): field for input text (default: "text")
         label_field          (str): field for predicted label id (default: "predicted_label")
@@ -31,7 +39,13 @@ class SelfFeedbackDataSource(DataSource):
 
     def __init__(self, config: DataSourceConfig) -> None:
         super().__init__(config)
-        self._log_path = Path(config.params.get("inference_log_path", ""))
+        self._log_path: Optional[Path] = (
+            Path(config.params["inference_log_path"])
+            if config.params.get("inference_log_path")
+            else None
+        )
+        self._model_name = config.params.get("model_name", "intent-classifier")
+        self._mlflow_uri = config.params.get("mlflow_tracking_uri", "http://localhost:5000")
         self._threshold = config.params.get("confidence_threshold", 0.90)
         self._text_field = config.params.get("text_field", "text")
         self._label_field = config.params.get("label_field", "predicted_label")
@@ -39,10 +53,34 @@ class SelfFeedbackDataSource(DataSource):
         self._confidence_field = config.params.get("confidence_field", "confidence")
         self._max_samples = config.params.get("max_samples", None)
 
+    def _resolve_log_path(self) -> Optional[Path]:
+        """
+        Return the inference log path, falling back to MLflow ModelRegistry
+        if no explicit path was configured.
+        """
+        if self._log_path:
+            return self._log_path
+
+        # Dynamic discovery: ask ModelRegistry for the latest Production model
+        try:
+            from deepiri_training_orchestrator import ModelRegistry
+
+            registry = ModelRegistry(tracking_uri=self._mlflow_uri)
+            model_dir = registry.get_latest_model(self._model_name, stage="Production")
+            if model_dir:
+                candidate = Path(model_dir) / "inference_log.jsonl"
+                if candidate.exists():
+                    return candidate
+        except Exception:
+            pass
+
+        return None
+
     def _iter_log(self) -> Iterator[DataSample]:
-        if not self._log_path or not self._log_path.exists():
+        log_path = self._resolve_log_path()
+        if not log_path or not log_path.exists():
             return
-        with open(self._log_path, "r", encoding="utf-8") as f:
+        with open(log_path, "r", encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -84,10 +122,12 @@ class SelfFeedbackDataSource(DataSource):
                 return
 
     def get_info(self) -> Dict[str, Any]:
+        resolved = self._resolve_log_path()
         return {
             "source_type": "self_feedback",
             "name": self.name,
-            "inference_log_path": str(self._log_path),
-            "log_exists": self._log_path.exists() if self._log_path else False,
+            "inference_log_path": str(resolved) if resolved else None,
+            "log_exists": resolved.exists() if resolved else False,
             "confidence_threshold": self._threshold,
+            "model_name": self._model_name,
         }
