@@ -58,10 +58,8 @@ def main() -> int:
         print(f"Error: config file not found: {config_path}")
         return 1
 
-    with open(config_path) as f:
-        config = json.load(f)
-
-    pipeline = DynamicTrainingPipeline(config)
+    # Use from_file() so ${ENV_VAR} placeholders are expanded consistently.
+    pipeline = DynamicTrainingPipeline.from_file(str(config_path))
 
     if args.dry_run:
         print(f"\nDry run: loading data from config '{config_path.name}'")

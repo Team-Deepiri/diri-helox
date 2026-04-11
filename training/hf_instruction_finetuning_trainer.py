@@ -114,7 +114,7 @@ class _OrchestratorCallbackAdapter(TrainerCallback):
             return control
         self._ctx.step = state.global_step
         eval_metrics = {
-            k.removeprefix("eval_") if k.startswith("eval_") else k: float(v)
+            k: float(v)
             for k, v in metrics.items()
             if isinstance(v, (int, float))
         }
@@ -233,7 +233,7 @@ class HFInstructionFinetuningTrainer:
             use_cpu=not use_gpu,
         )
 
-        hf_callbacks = []
+        hf_callbacks: List[TrainerCallback] = []
         if self.orchestrator_callbacks:
             hf_callbacks.append(
                 _OrchestratorCallbackAdapter(self.orchestrator_callbacks, pipeline=self)
