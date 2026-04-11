@@ -220,10 +220,18 @@ class DynamicTrainingPipeline:
         """
         Train using the configured trainer type.
 
-        Wraps training with deepiri-training-orchestrator callbacks:
-          - LoggingCallback  — structured step logging
-          - CheckpointCallback — JSON metric checkpoints every N steps
-          - EarlyStoppingCallback — stops if eval_f1 stops improving (patience=3)
+        Supported trainer_type values:
+          - "intent_classifier"       — BERT/DeBERTa fine-tuning for 31-category intent
+                                        classification (default). Used by Cyrex for task routing.
+          - "instruction_finetuning"  — Causal LM fine-tuning with response-only loss masking.
+                                        Used for Persola personality fine-tuning: samples must
+                                        have instruction/response format in metadata.
+          - "bandit"                  — Contextual multi-armed bandit (Thompson sampling) for
+                                        challenge selection. Samples must carry challenge_type
+                                        and reward in metadata. Used by Cyrex engagement service.
+
+        All trainer_types (except "bandit") are wrapped with deepiri-training-orchestrator
+        callbacks for structured logging, checkpointing, and early stopping.
         """
         training_cfg = dict(self.config.get("training", {}))
         trainer_type = training_cfg.pop("trainer_type", "intent_classifier")
@@ -243,15 +251,105 @@ class DynamicTrainingPipeline:
             self._trainer = IntentClassifierTrainer(
                 orchestrator_callbacks=_callbacks, **training_cfg
             )
-        else:
-            raise ValueError(f"Unknown trainer_type: '{trainer_type}'")
+            metrics: Dict[str, Any] = self._trainer.train(train_samples, val_samples)
+            self._trainer.save()
+            return metrics
 
-        metrics: Dict[str, Any] = self._trainer.train(train_samples, val_samples)
-        self._trainer.save()
+        if trainer_type == "instruction_finetuning":
+            # Causal LM fine-tuning with instruction masking — for Persola personality models.
+            # Samples are expected to have 'instruction' and 'response' in metadata; falls back
+            # to using text as the full sequence if not present.
+            from training.hf_instruction_finetuning_trainer import HFInstructionFinetuningTrainer
+
+            self._trainer = HFInstructionFinetuningTrainer(
+                orchestrator_callbacks=_callbacks, **training_cfg
+            )
+            metrics = self._trainer.train(train_samples, val_samples)
+            self._trainer.save()
+            return metrics
+
+        if trainer_type == "bandit":
+            # Contextual multi-armed bandit for challenge selection (Thompson sampling).
+            # Samples must have 'challenge_type' and 'reward' in metadata.
+            # Trained bandit is saved as a pickle alongside the model output dir.
+            return self._train_bandit(train_samples, training_cfg)
+
+        raise ValueError(
+            f"Unknown trainer_type: '{trainer_type}'. "
+            "Valid options: 'intent_classifier', 'instruction_finetuning', 'bandit'."
+        )
+
+    def _train_bandit(
+        self, samples: List[DataSample], training_cfg: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Train the contextual multi-armed bandit on challenge-engagement feedback samples.
+
+        Each DataSample must carry in metadata:
+          - challenge_type (str): the challenge type arm that was selected
+          - reward         (float): engagement reward signal (0.0–1.0)
+          - context        (list[float], optional): feature vector for the user/session context
+
+        The trained bandit is saved to <output_dir>/bandit.pkl and loaded by Cyrex's
+        engagement service at inference time to pick personalized challenges.
+        """
+        from pipelines.training.bandit_training import ContextualBandit
+
+        challenge_types = training_cfg.get(
+            "challenge_types",
+            ["quiz", "code", "creative", "analysis", "debugging", "design"],
+        )
+        context_dim = training_cfg.get("context_dim", 10)
+        output_dir = Path(training_cfg.get("output_dir", "models/bandit"))
+
+        bandit = ContextualBandit(challenge_types=challenge_types, context_dim=context_dim)
+
+        training_data = []
+        skipped = 0
+        for s in samples:
+            challenge_type = s.metadata.get("challenge_type") or s.label_name
+            if not challenge_type:
+                skipped += 1
+                continue
+            training_data.append(
+                {
+                    "challenge_type": challenge_type,
+                    "reward": float(s.metadata.get("reward", 1.0)),
+                    "context": s.metadata.get("context", []),
+                }
+            )
+
+        if skipped:
+            print(f"  Warning: {skipped} samples skipped (missing challenge_type/label_name)")
+
+        bandit.train(training_data)
+        output_dir.mkdir(parents=True, exist_ok=True)
+        bandit_path = str(output_dir / "bandit.pkl")
+        bandit.save(bandit_path)
+
+        counts = bandit.counts
+        metrics = {
+            "trainer_type": "bandit",
+            "samples_trained": len(training_data),
+            "challenge_counts": counts,
+            "bandit_path": bandit_path,
+        }
+        print(f"  Bandit trained on {len(training_data)} samples → {bandit_path}")
         return metrics
 
     def evaluate(self, test_samples: List[DataSample]) -> Dict[str, Any]:
-        """Evaluate the trained model on test samples."""
+        """
+        Evaluate the trained model on test samples.
+
+        Bandit trainer_type uses its own metrics from training and does not run
+        ModelEvaluator (there is no classification model to evaluate).
+        """
+        trainer_type = self.config.get("training", {}).get("trainer_type", "intent_classifier")
+        if trainer_type == "bandit":
+            # Bandit evaluation is reward-based, not classification-based.
+            # Return empty so the pipeline continues without crashing.
+            return {}
+
         from evaluation.model_evaluator import ModelEvaluator
 
         model_path = (
