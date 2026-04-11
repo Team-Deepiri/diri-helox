@@ -50,7 +50,7 @@ class ContextualBandit:
         scores = {
             ct: float(np.random.beta(self.alpha[ct], self.beta[ct])) for ct in self.challenge_types
         }
-        return max(scores, key=scores.get)
+        return max(scores, key=lambda ct: scores[ct])
 
     def update(self, challenge_type: str, reward: float, context: np.ndarray):
         """

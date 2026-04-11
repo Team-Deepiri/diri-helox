@@ -250,7 +250,7 @@ class HFInstructionFinetuningTrainer:
             eval_dataset=val_hf,
             data_collator=data_collator,
             compute_metrics=_compute_metrics,
-            callbacks=hf_callbacks or None,
+            callbacks=hf_callbacks if hf_callbacks else None,
         )
 
         print("\nStarting instruction fine-tuning...")
@@ -267,7 +267,8 @@ class HFInstructionFinetuningTrainer:
         out.mkdir(parents=True, exist_ok=True)
 
         self._trainer.save_model(str(out))
-        self._tokenizer.save_pretrained(str(out))
+        if self._tokenizer is not None:
+            self._tokenizer.save_pretrained(str(out))
 
         eval_res = self._trainer.evaluate() if self._trainer else {}
         with open(out / "training_info.json", "w") as f:
