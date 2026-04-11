@@ -9,8 +9,7 @@ from datasets import load_dataset
 from peft import PeftModel
 import json
 import argparse
-from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 import numpy as np
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from deepiri_modelkit.logging import get_logger
@@ -45,7 +44,6 @@ class ModelEvaluator:
         """Evaluate classification task."""
         dataset = load_dataset("json", data_files=test_dataset, split="train")
 
-        correct = 0
         total = 0
         predictions = []
         labels = []
@@ -80,7 +78,6 @@ class ModelEvaluator:
         dataset = load_dataset("json", data_files=test_dataset, split="train")
 
         perplexities = []
-        bleu_scores = []
 
         for example in dataset:
             prompt = example["prompt"]
@@ -104,7 +101,7 @@ class ModelEvaluator:
             inputs = self.tokenizer(prompt, return_tensors="pt")
             start = time.time()
             with torch.no_grad():
-                outputs = self.model.generate(**inputs, max_length=50)
+                self.model.generate(**inputs, max_length=50)
             times.append(time.time() - start)
 
         return {
