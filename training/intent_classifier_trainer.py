@@ -305,6 +305,11 @@ class IntentClassifierTrainer:
             per_device_eval_batch_size=self.batch_size,
             learning_rate=self.learning_rate,
             weight_decay=0.01,
+            # Warmup over 6% of total steps — standard for BERT fine-tuning per
+            # the original paper (Devlin et al. 2019). Prevents large gradient
+            # updates from destabilising the pre-trained weights at step 0.
+            warmup_ratio=0.06,
+            lr_scheduler_type="linear",
             logging_dir=str(self.output_dir / "logs"),
             logging_steps=10,
             eval_strategy="steps",

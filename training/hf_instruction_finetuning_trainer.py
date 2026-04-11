@@ -214,6 +214,11 @@ class HFInstructionFinetuningTrainer:
             per_device_eval_batch_size=self.batch_size,
             learning_rate=self.learning_rate,
             weight_decay=0.01,
+            # Warmup over 3% of total steps with cosine decay — standard for
+            # causal LM instruction fine-tuning. Warmup prevents large updates
+            # from destabilising pre-trained weights at the start of training.
+            warmup_ratio=0.03,
+            lr_scheduler_type="cosine",
             logging_dir=str(self.output_dir / "logs"),
             logging_steps=10,
             eval_strategy="steps",
@@ -221,8 +226,8 @@ class HFInstructionFinetuningTrainer:
             save_strategy="steps",
             save_steps=eval_steps,
             load_best_model_at_end=True,
-            metric_for_best_model="token_accuracy",
-            greater_is_better=True,
+            metric_for_best_model="eval_loss",
+            greater_is_better=False,
             push_to_hub=False,
             report_to="none",
             use_cpu=not use_gpu,
