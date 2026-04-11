@@ -9,10 +9,18 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# Submodules installed as path deps so CI can install from the already-checked-out
-# submodule without requiring separate git clones with cross-repo credentials.
+# Submodule deps — installed from the already-checked-out submodule directories so CI
+# can run `git submodule update --init --recursive && poetry install` without needing
+# cross-repo credentials beyond what the initial clone already provided.
+# Equivalent git-rev references (for direct pinning without submodule checkout):
+#   deepiri-dataset-processor = {git = "git@github.com:Team-Deepiri/deepiri-dataset-processor.git", rev = "<SHA>"}
+#   deepiri-training-orchestrator = {git = "git@github.com:Team-Deepiri/deepiri-training-orchestrator.git", rev = "<SHA>"}
+#   deepiri-gpu-utils = {git = "git@github.com:Team-Deepiri/deepiri-gpu-utils.git", rev = "<SHA>"}
 deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
 deepiri-training-orchestrator = {path = "./deepiri-training-orchestrator", develop = true}
+# deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
+# Deepiri services. Replaces deepiri-modelkit device utils in helox.
+deepiri-gpu-utils = {path = "./deepiri-gpu-utils", extras = ["torch"], develop = true}
 
 # ML Training Dependencies
 torch = "^2.0.0"
@@ -67,6 +75,8 @@ pytest = "^7.0.0"
 black = "^26.0.0"
 mypy = "^1.0.0"
 ruff = "^0.1.0"
+# fakeredis: in-process Redis emulator used by StreamDataSource tests — lets the
+# test suite inject a fake Redis client so tests run without a real Redis server.
 fakeredis = ">=2.20.0"
 
 [tool.poetry.group.optional.dependencies]
@@ -97,6 +107,7 @@ extend-exclude = '''
   /(
       deepiri-dataset-processor
     | deepiri-training-orchestrator
+    | deepiri-gpu-utils
   )/
   | docker_test_versioning\.py
   | scripts/generate_synthetic_b2b_data_v2\.py
@@ -112,6 +123,7 @@ explicit_package_bases = true
 exclude = [
     "deepiri-dataset-processor",
     "deepiri-training-orchestrator",
+    "deepiri-gpu-utils",
     "docker_test_versioning\\.py",
     "scripts/generate_synthetic_b2b_data_v2\\.py",
 ]
@@ -138,6 +150,7 @@ target-version = "py311"
 extend-exclude = [
     "deepiri-dataset-processor",
     "deepiri-training-orchestrator",
+    "deepiri-gpu-utils",
     "core",
     "examples",
     "experiments",

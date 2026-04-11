@@ -1,13 +1,13 @@
 """
 GPU detection and memory utilities for diri-helox.
 
-Device detection delegates to deepiri-modelkit (the shared platform library),
-which is the single source of truth for GPU/CUDA/MPS detection across all
+Device detection delegates to deepiri-gpu-utils (the shared platform library),
+which is the single source of truth for GPU/CUDA/MPS/ROCm detection across all
 Deepiri services (cyrex, helox, etc.).
 
 Helox-specific helpers (batch size recommendation, cache clearing, detailed
 GPU info) are defined here because they are training-specific and do not
-belong in the shared contract library.
+belong in the shared library.
 
 Usage:
     from core.gpu_utils import detect_device, get_gpu_info, is_gpu_available
@@ -23,48 +23,44 @@ import torch
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
-# Core device detection — delegates to deepiri-modelkit
+# Core device detection — delegates to deepiri-gpu-utils
 # ---------------------------------------------------------------------------
 
 try:
-    from deepiri_modelkit.utils.device import get_torch_device as _modelkit_get_torch_device
-    from deepiri_modelkit.utils.device import get_device as _modelkit_get_device
+    from deepiri_gpu_utils.torch_device import resolve_torch_device, DevicePolicy
 
     def detect_device(force: Optional[str] = None) -> torch.device:
         """
         Detect the optimal compute device.
 
-        Delegates to deepiri-modelkit for consistent device detection across
+        Delegates to deepiri-gpu-utils for consistent device detection across
         all Deepiri services.  Priority: CUDA → MPS (Apple Silicon) → CPU.
+        Also supports ROCm (AMD) via the "rocm" policy.
 
         Args:
-            force: Optional override string — "cpu", "cuda", or "mps".
+            force: Optional override string — "cpu", "cuda", "mps", or "rocm".
                    When set, attempts to use that device only.
 
         Returns:
             torch.device
         """
-        if force:
-            key = force.lower()
-            if key == "cpu":
-                return torch.device("cpu")
-            if key == "cuda" and torch.cuda.is_available():
-                return torch.device("cuda")
-            if key == "mps" and torch.backends.mps.is_available():
-                return torch.device("mps")
+        policy: DevicePolicy = force.lower() if force else "auto"  # type: ignore[assignment]
+        decision = resolve_torch_device(policy)
+        if force and decision.device != force.lower().replace("rocm", "cuda"):
             logger.warning(
-                "Forced device '%s' not available — falling back to auto-detection", force
+                "Requested device '%s' not available — using '%s'", force, decision.device
             )
-        return _modelkit_get_torch_device()  # type: ignore[no-any-return]
+        return torch.device(decision.device)
 
     def is_gpu_available() -> bool:
-        """Return True if any GPU (CUDA or MPS) is available."""
-        return _modelkit_get_device() != "cpu"  # type: ignore[no-any-return]
+        """Return True if any GPU (CUDA, ROCm, or MPS) is available."""
+        decision = resolve_torch_device("auto")
+        return decision.device != "cpu"
 
 except ImportError:
     logger.warning(
-        "deepiri-modelkit not installed — falling back to local GPU detection. "
-        "Install with: pip install git+git@github.com:Team-Deepiri/deepiri-modelkit.git"
+        "deepiri-gpu-utils not installed — falling back to local GPU detection. "
+        "Ensure the deepiri-gpu-utils submodule is checked out."
     )
 
     def detect_device(force: Optional[str] = None) -> torch.device:  # type: ignore[misc]
