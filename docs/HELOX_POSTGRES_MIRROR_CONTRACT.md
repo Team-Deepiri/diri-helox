@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS cyrex.helox_training_samples (
 
     -- structured payload fields
     instruction TEXT,
-    input TEXT,
-    output TEXT,
+    input_text TEXT,
+    output_text TEXT,
     category TEXT,
 
     quality_score DOUBLE PRECISION NOT NULL DEFAULT 1.0,
