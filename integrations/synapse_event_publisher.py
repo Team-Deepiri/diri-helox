@@ -24,7 +24,8 @@ _GEN_ROOT = Path(__file__).resolve().parent / "streaming" / "gen"
 if str(_GEN_ROOT) not in sys.path:
     sys.path.append(str(_GEN_ROOT))
 
-from proto.synapse.v1 import sidecar_pb2, sidecar_pb2_grpc  # type: ignore
+from proto.synapse.v1 import sugar_glider_pb2 as sidecar_pb2  # type: ignore
+from proto.synapse.v1 import sugar_glider_pb2_grpc as sidecar_pb2_grpc  # type: ignore
 
 
 def _env_float(name: str, default: float) -> float:

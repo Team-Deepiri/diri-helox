@@ -2,7 +2,7 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from proto.synapse.v1 import sidecar_pb2 as proto_dot_synapse_dot_v1_dot_sidecar__pb2
+from proto.synapse.v1 import sugar_glider_pb2 as proto_dot_synapse_dot_v1_dot_sidecar__pb2
 
 
 class SynapseSidecarStub(object):
