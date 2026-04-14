@@ -151,6 +151,10 @@ class DynamicTrainingPipeline:
         """
         Apply text cleaning and deduplication via deepiri-dataset-processor.
         Falls back gracefully if the package is unavailable.
+
+        Optional (off by default): quality scoring via deepiri-dataset-processor
+        QualityChecker. Enable with:
+          preprocessing.use_quality_checker = true
         """
         cfg = self.config.get("preprocessing", {})
         min_len = cfg.get("min_text_length", 5)
@@ -200,6 +204,48 @@ class DynamicTrainingPipeline:
                 print(f"  Deduplication: {before} -> {len(samples)} samples")
             except ImportError:
                 print("  Warning: deepiri-dataset-processor not available, skipping deduplication")
+
+        # Optional quality scoring stage (non-blocking unless explicitly enforced).
+        if cfg.get("use_quality_checker", False):
+            try:
+                from deepiri_dataset_processor.quality.checker import QualityChecker, QualityConfig
+
+                qc_cfg_raw = cfg.get("quality_checker", {})
+                qc_cfg = QualityConfig(
+                    **{
+                        k: v
+                        for k, v in qc_cfg_raw.items()
+                        if k in QualityConfig.__dataclass_fields__
+                    }
+                )
+                checker = QualityChecker(config=qc_cfg)
+
+                rows = [
+                    {
+                        "text": s.text,
+                        "label": s.label_name if s.label_name is not None else s.label,
+                        "source": s.source,
+                    }
+                    for s in samples
+                ]
+                report = checker.check_quality(
+                    rows,
+                    dataset_id=self.config.get("pipeline_name", "dynamic_training_pipeline"),
+                )
+
+                overall = float(report.overall_score)
+                min_quality = float(cfg.get("min_quality_score", 0.0))
+                print(
+                    "  QualityChecker: "
+                    f"overall={overall:.3f}, failed_metrics={report.summary.get('failed_metrics', 0)}"
+                )
+                if min_quality > 0 and overall < min_quality:
+                    msg = f"Quality score {overall:.3f} below configured min_quality_score={min_quality:.3f}"
+                    if cfg.get("enforce_quality_threshold", False):
+                        raise ValueError(msg)
+                    print(f"  Warning: {msg}")
+            except ImportError:
+                print("  Warning: quality checker unavailable, skipping quality scoring")
 
         if self._ingestion_logger:
             self._ingestion_logger.record("preprocess", samples)

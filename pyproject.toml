@@ -9,18 +9,13 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-# Submodule deps — installed from the already-checked-out submodule directories so CI
-# can run `git submodule update --init --recursive && poetry install` without needing
-# cross-repo credentials beyond what the initial clone already provided.
-# Equivalent git-rev references (for direct pinning without submodule checkout):
-#   deepiri-dataset-processor = {git = "git@github.com:Team-Deepiri/deepiri-dataset-processor.git", rev = "<SHA>"}
-#   deepiri-training-orchestrator = {git = "git@github.com:Team-Deepiri/deepiri-training-orchestrator.git", rev = "<SHA>"}
-#   deepiri-gpu-utils = {git = "git@github.com:Team-Deepiri/deepiri-gpu-utils.git", rev = "<SHA>"}
-deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
-deepiri-training-orchestrator = {path = "./deepiri-training-orchestrator", develop = true}
+# Internal Deepiri deps pinned by git revision for deterministic builds.
+# NOTE: These repos are private Team-Deepiri repositories.
+deepiri-dataset-processor = {git = "git@github.com:Team-Deepiri/deepiri-dataset-processor.git", rev = "f564b41fc1e475be7fcd792703149daeb84056b7", extras = ["all"]}
+deepiri-training-orchestrator = {git = "git@github.com:Team-Deepiri/deepiri-training-orchestrator.git", rev = "214cb720a212d2283c1b60bed772fcebae86ca97"}
 # deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
 # Deepiri services. Replaces deepiri-modelkit device utils in helox.
-deepiri-gpu-utils = {path = "./deepiri-gpu-utils", extras = ["torch"], develop = true}
+deepiri-gpu-utils = {git = "git@github.com:Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"]}
 
 # ML Training Dependencies
 torch = "^2.0.0"
