@@ -20,7 +20,8 @@ jobs:
 
       - name: Init submodules
         run: |
-          git config --global url."https://${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
           git submodule update --init --recursive
 
       - name: Set up Python
@@ -36,6 +37,7 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
+          poetry config experimental.system-git-client true
 
       - name: Install dependencies
         run: |
@@ -56,4 +58,3 @@ jobs:
 
       - name: Integration tests (pytest)
         run: poetry run pytest -m integration
-

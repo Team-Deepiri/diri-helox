@@ -11,11 +11,11 @@ package-mode = false
 python = "^3.11"
 # Internal Deepiri deps pinned by git revision for deterministic builds.
 # NOTE: These repos are private Team-Deepiri repositories.
-deepiri-dataset-processor = {git = "git@github.com:Team-Deepiri/deepiri-dataset-processor.git", rev = "f564b41fc1e475be7fcd792703149daeb84056b7", extras = ["all"]}
-deepiri-training-orchestrator = {git = "git@github.com:Team-Deepiri/deepiri-training-orchestrator.git", rev = "214cb720a212d2283c1b60bed772fcebae86ca97"}
+deepiri-dataset-processor = {git = "https://github.com/Team-Deepiri/deepiri-dataset-processor.git", rev = "f564b41fc1e475be7fcd792703149daeb84056b7", extras = ["all"]}
+deepiri-training-orchestrator = {git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", rev = "214cb720a212d2283c1b60bed772fcebae86ca97"}
 # deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
 # Deepiri services. Replaces deepiri-modelkit device utils in helox.
-deepiri-gpu-utils = {git = "git@github.com:Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"]}
+deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"]}
 
 # ML Training Dependencies
 torch = "^2.0.0"
