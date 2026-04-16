@@ -1,11 +1,14 @@
 name: diri-helox-codeql-config
 
 # Focus analysis on maintained Python modules, pipelines, and tests.
+# NOTE: list directories only — individual .py files must NOT appear here;
+# CodeQL's autobuild walks each entry as a directory and crashes on files.
 paths:
   - core
   - data_management
   - data_processing
   - data_safety
+  - data_sources
   - evaluation
   - examples
   - experiments
@@ -21,13 +24,8 @@ paths:
   - train
   - training
   - utils
-  - docker_test_versioning.py
-  - test_docker_simple.py
-  - test_simple_standalone.py
-  - test_standalone_versioning.py
-  - test_versioning.py
 
-# Exclude generated/build/cache/runtime and heavy data artifacts.
+# Exclude generated/build/cache/runtime, standalone test scripts, and heavy data artifacts.
 paths-ignore:
   - '**/__pycache__/**'
   - '**/.pytest_cache/**'

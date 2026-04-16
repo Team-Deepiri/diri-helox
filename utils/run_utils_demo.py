@@ -5,13 +5,14 @@ This script:
 - Falls back to a small `MockSemanticAnalyzer` when Ollama is not reachable.
 - Uses `get_confidence_calculator()` to compute confidence for a sample model output.
 
-Run from diri-cyrex/app/train/utils:
+Run from diri-helox/utils:
 
     python -m run_utils_demo
 
 The script is intentionally simple so it can be used as a smoke test or as
 an example for integrating these utilities into pipelines.
 """
+
 from __future__ import annotations
 
 import argparse
@@ -87,7 +88,7 @@ def run_demo(force_mock: bool = False) -> None:
         training_coverage=0.8,
         feature_quality=0.9,
         context_match=0.7,
-        historical_accuracy={1: 0.85}
+        historical_accuracy={1: 0.85},
     )
 
     print("Confidence attributes:")
