@@ -197,7 +197,9 @@ class StreamDataSource(DataSource):
                 if isinstance(decoded, dict):
                     return decoded
             except json.JSONDecodeError:
-                pass
+                # Payload strings from fallback/export files are not guaranteed to be
+                # JSON; on decode failure we intentionally keep the original envelope.
+                return item
         return item
 
     def _parse_item(self, item: Dict) -> Optional[DataSample]:
