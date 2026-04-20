@@ -8,20 +8,21 @@ research, planning, communication, big_data_analytics, data_processing, design,
 qa, testing, validation, reporting, documentation, system_admin, ux_ui, security, data_privacy
 Enhanced with Ollama integration for better synthetic data generation
 """
+
 import json
 import random
 from pathlib import Path
 from collections import Counter
-from typing import List, Dict, Optional
+from typing import List, Dict
 import sys
-import os
 
 # Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import semantic analyzer for dynamic analysis
 try:
-    from app.train.utils.semantic_analyzer import get_semantic_analyzer
+    from utils.semantic_analyzer import get_semantic_analyzer
+
     HAS_SEMANTIC_ANALYZER = True
 except ImportError:
     HAS_SEMANTIC_ANALYZER = False
@@ -64,117 +65,150 @@ LABEL_MAPPING = {
     # New categories
     "ux_ui": 28,
     "security": 29,
-    "data_privacy": 30
+    "data_privacy": 30,
 }
 
 ID_TO_LABEL = {v: k for k, v in LABEL_MAPPING.items()}
 
 # Common bare verbs that should not appear at the end of a sentence
 BARE_VERBS = {
-    "write", "create", "implement", "generate", "process", "review", 
-    "run", "test", "validate", "inspect", "organize", "schedule", 
-    "plan", "design", "debug", "fix", "troubleshoot", "develop",
-    "build", "deploy", "configure", "setup", "install", "update",
-    "analyze", "evaluate", "assess", "monitor", "track", "measure",
-    "prepare", "collect", "gather", "compile", "document", "refactor"
+    "write",
+    "create",
+    "implement",
+    "generate",
+    "process",
+    "review",
+    "run",
+    "test",
+    "validate",
+    "inspect",
+    "organize",
+    "schedule",
+    "plan",
+    "design",
+    "debug",
+    "fix",
+    "troubleshoot",
+    "develop",
+    "build",
+    "deploy",
+    "configure",
+    "setup",
+    "install",
+    "update",
+    "analyze",
+    "evaluate",
+    "assess",
+    "monitor",
+    "track",
+    "measure",
+    "prepare",
+    "collect",
+    "gather",
+    "compile",
+    "document",
+    "refactor",
 }
+
 
 def fix_bare_verb_at_end(text: str) -> str:
     """
     If the sentence ends with a bare verb, rewrite it into natural English.
-    
+
     Examples:
       "A white paper on industry trends write" -> "Write a white paper on industry trends"
       "Inventory data process" -> "Process inventory data"
       "Team workflows organize" -> "Organize team workflows"
       "A design system create" -> "Create a design system"
-    
+
     Args:
         text: The text to check and potentially fix
-        
+
     Returns:
         The corrected text with proper verb-object order
     """
     if not text or not text.strip():
         return text
-    
+
     # Strip and split into words
     text = text.strip()
     words = text.split()
-    
+
     if len(words) < 2:
         return text
-    
+
     # Get the last word (strip punctuation)
-    last_word = words[-1].rstrip('.,!?;:').lower()
-    
+    last_word = words[-1].rstrip(".,!?;:").lower()
+
     # Check if it ends with a bare verb
     if last_word in BARE_VERBS:
         # Extract the verb and the rest of the phrase
-        verb = words[-1].rstrip('.,!?;:')
-        
+        verb = words[-1].rstrip(".,!?;:")
+
         # Get punctuation if any
-        punctuation = ''.join(c for c in words[-1] if c in '.,!?;:')
-        
+        punctuation = "".join(c for c in words[-1] if c in ".,!?;:")
+
         # Get the object phrase (everything before the verb)
-        object_phrase = ' '.join(words[:-1])
-        
+        object_phrase = " ".join(words[:-1])
+
         # Remove leading articles if present (to avoid "a the system" issues)
         # and lowercase the object phrase for consistency
         object_phrase_lower = object_phrase.lower()
-        if object_phrase_lower.startswith('a '):
+        if object_phrase_lower.startswith("a "):
             object_phrase = object_phrase_lower[2:]
-        elif object_phrase_lower.startswith('an '):
+        elif object_phrase_lower.startswith("an "):
             object_phrase = object_phrase_lower[3:]
-        elif object_phrase_lower.startswith('the '):
+        elif object_phrase_lower.startswith("the "):
             object_phrase = object_phrase_lower[4:]
         else:
             object_phrase = object_phrase_lower
-        
+
         # Rebuild: Verb (capitalized) + object phrase + punctuation
         # Capitalize the verb
         verb_capitalized = verb.capitalize()
-        
+
         # Construct the new sentence
         fixed_text = f"{verb_capitalized} {object_phrase}{punctuation}".strip()
-        
+
         # Check if the verb already appears at the start of the object phrase
         # to avoid "Write write a document" situations
         object_words = object_phrase.split()
         if object_words and object_words[0] == verb.lower():
             # Already has verb at start, just return object phrase capitalized
             return object_phrase.capitalize() + punctuation
-        
+
         return fixed_text
-    
+
     return text
+
 
 def is_valid_sentence(text: str) -> bool:
     """
     Validate that a sentence follows natural English order.
     Returns False if the sentence ends with a bare verb.
-    
+
     Args:
         text: The text to validate
-        
+
     Returns:
         True if the sentence is valid, False otherwise
     """
     if not text or not text.strip():
         return False
-    
+
     # Get the last word (lowercase, stripped of punctuation)
-    words = text.strip().rstrip('.!?').split()
+    words = text.strip().rstrip(".!?").split()
     if not words:
         return False
-    
-    last_word = words[-1].lower().strip('.,!?;:')
-    
+
+    last_word = words[-1].lower().strip(".,!?;:")
+
     # Check if the last word is a bare verb
     if last_word in BARE_VERBS:
         return False
-    
+
     return True
+
 
 # Task templates for each category
 TASK_TEMPLATES = {
@@ -203,7 +237,7 @@ TASK_TEMPLATES = {
         "Debug the security vulnerability",
         "Fix the bug in the data migration",
         "Debug the issue with the API gateway",
-        "Fix the problem with the message queue"
+        "Fix the problem with the message queue",
     ],
     "refactoring": [
         "Refactor the user service module",
@@ -230,7 +264,7 @@ TASK_TEMPLATES = {
         "Improve code maintainability",
         "Refactor the integration layer",
         "Restructure the configuration files",
-        "Refactor the utility functions"
+        "Refactor the utility functions",
     ],
     "writing_code": [
         "Write unit tests for my authentication API endpoints",
@@ -257,7 +291,7 @@ TASK_TEMPLATES = {
         "Write the monitoring dashboard code",
         "Write code for the message queue",
         "Write the deployment automation script",
-        "Write code for the security layer"
+        "Write code for the security layer",
     ],
     "programming": [
         "Implement a new feature for user authentication",
@@ -284,7 +318,7 @@ TASK_TEMPLATES = {
         "Program the data access layer",
         "Implement the service orchestration",
         "Create the API documentation generator",
-        "Implement the performance optimization"
+        "Implement the performance optimization",
     ],
     "running_code": [
         "Run the test suite for the project",
@@ -311,7 +345,7 @@ TASK_TEMPLATES = {
         "Execute the configuration validation",
         "Run the API documentation generator",
         "Execute the backup verification",
-        "Run the system health checks"
+        "Run the system health checks",
     ],
     "inspecting": [
         "Review and optimize the search algorithm",
@@ -338,7 +372,7 @@ TASK_TEMPLATES = {
         "Inspect the data flow architecture",
         "Review the scalability considerations",
         "Inspect the compliance requirements",
-        "Review the system reliability metrics"
+        "Review the system reliability metrics",
     ],
     "writing": [
         "Write a blog post about machine learning trends",
@@ -365,7 +399,7 @@ TASK_TEMPLATES = {
         "Draft a presentation script for the conference",
         "Create a style guide for the documentation",
         "Write a white paper on industry trends",
-        "Compose a thank you note to the team"
+        "Compose a thank you note to the team",
     ],
     "learning_research": [
         "Read a research paper on transformers",
@@ -392,7 +426,7 @@ TASK_TEMPLATES = {
         "Read academic papers on the topic",
         "Research market trends",
         "Investigate competitor solutions",
-        "Read technical blog posts"
+        "Read technical blog posts",
     ],
     "learning_study": [
         "Study for the certification exam",
@@ -419,7 +453,7 @@ TASK_TEMPLATES = {
         "Study the design principles",
         "Study the coding standards",
         "Study the documentation format",
-        "Study the best practices"
+        "Study the best practices",
     ],
     "learning_training": [
         "Take an online course on machine learning",
@@ -446,7 +480,7 @@ TASK_TEMPLATES = {
         "Attend training on new tools",
         "Take a course on best practices",
         "Attend a professional development session",
-        "Take an advanced training program"
+        "Take an advanced training program",
     ],
     "learning_practice": [
         "Practice coding problems on LeetCode",
@@ -473,7 +507,7 @@ TASK_TEMPLATES = {
         "Practice code organization",
         "Practice testing strategies",
         "Practice monitoring setup",
-        "Practice automation scripting"
+        "Practice automation scripting",
     ],
     "creative": [
         "Design a logo for the new project",
@@ -500,7 +534,7 @@ TASK_TEMPLATES = {
         "Create a marketing campaign",
         "Write creative content",
         "Design visual assets",
-        "Create multimedia presentations"
+        "Create multimedia presentations",
     ],
     "administrative": [
         "Schedule a meeting with the team",
@@ -527,7 +561,7 @@ TASK_TEMPLATES = {
         "Update contact information",
         "Schedule training sessions",
         "Review and process invoices",
-        "Update the employee handbook"
+        "Update the employee handbook",
     ],
     "team_organization": [
         "Organize a team building event",
@@ -554,7 +588,7 @@ TASK_TEMPLATES = {
         "Organize team celebrations",
         "Organize team onboarding process",
         "Organize team offboarding process",
-        "Organize team recognition program"
+        "Organize team recognition program",
     ],
     "team_collaboration": [
         "Reach out to a colleague for coffee",
@@ -581,7 +615,7 @@ TASK_TEMPLATES = {
         "Work together on execution",
         "Collaborate on evaluation",
         "Work on team feedback",
-        "Collaborate on continuous improvement"
+        "Collaborate on continuous improvement",
     ],
     "team_planning": [
         "Plan a team lunch",
@@ -608,7 +642,7 @@ TASK_TEMPLATES = {
         "Plan team code review process",
         "Plan team deployment strategy",
         "Plan team monitoring approach",
-        "Plan team continuous improvement"
+        "Plan team continuous improvement",
     ],
     "research": [
         "Research market trends for the new product",
@@ -635,7 +669,7 @@ TASK_TEMPLATES = {
         "Research team collaboration tools",
         "Find information about regulations",
         "Investigate monitoring and logging solutions",
-        "Research backup and disaster recovery"
+        "Research backup and disaster recovery",
     ],
     "planning": [
         "Plan the project roadmap for Q1",
@@ -662,7 +696,7 @@ TASK_TEMPLATES = {
         "Create a maintenance schedule",
         "Plan the feature prioritization",
         "Schedule team retrospectives",
-        "Plan the capacity expansion"
+        "Plan the capacity expansion",
     ],
     "communication": [
         "Send an email to the team about the update",
@@ -689,7 +723,7 @@ TASK_TEMPLATES = {
         "Write a meeting summary",
         "Send a status notification",
         "Schedule a review meeting",
-        "Write a change request"
+        "Write a change request",
     ],
     "big_data_analytics": [
         "Analyze large-scale user engagement data",
@@ -716,7 +750,7 @@ TASK_TEMPLATES = {
         "Analyze data lake contents",
         "Process big data for pattern recognition",
         "Create big data performance metrics",
-        "Analyze distributed analytics results"
+        "Analyze distributed analytics results",
     ],
     "data_processing": [
         "Process sales data for the quarter",
@@ -743,7 +777,7 @@ TASK_TEMPLATES = {
         "Process aggregation data",
         "Process normalization data",
         "Process enrichment data",
-        "Process cleaning data pipelines"
+        "Process cleaning data pipelines",
     ],
     "design": [
         "Design a user interface mockup",
@@ -770,7 +804,7 @@ TASK_TEMPLATES = {
         "Create a social media graphic",
         "Design a packaging concept",
         "Create a animation storyboard",
-        "Design a website layout"
+        "Design a website layout",
     ],
     "qa": [
         "Perform quality assurance testing",
@@ -797,7 +831,7 @@ TASK_TEMPLATES = {
         "Perform QA database testing",
         "Conduct QA end-to-end testing",
         "Execute QA automated testing",
-        "Perform QA manual testing"
+        "Perform QA manual testing",
     ],
     "testing": [
         "Write unit tests for the new feature",
@@ -824,7 +858,7 @@ TASK_TEMPLATES = {
         "Test the notification system",
         "Perform penetration testing",
         "Test the search functionality",
-        "Run automated test suite"
+        "Run automated test suite",
     ],
     "validation": [
         "Validate the user input data",
@@ -851,7 +885,7 @@ TASK_TEMPLATES = {
         "Validate the logging implementation",
         "Validate the data privacy",
         "Validate the user permissions",
-        "Validate the system reliability"
+        "Validate the system reliability",
     ],
     "reporting": [
         "Create a report on website traffic",
@@ -878,7 +912,7 @@ TASK_TEMPLATES = {
         "Generate a trend analysis report",
         "Create a benchmark comparison report",
         "Generate a recommendations report",
-        "Create a executive summary report"
+        "Create a executive summary report",
     ],
     "documentation": [
         "Write API documentation for the endpoints",
@@ -905,7 +939,7 @@ TASK_TEMPLATES = {
         "Write a contribution guide",
         "Create a glossary of terms",
         "Document the backup procedures",
-        "Write a release notes document"
+        "Write a release notes document",
     ],
     "system_admin": [
         "Set up a new server environment",
@@ -932,7 +966,7 @@ TASK_TEMPLATES = {
         "Set up the development environment",
         "Configure the caching layer",
         "Monitor application logs",
-        "Set up the production environment"
+        "Set up the production environment",
     ],
     "ux_ui": [
         "Design the user experience flow",
@@ -959,7 +993,7 @@ TASK_TEMPLATES = {
         "Create loading state designs",
         "Design the empty states",
         "Create feedback mechanisms",
-        "Design the mobile interface"
+        "Design the mobile interface",
     ],
     "security": [
         "Perform security audit of the system",
@@ -986,7 +1020,7 @@ TASK_TEMPLATES = {
         "Configure security backups",
         "Review security access logs",
         "Implement security protocols",
-        "Configure security automation"
+        "Configure security automation",
     ],
     "data_privacy": [
         "Review data privacy policies",
@@ -1013,21 +1047,22 @@ TASK_TEMPLATES = {
         "Implement privacy monitoring",
         "Audit data privacy compliance",
         "Configure privacy reporting",
-        "Review data privacy governance"
-    ]
+        "Review data privacy governance",
+    ],
 }
 
+
 def generate_variations(
-    base_text: str, 
-    category: str, 
+    base_text: str,
+    category: str,
     num_variations: int = 3,
     use_ollama: bool = False,
-    semantic_analyzer = None
+    semantic_analyzer=None,
 ) -> List[str]:
     """
     Generate variations of a base task text with dynamic semantic analysis
     Uses CMU-inspired semantic analysis approaches for dynamic variation generation
-    
+
     Args:
         base_text: Base task text
         category: Task category
@@ -1036,7 +1071,7 @@ def generate_variations(
         semantic_analyzer: SemanticAnalyzer instance if available
     """
     variations = [base_text]  # Include original
-    
+
     # Use dynamic semantic analysis if available (optimized to minimize Ollama calls)
     if use_ollama and semantic_analyzer and HAS_SEMANTIC_ANALYZER:
         try:
@@ -1044,34 +1079,38 @@ def generate_variations(
             # This avoids repeated Ollama calls for the same category
             prefixes = semantic_analyzer.generate_semantic_prefixes(base_text, category)
             suffixes = semantic_analyzer.generate_semantic_suffixes(base_text, category)
-            
+
             # Generate template-based variations with dynamic prefixes/suffixes
             template_variations = []
-            for prefix in prefixes[:min(3, num_variations - 1)]:
+            for prefix in prefixes[: min(3, num_variations - 1)]:
                 for suffix in suffixes[:1]:  # Use first suffix only for templates
                     variation = f"{prefix} {base_text.lower()}{suffix}".strip()
-                    if variation != base_text and variation not in template_variations and is_valid_sentence(variation):
+                    if (
+                        variation != base_text
+                        and variation not in template_variations
+                        and is_valid_sentence(variation)
+                    ):
                         template_variations.append(variation)
-            
-            variations.extend(template_variations[:num_variations - 1])
-            
+
+            variations.extend(template_variations[: num_variations - 1])
+
             # Only use expensive Ollama calls (paraphrases, verbs) if we still need more variations
             # Skip if we already have enough
             if len(variations) < num_variations:
                 # Generate semantic paraphrases using Ollama (only if needed)
                 try:
                     paraphrases = semantic_analyzer.generate_paraphrases(
-                        base_text, 
-                        category, 
-                        min(2, num_variations - len(variations))  # Limit to 2 paraphrases max
+                        base_text,
+                        category,
+                        min(2, num_variations - len(variations)),  # Limit to 2 paraphrases max
                     )
                     # Validate paraphrases before adding
                     for paraphrase in paraphrases:
                         if is_valid_sentence(paraphrase):
                             variations.append(paraphrase)
-                except Exception as e:
+                except Exception:
                     pass  # Skip paraphrases if Ollama fails, continue with what we have
-            
+
             # Use semantic verb extraction for additional variations (cached per category)
             if len(variations) < num_variations:
                 semantic_verbs = semantic_analyzer.extract_semantic_verbs(base_text, category)
@@ -1079,18 +1118,18 @@ def generate_variations(
                     words = base_text.split()
                     if len(words) > 1:
                         # Replace first word (likely verb) with semantic alternatives
-                        for verb in semantic_verbs[:min(3, num_variations - len(variations))]:
+                        for verb in semantic_verbs[: min(3, num_variations - len(variations))]:
                             if verb.lower() != words[0].lower():
                                 new_text = f"{verb} {' '.join(words[1:])}"
                                 if new_text not in variations and is_valid_sentence(new_text):
                                     variations.append(new_text)
                                     if len(variations) >= num_variations:
                                         break
-            
-        except Exception as e:
+
+        except Exception:
             # Silently fall back to default templates (don't spam errors)
             use_ollama = False
-    
+
     # Fallback: Use default templates if semantic analysis not available
     if not use_ollama or len(variations) < num_variations:
         # Default prefixes (fallback)
@@ -1102,9 +1141,9 @@ def generate_variations(
             "Help me",
             "I should",
             "Let me",
-            "I'm going to"
+            "I'm going to",
         ]
-        
+
         # Default suffixes (fallback)
         default_suffixes = [
             "",
@@ -1113,19 +1152,23 @@ def generate_variations(
             " as soon as possible",
             " when you have time",
             " - urgent",
-            " - important"
+            " - important",
         ]
-        
+
         # Generate template-based variations
         template_variations = []
-        for prefix in default_prefixes[:min(3, num_variations - len(variations))]:
+        for prefix in default_prefixes[: min(3, num_variations - len(variations))]:
             for suffix in default_suffixes[:1]:
                 variation = f"{prefix} {base_text.lower()}{suffix}".strip()
-                if variation != base_text and variation not in variations and is_valid_sentence(variation):
+                if (
+                    variation != base_text
+                    and variation not in variations
+                    and is_valid_sentence(variation)
+                ):
                     template_variations.append(variation)
-        
+
         variations.extend(template_variations)
-    
+
     # Ensure we have enough variations (with safety limit to prevent infinite loop)
     attempts = 0
     max_attempts = 10
@@ -1134,7 +1177,7 @@ def generate_variations(
         # Generate additional variations using simple transformations
         # that maintain proper sentence structure
         words = base_text.split()
-        
+
         # Try adding contextual modifiers to the beginning (keeping verb structure intact)
         if len(words) >= 2:
             modifiers = ["Quickly", "Carefully", "Thoroughly", "Efficiently"]
@@ -1145,27 +1188,28 @@ def generate_variations(
                     new_text = f"{modifier} {base_text.lower()}".strip()
                 else:
                     new_text = f"{modifier} {base_text}".strip()
-                
+
                 if new_text not in variations and is_valid_sentence(new_text):
                     variations.append(new_text)
                     if len(variations) >= num_variations:
                         break
-            
+
             if len(variations) >= num_variations:
                 break
-        
+
         # If still need more, just break instead of creating malformed sentences
         break
-    
+
     # If still not enough, pad with the base text (better than malformed sentences)
     while len(variations) < num_variations:
         variations.append(base_text)
-    
+
     return variations[:num_variations]
+
 
 # -------------------------------------------------------------
 # ABILITY DATA GENERATOR (NEW)
-# Simple stub generator for ability data. 
+# Simple stub generator for ability data.
 # This allows multi-model generation without breaking training.
 # -------------------------------------------------------------
 class AbilityGenerator:
@@ -1178,7 +1222,6 @@ class AbilityGenerator:
     def __init__(self, output_dir):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
-
 
     def generate(self, num_examples=50):
         # Very small stub dataset — enough to satisfy instructor requirement
@@ -1202,7 +1245,6 @@ class AbilityGenerator:
         return items
 
 
-
 def generate_synthetic_dataset(
     total_examples: int = 7000,
     examples_per_class: int = None,
@@ -1216,7 +1258,7 @@ def generate_synthetic_dataset(
       - ability
       - rl (future)
     """
- # Normalize output directory to an absolute path
+    # Normalize output directory to an absolute path
     output_dir = str(Path(output_dir).resolve())
 
     # Ability mode (NEW)
@@ -1227,12 +1269,10 @@ def generate_synthetic_dataset(
         return {
             "type": "ability",
             "count": len(ability_data),
-            "file": str(Path(output_dir) / "ability_dataset.jsonl")
+            "file": str(Path(output_dir) / "ability_dataset.jsonl"),
         }
 
-
     # If not ability mode, continue with classification generation below.
-
 
     """
     Generate synthetic dataset for task classification
@@ -1245,25 +1285,27 @@ def generate_synthetic_dataset(
     """
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
-    
+
     # Calculate examples per class
     if examples_per_class:
         total_examples = examples_per_class * len(LABEL_MAPPING)
-    
+
     examples_per_class = total_examples // len(LABEL_MAPPING)
     remainder = total_examples % len(LABEL_MAPPING)
-    
+
     print("=" * 60)
     print("Generating Synthetic Training Data")
     print("=" * 60)
     print(f"Total examples: {total_examples}")
     print(f"Examples per class: ~{examples_per_class}")
     print(f"Categories: {len(LABEL_MAPPING)} total")
-    print(f"Semantic augmentation: {'Enabled (slower)' if use_ollama else 'Disabled (fast, template-based)'}")
+    print(
+        f"Semantic augmentation: {'Enabled (slower)' if use_ollama else 'Disabled (fast, template-based)'}"
+    )
     if use_ollama:
-        print(f"⚠️  Note: Ollama will be used selectively (every 20th template) for speed")
+        print("⚠️  Note: Ollama will be used selectively (every 20th template) for speed")
     print()
-    
+
     # Initialize semantic analyzer if requested
     semantic_analyzer = None
     if use_ollama and HAS_SEMANTIC_ANALYZER:
@@ -1281,22 +1323,24 @@ def generate_synthetic_dataset(
             print(f"⚠ Failed to initialize semantic analyzer: {e}")
             print("   Continuing with template-based generation only")
             semantic_analyzer = None
-    
+
     all_data = []
     label_counts = Counter()
-    
+
     # Generate data for each category
     total_categories = len(LABEL_MAPPING)
     for cat_idx, (category, label_id) in enumerate(LABEL_MAPPING.items(), 1):
         templates = TASK_TEMPLATES[category]
         num_examples = examples_per_class + (1 if label_id < remainder else 0)
-        
-        print(f"[{cat_idx}/{total_categories}] Generating {num_examples} examples for '{category}'...")
-        
+
+        print(
+            f"[{cat_idx}/{total_categories}] Generating {num_examples} examples for '{category}'..."
+        )
+
         # Calculate how many variations per template
         variations_per_template = max(1, num_examples // len(templates))
         extra_variations = num_examples % len(templates)
-        
+
         category_data = []
         # Pre-cache semantic prefixes/suffixes for this category (once per category, not per template)
         if use_ollama and semantic_analyzer is not None:
@@ -1305,47 +1349,49 @@ def generate_synthetic_dataset(
                 sample_template = templates[0] if templates else ""
                 print(f"    Pre-caching semantic data for '{category}'...")
                 _ = semantic_analyzer.generate_semantic_prefixes(sample_template, category)
-                print(f"      ✓ Prefixes cached")
+                print("      ✓ Prefixes cached")
                 _ = semantic_analyzer.generate_semantic_suffixes(sample_template, category)
-                print(f"      ✓ Suffixes cached")
+                print("      ✓ Suffixes cached")
                 _ = semantic_analyzer.extract_semantic_verbs(sample_template, category)
-                print(f"      ✓ Verbs cached")
+                print("      ✓ Verbs cached")
             except Exception as e:
                 print(f"      ⚠ Pre-caching failed: {e}")
                 pass  # Continue even if pre-caching fails
-        
+
         for i, template in enumerate(templates):
             num_variations = variations_per_template + (1 if i < extra_variations else 0)
             # Use semantic analysis much more selectively: only every 20th template (was every 5th)
             # This reduces Ollama calls by 75%
             use_semantic_for_this = use_ollama and (i % 20 == 0) and semantic_analyzer is not None
             variations = generate_variations(
-                template, 
-                category, 
+                template,
+                category,
                 num_variations,
                 use_ollama=use_semantic_for_this,
-                semantic_analyzer=semantic_analyzer
+                semantic_analyzer=semantic_analyzer,
             )
-            
+
             # Progress indicator every 5 templates
             if (i + 1) % 5 == 0:
-                print(f"    Progress: {i + 1}/{len(templates)} templates processed ({len(category_data)} examples so far)")
-            
+                print(
+                    f"    Progress: {i + 1}/{len(templates)} templates processed ({len(category_data)} examples so far)"
+                )
+
             for variation in variations:
                 if len(category_data) >= num_examples:
                     break
-                
+
                 # Apply post-processing to fix any bare verbs at the end
-                # This transforms malformed text like "Inventory data process" 
+                # This transforms malformed text like "Inventory data process"
                 # into "Process inventory data"
                 fixed_text = fix_bare_verb_at_end(variation)
-                
+
                 # Final validation: skip truly invalid sentences
                 if not is_valid_sentence(fixed_text):
                     continue
-                
+
                 task_id = f"task_{len(all_data) + len(category_data):06d}"
-                
+
                 example = {
                     "id": task_id,
                     "text": fixed_text,
@@ -1354,69 +1400,67 @@ def generate_synthetic_dataset(
                     "metadata": {
                         "length": len(fixed_text),
                         "difficulty": random.choice(["beginner", "intermediate", "advanced"]),
-                        "source": "synthetic"
-                    }
+                        "source": "synthetic",
+                    },
                 }
-                
+
                 category_data.append(example)
                 label_counts[category] += 1
-        
+
         all_data.extend(category_data)
         print(f"  ✓ Generated {len(category_data)} examples for '{category}'")
         if use_ollama and semantic_analyzer:
             cache_size = len(semantic_analyzer._cache)
             print(f"    (Semantic cache: {cache_size} entries)")
-    
+
     # Shuffle the data
     random.shuffle(all_data)
-    
+
     # Split into train (70%), validation (15%), test (15%)
     total = len(all_data)
     train_size = int(total * 0.70)
     val_size = int(total * 0.15)
-    
+
     train_data = all_data[:train_size]
-    val_data = all_data[train_size:train_size + val_size]
-    test_data = all_data[train_size + val_size:]
-    
+    val_data = all_data[train_size : train_size + val_size]
+    test_data = all_data[train_size + val_size :]
+
     # Save datasets
     train_file = output_path / "classification_train.jsonl"
     val_file = output_path / "classification_val.jsonl"
     test_file = output_path / "classification_test.jsonl"
-    
-    print(f"\nSaving datasets...")
+
+    print("\nSaving datasets...")
     print(f"  Train: {len(train_data)} examples -> {train_file}")
     print(f"  Val: {len(val_data)} examples -> {val_file}")
     print(f"  Test: {len(test_data)} examples -> {test_file}")
-    
+
     # Save in format expected by training script (text, label as integer)
     for file_path, data in [(train_file, train_data), (val_file, val_data), (test_file, test_data)]:
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             for item in data:
                 # Save in format expected by trainer: {"text": "...", "label": 0}
-                f.write(json.dumps({
-                    "text": item["text"],
-                    "label": item["label_id"]
-                }) + '\n')
-    
+                f.write(json.dumps({"text": item["text"], "label": item["label_id"]}) + "\n")
+
     # Also save full format with metadata
     full_train_file = output_path / "synthetic_classification_train.jsonl"
     full_val_file = output_path / "synthetic_classification_val.jsonl"
     full_test_file = output_path / "synthetic_classification_test.jsonl"
-    
-    for file_path, data in [(full_train_file, train_data), (full_val_file, val_data), (full_test_file, test_data)]:
-        with open(file_path, 'w') as f:
+
+    for file_path, data in [
+        (full_train_file, train_data),
+        (full_val_file, val_data),
+        (full_test_file, test_data),
+    ]:
+        with open(file_path, "w") as f:
             for item in data:
-                f.write(json.dumps(item) + '\n')
-    
+                f.write(json.dumps(item) + "\n")
+
     # Save label mapping
     label_map_file = output_path / "label_mapping.json"
-    with open(label_map_file, 'w') as f:
-        json.dump({
-            "label2id": LABEL_MAPPING,
-            "id2label": ID_TO_LABEL
-        }, f, indent=2)
-    
+    with open(label_map_file, "w") as f:
+        json.dump({"label2id": LABEL_MAPPING, "id2label": ID_TO_LABEL}, f, indent=2)
+
     # Save metadata
     metadata = {
         "dataset_name": "deepiri-task-classification-v1",
@@ -1429,71 +1473,64 @@ def generate_synthetic_dataset(
         "label_distribution": dict(label_counts),
         "avg_text_length": sum(len(item["text"]) for item in all_data) / len(all_data),
         "min_text_length": min(len(item["text"]) for item in all_data),
-        "max_text_length": max(len(item["text"]) for item in all_data)
+        "max_text_length": max(len(item["text"]) for item in all_data),
     }
-    
+
     metadata_file = output_path / "dataset_metadata.json"
-    with open(metadata_file, 'w') as f:
+    with open(metadata_file, "w") as f:
         json.dump(metadata, f, indent=2)
-    
-    print(f"\n✅ Dataset generation complete!")
-    print(f"\nDataset Statistics:")
+
+    print("\n✅ Dataset generation complete!")
+    print("\nDataset Statistics:")
     print(f"  Total examples: {total}")
     print(f"  Train: {len(train_data)} ({len(train_data)/total*100:.1f}%)")
     print(f"  Validation: {len(val_data)} ({len(val_data)/total*100:.1f}%)")
     print(f"  Test: {len(test_data)} ({len(test_data)/total*100:.1f}%)")
-    print(f"\nLabel Distribution:")
+    print("\nLabel Distribution:")
     for label, count in label_counts.most_common():
         print(f"  {label}: {count} examples")
-    print(f"\nFiles saved:")
+    print("\nFiles saved:")
     print(f"  Training data: {train_file}")
     print(f"  Validation data: {val_file}")
     print(f"  Test data: {test_file}")
     print(f"  Label mapping: {label_map_file}")
     print(f"  Metadata: {metadata_file}")
-    print(f"\nNext step: Run training")
-    print(f"  python app/train/scripts/train_intent_classifier.py")
-    
-    return {
-        "train": train_data,
-        "val": val_data,
-        "test": test_data,
-        "metadata": metadata
-    }
+    print("\nNext step: Run training")
+    print("  python scripts/training/train_intent_classifier.py")
+
+    return {"train": train_data, "val": val_data, "test": test_data, "metadata": metadata}
+
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Generate synthetic training data")
     parser.add_argument(
         "--total-examples",
         type=int,
         default=7000,
-        help="Total number of examples to generate (default: 7000)"
+        help="Total number of examples to generate (default: 7000)",
     )
     parser.add_argument(
         "--examples-per-class",
         type=int,
         default=None,
-        help="Number of examples per class (overrides total-examples)"
+        help="Number of examples per class (overrides total-examples)",
     )
     parser.add_argument(
         "--output-dir",
         type=str,
         default=str(Path(__file__).parent.parent / "data"),
-        help="Output directory for datasets (default: app/train/data)"
+        help="Output directory for datasets (default: data/datasets/raw)",
     )
     parser.add_argument(
         "--use-ollama",
         action="store_true",
         default=False,
-        help="Use Ollama for enhanced data augmentation (slower, default: False for speed)"
+        help="Use Ollama for enhanced data augmentation (slower, default: False for speed)",
     )
     parser.add_argument(
-        "--no-ollama",
-        dest="use_ollama",
-        action="store_false",
-        help="Disable Ollama augmentation"
+        "--no-ollama", dest="use_ollama", action="store_false", help="Disable Ollama augmentation"
     )
     # NEW ARG: allows selecting classification / ability / rl
     # Adds multi-model generation support without changing behavior today.
@@ -1502,12 +1539,12 @@ if __name__ == "__main__":
         type=str,
         default="classification",
         choices=["classification", "ability", "rl"],
-        help="Type of synthetic data to generate. Currently only 'classification' is implemented."
+        help="Type of synthetic data to generate. Currently only 'classification' is implemented.",
     )
 
     # Parse AFTER all arguments are defined
     args = parser.parse_args()
-    
+
     generate_synthetic_dataset(
         total_examples=args.total_examples,
         examples_per_class=args.examples_per_class,

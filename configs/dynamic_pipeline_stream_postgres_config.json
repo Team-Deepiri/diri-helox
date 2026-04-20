@@ -1,0 +1,72 @@
+{
+  "pipeline_name": "intent_classifier_live_plus_history",
+  "description": "Train from live Redis stream (primary) with Postgres durable history backfill.",
+
+  "data_sources": [
+    {
+      "source_type": "stream",
+      "name": "cyrex_live_stream",
+      "weight": 0.8,
+      "params": {
+        "mode": "subscribe",
+        "stream_type": "structured",
+        "redis_url": "${REDIS_URL}",
+        "min_quality": 0.4,
+        "idle_timeout_s": 30,
+        "fallback_mode": "file",
+        "pipeline_dir": "data/datasets/pipeline"
+      }
+    },
+    {
+      "source_type": "postgres",
+      "name": "cyrex_durable_history",
+      "weight": 0.2,
+      "params": {
+        "dsn": "${POSTGRES_DSN}",
+        "table": "cyrex.helox_training_samples",
+        "stream_type": "structured",
+        "producer": "language_intelligence",
+        "min_quality": 0.4,
+        "max_samples": 5000
+      }
+    }
+  ],
+
+  "preprocessing": {
+    "use_text_cleaner": true,
+    "use_deduplication": true,
+    "min_text_length": 10
+  },
+
+  "training": {
+    "trainer_type": "intent_classifier",
+    "model_name": "bert-base-uncased",
+    "num_labels": 31,
+    "num_epochs": 3,
+    "batch_size": 16,
+    "learning_rate": 2e-5,
+    "max_length": 128,
+    "output_dir": "models/intent_classifier_live_plus_history"
+  },
+
+  "evaluation": {
+    "enabled": true
+  },
+
+  "export": {
+    "mlflow": {
+      "enabled": true,
+      "tracking_uri": "${MLFLOW_TRACKING_URI}",
+      "experiment_name": "intent_classifier_live_plus_history",
+      "register_model": true
+    },
+    "publish_model_ready": true
+  },
+
+  "split": {
+    "train_ratio": 0.70,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15,
+    "seed": 42
+  }
+}

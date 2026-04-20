@@ -1,5 +1,4 @@
-"""Export shim for pipeline base types.
-"""
+"""Export shim for pipeline base types."""
 
 from __future__ import annotations
 
@@ -64,4 +63,3 @@ __all__ = [
     "ValidationResult",
     "DataPreprocessor",
 ]
-
