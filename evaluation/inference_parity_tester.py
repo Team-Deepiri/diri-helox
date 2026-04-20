@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 class InferenceParityTester:
     """
     Tests inference parity between training and production.
-    
+
     Tests:
     - Train vs inference mode output parity
     - Full precision vs quantized parity
     - Batch size variations
     - Sequence length variations
     """
-    
+
     def __init__(
         self,
         tolerance: float = 1e-5,
@@ -33,14 +33,14 @@ class InferenceParityTester:
     ):
         """
         Initialize parity tester.
-        
+
         Args:
             tolerance: Absolute tolerance for comparisons
             rtol: Relative tolerance for comparisons
         """
         self.tolerance = tolerance
         self.rtol = rtol
-    
+
     def test_train_inference_parity(
         self,
         model: nn.Module,
@@ -48,27 +48,27 @@ class InferenceParityTester:
     ) -> Dict[str, Any]:
         """
         Test parity between train and inference modes.
-        
+
         Args:
             model: Model to test
             input_ids: Input token IDs
-            
+
         Returns:
             Parity test results
         """
         model.train()
         train_output = model(input_ids=input_ids)
         train_logits = train_output["logits"]
-        
+
         model.eval()
         with torch.no_grad():
             eval_output = model(input_ids=input_ids)
             eval_logits = eval_output["logits"]
-        
+
         # Compare outputs
         max_diff = (train_logits - eval_logits).abs().max().item()
         mean_diff = (train_logits - eval_logits).abs().mean().item()
-        
+
         # Check if close
         is_close = torch.allclose(
             train_logits,
@@ -76,14 +76,14 @@ class InferenceParityTester:
             atol=self.tolerance,
             rtol=self.rtol,
         )
-        
+
         result = {
             "parity_passed": is_close.item() if torch.is_tensor(is_close) else is_close,
             "max_difference": max_diff,
             "mean_difference": mean_diff,
             "tolerance": self.tolerance,
         }
-        
+
         if not result["parity_passed"]:
             logger.warning(
                 f"Train/inference parity failed: max_diff={max_diff:.2e}, "
@@ -91,9 +91,9 @@ class InferenceParityTester:
             )
         else:
             logger.info("Train/inference parity passed")
-        
+
         return result
-    
+
     def test_quantization_parity(
         self,
         model: nn.Module,
@@ -102,22 +102,22 @@ class InferenceParityTester:
     ) -> Dict[str, Any]:
         """
         Test parity between full precision and quantized models.
-        
+
         Args:
             model: Model to test
             input_ids: Input token IDs
             quantization_bits: Quantization bits (8, 4, etc.)
-            
+
         Returns:
             Quantization parity results
         """
         model.eval()
-        
+
         # Full precision
         with torch.no_grad():
             full_output = model(input_ids=input_ids)
             full_logits = full_output["logits"]
-        
+
         # Quantized
         try:
             if quantization_bits == 8:
@@ -130,15 +130,15 @@ class InferenceParityTester:
                 # For other bit widths, would need custom quantization
                 logger.warning(f"Quantization to {quantization_bits} bits not implemented")
                 return {"parity_passed": False, "error": "Unsupported quantization"}
-            
+
             with torch.no_grad():
                 quant_output = quantized_model(input_ids=input_ids)
                 quant_logits = quant_output["logits"]
-            
+
             # Compare
             max_diff = (full_logits - quant_logits).abs().max().item()
             mean_diff = (full_logits - quant_logits).abs().mean().item()
-            
+
             # Quantized models have lower precision, so use relaxed tolerance
             relaxed_tolerance = self.tolerance * 10
             is_close = torch.allclose(
@@ -147,30 +147,28 @@ class InferenceParityTester:
                 atol=relaxed_tolerance,
                 rtol=self.rtol * 10,
             )
-            
+
             result = {
                 "parity_passed": is_close.item() if torch.is_tensor(is_close) else is_close,
                 "max_difference": max_diff,
                 "mean_difference": mean_diff,
                 "quantization_bits": quantization_bits,
             }
-            
+
             if not result["parity_passed"]:
-                logger.warning(
-                    f"Quantization parity failed: max_diff={max_diff:.2e}"
-                )
+                logger.warning(f"Quantization parity failed: max_diff={max_diff:.2e}")
             else:
                 logger.info("Quantization parity passed")
-            
+
             return result
-        
+
         except Exception as e:
             logger.error(f"Quantization parity test failed: {e}")
             return {
                 "parity_passed": False,
                 "error": str(e),
             }
-    
+
     def test_batch_size_parity(
         self,
         model: nn.Module,
@@ -178,50 +176,50 @@ class InferenceParityTester:
     ) -> Dict[str, Any]:
         """
         Test parity across different batch sizes.
-        
+
         Args:
             model: Model to test
             input_ids: Input token IDs (single batch)
-            
+
         Returns:
             Batch size parity results
         """
         model.eval()
-        
+
         # Single batch
         with torch.no_grad():
             single_output = model(input_ids=input_ids)
             single_logits = single_output["logits"]
-        
+
         # Batch of 2
         batched_input = torch.cat([input_ids, input_ids], dim=0)
         with torch.no_grad():
             batched_output = model(input_ids=batched_input)
             batched_logits = batched_output["logits"]
-        
+
         # Compare first item of batch
         first_item = batched_logits[0:1]
         max_diff = (single_logits - first_item).abs().max().item()
-        
+
         is_close = torch.allclose(
             single_logits,
             first_item,
             atol=self.tolerance,
             rtol=self.rtol,
         )
-        
+
         result = {
             "parity_passed": is_close.item() if torch.is_tensor(is_close) else is_close,
             "max_difference": max_diff,
         }
-        
+
         if not result["parity_passed"]:
             logger.warning(f"Batch size parity failed: max_diff={max_diff:.2e}")
         else:
             logger.info("Batch size parity passed")
-        
+
         return result
-    
+
     def run_full_parity_suite(
         self,
         model: nn.Module,
@@ -229,11 +227,11 @@ class InferenceParityTester:
     ) -> Dict[str, Any]:
         """
         Run full parity test suite.
-        
+
         Args:
             model: Model to test
             input_ids: Input token IDs
-            
+
         Returns:
             Complete parity test results
         """
@@ -242,17 +240,14 @@ class InferenceParityTester:
             "quantization": self.test_quantization_parity(model, input_ids),
             "batch_size": self.test_batch_size_parity(model, input_ids),
         }
-        
-        all_passed = all(
-            r.get("parity_passed", False) for r in results.values()
-        )
-        
+
+        all_passed = all(r.get("parity_passed", False) for r in results.values())
+
         results["all_tests_passed"] = all_passed
-        
+
         if all_passed:
             logger.info("All parity tests passed")
         else:
             logger.warning("Some parity tests failed")
-        
-        return results
 
+        return results

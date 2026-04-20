@@ -18,18 +18,18 @@ logger = logging.getLogger(__name__)
 class SynapseEventPublisher:
     """
     Publishes training events to Synapse.
-    
+
     Integrates with platform-services/shared/deepiri-synapse
     for event-driven architecture.
     """
-    
+
     def __init__(
         self,
         redis_url: Optional[str] = None,
     ):
         """
         Initialize Synapse event publisher.
-        
+
         Args:
             redis_url: Redis URL (defaults to env var)
         """
@@ -39,7 +39,7 @@ class SynapseEventPublisher:
         )
         self.redis_client: Optional[redis.Redis] = None
         self._connected = False
-    
+
     async def connect(self):
         """Connect to Redis."""
         try:
@@ -53,7 +53,7 @@ class SynapseEventPublisher:
         except Exception as e:
             logger.error(f"Failed to connect to Synapse: {e}")
             self._connected = False
-    
+
     async def publish_training_event(
         self,
         event_type: str,
@@ -64,7 +64,7 @@ class SynapseEventPublisher:
     ):
         """
         Publish training event.
-        
+
         Args:
             event_type: Event type (started, progress, completed, checkpoint)
             model_name: Model name
@@ -74,11 +74,11 @@ class SynapseEventPublisher:
         """
         if not self._connected:
             await self.connect()
-        
+
         if not self._connected:
             logger.warning("Not connected to Synapse, skipping event")
             return
-        
+
         event = {
             "event": event_type,
             "model_name": model_name,
@@ -87,7 +87,7 @@ class SynapseEventPublisher:
             "metrics": json.dumps(metrics) if metrics else None,
             **kwargs,
         }
-        
+
         try:
             await self.redis_client.xadd(
                 "training-events",
@@ -98,7 +98,7 @@ class SynapseEventPublisher:
             logger.debug(f"Published training event: {event_type} for {model_name}")
         except Exception as e:
             logger.error(f"Failed to publish training event: {e}")
-    
+
     async def publish_model_ready_event(
         self,
         model_name: str,
@@ -108,7 +108,7 @@ class SynapseEventPublisher:
     ):
         """
         Publish model-ready event (for Cyrex to auto-load).
-        
+
         Args:
             model_name: Model name
             version: Model version
@@ -117,10 +117,10 @@ class SynapseEventPublisher:
         """
         if not self._connected:
             await self.connect()
-        
+
         if not self._connected:
             return
-        
+
         event = {
             "event": "model-ready",
             "model_name": model_name,
@@ -129,7 +129,7 @@ class SynapseEventPublisher:
             "timestamp": datetime.utcnow().isoformat(),
             "metrics": json.dumps(metrics) if metrics else None,
         }
-        
+
         try:
             await self.redis_client.xadd(
                 "model-events",
@@ -140,10 +140,9 @@ class SynapseEventPublisher:
             logger.info(f"Published model-ready event: {model_name} v{version}")
         except Exception as e:
             logger.error(f"Failed to publish model-ready event: {e}")
-    
+
     async def close(self):
         """Close Redis connection."""
         if self.redis_client:
             await self.redis_client.close()
             self._connected = False
-

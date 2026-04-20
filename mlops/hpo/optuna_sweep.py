@@ -10,17 +10,16 @@ from optuna.samplers import TPESampler
 
 from .objective import run_one_trial, DEFAULT_METRIC
 
-
 # Default search space (ranges) for the versioned training pipeline
 DEFAULT_OPTUNA_SPACE = {
-    "learning_rate": (1e-5, 5e-4),      # log scale, QLoRA sweet spot
-    "batch_size": (2, 8),                # bounded by GPU memory
-    "weight_decay": (0.01, 0.1),         # AdamW standard range
-    "warmup_steps": (50, 200),           # ~5-10% of typical total steps
-    "num_epochs": (1, 3),                # QLoRA overfits fast on small data
-    "lora_rank": [8, 16, 32],            # categorical instead of range
-    "lora_alpha": [16, 32, 64],          # categorical, usually 2x rank
-    "lora_dropout": (0.03, 0.1),         # tight range around common values
+    "learning_rate": (1e-5, 5e-4),  # log scale, QLoRA sweet spot
+    "batch_size": (2, 8),  # bounded by GPU memory
+    "weight_decay": (0.01, 0.1),  # AdamW standard range
+    "warmup_steps": (50, 200),  # ~5-10% of typical total steps
+    "num_epochs": (1, 3),  # QLoRA overfits fast on small data
+    "lora_rank": [8, 16, 32],  # categorical instead of range
+    "lora_alpha": [16, 32, 64],  # categorical, usually 2x rank
+    "lora_dropout": (0.03, 0.1),  # tight range around common values
 }
 
 
@@ -73,9 +72,7 @@ def run_optuna_sweep(
     def objective(trial: optuna.Trial) -> float:
         overrides = {}
         for key, spec in space.items():
-            overrides[key] = _suggest_value(
-                trial, key, spec, log_scale=(key in log_scale_keys)
-            )
+            overrides[key] = _suggest_value(trial, key, spec, log_scale=(key in log_scale_keys))
         config = {**base_config, **overrides}
         return run_one_trial(
             config,

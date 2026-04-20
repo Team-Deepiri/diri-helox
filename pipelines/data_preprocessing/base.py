@@ -1,9 +1,4 @@
-"""Backward-compatible re-export shim for pipeline base types.
-
-The canonical implementations live in ``deepiri_dataset_processor.pipeline.base``.
-This module also provides a minimal ``DataPreprocessor`` compatibility class for
-older training pipelines that import it.
-"""
+"""Export shim for pipeline base types."""
 
 from __future__ import annotations
 
@@ -70,4 +65,3 @@ __all__ = [
     # legacy facade
     "DataPreprocessor",
 ]
-

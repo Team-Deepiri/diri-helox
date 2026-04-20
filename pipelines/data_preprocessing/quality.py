@@ -21,4 +21,3 @@ __all__ = [
     "QualityReport",
     "check_data_quality",
 ]
-
