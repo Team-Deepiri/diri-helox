@@ -1,3 +1,10 @@
+# Internal Deepiri libraries (pip): track main (tip of branch). For reproducible installs,
+# prefer Poetry + committed poetry.lock; pip from this file follows branch HEAD.
+# Requires GitHub auth for private repos (e.g. git credential or pip config).
+deepiri-dataset-processor[all] @ git+https://github.com/Team-Deepiri/deepiri-dataset-processor.git@main
+deepiri-training-orchestrator @ git+https://github.com/Team-Deepiri/deepiri-training-orchestrator.git@main
+deepiri-gpu-utils[torch] @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git@main
+
 # ML Training Dependencies
 torch>=2.0.0
 transformers>=4.35.0
