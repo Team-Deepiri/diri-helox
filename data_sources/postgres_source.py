@@ -29,6 +29,11 @@ from typing import Any, Dict, Iterator, List, Optional
 from .base import DataSample, DataSource, DataSourceConfig
 
 DEFAULT_TABLE = "cyrex.helox_training_samples"
+
+# SQL identifiers (table/column names) cannot be parameterized — they must be
+# interpolated directly into the query string. This regex is the guard: only
+# plain identifiers (letters, digits, underscores, no quotes or special chars)
+# are allowed, which prevents SQL injection through config-supplied names.
 _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
@@ -41,7 +46,7 @@ class PostgresDataSource(DataSource):
     def __init__(self, config: DataSourceConfig) -> None:
         super().__init__(config)
         self._dsn: str = config.params.get(
-            "dsn", os.environ.get("POSTGRES_DSN", "postgresql://localhost:5432/deepiri")
+            "dsn", os.environ.get("POSTGRES_DSN", "postgresql://localhost:5434/cyrex_db")
         )
         self._table: str = config.params.get("table", DEFAULT_TABLE)
         self._text_col: str = config.params.get("text_column", "text")
@@ -51,12 +56,21 @@ class PostgresDataSource(DataSource):
         self._producer: Optional[str] = config.params.get("producer", None)
         self._max_samples: Optional[int] = config.params.get("max_samples", None)
         self._where: Optional[str] = config.params.get("where", None)
+        # allow_unsafe_where is an opt-in escape hatch for trusted operators who need
+        # complex WHERE logic that can't be expressed with the parameterized filters
+        # above (e.g. date ranges, JSON operators). Off by default; callers must
+        # explicitly set it to true and are responsible for sanitizing the fragment.
         self._allow_unsafe_where: bool = bool(config.params.get("allow_unsafe_where", False))
 
         self._validate_config()
 
     @staticmethod
     def _validate_identifier(identifier: str, kind: str) -> None:
+        """Reject any table/column/schema name that contains SQL-special chars.
+
+        Because identifiers are interpolated (not parameterized) in the SELECT
+        and FROM clauses, we must validate them before use.
+        """
         if not _IDENTIFIER_RE.match(identifier):
             raise ValueError(f"Invalid {kind} identifier: {identifier!r}")
 
