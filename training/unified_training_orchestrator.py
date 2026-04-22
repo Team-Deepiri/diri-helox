@@ -6,12 +6,10 @@ This is the main entry point for production training.
 """
 
 import logging
-import asyncio
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 import torch
 from torch.utils.data import DataLoader
-import json
 from datetime import datetime
 
 # Core components
@@ -39,7 +37,6 @@ from ..training.curriculum_learning_scheduler import (
 )
 from ..training.failure_resilience_manager import FailureResilienceManager
 from ..training.precision_aware_layer_control import PrecisionAwareLayerControl
-from ..training.multi_objective_trainer import MultiObjectiveLoss
 from ..training.instruction_formatting_abstraction import InstructionFormatter
 
 # Observability
@@ -679,7 +676,7 @@ class UnifiedTrainingOrchestrator:
 
                 # Evaluation
                 if val_loader and (self.global_step + 1) % self.training_config.eval_steps == 0:
-                    eval_metrics = await self.evaluate(val_loader)
+                    await self.evaluate(val_loader)
                     self.training_stats["evaluations_run"] += 1
 
                     # Run parity tests

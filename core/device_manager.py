@@ -22,6 +22,13 @@ from .gpu_utils import (
 
 logger = logging.getLogger(__name__)
 
+# Backward-compatibility shim:
+# legacy tests and integrations patch `core.device_manager.resolve_torch_device`.
+try:
+    from deepiri_gpu_utils.torch_device import resolve_torch_device
+except ImportError:  # pragma: no cover - optional dependency
+    resolve_torch_device = None  # type: ignore[misc,assignment]
+
 
 class DeviceManager:
     """
@@ -33,7 +40,11 @@ class DeviceManager:
 
     def __init__(self, force_device: Optional[str] = None) -> None:
         self.force_device = force_device
-        self.device = detect_device(force=force_device)
+        if force_device is None and resolve_torch_device is not None:
+            decision = resolve_torch_device("auto")
+            self.device = torch.device(decision.device)
+        else:
+            self.device = detect_device(force=force_device)
         self.device_info = get_gpu_info(self.device)
         logger.info("DeviceManager initialized: %s", self.device_info)
 

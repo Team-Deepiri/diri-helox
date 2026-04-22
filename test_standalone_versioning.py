@@ -23,9 +23,8 @@ def test_helox_versioning_system():
         # Test all imports work
         print("📦 Testing imports...")
         from utils.dataset_versioning import DatasetVersionManager, DatasetType
-        from utils.dataset_validation import validate_dataset_quality, DatasetValidator
-        from utils.dataset_monitoring import DatasetMonitor, get_health_report
-        from pipelines.training.versioned_training_pipeline import VersionedTrainingPipeline
+        from utils.dataset_validation import validate_dataset_quality
+        from utils.dataset_monitoring import DatasetMonitor
 
         print("✅ All modules imported successfully!")
 
@@ -33,7 +32,7 @@ def test_helox_versioning_system():
         data_v1_path = Path("./data/samples/lease_abstraction_v1")
         data_v2_path = Path("./data/samples/lease_abstraction_v2")
 
-        print(f"📁 Test data paths:")
+        print("📁 Test data paths:")
         print(f"   V1: {data_v1_path.absolute()}")
         print(f"   V2: {data_v2_path.absolute()}")
 
@@ -186,9 +185,9 @@ def test_helox_versioning_system():
         print("\n📝 Test Summary:")
         print(f"   ✅ Created {len(versions)} dataset versions")
         print(f"   ✅ Validated dataset quality: {validation_result['quality_score']:.2f}")
-        print(f"   ✅ Tested version comparison and retrieval")
-        print(f"   ✅ Monitoring and logging operational")
-        print(f"   ✅ All core functionality working")
+        print("   ✅ Tested version comparison and retrieval")
+        print("   ✅ Monitoring and logging operational")
+        print("   ✅ All core functionality working")
 
         print("\n🚀 The dataset versioning system is ready for use in Helox!")
         print("\n💡 Usage Examples:")

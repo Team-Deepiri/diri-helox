@@ -82,7 +82,7 @@ except ImportError:
         return torch.device("cpu")
 
     def is_gpu_available() -> bool:  # type: ignore[misc]
-        return torch.cuda.is_available() or torch.backends.mps.is_available()
+        return bool(torch.cuda.is_available() or torch.backends.mps.is_available())
 
 
 # ---------------------------------------------------------------------------

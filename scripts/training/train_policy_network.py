@@ -6,8 +6,6 @@ ML Engineer 1: Train actor-critic models for real-time difficulty adjustment
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from typing import Dict, List, Tuple
-import numpy as np
 
 
 class PolicyNetwork(nn.Module):

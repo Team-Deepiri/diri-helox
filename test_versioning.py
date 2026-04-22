@@ -10,6 +10,13 @@ from pathlib import Path
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
+import pytest
+
+pytest.importorskip(
+    "deepiri_dataset_processor",
+    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
+)
+
 from utils.dataset_versioning import DatasetVersionManager, DatasetType
 
 
@@ -33,7 +40,7 @@ def test_versioning():
     data_v1_path = Path("./data/samples/lease_abstraction_v1")
     data_v2_path = Path("./data/samples/lease_abstraction_v2")
 
-    print(f"📁 Testing with data paths:")
+    print("📁 Testing with data paths:")
     print(f"   V1: {data_v1_path}")
     print(f"   V2: {data_v2_path}")
 

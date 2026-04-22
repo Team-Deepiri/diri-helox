@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.device_manager import DeviceManager
 from core.training_config import TrainingConfig, ModelConfig
-from models.transformer_lm import TransformerLanguageModel, create_model_from_config
+from models.transformer_lm import create_model_from_config
 from training.instruction_finetuning_trainer import InstructionFinetuningTrainer
 from torch.utils.data import DataLoader
 import torch

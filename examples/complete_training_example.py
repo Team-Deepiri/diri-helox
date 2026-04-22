@@ -78,7 +78,7 @@ async def main():
                 try:
                     data = json.loads(line)
                     train_texts.append(data.get("text", ""))
-                except:
+                except (json.JSONDecodeError, ValueError):
                     continue
 
         with open(val_data_path, "r") as f:
@@ -88,7 +88,7 @@ async def main():
                 try:
                     data = json.loads(line)
                     val_texts.append(data.get("text", ""))
-                except:
+                except (json.JSONDecodeError, ValueError):
                     continue
 
         # Check for contamination

@@ -1,3 +1,10 @@
+# Internal Deepiri libraries (pip): track main (tip of branch). For reproducible installs,
+# prefer Poetry + committed poetry.lock; pip from this file follows branch HEAD.
+# Requires GitHub auth for private repos (e.g. git credential or pip config).
+deepiri-dataset-processor[all] @ git+https://github.com/Team-Deepiri/deepiri-dataset-processor.git@main
+deepiri-training-orchestrator @ git+https://github.com/Team-Deepiri/deepiri-training-orchestrator.git@main
+deepiri-gpu-utils[torch] @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git@main
+
 # ML Training Dependencies
 torch>=2.0.0
 transformers>=4.35.0
@@ -62,3 +69,8 @@ rich>=13.0.0
 tqdm>=4.66.0
 pyyaml>=6.0
 python-dotenv>=1.0.0
+
+# GPU / device policy (shared with Cyrex via deepiri-gpu-utils). Poetry pins git revs in pyproject.toml.
+# pip-only (match pyproject revs when bumping):
+deepiri-gpu-utils @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git@98dc2f239ac585301024bcb538aa92c994034465
+deepiri-dataset-processor[all] @ git+https://github.com/Team-Deepiri/deepiri-dataset-processor.git@main

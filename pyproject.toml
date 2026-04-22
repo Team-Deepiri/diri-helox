@@ -6,7 +6,6 @@ readme = "README.md"
 authors = ["Deepiri Team"]
 license = "MIT"
 package-mode = false
-
 [tool.poetry.dependencies]
 python = "^3.11"
 # Internal Deepiri deps pinned by git revision for deterministic builds.
@@ -121,6 +120,7 @@ exclude = [
     "deepiri-gpu-utils",
     "docker_test_versioning\\.py",
     "scripts/generate_synthetic_b2b_data_v2\\.py",
+    "pipelines/data_processing/",
 ]
 
 # Suppress errors in pre-existing files with known issues
@@ -203,7 +203,6 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-per-file-ignores = {"tests/*" = ["E402"], "scripts/*" = ["E402"], "data_sources/synthetic_source.py" = ["E402"], "pipelines/training/dynamic_training_pipeline.py" = ["E402"]}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -213,4 +212,14 @@ markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests as integration tests",
 ]
+
+[tool.ruff.lint.per-file-ignores]
+# Imports after sys.path / importlib hacks (examples/scripts/tests)
+"examples/**/*.py" = ["E402"]
+"scripts/**/*.py" = ["E402"]
+"pipelines/data_preprocessing/test_quality.py" = ["E402"]
+"test_versioning.py" = ["E402"]
+"tests/**/*.py" = ["E402"]
+# Smoke script: imports exist only to verify the environment
+"tests/test_import.py" = ["F401"]
 

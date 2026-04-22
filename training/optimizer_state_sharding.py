@@ -7,9 +7,7 @@ for scaling beyond 1B parameters.
 
 import logging
 import torch
-import torch.nn as nn
-from typing import Dict, Any, Optional, List
-from pathlib import Path
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 

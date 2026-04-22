@@ -6,34 +6,11 @@ Does NOT duplicate code — imports the generator directly.
 
 from __future__ import annotations
 
-import sys
 import tempfile
-from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
-# Ensure helox root is on the path so the import below works
-_HELOX_ROOT = Path(__file__).parent.parent
-if str(_HELOX_ROOT) not in sys.path:
-    sys.path.insert(0, str(_HELOX_ROOT))
-
 from .base import DataSample, DataSource, DataSourceConfig
-
-# Lazy import — only attempt when actually generating
-_generator_module = None
-
-
-def _get_generator():
-    global _generator_module
-    if _generator_module is None:
-        import importlib.util
-
-        spec = importlib.util.spec_from_file_location(
-            "generate_synthetic_data",
-            str(_HELOX_ROOT / "scripts" / "generate_synthetic_data.py"),
-        )
-        _generator_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(_generator_module)
-    return _generator_module
+from .synthetic_generator import generate_synthetic_dataset
 
 
 class SyntheticDataSource(DataSource):
@@ -57,10 +34,8 @@ class SyntheticDataSource(DataSource):
         if self._cached is not None:
             return self._cached
 
-        gen = _get_generator()
-
         with tempfile.TemporaryDirectory() as tmp_dir:
-            result = gen.generate_synthetic_dataset(
+            result = generate_synthetic_dataset(
                 total_examples=self._total,
                 output_dir=tmp_dir,
                 use_ollama=self._use_ollama,

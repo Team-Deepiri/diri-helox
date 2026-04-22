@@ -7,9 +7,8 @@ Implements the core pretraining loop with checkpointing, evaluation, and logging
 import logging
 import math
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict
 import torch
-import torch.nn as nn
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, get_constant_schedule_with_warmup

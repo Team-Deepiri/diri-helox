@@ -7,9 +7,7 @@ for RAG-native model training.
 """
 
 import logging
-from typing import Dict, Any, List, Optional
-import torch
-from pathlib import Path
+from typing import Dict, Any, List
 
 logger = logging.getLogger(__name__)
 

@@ -6,7 +6,6 @@ Handles connection, error handling, and fallback behavior.
 """
 
 import logging
-import os
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 

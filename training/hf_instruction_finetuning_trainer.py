@@ -31,11 +31,11 @@ Usage in DynamicTrainingPipeline config:
 from __future__ import annotations
 
 import json
+import importlib
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import numpy as np
-from datasets import Dataset
 from sklearn.metrics import accuracy_score
 from transformers import (
     AutoModelForCausalLM,
@@ -251,7 +251,7 @@ class HFInstructionFinetuningTrainer:
 
         print("\nStarting instruction fine-tuning...")
         self._trainer.train()
-        eval_results = self._trainer.evaluate()
+        eval_results = cast(Dict[str, Any], self._trainer.evaluate())
         print(f"\nValidation token accuracy: {eval_results.get('eval_token_accuracy', 0):.4f}")
         return eval_results
 
@@ -379,7 +379,9 @@ class HFInstructionFinetuningTrainer:
             "labels": labels,
         }
 
-    def _to_hf_dataset(self, samples: List[DataSample], tokenizer) -> Dataset:
+    def _to_hf_dataset(self, samples: List[DataSample], tokenizer) -> Any:
         """Convert DataSample list to a tokenised HuggingFace Dataset."""
         rows = [self._tokenize_with_mask(s, tokenizer) for s in samples]
-        return Dataset.from_list(rows)
+        datasets_mod = importlib.import_module("datasets")
+        dataset_cls = getattr(datasets_mod, "Dataset")
+        return dataset_cls.from_list(rows)

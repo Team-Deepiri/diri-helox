@@ -7,9 +7,8 @@ and difficulty-based sample progression for improved convergence.
 
 import logging
 import numpy as np
-from typing import Dict, Any, List, Optional
+from typing import Optional
 from collections import deque
-import torch
 
 logger = logging.getLogger(__name__)
 
