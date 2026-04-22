@@ -46,7 +46,6 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
-          poetry config experimental.system-git-client true
 
       - name: Install dependencies
         run: |
