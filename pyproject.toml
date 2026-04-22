@@ -203,7 +203,6 @@ extend-exclude = [
 ]
 
 [tool.ruff.lint]
-per-file-ignores = {"tests/*" = ["E402"], "scripts/*" = ["E402"], "data_sources/synthetic_source.py" = ["E402"], "pipelines/training/dynamic_training_pipeline.py" = ["E402"]}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
