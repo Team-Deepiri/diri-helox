@@ -456,9 +456,9 @@ def generate_synthetic_dataset(
         "test_samples": len(test_data),
         "num_classes": len(LABEL_MAPPING),
         "label_distribution": dict(label_counts),
-        "avg_text_length": sum(len(item["text"]) for item in all_data) / len(all_data)
-        if all_data
-        else 0,
+        "avg_text_length": (
+            sum(len(item["text"]) for item in all_data) / len(all_data) if all_data else 0
+        ),
         "min_text_length": min((len(item["text"]) for item in all_data), default=0),
         "max_text_length": max((len(item["text"]) for item in all_data), default=0),
     }
