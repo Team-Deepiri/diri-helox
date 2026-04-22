@@ -4,10 +4,14 @@ Train models from collected data with local/API model support
 """
 
 import json
+import asyncio
+from pathlib import Path
 from typing import Dict, Optional
 from .full_training_pipeline import FullTrainingPipeline
 from .data_collection_pipeline import get_data_collector
+from mlops.infrastructure.lora_training import QLoRATrainingPipeline
 from .bandit_training import train_bandit_from_data
+from mlops.infrastructure.experiment_tracker import ExperimentTracker
 from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("helox.ml_pipeline")
@@ -117,7 +121,7 @@ class MLTrainingPipeline:
         dataset_path = "data/datasets/raw/bandit_training.jsonl"
         output_path = "models/bandit/bandit.pkl"
 
-        _ = train_bandit_from_data(dataset_path, output_path)
+        bandit = train_bandit_from_data(dataset_path, output_path)
 
         logger.info("Bandit training complete", output_path=output_path)
         return output_path

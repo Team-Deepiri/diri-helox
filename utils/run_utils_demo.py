@@ -5,7 +5,7 @@ This script:
 - Falls back to a small `MockSemanticAnalyzer` when Ollama is not reachable.
 - Uses `get_confidence_calculator()` to compute confidence for a sample model output.
 
-Run from diri-cyrex/app/train/utils:
+Run from diri-helox/utils:
 
     python -m run_utils_demo
 

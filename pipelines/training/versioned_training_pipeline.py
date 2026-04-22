@@ -13,13 +13,15 @@ from transformers import (
     BitsAndBytesConfig,
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
-from datasets import load_dataset
+from datasets import load_dataset, Dataset
 import json
 from pathlib import Path
-from typing import Dict
+import os
+from typing import Dict, Optional
 import argparse
 
 from ...utils.dataset_versioning import DatasetVersionManager, DatasetType
+from ...utils.dataset_validation import validate_dataset_quality
 from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
 from deepiri_modelkit.logging import get_logger
 
@@ -50,6 +52,7 @@ class VersionedTrainingPipeline:
 
     def setup_experiment_tracking(self):
         """Setup experiment tracking with dataset version info."""
+        from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
 
         self.tracker = ExperimentTracker(
             experiment_name=self.config.get("experiment_name", "versioned_training"),
@@ -121,7 +124,7 @@ class VersionedTrainingPipeline:
                     dataset_name=self.config.get("auto_dataset_name", "auto_versioned"),
                     dataset_type=dataset_type,
                     data_path=Path(dataset_path),
-                    change_summary="Auto-versioned for training run",
+                    change_summary=f"Auto-versioned for training run",
                     tags=["auto_versioned", "training"],
                 )
                 dataset_path = self.dataset_version.storage_path
@@ -307,14 +310,17 @@ class VersionedTrainingPipeline:
         with open(metadata_path, "w") as f:
             json.dump(training_metadata, f, indent=2, default=str)
 
+        eval_results = trainer.evaluate()
         if self.tracker:
             self.tracker.log_model(self.model, "model")
-            eval_results = trainer.evaluate()
             self.tracker.log_metrics(eval_results)
 
             # Log dataset version as artifact
             if self.dataset_version:
                 self.tracker.log_artifact(str(metadata_path))
+
+        # Include eval metric for HPO (e.g. minimize eval_loss)
+        training_metadata["eval_results"] = eval_results
 
         logger.info(
             "Versioned training complete",

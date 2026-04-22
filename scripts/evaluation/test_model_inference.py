@@ -8,7 +8,7 @@ import sys
 from pathlib import Path
 
 # Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 try:
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -20,16 +20,39 @@ except ImportError as e:
     print("Install: pip install transformers torch")
     IMPORTS_AVAILABLE = False
 
-# Category mapping
+# Category mapping (31 categories)
 CATEGORIES = {
-    0: "coding",
-    1: "writing",
-    2: "fitness",
-    3: "cleaning",
-    4: "learning",
-    5: "creative",
-    6: "administrative",
-    7: "social",
+    0: "debugging",
+    1: "refactoring",
+    2: "writing_code",
+    3: "programming",
+    4: "running_code",
+    5: "inspecting",
+    6: "writing",
+    7: "learning_research",
+    8: "learning_study",
+    9: "learning_training",
+    10: "learning_practice",
+    11: "creative",
+    12: "administrative",
+    13: "team_organization",
+    14: "team_collaboration",
+    15: "team_planning",
+    16: "research",
+    17: "planning",
+    18: "communication",
+    19: "big_data_analytics",
+    20: "data_processing",
+    21: "design",
+    22: "qa",
+    23: "testing",
+    24: "validation",
+    25: "reporting",
+    26: "documentation",
+    27: "system_admin",
+    28: "ux_ui",
+    29: "security",
+    30: "data_privacy",
 }
 
 
@@ -84,7 +107,7 @@ class TaskClassifier:
         }
 
 
-def interactive_test(model_path: str = "app/train/models/intent_classifier"):
+def interactive_test(model_path: str = "models/intent_classifier"):
     """Interactive testing mode"""
 
     if not IMPORTS_AVAILABLE:
@@ -95,7 +118,7 @@ def interactive_test(model_path: str = "app/train/models/intent_classifier"):
     model_path_obj = Path(model_path)
     if not model_path_obj.exists():
         print(f"❌ Model not found: {model_path}")
-        print("   Train a model first: python app/train/scripts/train_intent_classifier.py")
+        print("   Train a model first: python scripts/training/train_intent_classifier.py")
         return
 
     # Load classifier

@@ -81,7 +81,6 @@ class ModelEvaluator:
 
         for example in dataset:
             prompt = example["prompt"]
-            _ = example["reference"]
 
             inputs = self.tokenizer(prompt, return_tensors="pt")
             outputs = self.model(**inputs, labels=inputs["input_ids"])
@@ -102,7 +101,7 @@ class ModelEvaluator:
             inputs = self.tokenizer(prompt, return_tensors="pt")
             start = time.time()
             with torch.no_grad():
-                _ = self.model.generate(**inputs, max_length=50)
+                self.model.generate(**inputs, max_length=50)
             times.append(time.time() - start)
 
         return {

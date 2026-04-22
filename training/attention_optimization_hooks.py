@@ -9,7 +9,7 @@ import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from typing import Optional
+from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -34,9 +34,10 @@ class FlashAttentionFallback:
     def _check_flash_availability(self) -> bool:
         """Check if FlashAttention is available."""
         try:
-            import importlib.util
+            # Check if flash_attn is installed
+            import flash_attn
 
-            return importlib.util.find_spec("flash_attn") is not None
+            return True
         except ImportError:
             logger.warning("FlashAttention not available, using standard attention")
             return False

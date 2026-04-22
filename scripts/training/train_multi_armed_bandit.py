@@ -4,7 +4,7 @@ ML Engineer 1: Train models for optimal challenge selection
 """
 
 import numpy as np
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import json
 from pathlib import Path
 
@@ -105,7 +105,7 @@ def train_bandit_model():
     print("=" * 60)
 
     challenge_types = ["quiz", "puzzle", "coding_challenge", "timed_completion", "streak"]
-    _ = MultiArmedBandit(challenge_types, exploration_rate=0.1)
+    bandit = MultiArmedBandit(challenge_types, exploration_rate=0.1)
 
     print("\n1. Load training data from train/data/bandit_training.jsonl")
     print("2. Train bandit on historical challenge performance")

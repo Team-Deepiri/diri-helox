@@ -5,6 +5,7 @@ Trains custom tokenizers optimized for your data.
 """
 
 import logging
+import subprocess
 from pathlib import Path
 from typing import Optional, List
 import sentencepiece as spm
@@ -85,7 +86,7 @@ class TokenizerTrainer:
             max_sentence_length=4192,
         )
 
-        logger.info("Tokenizer training complete")
+        logger.info(f"Tokenizer training complete")
         logger.info(f"Model: {model_path}")
         logger.info(f"Vocab: {vocab_path}")
 

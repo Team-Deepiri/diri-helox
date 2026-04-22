@@ -9,7 +9,10 @@ Collects training data for:
 """
 
 import json
+import asyncio
+from pathlib import Path
 from typing import List, Dict, Optional
+from datetime import datetime
 import sqlite3
 from deepiri_modelkit.logging import get_logger
 
@@ -31,8 +34,7 @@ class DataCollectionPipeline:
         # ========================================================================
         # TIER 1: Intent Classification (50 predefined abilities)
         # ========================================================================
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS task_classifications (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task_text TEXT NOT NULL,
@@ -48,14 +50,12 @@ class DataCollectionPipeline:
                 user_feedback REAL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # ========================================================================
         # TIER 2: Role-based Ability Generation (dynamic abilities)
         # ========================================================================
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS ability_generations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -76,14 +76,12 @@ class DataCollectionPipeline:
                 performance_score REAL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # ========================================================================
         # PROMPT-TO-TASKS ENGINE (Main Differentiator)
         # ========================================================================
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS prompt_to_tasks (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -104,14 +102,12 @@ class DataCollectionPipeline:
                 model_used TEXT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # ========================================================================
         # TIER 3: RL Productivity Optimization
         # ========================================================================
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS rl_training_sequences (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -124,11 +120,9 @@ class DataCollectionPipeline:
                 step_number INTEGER,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS productivity_recommendations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -141,16 +135,14 @@ class DataCollectionPipeline:
                 reward_signal REAL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # ========================================================================
         # GAMIFICATION SYSTEM DATA
         # ========================================================================
 
         # Objectives (Tasks with Momentum)
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS objective_data (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -166,12 +158,10 @@ class DataCollectionPipeline:
                 season_id TEXT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # Odysseys (Project Workflows)
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS odyssey_data (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -188,12 +178,10 @@ class DataCollectionPipeline:
                 season_id TEXT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # Seasons (Sprint Cycles)
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS season_data (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -208,12 +196,10 @@ class DataCollectionPipeline:
                 odysseys_completed INTEGER,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # Momentum (XP/Levels)
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS momentum_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -225,12 +211,10 @@ class DataCollectionPipeline:
                 skill_category TEXT,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # Streaks (Consistency Tracking)
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS streak_events (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -241,12 +225,10 @@ class DataCollectionPipeline:
                 boost_credits_earned INTEGER,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # Boosts (Power-ups)
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS boost_usage (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -259,14 +241,12 @@ class DataCollectionPipeline:
                 time_saved_minutes INTEGER,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # ========================================================================
         # GENERAL USER INTERACTIONS
         # ========================================================================
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS user_interactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 user_id TEXT,
@@ -279,12 +259,10 @@ class DataCollectionPipeline:
                 feedback REAL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         # Legacy table for backward compatibility
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS challenge_generations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 task_id TEXT,
@@ -298,8 +276,7 @@ class DataCollectionPipeline:
                 performance_score REAL,
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        """
-        )
+        """)
 
         conn.commit()
         conn.close()
@@ -834,14 +811,12 @@ class DataCollectionPipeline:
 
         if data_type == "classification":
             # Tier 1: Intent Classification
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT task_text, description, user_role, predicted_type, predicted_complexity,
                        predicted_confidence, actual_type, actual_complexity, user_feedback
                 FROM task_classifications
                 WHERE actual_type IS NOT NULL OR user_feedback IS NOT NULL
-            """
-            )
+            """)
 
             with open(output_path, "w") as f:
                 for row in cursor.fetchall():
@@ -859,15 +834,13 @@ class DataCollectionPipeline:
 
         elif data_type == "ability_generation":
             # Tier 2: Role-based Ability Generation
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT user_id, user_role, user_command, generated_ability, ability_name,
                        ability_category, rag_context, model_used, user_engagement,
                        ability_used, completion_rate, performance_score
                 FROM ability_generations
                 WHERE user_engagement IS NOT NULL OR ability_used IS NOT NULL
-            """
-            )
+            """)
 
             with open(output_path, "w") as f:
                 for row in cursor.fetchall():
@@ -892,14 +865,12 @@ class DataCollectionPipeline:
 
         elif data_type == "prompt_to_tasks":
             # Prompt-to-Tasks Engine
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT user_id, user_role, prompt, generated_tasks, execution_plan,
                        project_type, user_acceptance, tasks_completed, actual_duration, user_feedback
                 FROM prompt_to_tasks
                 WHERE user_acceptance IS NOT NULL
-            """
-            )
+            """)
 
             with open(output_path, "w") as f:
                 for row in cursor.fetchall():
@@ -921,14 +892,12 @@ class DataCollectionPipeline:
 
         elif data_type == "rl_training":
             # Tier 3: RL Training Sequences
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT user_id, state_data, action_taken, reward, next_state_data,
                        done, episode_id, step_number
                 FROM rl_training_sequences
                 ORDER BY episode_id, step_number
-            """
-            )
+            """)
 
             with open(output_path, "w") as f:
                 for row in cursor.fetchall():
@@ -948,14 +917,12 @@ class DataCollectionPipeline:
 
         elif data_type == "challenge":
             # Legacy challenge generation
-            cursor.execute(
-                """
+            cursor.execute("""
                 SELECT task_text, generated_challenge, challenge_type, difficulty,
                        user_engagement, completion_rate, performance_score
                 FROM challenge_generations
                 WHERE user_engagement IS NOT NULL
-            """
-            )
+            """)
 
             with open(output_path, "w") as f:
                 for row in cursor.fetchall():

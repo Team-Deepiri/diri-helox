@@ -17,11 +17,11 @@ from typing import List, Dict
 import sys
 
 # Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Import semantic analyzer for dynamic analysis
 try:
-    from app.train.utils.semantic_analyzer import get_semantic_analyzer
+    from utils.semantic_analyzer import get_semantic_analyzer
 
     HAS_SEMANTIC_ANALYZER = True
 except ImportError:
@@ -1496,7 +1496,7 @@ def generate_synthetic_dataset(
     print(f"  Label mapping: {label_map_file}")
     print(f"  Metadata: {metadata_file}")
     print("\nNext step: Run training")
-    print("  python app/train/scripts/train_intent_classifier.py")
+    print("  python scripts/training/train_intent_classifier.py")
 
     return {"train": train_data, "val": val_data, "test": test_data, "metadata": metadata}
 
@@ -1521,7 +1521,7 @@ if __name__ == "__main__":
         "--output-dir",
         type=str,
         default=str(Path(__file__).parent.parent / "data"),
-        help="Output directory for datasets (default: app/train/data)",
+        help="Output directory for datasets (default: data/datasets/raw)",
     )
     parser.add_argument(
         "--use-ollama",

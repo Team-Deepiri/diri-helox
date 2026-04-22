@@ -3,7 +3,9 @@ Task Classification Model Training Script
 Trains transformer models to understand and classify user tasks
 """
 
+import os
 import sys
+import json
 from pathlib import Path
 
 # Add parent directory to path

@@ -3,6 +3,7 @@ Challenge Generation Model Training Script
 Trains models to generate adaptive challenges from tasks
 """
 
+import os
 import sys
 from pathlib import Path
 

@@ -1,0 +1,51 @@
+{
+  "pipeline_name": "persola_instruction_finetuning",
+  "description": "Fine-tune a causal LM on Persola personality data. Response-only loss masking ensures the model learns to generate persona-consistent replies without memorising system prompt tokens.",
+  "data_sources": [
+    {
+      "source_type": "stream",
+      "name": "persola_stream",
+      "params": {
+        "mode": "subscribe",
+        "stream_type": "structured",
+        "redis_url": "${REDIS_URL}",
+        "idle_timeout_s": 60,
+        "fallback_mode": "synthetic",
+        "fallback_synthetic_examples": 50
+      }
+    }
+  ],
+  "preprocessing": {
+    "use_text_cleaner": true,
+    "use_deduplication": true,
+    "min_text_length": 10
+  },
+  "training": {
+    "trainer_type": "instruction_finetuning",
+    "model_name": "microsoft/phi-2",
+    "output_dir": "models/persola_finetuned",
+    "num_epochs": 3,
+    "batch_size": 4,
+    "learning_rate": 2e-5,
+    "max_length": 512
+  },
+  "evaluation": {
+    "enabled": false
+  },
+  "export": {
+    "mlflow": {
+      "enabled": true,
+      "tracking_uri": "${MLFLOW_TRACKING_URI}",
+      "experiment_name": "persola_instruction_finetuning",
+      "register_model": true,
+      "model_name": "persola-personality-model"
+    },
+    "publish_model_ready": true
+  },
+  "split": {
+    "train_ratio": 0.85,
+    "val_ratio": 0.10,
+    "test_ratio": 0.05,
+    "seed": 42
+  }
+}

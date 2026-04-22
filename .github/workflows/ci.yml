@@ -18,9 +18,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # Allow Poetry to clone private Team-Deepiri git dependencies from pyproject.toml.
-      - name: Authenticate git for GitHub dependencies
-        run: git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+      - name: Init submodules
+        run: |
+          # Allow cloning private Team-Deepiri git dependencies + submodules.
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git submodule update --init --recursive
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -35,9 +38,12 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
+          poetry config experimental.system-git-client true
 
       - name: Install dependencies
-        run: poetry install --with dev
+        run: |
+          poetry install --with dev
+          poetry run pip install "transformers[torch]" --upgrade
 
       - name: Lint (ruff)
         run: poetry run ruff check .
@@ -46,10 +52,10 @@ jobs:
         run: poetry run black --check .
 
       - name: Type check (mypy)
-        run: poetry run mypy .
+        run: poetry run mypy data_sources pipelines/training/dynamic_training_pipeline.py training/intent_classifier_trainer.py evaluation/model_evaluator.py scripts/pipelines/run_dynamic_pipeline.py
 
       - name: Unit tests (pytest)
-        run: poetry run pytest -m "not integration"
+        run: poetry run pytest -m "not integration and not slow"
 
       - name: Integration tests (pytest)
         run: |

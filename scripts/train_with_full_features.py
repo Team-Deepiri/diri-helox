@@ -40,6 +40,21 @@ def load_configs(config_dir: Path):
     return model_config, data_config, training_config
 
 
+def initialize_cyrex_rag() -> RAGPipeline:
+    """Initialize Cyrex RAG pipeline if available."""
+    if not CYREX_AVAILABLE:
+        logger.warning("Cyrex RAG not available - RAG-aware training disabled")
+        return None
+
+    try:
+        rag_pipeline = initialize_rag_system()
+        logger.info("Cyrex RAG pipeline initialized")
+        return rag_pipeline
+    except Exception as e:
+        logger.warning(f"Failed to initialize Cyrex RAG: {e}")
+        return None
+
+
 async def main():
     parser = argparse.ArgumentParser(description="Train LLM with all features")
     parser.add_argument(

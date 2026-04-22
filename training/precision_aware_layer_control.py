@@ -8,7 +8,7 @@ and attention vs MLP precision split for optimal mixed precision.
 import logging
 import torch
 import torch.nn as nn
-from typing import Dict, List, Optional
+from typing import Dict, Any, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +115,14 @@ class PrecisionAwareLayerControl:
         # Find layers with high gradient variance
         norms = list(gradient_norms.values())
         mean_norm = sum(norms) / len(norms) if norms else 0.0
-        std_norm = (sum((n - mean_norm) ** 2 for n in norms) / len(norms)) ** 0.5 if norms else 0.0
+        # Sample standard deviation (Bessel's correction: divide by N-1) is appropriate
+        # here because we're estimating variability across a sample of layers.
+        # Population std (÷N) would systematically underestimate spread for small layer counts.
+        std_norm = (
+            (sum((n - mean_norm) ** 2 for n in norms) / (len(norms) - 1)) ** 0.5
+            if len(norms) > 1
+            else 0.0
+        )
 
         threshold = mean_norm + 2 * std_norm
 

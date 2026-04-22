@@ -15,13 +15,6 @@ import os
 # Add parent directory to path to import pipeline modules
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
-import pytest
-
-pytest.importorskip(
-    "deepiri_dataset_processor",
-    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
-)
-
 from pipelines.data_preprocessing import (
     PipelineOrchestrator,
     DataLoadingStage,
@@ -188,7 +181,7 @@ def test_individual_stages():
     data = get_processed_data(result)
     if data:
         print(f"   First item text: '{data[0]['text']}'")
-        print("   Removed fields: 'meta', 'empty' should be gone")
+        print(f"   Removed fields: 'meta', 'empty' should be gone")
 
     # Test DataValidationStage
     print("\n3. Testing DataValidationStage...")
@@ -264,7 +257,7 @@ def test_full_pipeline():
         if result.processed_data:
             final_data = result.processed_data.data
             print(f"   Output data: {len(final_data)} items")
-            print("\n   Sample output item:")
+            print(f"\n   Sample output item:")
             print(f"   {final_data[0]}")
 
             if result.processed_data.metadata:
@@ -312,13 +305,13 @@ def test_error_handling():
     print("\n1. Testing with invalid label...")
     invalid_data = [{"text": "Test with invalid label", "label": "invalid_label"}]
     orchestrator = create_default_orchestrator(label_mapping, include_all_stages=True)
-    _ = execute_and_print_result(orchestrator, invalid_data)
+    result = execute_and_print_result(orchestrator, invalid_data)
 
     # Test with missing required field
     print("\n2. Testing with missing required field...")
     missing_field_data = [{"text": "Missing label field"}]
     orchestrator2 = create_default_orchestrator(label_mapping, include_all_stages=False)
-    _ = execute_and_print_result(orchestrator2, missing_field_data)
+    result = execute_and_print_result(orchestrator2, missing_field_data)
 
 
 def main():

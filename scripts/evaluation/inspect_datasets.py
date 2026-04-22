@@ -12,7 +12,7 @@ from typing import Dict, List
 import argparse
 
 # Add parent to path
-sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 
 class DatasetInspector:
@@ -60,7 +60,6 @@ class DatasetInspector:
                         label_id = self._get_label_id(label)
                     else:
                         label_id = "unknown"
-                        label_name = "unknown"
 
                     label_counts[label_id] += 1
 
@@ -221,7 +220,7 @@ class DatasetInspector:
 def main():
     parser = argparse.ArgumentParser(description="Inspect training datasets")
     parser.add_argument(
-        "--data-dir", type=str, default="data", help="Data directory (default: app/train/data)"
+        "--data-dir", type=str, default="data", help="Data directory (default: data/datasets/raw)"
     )
     parser.add_argument("--file", type=str, help="Specific file to inspect")
     parser.add_argument("--compare", nargs="+", help="Compare multiple files")

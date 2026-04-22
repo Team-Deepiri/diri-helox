@@ -10,7 +10,7 @@ Shows how to collect data for all Deepiri features:
 
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
-from typing import Optional, Dict
+from typing import Optional, Dict, List
 from datetime import datetime
 import time
 
@@ -304,7 +304,7 @@ async def productivity_recommendation_example(request: ProductivityRecommendatio
             "efficiency_increase": 0.15,
         }
 
-        _ = (time.time() - start_time) * 1000
+        latency_ms = (time.time() - start_time) * 1000
 
         collector.collect_productivity_recommendation(
             user_id=request.user_id,

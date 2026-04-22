@@ -167,7 +167,7 @@ class ReproducibilityController:
                     f"Fingerprint mismatch: expected {expected_fingerprint}, "
                     f"got {saved_fingerprint}"
                 )
-            return bool(matches)
+            return matches
 
         return True
 

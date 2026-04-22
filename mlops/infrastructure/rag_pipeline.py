@@ -3,11 +3,13 @@ Production RAG Pipeline for Challenge Generation
 Retrieval-Augmented Generation with vector search, reranking, and context management
 """
 
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 import os
+import numpy as np
 from sentence_transformers import SentenceTransformer
 from pymilvus import connections, Collection, FieldSchema, CollectionSchema, DataType, utility
 import json
+from pathlib import Path
 from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("rag.pipeline")

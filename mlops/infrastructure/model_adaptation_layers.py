@@ -82,6 +82,7 @@ class LayeredModelAdapter:
     # LOAD EXISTING ADAPTER
     # -------------------------
     def load_adapter(self, adapter_path: Union[str, Path], adapter_name: str) -> None:
+
         adapter_path = Path(adapter_path)
 
         if not adapter_path.exists():
@@ -105,6 +106,7 @@ class LayeredModelAdapter:
     # ATTACH NEW LORA
     # -------------------------
     def attach_new_lora_layer(self, layer_cfg: LayerConfig, task_type: str = "CAUSAL_LM") -> str:
+
         if layer_cfg.target_modules is None:
             raise ValueError("LayerConfig.target_modules must be provided.")
 
@@ -150,6 +152,7 @@ class LayeredModelAdapter:
     # ACTIVATE ADAPTER
     # -------------------------
     def set_active_adapter(self, adapter_name: str) -> None:
+
         if not isinstance(self.model, PeftModel):
             raise RuntimeError("Model is not a PeftModel yet.")
 
@@ -193,6 +196,7 @@ class LayeredModelAdapter:
         tensors = 0
 
         for name, p in self.model.named_parameters():
+
             if f".{key}." in name and "lora_" in name:
                 p.requires_grad = True
                 unfrozen += p.numel()
@@ -213,6 +217,7 @@ class LayeredModelAdapter:
     # SAVE ACTIVE ADAPTER
     # -------------------------
     def save_active_adapter(self, output_dir: Union[str, Path]) -> Path:
+
         if not isinstance(self.model, PeftModel):
             raise RuntimeError("Model is not a PeftModel yet.")
 

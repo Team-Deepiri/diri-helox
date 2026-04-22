@@ -10,14 +10,8 @@ import os
 # Add parent directories to path to allow proper imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../.."))
 
-import pytest
-
-pytest.importorskip(
-    "deepiri_dataset_processor",
-    reason='Install sibling: poetry run pip install -e "../../deepiri-dataset-processor[all]" (see pyproject.toml)',
-)
-
 import pandas as pd
+import numpy as np
 from datetime import datetime, timedelta
 
 # Import quality framework using absolute imports
@@ -84,7 +78,7 @@ def test_basic_quality_check():
 
     print(f"Dataset ID: {report.dataset_id}")
     print(f"Overall Score: {report.overall_score:.2%}")
-    print("\nDimension Scores:")
+    print(f"\nDimension Scores:")
     for dim, score in report.dimension_scores.items():
         print(f"  {dim}: {score:.2%}")
 
@@ -107,12 +101,12 @@ def test_data_with_issues():
     report = checker.check_quality(data, dataset_id="test_bad_data")
 
     print(f"Overall Score: {report.overall_score:.2%}")
-    print("\nDimension Scores:")
+    print(f"\nDimension Scores:")
     for dim, score in report.dimension_scores.items():
         status = "✅" if score >= 0.8 else "❌"
         print(f"  {status} {dim}: {score:.2%}")
 
-    print("\nFailed Metrics:")
+    print(f"\nFailed Metrics:")
     failed = [m for m in report.metrics if not m.passed]
     for m in failed[:5]:  # Show first 5
         print(f"  - {m.dimension}.{m.metric_name}: {m.value:.2f} (threshold: {m.threshold})")
@@ -143,7 +137,7 @@ def test_custom_config():
     checker = QualityChecker(config=config)
     report = checker.check_quality(data, dataset_id="test_custom_config")
 
-    print("Using strict thresholds:")
+    print(f"Using strict thresholds:")
     print(f"  Completeness threshold: {config.completeness_threshold}")
     print(f"  Accuracy threshold: {config.accuracy_threshold}")
     print(f"  IQR multiplier: {config.iqr_multiplier}")
@@ -170,7 +164,7 @@ def test_validation_result_conversion():
     print(f"Is Valid: {validation_result.is_valid}")
     print(f"Errors: {len(validation_result.errors)}")
     print(f"Warnings: {len(validation_result.warnings)}")
-    print("\nQuality Scores:")
+    print(f"\nQuality Scores:")
     for key, value in validation_result.quality_scores.items():
         print(f"  {key}: {value:.2%}")
 
@@ -198,10 +192,10 @@ def test_quality_check_stage():
     print(f"Stage Name: {result.stage_name}")
 
     if result.success:
-        print("\nProcessed Data:")
+        print(f"\nProcessed Data:")
         print(f"  Quality Metrics: {result.processed_data.quality_metrics}")
 
-        print("\nValidation Result:")
+        print(f"\nValidation Result:")
         print(f"  Is Valid: {result.validation_result.is_valid}")
         print(f"  Quality Scores: {result.validation_result.quality_scores}")
 
@@ -231,7 +225,7 @@ def test_schema_validation():
     checker = QualityChecker()
     report = checker.check_quality(data, dataset_id="test_schema", schema=schema)
 
-    print("Schema validation completed")
+    print(f"Schema validation completed")
     print(f"Overall Score: {report.overall_score:.2%}")
 
     # Check validity dimension
@@ -258,7 +252,7 @@ def test_error_handling():
     try:
         invalid_data = "not a dataframe"
         report = checker.check_quality(invalid_data, dataset_id="test_invalid")
-        print("Invalid data converted or handled gracefully")
+        print(f"Invalid data converted or handled gracefully")
     except Exception as e:
         print(f"Error handled: {type(e).__name__}")
 
@@ -278,7 +272,7 @@ def test_convenience_function():
         data, dataset_id="test_convenience", config=QualityConfig(completeness_threshold=0.9)
     )
 
-    print("Convenience function works")
+    print(f"Convenience function works")
     print(f"Overall Score: {report.overall_score:.2%}")
 
     assert isinstance(report, QualityReport)
