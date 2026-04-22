@@ -127,9 +127,12 @@ def calculate_metrics(y_true, y_pred, y_conf):
     )
 
     # Per-class metrics
-    precision_per_class, recall_per_class, f1_per_class, support_per_class = (
-        precision_recall_fscore_support(y_true, y_pred, average=None, zero_division=0)
-    )
+    (
+        precision_per_class,
+        recall_per_class,
+        f1_per_class,
+        support_per_class,
+    ) = precision_recall_fscore_support(y_true, y_pred, average=None, zero_division=0)
 
     # Confusion matrix
     cm = confusion_matrix(y_true, y_pred)
