@@ -10,10 +10,11 @@ directly without lint violations (ruff E402).
 from __future__ import annotations
 
 import json
+import importlib
 import random
 from collections import Counter
 from pathlib import Path
-from typing import Dict, List
+from typing import Any, Dict, List, cast
 
 # Import semantic analyzer for dynamic analysis
 try:
@@ -169,13 +170,9 @@ def _load_templates_from_script() -> None:
     if TASK_TEMPLATES:
         return
 
-    # Importing the script is safe here because we no longer need sys.path hacks;
-    # it lives in the same repo and is importable as a module only if scripts is a package.
-    # As a fallback, we duplicate only the dictionary by reading it from the file system
-    # would be worse, so we require scripts to be importable when this is used.
-    from scripts.generate_synthetic_data import TASK_TEMPLATES as _T  # type: ignore
-
-    TASK_TEMPLATES = _T
+    # Use dynamic import so mypy doesn't recursively type-check the script module.
+    module = importlib.import_module("scripts.generate_synthetic_data")
+    TASK_TEMPLATES = cast(Dict[str, List[str]], getattr(module, "TASK_TEMPLATES"))
 
 
 def generate_variations(
@@ -323,7 +320,7 @@ def generate_synthetic_dataset(
     output_dir: str = str(Path(__file__).parent.parent / "data"),
     use_ollama: bool = False,
     data_type: str = "classification",
-) -> Dict:
+) -> Dict[str, Any]:
     output_dir = str(Path(output_dir).resolve())
 
     if data_type == "ability":
@@ -339,7 +336,7 @@ def generate_synthetic_dataset(
     output_path = Path(output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
-    if examples_per_class:
+    if examples_per_class is not None:
         total_examples = examples_per_class * len(LABEL_MAPPING)
 
     examples_per_class = total_examples // len(LABEL_MAPPING)
@@ -354,17 +351,17 @@ def generate_synthetic_dataset(
         except Exception:
             semantic_analyzer = None
 
-    all_data = []
-    label_counts = Counter()
+    all_data: List[Dict[str, Any]] = []
+    label_counts: Counter[str] = Counter()
 
-    for cat_idx, (category, label_id) in enumerate(LABEL_MAPPING.items(), 1):
+    for category, label_id in LABEL_MAPPING.items():
         templates = TASK_TEMPLATES[category]
         num_examples = examples_per_class + (1 if label_id < remainder else 0)
 
         variations_per_template = max(1, num_examples // len(templates))
         extra_variations = num_examples % len(templates)
 
-        category_data = []
+        category_data: List[Dict[str, Any]] = []
         if use_ollama and semantic_analyzer is not None and templates:
             try:
                 sample_template = templates[0]
