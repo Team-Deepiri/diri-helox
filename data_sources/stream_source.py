@@ -128,6 +128,8 @@ class StreamDataSource(DataSource):
             try:
                 return json.loads(payload_str)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
+                # Some fallback/export payloads are plain strings (not JSON).
+                # Keep the decoded envelope as-is when payload parsing fails.
                 pass
         return decoded
 
