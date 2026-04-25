@@ -1,7 +1,13 @@
 # Migrated to deepiri-modelkit. Re-exporting for backwards compatibility.
-from deepiri_modelkit.ml import confidence as _confidence
+try:
+    from deepiri_modelkit.ml import confidence as _confidence
+except ImportError:
+    _confidence = None
 
-ConfidenceLevel = _confidence.ConfidenceLevel
+if _confidence is not None and hasattr(_confidence, "ConfidenceLevel"):
+    ConfidenceLevel = _confidence.ConfidenceLevel
+else:
+    ConfidenceLevel = None
 
 _OPTIONAL_EXPORTS = (
     "ConfidenceSource",
@@ -11,7 +17,7 @@ _OPTIONAL_EXPORTS = (
 )
 
 for _name in _OPTIONAL_EXPORTS:
-    if hasattr(_confidence, _name):
+    if _confidence is not None and hasattr(_confidence, _name):
         globals()[_name] = getattr(_confidence, _name)
 
 __all__ = ["ConfidenceLevel"] + [name for name in _OPTIONAL_EXPORTS if name in globals()]
