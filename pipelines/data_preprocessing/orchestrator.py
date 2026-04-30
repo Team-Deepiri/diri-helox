@@ -3,7 +3,7 @@
 The canonical implementations live in ``deepiri_dataset_processor.pipeline``.
 """
 
-from deepiri_dataset_processor.pipeline.orchestrator import (  # noqa: F401
+from deepiri_dataset_processor.pipeline import (  # noqa: F401
     DatasetPipeline,
     PipelineOrchestrator,
 )
