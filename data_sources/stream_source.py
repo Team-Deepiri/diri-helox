@@ -128,11 +128,16 @@ class StreamDataSource(DataSource):
             try:
                 return json.loads(payload_str)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
+                # Some fallback/export payloads are plain strings (not JSON).
+                # Keep the decoded envelope as-is when payload parsing fails.
                 pass
         return decoded
 
     def _parse_raw_record(self, item: Dict) -> Optional[DataSample]:
-        quality = float(item.get("quality_score", 1.0))
+        try:
+            quality = float(item.get("quality_score", 1.0))
+        except (TypeError, ValueError):
+            quality = 0.0
         if quality < self._min_quality:
             return None
         text = item.get("text", "")
@@ -147,7 +152,10 @@ class StreamDataSource(DataSource):
         )
 
     def _parse_structured_record(self, item: Dict) -> Optional[DataSample]:
-        quality = float(item.get("quality_score", 1.0))
+        try:
+            quality = float(item.get("quality_score", 1.0))
+        except (TypeError, ValueError):
+            quality = 0.0
         if quality < self._min_quality:
             return None
         instruction = item.get("instruction", "")
@@ -162,6 +170,11 @@ class StreamDataSource(DataSource):
             label_name=item.get("category"),
             metadata={
                 "source_stream": "structured",
+                "record_id": item.get("id"),
+                # Keep both canonical instruction-tuning keys and the original fields.
+                "instruction": instruction,
+                "input": inp,
+                "response": output,
                 "output": output,
                 "quality_score": quality,
                 "category": item.get("category"),
@@ -169,7 +182,30 @@ class StreamDataSource(DataSource):
             source=f"stream:{self.name}",
         )
 
+    def _unwrap_payload(self, item: Dict) -> Dict:
+        """
+        Unwrap payload records from file fallbacks and bridge formats.
+
+        Cyrex fallback exports may contain envelope fields like:
+          {"event_type": "...", "payload": {...}}
+        or payload as a JSON-encoded string.
+        """
+        payload = item.get("payload")
+        if isinstance(payload, dict):
+            return payload
+        if isinstance(payload, str):
+            try:
+                decoded = json.loads(payload)
+                if isinstance(decoded, dict):
+                    return decoded
+            except json.JSONDecodeError:
+                # Payload strings from fallback/export files are not guaranteed to be
+                # JSON; on decode failure we intentionally keep the original envelope.
+                return item
+        return item
+
     def _parse_item(self, item: Dict) -> Optional[DataSample]:
+        item = self._unwrap_payload(item)
         if "instruction" in item or "input" in item:
             return self._parse_structured_record(item)
         return self._parse_raw_record(item)
@@ -186,10 +222,19 @@ class StreamDataSource(DataSource):
             patterns.append("*raw*.jsonl")
         if self._stream_type in ("structured", "both"):
             patterns.append("*structured*.jsonl")
+
+        matched: List[Path] = []
         for pattern in patterns:
-            yield from sorted(self._pipeline_dir.glob(pattern))
-        if not patterns:
-            yield from sorted(self._pipeline_dir.glob("*.jsonl"))
+            matched.extend(sorted(self._pipeline_dir.glob(pattern)))
+        matched = sorted(set(matched))
+
+        # If stream-specific filenames do not exist, gracefully fall back to any JSONL file.
+        # This helps interop with fallback exporters that use names like events_training.jsonl.
+        if matched:
+            yield from matched
+            return
+
+        yield from sorted(self._pipeline_dir.glob("*.jsonl"))
 
     def _load_file_mode(self) -> List[DataSample]:
         samples: List[DataSample] = []
@@ -199,7 +244,10 @@ class StreamDataSource(DataSource):
                     line = line.strip()
                     if not line:
                         continue
-                    item = json.loads(line)
+                    try:
+                        item = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
                     sample = self._parse_item(item)
                     if sample:
                         samples.append(sample)

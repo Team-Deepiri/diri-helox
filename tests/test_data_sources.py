@@ -132,6 +132,27 @@ class TestStreamDataSource:
         assert len(samples) == 1
         assert samples[0].text == "good data"
 
+    def test_malformed_quality_score_is_skipped_not_crash(self, tmp_path):
+        records = [
+            {"text": "good data", "quality_score": 0.9},
+            {"text": "bad quality shape", "quality_score": "not-a-number"},
+        ]
+        _write_jsonl(tmp_path / "raw_quality.jsonl", records)
+
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "raw",
+                "min_quality": 0.4,
+            },
+        )
+        samples = StreamDataSource(cfg).load()
+        assert len(samples) == 1
+        assert samples[0].text == "good data"
+
     def test_structured_format(self, tmp_path):
         records = [
             {
@@ -155,6 +176,58 @@ class TestStreamDataSource:
         samples = StreamDataSource(cfg).load()
         assert len(samples) == 1
         assert "write unit tests" in samples[0].text
+        assert samples[0].metadata["instruction"] == "Classify task"
+        assert samples[0].metadata["response"] == "testing"
+
+    def test_structured_payload_unwrap_from_training_store_envelope(self, tmp_path):
+        # Cyrex fallback exports can wrap records under "payload".
+        records = [
+            {
+                "event_id": "evt-1",
+                "event_type": "pipeline.learning",
+                "payload": {
+                    "id": "rec-123",
+                    "instruction": "Answer politely",
+                    "input": "How are you?",
+                    "output": "I'm doing well, thank you!",
+                    "category": "communication",
+                    "quality_score": 0.92,
+                },
+            }
+        ]
+        # Filename intentionally does not match *structured*.jsonl to verify fallback discovery.
+        _write_jsonl(tmp_path / "events_training.jsonl", records)
+
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "structured",
+            },
+        )
+        samples = StreamDataSource(cfg).load()
+        assert len(samples) == 1
+        assert samples[0].metadata["record_id"] == "rec-123"
+        assert samples[0].metadata["instruction"] == "Answer politely"
+        assert samples[0].metadata["response"] == "I'm doing well, thank you!"
+        assert samples[0].label_name == "communication"
+
+    def test_both_mode_does_not_double_count_same_file_pattern_match(self, tmp_path):
+        records = [{"text": "single-row", "quality_score": 0.9}]
+        _write_jsonl(tmp_path / "raw_structured_mix.jsonl", records)
+        cfg = DataSourceConfig(
+            "stream",
+            "s",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "both",
+            },
+        )
+        samples = StreamDataSource(cfg).load()
+        assert len(samples) == 1
 
     def test_empty_pipeline_dir_returns_empty(self, tmp_path):
         cfg = DataSourceConfig(
@@ -236,7 +309,7 @@ class TestPostgresDataSource:
         src = PostgresDataSource(cfg)
         query = src._build_query()
         assert "FROM cyrex.helox_training_samples" in query
-        assert "quality_score >= 0.4" in query
+        assert "quality_score >= %s" in query
         assert "ORDER BY created_at DESC" in query
 
     def test_build_query_with_stream_and_producer_filters(self):
@@ -251,28 +324,90 @@ class TestPostgresDataSource:
         )
         src = PostgresDataSource(cfg)
         query = src._build_query()
-        assert "stream_type = 'structured'" in query
-        assert "producer = 'language_intelligence'" in query
+        assert "stream_type = %s" in query
+        assert "producer = %s" in query
         assert "LIMIT 50" in query
+
+    def test_build_query_and_params_skip_missing_optional_columns(self):
+        cfg = DataSourceConfig(
+            "postgres",
+            "pg",
+            {
+                "stream_type": "structured",
+                "producer": "language_intelligence",
+            },
+        )
+        src = PostgresDataSource(cfg)
+        query, params = src._build_query_and_params({"text", "category"})
+        assert "stream_type = %s" not in query
+        assert "producer = %s" not in query
+        assert params == ()
+
+    def test_build_query_ignores_raw_where_by_default(self):
+        cfg = DataSourceConfig(
+            "postgres",
+            "pg",
+            {
+                "where": "status = 'approved'",
+            },
+        )
+        src = PostgresDataSource(cfg)
+        query = src._build_query()
+        assert "status = 'approved'" not in query
+
+    def test_build_query_allows_raw_where_when_explicitly_enabled(self):
+        cfg = DataSourceConfig(
+            "postgres",
+            "pg",
+            {
+                "where": "status = 'approved'",
+                "allow_unsafe_where": True,
+            },
+        )
+        src = PostgresDataSource(cfg)
+        query = src._build_query()
+        assert "status = 'approved'" in query
+
+    def test_invalid_identifier_raises(self):
+        with pytest.raises(ValueError, match="Invalid table identifier"):
+            PostgresDataSource(
+                DataSourceConfig(
+                    "postgres",
+                    "pg",
+                    {"table": "cyrex.helox_training_samples; DROP TABLE users;"},
+                )
+            )
 
     def test_row_to_sample_maps_metadata(self):
         cfg = DataSourceConfig("postgres", "pg", {})
         src = PostgresDataSource(cfg)
-        row = (
-            "Write unit tests for stream ingestion",
-            "testing",
-            0.91,
-            "rec-123",
-            "structured",
-            "language_intelligence",
-        )
-        sample = src._row_to_sample(row)
+        row_map = {
+            "text": "Write unit tests for stream ingestion",
+            "category": "testing",
+            "quality_score": 0.91,
+            "record_id": "rec-123",
+            "stream_type": "structured",
+            "producer": "language_intelligence",
+        }
+        sample = src._row_to_sample(row_map)
         assert sample is not None
         assert sample.text.startswith("Write unit tests")
         assert sample.label_name == "testing"
         assert sample.metadata["record_id"] == "rec-123"
         assert sample.metadata["stream_type"] == "structured"
         assert sample.metadata["producer"] == "language_intelligence"
+
+    def test_row_to_sample_handles_optional_columns_missing(self):
+        cfg = DataSourceConfig("postgres", "pg", {})
+        src = PostgresDataSource(cfg)
+        row_map = {
+            "text": "Run integration tests",
+            "category": "testing",
+        }
+        sample = src._row_to_sample(row_map)
+        assert sample is not None
+        assert sample.metadata["quality_score"] == 1.0
+        assert sample.metadata["record_id"] is None
 
 
 # ---------------------------------------------------------------------------

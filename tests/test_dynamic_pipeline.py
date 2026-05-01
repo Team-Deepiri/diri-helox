@@ -137,6 +137,51 @@ class TestPreprocessing:
         result = pipeline.preprocess([])
         assert result == []
 
+    def test_create_dataset_version_snapshot(self, tmp_path):
+        samples = [
+            DataSample(text="alpha task text", label=0, label_name="debugging", source="test"),
+            DataSample(text="beta task text", label=1, label_name="testing", source="test"),
+        ]
+        snapshot = tmp_path / "processed" / "snapshot.jsonl"
+        metadata_dir = tmp_path / "metadata"
+        pipeline = DynamicTrainingPipeline(
+            {
+                "pipeline_name": "versioning_test",
+                "preprocessing": {
+                    "use_text_cleaner": False,
+                    "use_deduplication": False,
+                    "create_dataset_version": True,
+                    "dataset_snapshot_path": str(snapshot),
+                    "dataset_metadata_dir": str(metadata_dir),
+                },
+            }
+        )
+        result = pipeline.preprocess(samples)
+        assert len(result) == 2
+        assert snapshot.exists()
+        assert (metadata_dir / "versioning_test_version.json").exists()
+
+    def test_semantic_dedup_skips_without_model_by_default(self):
+        samples = [
+            DataSample(text="first unique sentence", label=0, source="test"),
+            DataSample(text="second unique sentence", label=1, source="test"),
+        ]
+        pipeline = DynamicTrainingPipeline(
+            {
+                "preprocessing": {
+                    "use_text_cleaner": False,
+                    "use_deduplication": False,
+                    "use_semantic_deduplication": True,
+                    "semantic_deduplication": {
+                        "similarity_threshold": 0.95,
+                        # No embedding_model_name on purpose.
+                    },
+                }
+            }
+        )
+        result = pipeline.preprocess(samples)
+        assert len(result) == 2
+
 
 # ---------------------------------------------------------------------------
 # Split
@@ -170,6 +215,110 @@ class TestSplitData:
         train, val, test = pipeline.split_data(samples)
         # All samples accounted for
         assert len(train) + len(val) + len(test) == 3
+
+    def test_split_invalid_ratios_raise(self):
+        samples = _make_samples(10)
+        pipeline = DynamicTrainingPipeline(
+            {"split": {"train_ratio": 0.9, "val_ratio": 0.2, "seed": 42}}
+        )
+        with pytest.raises(ValueError, match="Invalid split ratios"):
+            pipeline.split_data(samples)
+
+    def test_stratified_split_preserves_class_presence(self):
+        samples = []
+        for i in range(30):
+            samples.append(
+                DataSample(
+                    text=f"class_a_{i}",
+                    label=0,
+                    label_name="debugging",
+                    source="test",
+                )
+            )
+            samples.append(
+                DataSample(
+                    text=f"class_b_{i}",
+                    label=1,
+                    label_name="testing",
+                    source="test",
+                )
+            )
+
+        pipeline = DynamicTrainingPipeline(
+            {
+                "split": {
+                    "train_ratio": 0.70,
+                    "val_ratio": 0.15,
+                    "seed": 42,
+                    "strategy": "stratified",
+                }
+            }
+        )
+        train, val, test = pipeline.split_data(samples)
+
+        train_labels = {s.label for s in train}
+        val_labels = {s.label for s in val}
+        test_labels = {s.label for s in test}
+        assert train_labels == {0, 1}
+        assert val_labels == {0, 1}
+        assert test_labels == {0, 1}
+
+    def test_stratified_auto_falls_back_on_sparse_labels(self):
+        samples = [
+            DataSample(text=f"s{i}", label=i, label_name=f"c{i}", source="test") for i in range(6)
+        ]
+        pipeline = DynamicTrainingPipeline(
+            {
+                "split": {
+                    "train_ratio": 0.70,
+                    "val_ratio": 0.15,
+                    "seed": 42,
+                    "strategy": "auto",
+                }
+            }
+        )
+        train, val, test = pipeline.split_data(samples)
+        assert len(train) + len(val) + len(test) == 6
+
+    def test_stratified_auto_falls_back_when_eval_pool_smaller_than_classes(self):
+        samples = []
+        for cls in range(20):
+            samples.append(
+                DataSample(text=f"class_{cls}_a", label=cls, label_name=f"c{cls}", source="test")
+            )
+            samples.append(
+                DataSample(text=f"class_{cls}_b", label=cls, label_name=f"c{cls}", source="test")
+            )
+
+        pipeline = DynamicTrainingPipeline(
+            {
+                "split": {
+                    "train_ratio": 0.80,
+                    "val_ratio": 0.10,
+                    "seed": 42,
+                    "strategy": "auto",
+                }
+            }
+        )
+        train, val, test = pipeline.split_data(samples)
+        assert len(train) + len(val) + len(test) == 40
+
+    def test_split_with_leakage_check_enabled(self):
+        samples = _make_samples(30)
+        pipeline = DynamicTrainingPipeline(
+            {
+                "split": {
+                    "train_ratio": 0.70,
+                    "val_ratio": 0.15,
+                    "seed": 42,
+                    "run_leakage_check": True,
+                    "leakage_ngram_size": 3,
+                    "leakage_overlap_threshold": 0.7,
+                }
+            }
+        )
+        train, val, test = pipeline.split_data(samples)
+        assert len(train) + len(val) + len(test) == 30
 
 
 # ---------------------------------------------------------------------------

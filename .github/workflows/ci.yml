@@ -17,12 +17,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Init submodules
-        run: |
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-          git submodule update --init --recursive
+        with:
+          submodules: recursive
+          token: ${{ github.token }}
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -37,7 +34,13 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
-          poetry config experimental.system-git-client true
+          if poetry config --list | grep -q "^system-git-client"; then
+            poetry config system-git-client true
+          elif poetry config --list | grep -q "^experimental.system-git-client"; then
+            poetry config experimental.system-git-client true
+          else
+            echo "Poetry git-client setting is not available in this Poetry version; continuing"
+          fi
 
       - name: Install dependencies
         run: |

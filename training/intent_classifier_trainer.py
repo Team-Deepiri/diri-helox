@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
+import torch
 
 from datasets import Dataset
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
@@ -201,11 +202,50 @@ class _OrchestratorCallbackAdapter(TrainerCallback):
 class _DeviceAwareTrainer(Trainer):
     """HuggingFace Trainer that applies the correct device configuration."""
 
-    def __init__(self, *args, use_gpu: bool = False, **kwargs):
+    def __init__(
+        self,
+        *args,
+        use_gpu: bool = False,
+        class_weights: Optional[List[float]] = None,
+        **kwargs,
+    ):
         training_args = kwargs.get("args")
         if training_args is not None:
             training_args.use_cpu = not use_gpu
+        self._class_weights = (
+            torch.tensor(class_weights, dtype=torch.float32) if class_weights is not None else None
+        )
         super().__init__(*args, **kwargs)
+
+    def compute_loss(
+        self,
+        model: Any,
+        inputs: Dict[str, Any],
+        return_outputs: bool = False,
+        num_items_in_batch: Optional[int] = None,
+    ) -> Any:
+        if self._class_weights is None or "labels" not in inputs:
+            try:
+                return super().compute_loss(
+                    model,
+                    inputs,
+                    return_outputs=return_outputs,
+                    num_items_in_batch=num_items_in_batch,
+                )
+            except TypeError:
+                return super().compute_loss(
+                    model,
+                    inputs,
+                    return_outputs=return_outputs,
+                )
+
+        labels = inputs["labels"]
+        outputs = model(**inputs)
+        logits = outputs.get("logits") if isinstance(outputs, dict) else outputs.logits
+        class_weights = self._class_weights.to(logits.device)
+        loss_fct = torch.nn.CrossEntropyLoss(weight=class_weights)
+        loss = loss_fct(logits.view(-1, logits.size(-1)), labels.view(-1))
+        return (loss, outputs) if return_outputs else loss
 
 
 class IntentClassifierTrainer:
@@ -233,6 +273,9 @@ class IntentClassifierTrainer:
         learning_rate: float = 2e-5,
         max_length: int = 128,
         force_device: Optional[str] = None,
+        class_weighting: str = "none",
+        class_weight_min: float = 0.25,
+        class_weight_max: float = 5.0,
         orchestrator_callbacks: Optional[List[Any]] = None,
         **kwargs,  # absorbs extra config keys like "trainer_type"
     ) -> None:
@@ -244,6 +287,9 @@ class IntentClassifierTrainer:
         self.learning_rate = learning_rate
         self.max_length = max_length
         self.force_device = force_device
+        self.class_weighting = class_weighting
+        self.class_weight_min = class_weight_min
+        self.class_weight_max = class_weight_max
         self.orchestrator_callbacks = orchestrator_callbacks or []
 
         self._tokenizer = None
@@ -267,6 +313,7 @@ class IntentClassifierTrainer:
         print(f"IntentClassifierTrainer — {self.model_name}")
         print(f"  Labels : {self.num_labels}")
         print(f"  Epochs : {self.num_epochs} | Batch: {self.batch_size} | LR: {self.learning_rate}")
+        print(f"  Class weighting : {self.class_weighting}")
         print("=" * 60)
 
         # Determine device at train time (not import time)
@@ -326,8 +373,10 @@ class IntentClassifierTrainer:
             )
 
         data_collator = DataCollatorWithPadding(tokenizer=tokenizer)
+        class_weights = self._resolve_class_weights(train_hf)
         self._trainer = _DeviceAwareTrainer(
             use_gpu=use_gpu,
+            class_weights=class_weights,
             model=model,
             args=training_args,
             train_dataset=train_hf,
@@ -383,6 +432,56 @@ class IntentClassifierTrainer:
     # ------------------------------------------------------------------
     # Private helpers
     # ------------------------------------------------------------------
+
+    def _resolve_class_weights(self, train_hf: Dataset) -> Optional[List[float]]:
+        mode = str(self.class_weighting).lower().strip()
+        if mode in {"none", "", "off", "false"}:
+            return None
+        if mode != "balanced":
+            raise ValueError(
+                "Unsupported class_weighting mode. " "Valid values: 'none' (default), 'balanced'."
+            )
+        labels = list(train_hf["label"])
+        weights = self._compute_balanced_class_weights(
+            labels=labels,
+            num_labels=self.num_labels,
+            min_weight=self.class_weight_min,
+            max_weight=self.class_weight_max,
+        )
+        print(
+            "  Balanced class weights enabled " f"(min={min(weights):.3f}, max={max(weights):.3f})"
+        )
+        return weights
+
+    @staticmethod
+    def _compute_balanced_class_weights(
+        labels: List[int],
+        num_labels: int,
+        min_weight: float = 0.25,
+        max_weight: float = 5.0,
+    ) -> List[float]:
+        if not labels:
+            return [1.0] * num_labels
+        if num_labels <= 0:
+            raise ValueError("num_labels must be > 0")
+        if min_weight <= 0 or max_weight <= 0 or min_weight > max_weight:
+            raise ValueError("Invalid class weight clip range")
+
+        label_array = np.array(labels, dtype=np.int64)
+        if np.any(label_array < 0) or np.any(label_array >= num_labels):
+            raise ValueError("Labels contain out-of-range values")
+
+        counts = np.bincount(label_array, minlength=num_labels).astype(np.float64)
+        present = counts > 0
+        if not np.any(present):
+            return [1.0] * num_labels
+
+        n_present = float(np.sum(present))
+        total_present = float(np.sum(counts[present]))
+        weights = np.ones(num_labels, dtype=np.float64)
+        weights[present] = total_present / (n_present * counts[present])
+        weights = np.clip(weights, min_weight, max_weight)
+        return weights.tolist()
 
     def _load_tokenizer(self):
         if self._tokenizer is None:
