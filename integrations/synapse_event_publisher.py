@@ -16,6 +16,7 @@ from pathlib import Path
 
 import grpc
 import redis.asyncio as redis
+from deepiri_modelkit.streaming.sidecar_utils import env_float, resolve_grpc_addr
 
 logger = logging.getLogger(__name__)
 
@@ -29,42 +30,11 @@ from proto.synapse.v1 import sugar_glider_pb2_grpc as sidecar_pb2_grpc  # type: 
 
 
 def _env_float(name: str, default: float) -> float:
-    raw = os.getenv(name)
-    if raw is None:
-        return default
-    try:
-        return float(raw)
-    except ValueError:
-        logger.warning(
-            "Invalid float for %s=%r; using default=%s",
-            name,
-            raw,
-            default,
-        )
-        return default
-
-
-def _derive_grpc_addr(sidecar_url: str) -> str:
-    explicit = os.getenv("SYNAPSE_GRPC_ADDR")
-    if explicit:
-        return explicit
-
-    try:
-        from urllib.parse import urlparse
-
-        parsed = urlparse(sidecar_url)
-        if parsed.scheme in {"http", "https"}:
-            host = parsed.hostname or "localhost"
-            port = parsed.port
-            if port is None:
-                port = 443 if parsed.scheme == "https" else 80
-            if port == 8081:
-                port = 50051
-            return f"{host}:{port}"
-    except Exception:
-        pass
-
-    return sidecar_url or "localhost:50051"
+    return env_float(
+        name,
+        default,
+        logger=lambda message: logger.warning(message),
+    )
 
 
 class SynapseEventPublisher:
@@ -94,7 +64,7 @@ class SynapseEventPublisher:
         self.sidecar_url = (
             os.getenv("SYNAPSE_SIDECAR_URL", "http://synapse-sidecar:8081").rstrip("/")
         )
-        self.sidecar_grpc_addr = _derive_grpc_addr(self.sidecar_url)
+        self.sidecar_grpc_addr = resolve_grpc_addr(self.sidecar_url)
         self.sidecar_timeout_sec = _env_float("SYNAPSE_SIDECAR_TIMEOUT_SEC", 5.0)
         self.sidecar_sender = os.getenv("SYNAPSE_SIDECAR_SENDER", "helox")
         self.redis_client: Optional[redis.Redis] = None
