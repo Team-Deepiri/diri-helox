@@ -17,11 +17,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
+
+      - name: Init submodules
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git submodule update --init --recursive
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
           cache: "pip"
@@ -33,23 +37,24 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
+          poetry config experimental.system-git-client true
 
       - name: Install dependencies
-        run: poetry install --with dev
-
-      - name: Lint (ruff, sidecar scope)
         run: |
-          poetry run ruff check --select E9,F63,F7,F82 \
-            integrations/synapse_event_publisher.py \
-            integrations/streaming/gen/proto/synapse/v1/sidecar_pb2.py \
-            integrations/streaming/gen/proto/synapse/v1/sidecar_pb2_grpc.py
+          poetry install --with dev
+          poetry run pip install "transformers[torch]" --upgrade
 
-      - name: Syntax check (py_compile, sidecar scope)
-        run: |
-          python -m py_compile \
-            integrations/synapse_event_publisher.py \
-            integrations/streaming/gen/proto/synapse/v1/sidecar_pb2.py \
-            integrations/streaming/gen/proto/synapse/v1/sidecar_pb2_grpc.py
+      - name: Lint (ruff)
+        run: poetry run ruff check .
 
-      - name: Build package
-        run: poetry build
+      - name: Format check (black)
+        run: poetry run black --check .
+
+      - name: Type check (mypy)
+        run: poetry run mypy data_sources pipelines/training/dynamic_training_pipeline.py training/intent_classifier_trainer.py evaluation/model_evaluator.py scripts/pipelines/run_dynamic_pipeline.py
+
+      - name: Unit tests (pytest)
+        run: poetry run pytest -m "not integration and not slow"
+
+      - name: Integration tests (pytest)
+        run: poetry run pytest -m integration

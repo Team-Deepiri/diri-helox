@@ -3,6 +3,7 @@
 Simple standalone test for dataset versioning system within Helox
 This test uses only standard Python libraries and doesn't require external dependencies
 """
+
 import sys
 import os
 import json
@@ -14,12 +15,13 @@ import sqlite3
 import logging
 
 # Setup basic logging
-logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 logger = logging.getLogger(__name__)
 
 # Add current directory to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
+
 
 def test_basic_versioning():
     """Test basic dataset versioning functionality"""
@@ -42,9 +44,9 @@ def test_basic_versioning():
 
         # Test data reading
         print("\n📖 Testing data reading...")
-        with open(data_v1_path, 'r') as f:
+        with open(data_v1_path, "r") as f:
             lines_v1 = f.readlines()
-        with open(data_v2_path, 'r') as f:
+        with open(data_v2_path, "r") as f:
             lines_v2 = f.readlines()
 
         print(f"   V1 has {len(lines_v1)} lines")
@@ -52,9 +54,10 @@ def test_basic_versioning():
 
         # Test checksum calculation
         print("\n🔐 Testing checksum calculation...")
+
         def calculate_checksum(file_path: Path) -> str:
             hasher = hashlib.sha256()
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 hasher.update(f.read())
             return hasher.hexdigest()
 
@@ -67,6 +70,7 @@ def test_basic_versioning():
         # Test basic database operations
         print("\n🗄️  Testing database operations...")
         import uuid
+
         db_name = f"test_simple_{uuid.uuid4().hex[:8]}.db"
         db_path = Path(db_name)
 
@@ -74,7 +78,7 @@ def test_basic_versioning():
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
 
-        cursor.execute('''
+        cursor.execute("""
             CREATE TABLE dataset_versions (
                 id INTEGER PRIMARY KEY,
                 dataset_name TEXT NOT NULL,
@@ -85,41 +89,50 @@ def test_basic_versioning():
                 data_checksum TEXT NOT NULL,
                 created_at TEXT NOT NULL
             )
-        ''')
+        """)
 
         # Insert test data
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO dataset_versions
             (dataset_name, version, dataset_type, storage_path, total_samples, data_checksum, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            "test_dataset",
-            "1.0.0",
-            "lease_abstraction",
-            str(data_v1_path),
-            len(lines_v1),
-            checksum_v1,
-            datetime.utcnow().isoformat()
-        ))
+        """,
+            (
+                "test_dataset",
+                "1.0.0",
+                "lease_abstraction",
+                str(data_v1_path),
+                len(lines_v1),
+                checksum_v1,
+                datetime.utcnow().isoformat(),
+            ),
+        )
 
-        cursor.execute('''
+        cursor.execute(
+            """
             INSERT INTO dataset_versions
             (dataset_name, version, dataset_type, storage_path, total_samples, data_checksum, created_at)
             VALUES (?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            "test_dataset",
-            "1.0.1",
-            "lease_abstraction",
-            str(data_v2_path),
-            len(lines_v2),
-            checksum_v2,
-            datetime.utcnow().isoformat()
-        ))
+        """,
+            (
+                "test_dataset",
+                "1.0.1",
+                "lease_abstraction",
+                str(data_v2_path),
+                len(lines_v2),
+                checksum_v2,
+                datetime.utcnow().isoformat(),
+            ),
+        )
 
         conn.commit()
 
         # Query data
-        cursor.execute("SELECT version, total_samples, data_checksum FROM dataset_versions WHERE dataset_name = ?", ("test_dataset",))
+        cursor.execute(
+            "SELECT version, total_samples, data_checksum FROM dataset_versions WHERE dataset_name = ?",
+            ("test_dataset",),
+        )
         rows = cursor.fetchall()
 
         print(f"   Database contains {len(rows)} versions:")
@@ -152,6 +165,7 @@ def test_basic_versioning():
     except Exception as e:
         print(f"❌ Test failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return False
 

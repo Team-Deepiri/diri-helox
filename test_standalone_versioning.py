@@ -3,6 +3,7 @@
 Standalone test script for dataset versioning system within Helox
 This allows testing the versioning system without requiring cyrex runtime
 """
+
 import sys
 import os
 from pathlib import Path
@@ -10,6 +11,7 @@ from pathlib import Path
 # Add current directory to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
+
 
 def test_helox_versioning_system():
     """Test the complete dataset versioning system within Helox"""
@@ -44,15 +46,13 @@ def test_helox_versioning_system():
 
         # Initialize system with unique database
         import uuid
+
         db_name = f"helox_test_{uuid.uuid4().hex[:8]}.db"
         db_path = Path("./") / db_name
 
         print(f"🗄️  Using database: {db_path}")
 
-        manager = DatasetVersionManager(
-            db_url=f"sqlite:///{db_name}",
-            storage_backend="local"
-        )
+        manager = DatasetVersionManager(db_url=f"sqlite:///{db_name}", storage_backend="local")
 
         print("✅ DatasetVersionManager initialized!")
 
@@ -78,9 +78,9 @@ def test_helox_versioning_system():
             metadata={
                 "environment": "helox_standalone",
                 "test_run": True,
-                "quality_score": validation_result['quality_score'],
-                "created_by": "helox_test_script"
-            }
+                "quality_score": validation_result["quality_score"],
+                "created_by": "helox_test_script",
+            },
         )
 
         print("✅ Version 1.0.0 created!")
@@ -96,7 +96,7 @@ def test_helox_versioning_system():
             data_path=data_v2_path,
             parent_version="1.0.0",
             change_summary="Added additional lease documents for testing",
-            tags=["helox", "test", "lease_abstraction", "updated"]
+            tags=["helox", "test", "lease_abstraction", "updated"],
         )
 
         print("✅ Version 1.0.1 created!")
@@ -133,21 +133,25 @@ def test_helox_versioning_system():
         monitor = DatasetMonitor()
 
         # Log operations
-        monitor.log_version_creation({
-            "dataset_name": "helox_lease_test",
-            "version": "1.0.0",
-            "total_samples": version_1.total_samples,
-            "creation_time": 2.1,
-            "quality_score": validation_result['quality_score']
-        })
+        monitor.log_version_creation(
+            {
+                "dataset_name": "helox_lease_test",
+                "version": "1.0.0",
+                "total_samples": version_1.total_samples,
+                "creation_time": 2.1,
+                "quality_score": validation_result["quality_score"],
+            }
+        )
 
-        monitor.log_validation_result({
-            "dataset_name": "helox_lease_test",
-            "version": "1.0.0",
-            "is_valid": validation_result['is_valid'],
-            "quality_score": validation_result['quality_score'],
-            "validation_time": 1.5
-        })
+        monitor.log_validation_result(
+            {
+                "dataset_name": "helox_lease_test",
+                "version": "1.0.0",
+                "is_valid": validation_result["is_valid"],
+                "quality_score": validation_result["quality_score"],
+                "validation_time": 1.5,
+            }
+        )
 
         # Get health report
         health = monitor.get_health_report()
@@ -163,7 +167,8 @@ def test_helox_versioning_system():
         config_path = Path("./configs/versioned_training_config.json")
         if config_path.exists():
             import json
-            with open(config_path, 'r') as f:
+
+            with open(config_path, "r") as f:
                 config = json.load(f)
             print("✅ Versioned training config loaded!")
             print(f"   Dataset spec: {config.get('dataset_spec', 'N/A')}")
@@ -188,16 +193,21 @@ def test_helox_versioning_system():
         print("\n🚀 The dataset versioning system is ready for use in Helox!")
         print("\n💡 Usage Examples:")
         print("   # Create versions")
-        print("   python scripts/dataset_versioning_cli.py create --name test --type lease_abstraction --path ./data")
+        print(
+            "   python scripts/dataset_versioning_cli.py create --name test --type lease_abstraction --path ./data"
+        )
         print("")
         print("   # Train with versioned datasets")
-        print("   python pipelines/training/versioned_training_pipeline.py --config configs/versioned_training_config.json")
+        print(
+            "   python pipelines/training/versioned_training_pipeline.py --config configs/versioned_training_config.json"
+        )
 
         return True
 
     except Exception as e:
         print(f"❌ Helox versioning test failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return False
 

@@ -1,21 +1,24 @@
 """
 CLI for dataset versioning operations
 """
+
 import click
 import sys
 import os
 from pathlib import Path
 
 # Add the parent directory to the path so we can import utils
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from deepiri_dataset_processor.versioning.database import DatasetVersionManager
 from deepiri_dataset_processor.versioning.models import DatasetType
+
 
 @click.group()
 def dataset():
     """Dataset versioning commands"""
     pass
+
 
 @dataset.command()
 @click.option("--name", required=True, help="Dataset name")
@@ -28,8 +31,7 @@ def dataset():
 def create(name, type, path, version, parent, summary, tags):
     """Create a new dataset version"""
     manager = DatasetVersionManager(
-        db_url="sqlite:///./dataset_versions.db",
-        storage_backend="local"
+        db_url="sqlite:///./dataset_versions.db", storage_backend="local"
     )
 
     tag_list = [t.strip() for t in tags.split(",") if t.strip()] if tags else None
@@ -49,14 +51,13 @@ def create(name, type, path, version, parent, summary, tags):
     click.echo(f"  Samples: {metadata.total_samples}")
     click.echo(f"  Checksum: {metadata.data_checksum[:16]}...")
 
+
 @dataset.command(name="list")
 @click.option("--name", required=True)
 @click.option("--version", help="Specific version (default: latest)")
 def list_versions_cmd(name, version):
     """List dataset versions"""
-    manager = DatasetVersionManager(
-        db_url="sqlite:///./dataset_versions.db"
-    )
+    manager = DatasetVersionManager(db_url="sqlite:///./dataset_versions.db")
 
     if version:
         metadata = manager.get_version(name, version)
@@ -73,15 +74,14 @@ def list_versions_cmd(name, version):
         for v in versions:
             click.echo(f"  {v.version} - {v.created_at} - {v.total_samples} samples")
 
+
 @dataset.command()
 @click.option("--name", required=True)
 @click.option("--version1", required=True)
 @click.option("--version2", required=True)
 def compare(name, version1, version2):
     """Compare two dataset versions"""
-    manager = DatasetVersionManager(
-        db_url="sqlite:///./dataset_versions.db"
-    )
+    manager = DatasetVersionManager(db_url="sqlite:///./dataset_versions.db")
 
     comparison = manager.compare_versions(name, version1, version2)
 
@@ -90,6 +90,7 @@ def compare(name, version1, version2):
     click.echo(f"  File difference: {comparison['file_difference']:+d}")
     click.echo(f"  Size difference: {comparison['size_difference_bytes']:+d} bytes")
     click.echo(f"  Change type: {comparison['change_type']}")
+
 
 if __name__ == "__main__":
     dataset()
