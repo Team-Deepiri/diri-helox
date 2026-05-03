@@ -1,2 +1,1 @@
 """Model deployment and registration"""
-

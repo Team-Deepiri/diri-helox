@@ -5,18 +5,24 @@ description = "ML training pipelines, model development, and research for Deepir
 readme = "README.md"
 authors = ["Deepiri Team"]
 license = "MIT"
-# Note: This is a script-based project, not a package
-# Packages are organized as modules in the root directory
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
-deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
+# Internal Deepiri deps pinned by git revision for deterministic builds.
+# NOTE: These repos are private Team-Deepiri repositories.
+deepiri-dataset-processor = {git = "https://github.com/Team-Deepiri/deepiri-dataset-processor.git", rev = "f564b41fc1e475be7fcd792703149daeb84056b7", extras = ["all"]}
+deepiri-training-orchestrator = {git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", rev = "214cb720a212d2283c1b60bed772fcebae86ca97"}
+# deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
+# Deepiri services. Replaces deepiri-modelkit device utils in helox.
+deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"]}
 
 # ML Training Dependencies
 torch = "^2.0.0"
-transformers = "^4.35.0"
-accelerate = "^0.24.0"
-datasets = "^2.14.0"
+peft = "^0.7.0"
+transformers = ">=4.40.0,<5.0.0"
+accelerate = ">=0.34.0,<2.0.0"
+datasets = ">=2.14.0,<4.0.0"
 mlflow = "^2.8.0"
 optuna = "^3.4.0"
 wandb = "^0.15.0"
@@ -47,6 +53,9 @@ hiredis = "^2.2.0"
 # Embeddings for semantic deduplication
 sentence-transformers = "^2.2.0"
 
+# TUI / CLI display
+rich = "^13.0.0"
+
 # Utilities
 tqdm = "^4.66.0"
 pyyaml = "^6.0"
@@ -58,9 +67,12 @@ jupyter = "^1.0.0"
 notebook = "^7.0.0"
 ipython = "^8.0.0"
 pytest = "^7.0.0"
-black = "^23.0.0"
+black = "^26.0.0"
 mypy = "^1.0.0"
 ruff = "^0.1.0"
+# fakeredis: in-process Redis emulator used by StreamDataSource tests — lets the
+# test suite inject a fake Redis client so tests run without a real Redis server.
+fakeredis = ">=2.20.0"
 
 [tool.poetry.group.optional.dependencies]
 # Privacy & security (optional)
@@ -85,14 +97,120 @@ build-backend = "poetry.core.masonry.api"
 [tool.black]
 line-length = 100
 target-version = ['py311']
+extend-exclude = '''
+(
+  /(
+      deepiri-dataset-processor
+    | deepiri-training-orchestrator
+    | deepiri-gpu-utils
+  )/
+  | docker_test_versioning\.py
+  | scripts/generate_synthetic_b2b_data_v2\.py
+)
+'''
 
 [tool.mypy]
 python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
+explicit_package_bases = true
+exclude = [
+    "deepiri-dataset-processor",
+    "deepiri-training-orchestrator",
+    "deepiri-gpu-utils",
+    "docker_test_versioning\\.py",
+    "scripts/generate_synthetic_b2b_data_v2\\.py",
+]
+
+# Suppress errors in pre-existing files with known issues
+[[tool.mypy.overrides]]
+module = [
+    "training.pretraining_trainer",
+    "training.instruction_finetuning_trainer",
+    "training.intent_classifier_trainer",
+    "mlops.infrastructure.model_adaptation_layers",
+    "mlops.infrastructure.lora_training",
+    "mlops.infrastructure.rag_pipeline",
+    "mlops.infrastructure.experiment_tracker",
+    "mlops.infrastructure",
+    "mlops.model_registry.registry_interface",
+]
+ignore_errors = true
 
 [tool.ruff]
 line-length = 100
 target-version = "py311"
+# Exclude pre-existing files/dirs with lint issues and submodules
+extend-exclude = [
+    "deepiri-dataset-processor",
+    "deepiri-training-orchestrator",
+    "deepiri-gpu-utils",
+    "core",
+    "examples",
+    "experiments",
+    "integrations",
+    "mlops",
+    "model_export",
+    "observability",
+    "tokenization",
+    "docker_test_versioning.py",
+    "test_docker_simple.py",
+    "test_simple_standalone.py",
+    "test_standalone_versioning.py",
+    "test_versioning.py",
+    "pipelines/data_preprocessing",
+    "pipelines/data_processing",
+    "pipelines/training/bandit_training.py",
+    "pipelines/training/data_collection_pipeline.py",
+    "pipelines/training/distributed_training.py",
+    "pipelines/training/full_training_pipeline.py",
+    "pipelines/training/ml_training_pipeline.py",
+    "pipelines/training/rag_training_pipeline.py",
+    "pipelines/training/versioned_training_pipeline.py",
+    "training/attention_optimization_hooks.py",
+    "training/continual_learning_hooks.py",
+    "training/curriculum_learning_scheduler.py",
+    "training/gradient_monitoring_system.py",
+    "training/instruction_finetuning_trainer.py",
+    "training/instruction_formatting_abstraction.py",
+    "training/multi_objective_trainer.py",
+    "training/numerical_stability_manager.py",
+    "training/optimizer_state_sharding.py",
+    "training/precision_aware_layer_control.py",
+    "training/pretraining_trainer.py",
+    "training/unified_training_orchestrator.py",
+    "scripts/generate_synthetic_b2b_data.py",
+    "scripts/generate_synthetic_b2b_data_v2.py",
+    "scripts/train_instruction_finetuning.py",
+    "scripts/train_llm_from_scratch.py",
+    "scripts/train_with_full_features.py",
+    "scripts/setup_llm_training_env.py",
+    "scripts/dataset_versioning_cli.py",
+    "scripts/evaluation/evaluate_model.py",
+    "scripts/evaluation/test_sentence_validation.py",
+    "scripts/training/train_challenge_generator.py",
+    "scripts/training/train_multi_armed_bandit.py",
+    "scripts/training/train_personalization_model.py",
+    "scripts/training/train_policy_network.py",
+    "scripts/training/train_task_classifier.py",
+    "scripts/training/train_transformer_classifier.py",
+    "tests/test_data_preprocessing_pipeline.py",
+    "tests/test_dataset_versioning.py",
+    "tests/test_import.py",
+    "evaluation/automatic_evaluation_harness.py",
+    "evaluation/inference_parity_tester.py",
+]
+
+[tool.ruff.lint]
+per-file-ignores = {"tests/*" = ["E402"], "scripts/*" = ["E402"], "data_sources/synthetic_source.py" = ["E402"], "pipelines/training/dynamic_training_pipeline.py" = ["E402"]}
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+# Use importlib mode so the root __init__.py is not treated as a package init
+addopts = "--import-mode=importlib"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]
 

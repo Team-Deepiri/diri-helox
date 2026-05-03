@@ -101,6 +101,7 @@ def _passes_quality_gate(record: Dict[str, Any]) -> bool:
 # Ingestion consumer
 # ---------------------------------------------------------------------------
 
+
 class HeloxRealtimeIngestion:
     """
     Consumes records from the Cyrex pipeline Redis streams and
@@ -182,7 +183,10 @@ class HeloxRealtimeIngestion:
         for stream in (self.RAW_STREAM, self.STRUCTURED_STREAM):
             try:
                 await self._redis.xgroup_create(
-                    stream, self.CONSUMER_GROUP, id="0", mkstream=True,
+                    stream,
+                    self.CONSUMER_GROUP,
+                    id="0",
+                    mkstream=True,
                 )
                 logger.info(f"Created consumer group '{self.CONSUMER_GROUP}' on '{stream}'")
             except Exception:
@@ -413,7 +417,8 @@ class HeloxRealtimeIngestion:
             with open(stats_file, "w", encoding="utf-8") as f:
                 json.dump(
                     {**self._stats, "saved_at": datetime.utcnow().isoformat()},
-                    f, indent=2,
+                    f,
+                    indent=2,
                 )
         except Exception as e:
             logger.debug(f"Failed to save stats: {e}")
@@ -458,6 +463,7 @@ class HeloxRealtimeIngestion:
 # ---------------------------------------------------------------------------
 # Standalone entry point
 # ---------------------------------------------------------------------------
+
 
 async def _main():
     """Run ingestion consumer as a standalone process"""

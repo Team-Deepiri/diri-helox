@@ -1,0 +1,54 @@
+{
+  "pipeline_name": "intent_classifier_stream_live",
+  "data_sources": [
+    {
+      "source_type": "stream",
+      "name": "cyrex_pipeline_data",
+      "weight": 0.7,
+      "params": {
+        "mode": "subscribe",
+        "stream_type": "both",
+        "redis_url": "${REDIS_URL}",
+        "block_ms": 2000,
+        "idle_timeout_s": 30,
+        "last_id": "0",
+        "max_samples": 500,
+        "min_quality": 0.4,
+        "fallback_mode": "synthetic",
+        "fallback_synthetic_examples": 50
+      }
+    }
+  ],
+  "preprocessing": {
+    "use_text_cleaner": false,
+    "use_deduplication": true,
+    "min_text_length": 5
+  },
+  "training": {
+    "trainer_type": "intent_classifier",
+    "model_name": "bert-base-uncased",
+    "num_labels": 31,
+    "num_epochs": 2,
+    "batch_size": 16,
+    "learning_rate": 1e-5,
+    "output_dir": "models/intent_classifier"
+  },
+  "evaluation": {
+    "enabled": true
+  },
+  "export": {
+    "mlflow": {
+      "enabled": false
+    },
+    "publish_model_ready": false
+  },
+  "split": {
+    "train_ratio": 0.70,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15,
+    "seed": 42
+  },
+  "observability": {
+    "ingestion_log_path": "logs/ingestion.jsonl"
+  }
+}

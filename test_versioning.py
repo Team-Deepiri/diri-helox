@@ -2,6 +2,7 @@
 """
 Simple test script for dataset versioning system
 """
+
 import sys
 import os
 from pathlib import Path
@@ -10,6 +11,7 @@ from pathlib import Path
 sys.path.insert(0, os.path.dirname(__file__))
 
 from utils.dataset_versioning import DatasetVersionManager, DatasetType
+
 
 def test_versioning():
     """Test the dataset versioning functionality"""
@@ -20,12 +22,10 @@ def test_versioning():
     # Initialize manager with in-memory database for testing
     # Use a unique database name to avoid conflicts
     import uuid
+
     db_name = f"test_versions_{uuid.uuid4().hex[:8]}.db"
 
-    manager = DatasetVersionManager(
-        db_url=f"sqlite:///{db_name}",
-        storage_backend="local"
-    )
+    manager = DatasetVersionManager(db_url=f"sqlite:///{db_name}", storage_backend="local")
 
     print("✅ Manager initialized successfully!")
 
@@ -50,8 +50,8 @@ def test_versioning():
             metadata={
                 "source": "SEC filings",
                 "annotation_method": "manual",
-                "quality_score": 0.95
-            }
+                "quality_score": 0.95,
+            },
         )
         print("✅ Version 1.0.0 created successfully!")
         print(f"   Samples: {version_1.total_samples}")
@@ -71,7 +71,7 @@ def test_versioning():
             data_path=data_v2_path,
             parent_version="1.0.0",
             change_summary="Added 3 more lease documents",
-            tags=["production", "lease_abstraction", "updated"]
+            tags=["production", "lease_abstraction", "updated"],
         )
         print("✅ Version 1.0.1 created successfully!")
         print(f"   Samples: {version_2.total_samples}")
@@ -96,11 +96,7 @@ def test_versioning():
     # Compare versions
     print("\n⚖️  Comparing versions 1.0.0 vs 1.0.1...")
     try:
-        comparison = manager.compare_versions(
-            "lease_abstraction_training",
-            "1.0.0",
-            "1.0.1"
-        )
+        comparison = manager.compare_versions("lease_abstraction_training", "1.0.0", "1.0.1")
         print("Comparison results:")
         print(f"   Sample difference: {comparison['sample_difference']:+d}")
         print(f"   File difference: {comparison['file_difference']:+d}")
@@ -129,6 +125,7 @@ def test_versioning():
     print("   1. Run: python scripts/dataset_versioning_cli.py --help")
     print("   2. Try creating versions with the CLI")
     print("   3. Integrate with your training pipelines")
+
 
 if __name__ == "__main__":
     test_versioning()

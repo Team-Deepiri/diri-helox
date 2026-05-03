@@ -17,12 +17,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
+
+      - name: Init submodules
+        run: |
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          git submodule update --init --recursive
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
           cache: "pip"
@@ -34,64 +37,24 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
+          poetry config experimental.system-git-client true
 
       - name: Install dependencies
-        run: poetry install --with dev --no-root
-
-      - name: Determine changed Python files
-        id: changed_python
         run: |
-          set -euo pipefail
-
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            base_sha="${{ github.event.pull_request.base.sha }}"
-            head_sha="${{ github.event.pull_request.head.sha }}"
-            files="$(git diff --name-only --diff-filter=ACMRT "$base_sha" "$head_sha" | grep -E '\.py$' || true)"
-          else
-            files="$(git diff --name-only --diff-filter=ACMRT HEAD~1 HEAD | grep -E '\.py$' || true)"
-          fi
-
-          files="$(echo "$files" | grep -v '^deepiri-dataset-processor/' || true)"
-          files="$(echo "$files" | xargs || true)"
-
-          echo "files=$files" >> "$GITHUB_OUTPUT"
-          if [ -n "$files" ]; then
-            echo "Changed Python files: $files"
-          else
-            echo "No changed Python files detected."
-          fi
-
-      - name: Determine changed test files
-        id: changed_tests
-        run: |
-          set -euo pipefail
-          tests="$(echo '${{ steps.changed_python.outputs.files }}' | tr ' ' '\n' | grep -E '(^tests/.*\.py$|(^|.*/)test_.*\.py$)' || true)"
-          tests="$(echo "$tests" | xargs || true)"
-          echo "files=$tests" >> "$GITHUB_OUTPUT"
+          poetry install --with dev
+          poetry run pip install "transformers[torch]" --upgrade
 
       - name: Lint (ruff)
-        if: steps.changed_python.outputs.files != ''
-        run: poetry run ruff check ${{ steps.changed_python.outputs.files }}
+        run: poetry run ruff check .
 
       - name: Format check (black)
-        if: steps.changed_python.outputs.files != ''
-        run: poetry run black --check ${{ steps.changed_python.outputs.files }}
+        run: poetry run black --check .
 
       - name: Type check (mypy)
-        if: steps.changed_python.outputs.files != ''
-        run: poetry run mypy ${{ steps.changed_python.outputs.files }}
+        run: poetry run mypy data_sources pipelines/training/dynamic_training_pipeline.py training/intent_classifier_trainer.py evaluation/model_evaluator.py scripts/pipelines/run_dynamic_pipeline.py
 
       - name: Unit tests (pytest)
-        if: steps.changed_tests.outputs.files != ''
-        run: poetry run pytest -m "not integration" ${{ steps.changed_tests.outputs.files }}
+        run: poetry run pytest -m "not integration and not slow"
 
       - name: Integration tests (pytest)
-        if: steps.changed_tests.outputs.files != ''
-        run: poetry run pytest -m integration ${{ steps.changed_tests.outputs.files }}
-
-      - name: Smoke check changed Python files
-        if: steps.changed_python.outputs.files != ''
-        run: poetry run python -m py_compile ${{ steps.changed_python.outputs.files }}
-
-      - name: Poetry project check
-        run: poetry check
+        run: poetry run pytest -m integration

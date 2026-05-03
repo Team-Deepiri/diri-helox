@@ -2,16 +2,18 @@
 Challenge Generation Model Training Script
 Trains models to generate adaptive challenges from tasks
 """
+
 import os
 import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
+
 def train_challenge_generator():
     """
     Train models for challenge generation.
-    
+
     This script should be implemented by ML Engineers to:
     1. Load challenge generation training data
     2. Train sequence-to-sequence model (e.g., T5, GPT-2)
@@ -35,6 +37,6 @@ def train_challenge_generator():
     print("- Data Engineers: Prepare challenge datasets")
     return
 
+
 if __name__ == "__main__":
     train_challenge_generator()
-
