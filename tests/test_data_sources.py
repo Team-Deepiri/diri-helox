@@ -304,6 +304,49 @@ class TestSelfFeedbackDataSource:
 
 
 class TestPostgresDataSource:
+    def test_default_dsn_targets_cyrex_split_database(self, monkeypatch):
+        for env_name in (
+            "POSTGRES_DSN",
+            "CYREX_POSTGRES_DSN",
+            "POSTGRES_CYREX_HOST",
+            "POSTGRES_CYREX_PORT",
+            "POSTGRES_CYREX_DB",
+            "POSTGRES_CYREX_USER",
+            "POSTGRES_CYREX_PASSWORD",
+            "POSTGRES_HOST",
+            "POSTGRES_PORT",
+            "POSTGRES_DB",
+            "POSTGRES_USER",
+            "POSTGRES_PASSWORD",
+        ):
+            monkeypatch.delenv(env_name, raising=False)
+
+        cfg = DataSourceConfig("postgres", "pg", {})
+        src = PostgresDataSource(cfg)
+        assert src._dsn == (
+            "postgresql://deepiri_cyrex:deepiripassword@localhost:5434/cyrex_db"
+        )
+
+    def test_default_dsn_uses_cyrex_env_over_legacy_postgres_env(self, monkeypatch):
+        monkeypatch.delenv("POSTGRES_DSN", raising=False)
+        monkeypatch.delenv("CYREX_POSTGRES_DSN", raising=False)
+        monkeypatch.setenv("POSTGRES_HOST", "postgres-core")
+        monkeypatch.setenv("POSTGRES_PORT", "5433")
+        monkeypatch.setenv("POSTGRES_DB", "deepiri")
+        monkeypatch.setenv("POSTGRES_USER", "deepiri")
+        monkeypatch.setenv("POSTGRES_PASSWORD", "core-secret")
+        monkeypatch.setenv("POSTGRES_CYREX_HOST", "postgres-cyrex")
+        monkeypatch.setenv("POSTGRES_CYREX_PORT", "5434")
+        monkeypatch.setenv("POSTGRES_CYREX_DB", "cyrex_db")
+        monkeypatch.setenv("POSTGRES_CYREX_USER", "deepiri_cyrex")
+        monkeypatch.setenv("POSTGRES_CYREX_PASSWORD", "cyrex-secret")
+
+        cfg = DataSourceConfig("postgres", "pg", {})
+        src = PostgresDataSource(cfg)
+        assert src._dsn == (
+            "postgresql://deepiri_cyrex:cyrex-secret@postgres-cyrex:5434/cyrex_db"
+        )
+
     def test_build_query_defaults_to_durable_table(self):
         cfg = DataSourceConfig("postgres", "pg", {})
         src = PostgresDataSource(cfg)
@@ -375,6 +418,16 @@ class TestPostgresDataSource:
                     "postgres",
                     "pg",
                     {"table": "cyrex.helox_training_samples; DROP TABLE users;"},
+                )
+            )
+
+    def test_invalid_column_identifier_raises_before_query_interpolation(self):
+        with pytest.raises(ValueError, match="Invalid column identifier"):
+            PostgresDataSource(
+                DataSourceConfig(
+                    "postgres",
+                    "pg",
+                    {"text_column": "text; DROP TABLE users;"},
                 )
             )
 

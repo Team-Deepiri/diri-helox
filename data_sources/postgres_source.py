@@ -1,20 +1,20 @@
 """
-PostgresDataSource: loads training data from the durable Postgres table.
+PostgresDataSource: loads training data from the Cyrex-owned durable table.
 
 This source is intentionally schema-aware and defensive:
   - Uses parameterized SQL for all value filters.
   - Validates SQL identifiers (table/column names) early.
   - Adapts when optional columns are missing (schema drift).
-  - Keeps the "actual" durable table path (no mirror concept in Helox).
+  - Reads the Cyrex training table as the owner-approved replay source.
 
 Config params:
-    dsn              (str): PostgreSQL DSN. Falls back to POSTGRES_DSN env var.
+    dsn              (str): PostgreSQL DSN. Defaults to the current Cyrex DB split.
     table            (str): Durable table (default: "cyrex.helox_training_samples")
     label_column     (str): Category/label column (default: "category")
     text_column      (str): Training text column (default: "text")
     min_quality      (float): Minimum quality threshold (default: 0.4)
     stream_type      (str): Optional filter: "raw" or "structured"
-    producer         (str): Optional producer filter (e.g. "language_intelligence")
+    producer         (str): Optional producer filter (e.g. "cyrex_realtime_pipeline")
     max_samples      (int): Optional LIMIT cap (must be > 0)
     where            (str): Legacy raw SQL fragment (ignored unless allow_unsafe_where=true)
     allow_unsafe_where (bool): If true, appends raw WHERE fragment directly (default: false)
@@ -25,6 +25,7 @@ from __future__ import annotations
 import os
 import re
 from typing import Any, Dict, Iterator, List, Optional
+from urllib.parse import quote
 
 from .base import DataSample, DataSource, DataSourceConfig
 
@@ -37,17 +38,43 @@ DEFAULT_TABLE = "cyrex.helox_training_samples"
 _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
+def _default_cyrex_postgres_dsn() -> str:
+    """
+    Build the default DSN for the split Cyrex Postgres database.
+
+    Live platform compose owns the source of truth here: Cyrex writes
+    `cyrex.helox_training_samples` in the Cyrex database, and Helox reads it as
+    a cross-service data contract. `POSTGRES_DSN`/`CYREX_POSTGRES_DSN` still win
+    for deployments that inject a complete DSN.
+    """
+    explicit_dsn = os.environ.get("POSTGRES_DSN") or os.environ.get("CYREX_POSTGRES_DSN")
+    if explicit_dsn:
+        return explicit_dsn
+
+    host = os.environ.get("POSTGRES_CYREX_HOST") or os.environ.get("POSTGRES_HOST") or "localhost"
+    port = os.environ.get("POSTGRES_CYREX_PORT") or os.environ.get("POSTGRES_PORT") or "5434"
+    db_name = os.environ.get("POSTGRES_CYREX_DB") or os.environ.get("POSTGRES_DB") or "cyrex_db"
+    user = os.environ.get("POSTGRES_CYREX_USER") or os.environ.get("POSTGRES_USER") or "deepiri_cyrex"
+    password = (
+        os.environ.get("POSTGRES_CYREX_PASSWORD")
+        or os.environ.get("POSTGRES_PASSWORD")
+        or "deepiripassword"
+    )
+
+    return (
+        f"postgresql://{quote(user)}:{quote(password)}"
+        f"@{host}:{port}/{quote(db_name)}"
+    )
+
+
 class PostgresDataSource(DataSource):
     """
-    Reads training samples from a PostgreSQL table populated by the
-    language intelligence service pipeline.
+    Reads training samples from the PostgreSQL table populated by Cyrex.
     """
 
     def __init__(self, config: DataSourceConfig) -> None:
         super().__init__(config)
-        self._dsn: str = config.params.get(
-            "dsn", os.environ.get("POSTGRES_DSN", "postgresql://localhost:5434/cyrex_db")
-        )
+        self._dsn: str = config.params.get("dsn", _default_cyrex_postgres_dsn())
         self._table: str = config.params.get("table", DEFAULT_TABLE)
         self._text_col: str = config.params.get("text_column", "text")
         self._label_col: str = config.params.get("label_column", "category")
