@@ -54,17 +54,16 @@ def _default_cyrex_postgres_dsn() -> str:
     host = os.environ.get("POSTGRES_CYREX_HOST") or os.environ.get("POSTGRES_HOST") or "localhost"
     port = os.environ.get("POSTGRES_CYREX_PORT") or os.environ.get("POSTGRES_PORT") or "5434"
     db_name = os.environ.get("POSTGRES_CYREX_DB") or os.environ.get("POSTGRES_DB") or "cyrex_db"
-    user = os.environ.get("POSTGRES_CYREX_USER") or os.environ.get("POSTGRES_USER") or "deepiri_cyrex"
+    user = (
+        os.environ.get("POSTGRES_CYREX_USER") or os.environ.get("POSTGRES_USER") or "deepiri_cyrex"
+    )
     password = (
         os.environ.get("POSTGRES_CYREX_PASSWORD")
         or os.environ.get("POSTGRES_PASSWORD")
         or "deepiripassword"
     )
 
-    return (
-        f"postgresql://{quote(user)}:{quote(password)}"
-        f"@{host}:{port}/{quote(db_name)}"
-    )
+    return f"postgresql://{quote(user)}:{quote(password)}" f"@{host}:{port}/{quote(db_name)}"
 
 
 class PostgresDataSource(DataSource):

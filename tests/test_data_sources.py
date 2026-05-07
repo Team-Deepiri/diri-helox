@@ -323,9 +323,7 @@ class TestPostgresDataSource:
 
         cfg = DataSourceConfig("postgres", "pg", {})
         src = PostgresDataSource(cfg)
-        assert src._dsn == (
-            "postgresql://deepiri_cyrex:deepiripassword@localhost:5434/cyrex_db"
-        )
+        assert src._dsn == ("postgresql://deepiri_cyrex:deepiripassword@localhost:5434/cyrex_db")
 
     def test_default_dsn_uses_cyrex_env_over_legacy_postgres_env(self, monkeypatch):
         monkeypatch.delenv("POSTGRES_DSN", raising=False)
@@ -343,9 +341,7 @@ class TestPostgresDataSource:
 
         cfg = DataSourceConfig("postgres", "pg", {})
         src = PostgresDataSource(cfg)
-        assert src._dsn == (
-            "postgresql://deepiri_cyrex:cyrex-secret@postgres-cyrex:5434/cyrex_db"
-        )
+        assert src._dsn == ("postgresql://deepiri_cyrex:cyrex-secret@postgres-cyrex:5434/cyrex_db")
 
     def test_build_query_defaults_to_durable_table(self):
         cfg = DataSourceConfig("postgres", "pg", {})
