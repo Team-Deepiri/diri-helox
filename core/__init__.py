@@ -1,14 +1,15 @@
 """Core utilities for LLM training infrastructure.
 
-Public symbols are loaded **lazily** (``__getattr__``) so ``import core`` does not eagerly
-import every submodule—reduces import-time side effects and keeps optional stacks isolated
-until used (review feedback on package ``__init__`` import style).
+Symbols are **explicitly** re-exported here so static analysis (e.g. CodeQL) and ``__all__``
+agree on what the package defines.
 """
 
 from __future__ import annotations
 
-import importlib
-from typing import Any
+from .device_manager import DeviceManager, get_optimal_device
+from .gpu_utils import detect_device, get_gpu_info, is_gpu_available
+from .mudspeed_gpu import resolve_mudspeed_torch_device
+from .training_config import DataConfig, ModelConfig, TrainingConfig
 
 __all__ = [
     "DeviceManager",
@@ -21,29 +22,3 @@ __all__ = [
     "ModelConfig",
     "DataConfig",
 ]
-
-_EXPORTS: dict[str, tuple[str, str]] = {
-    "DeviceManager": ("device_manager", "DeviceManager"),
-    "get_optimal_device": ("device_manager", "get_optimal_device"),
-    "detect_device": ("gpu_utils", "detect_device"),
-    "get_gpu_info": ("gpu_utils", "get_gpu_info"),
-    "is_gpu_available": ("gpu_utils", "is_gpu_available"),
-    "resolve_mudspeed_torch_device": ("mudspeed_gpu", "resolve_mudspeed_torch_device"),
-    "TrainingConfig": ("training_config", "TrainingConfig"),
-    "ModelConfig": ("training_config", "ModelConfig"),
-    "DataConfig": ("training_config", "DataConfig"),
-}
-
-
-def __getattr__(name: str) -> Any:
-    if name not in _EXPORTS:
-        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-    mod_name, attr_name = _EXPORTS[name]
-    mod = importlib.import_module(f"{__name__}.{mod_name}")
-    val = getattr(mod, attr_name)
-    globals()[name] = val
-    return val
-
-
-def __dir__() -> list[str]:  # noqa: D401
-    return sorted(set(globals()) | set(__all__))
