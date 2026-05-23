@@ -6,12 +6,13 @@ and complex training objectives beyond simple next-token prediction.
 """
 
 import logging
+from helox_logger import get_logger
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Dict, Any, List, Optional, Callable
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MultiObjectiveLoss:

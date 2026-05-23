@@ -13,10 +13,11 @@ from datetime import datetime
 from typing import Dict, List, Any, Optional
 import sqlite3
 import logging
+from helox_logger import get_logger
 
 # Setup basic logging
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Add current directory to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))

@@ -6,11 +6,12 @@ Handles connection, error handling, and fallback behavior.
 """
 
 import logging
+from helox_logger import get_logger
 import os
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CyrexRAGBridge:

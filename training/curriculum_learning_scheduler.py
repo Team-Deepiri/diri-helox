@@ -6,12 +6,13 @@ and difficulty-based sample progression for improved convergence.
 """
 
 import logging
+from helox_logger import get_logger
 import numpy as np
 from typing import Dict, Any, List, Optional
 from collections import deque
 import torch
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CurriculumLearningScheduler:

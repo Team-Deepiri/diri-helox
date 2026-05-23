@@ -6,12 +6,13 @@ and domain-aware training for steering model personality.
 """
 
 import logging
+from helox_logger import get_logger
 import random
 from typing import Dict, Any, List, Optional
 from collections import defaultdict
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DomainWeightingEngine:

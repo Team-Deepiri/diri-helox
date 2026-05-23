@@ -6,13 +6,14 @@ comparisons to prevent "works in training, breaks in prod" issues.
 """
 
 import logging
+from helox_logger import get_logger
 import torch
 import torch.nn as nn
 import numpy as np
 from typing import Dict, Any, List, Optional
 from pathlib import Path
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class InferenceParityTester:

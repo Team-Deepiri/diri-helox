@@ -6,13 +6,14 @@ and stateless workers for real cluster training.
 """
 
 import logging
+from helox_logger import get_logger
 import json
 import torch
 from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class FailureResilienceManager:

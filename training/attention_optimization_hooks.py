@@ -6,12 +6,13 @@ and local + global attention mix for extended context.
 """
 
 import logging
+from helox_logger import get_logger
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Optional, Tuple
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class FlashAttentionFallback:

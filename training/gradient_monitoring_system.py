@@ -6,13 +6,14 @@ and gradient explosion detection.
 """
 
 import logging
+from helox_logger import get_logger
 import torch
 import torch.nn as nn
 from typing import Optional, Dict, Any, List
 from collections import deque
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class GradientMonitoringSystem:

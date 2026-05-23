@@ -20,7 +20,8 @@ from ..core.device_manager import DeviceManager
 from ..core.training_config import TrainingConfig, ModelConfig
 from ..models.transformer_lm import TransformerLanguageModel
 
-logger = logging.getLogger(__name__)
+from helox_logger import get_logger
+logger = get_logger(__name__)
 
 
 class PretrainingTrainer:

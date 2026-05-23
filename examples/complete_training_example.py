@@ -11,6 +11,7 @@ This example demonstrates the full training pipeline with:
 
 import asyncio
 import logging
+from helox_logger import get_logger
 from pathlib import Path
 import sys
 
@@ -28,7 +29,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 async def main():

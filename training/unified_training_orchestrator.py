@@ -6,6 +6,7 @@ This is the main entry point for production training.
 """
 
 import logging
+from helox_logger import get_logger
 import asyncio
 from pathlib import Path
 from typing import Optional, Dict, Any, List
@@ -62,7 +63,7 @@ from ..model_export.format_exporter import ModelFormatExporter
 from ..models.transformer_lm import TransformerLanguageModel, create_model_from_config
 from ..tokenization.tokenizer_manager import TokenizerManager
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class UnifiedTrainingOrchestrator:

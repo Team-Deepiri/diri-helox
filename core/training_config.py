@@ -9,8 +9,9 @@ from dataclasses import dataclass, asdict, field
 from pathlib import Path
 from typing import Optional, Dict, Any
 import logging
+from helox_logger import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 @dataclass

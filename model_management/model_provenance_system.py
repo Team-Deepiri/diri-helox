@@ -6,6 +6,7 @@ and ownership proof for IP protection.
 """
 
 import logging
+from helox_logger import get_logger
 import hashlib
 import json
 from pathlib import Path
@@ -14,7 +15,7 @@ from datetime import datetime
 import torch
 import torch.nn as nn
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ModelProvenanceSystem:

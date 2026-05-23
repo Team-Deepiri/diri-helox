@@ -6,11 +6,12 @@ and format abstraction for fine-tuning once, deploying many personas.
 """
 
 import logging
+from helox_logger import get_logger
 from typing import Dict, Any, List, Optional, Callable
 from enum import Enum
 import json
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MessageRole(Enum):

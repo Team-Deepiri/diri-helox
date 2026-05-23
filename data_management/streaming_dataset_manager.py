@@ -6,6 +6,7 @@ resume mid-epoch capabilities for multi-TB corpora.
 """
 
 import logging
+from helox_logger import get_logger
 from pathlib import Path
 from typing import Iterator, Optional, List, Dict, Any
 import json
@@ -13,7 +14,7 @@ import torch
 from torch.utils.data import IterableDataset, DataLoader
 import random
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StreamingTextDataset(IterableDataset):

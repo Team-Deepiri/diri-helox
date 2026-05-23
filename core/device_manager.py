@@ -8,6 +8,7 @@ existing code using DeviceManager continues to work without changes.
 from __future__ import annotations
 
 import logging
+from helox_logger import get_logger
 from typing import Optional
 
 import torch
@@ -20,7 +21,7 @@ from .gpu_utils import (
     recommend_batch_size,
 )
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DeviceManager:

@@ -6,11 +6,12 @@ and distribution anomalies for maintaining model knowledge.
 """
 
 import logging
+from helox_logger import get_logger
 from typing import Dict, Any, List
 from collections import Counter, defaultdict
 import numpy as np
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TokenDistributionMonitor:
