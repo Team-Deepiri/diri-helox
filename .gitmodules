@@ -7,3 +7,6 @@
 [submodule "deepiri-gpu-utils"]
 	path = deepiri-gpu-utils
 	url = https://github.com/Team-Deepiri/deepiri-gpu-utils.git
+[submodule "deps/deepiri-logger"]
+	path = deps/deepiri-logger
+	url = https://github.com/Team-Deepiri/deepiri-logger.git
