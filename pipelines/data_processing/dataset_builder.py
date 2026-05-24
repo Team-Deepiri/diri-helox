@@ -5,11 +5,9 @@ Converts cleaned text into tokenized, ready-to-train datasets.
 """
 
 import json
-import logging
 from helox_logger import get_logger
 from pathlib import Path
-from typing import List, Optional, Iterator
-import numpy as np
+from typing import List, Optional
 from datasets import Dataset, DatasetDict
 import sentencepiece as spm
 

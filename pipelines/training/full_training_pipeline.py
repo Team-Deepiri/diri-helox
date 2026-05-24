@@ -17,10 +17,6 @@ from mlops.infrastructure import LayeredModelAdapter, LayerConfig, LayerType
 from datasets import load_dataset
 from accelerate import Accelerator
 
-try:
-    from deepspeed import init_distributed
-except ModuleNotFoundError:
-    init_distributed = None
 import json
 from pathlib import Path
 from typing import Dict, Optional
