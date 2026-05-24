@@ -8,7 +8,7 @@ and long-term model evolution without catastrophic forgetting.
 from helox_logger import get_logger
 import torch
 import torch.nn as nn
-from typing import Dict, Any, List, Optional
+from typing import Dict, List, Optional
 from pathlib import Path
 
 logger = get_logger(__name__)

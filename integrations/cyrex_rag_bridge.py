@@ -5,9 +5,7 @@ Provides seamless integration between Helox training and Cyrex RAG pipeline.
 Handles connection, error handling, and fallback behavior.
 """
 
-import logging
 from helox_logger import get_logger
-import os
 from typing import Optional, List, Dict, Any
 from pathlib import Path
 

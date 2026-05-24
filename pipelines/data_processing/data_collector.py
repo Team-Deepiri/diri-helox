@@ -5,10 +5,9 @@ Supports multiple data sources and formats.
 """
 
 import json
-import logging
 from helox_logger import get_logger
 from pathlib import Path
-from typing import List, Iterator, Optional
+from typing import List, Optional
 from .text_cleaner import TextCleaner
 
 logger = get_logger(__name__)
