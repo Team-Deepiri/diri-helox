@@ -1,0 +1,3 @@
+[submodule "deps/deepiri-logger"]
+	path = deps/deepiri-logger
+	url = https://github.com/Team-Deepiri/deepiri-logger.git
