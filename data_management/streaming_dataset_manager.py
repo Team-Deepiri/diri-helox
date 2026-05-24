@@ -235,7 +235,6 @@ class ShardedDatasetManager:
             "position": position,
         }
 
-
         with open(state_file, "w") as f:
             json.dump(state, f, indent=2)
 

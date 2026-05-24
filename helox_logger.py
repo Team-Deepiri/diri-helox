@@ -33,8 +33,10 @@ try:
 
     _init(service_name="diri-helox")
 except Exception:  # pragma: no cover
+
     def get_logger(name: str | None = None):  # type: ignore[misc]
         """Fallback stdlib logger when deepiri-logger is unavailable."""
         return logging.getLogger(name or __name__)
+
 
 __all__ = ["get_logger"]

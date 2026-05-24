@@ -38,6 +38,7 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 from helox_logger import get_logger
+
 logger = get_logger(__name__)
 
 
