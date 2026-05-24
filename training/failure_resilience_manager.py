@@ -5,7 +5,6 @@ Provides mid-step crash recovery, partial optimizer restore,
 and stateless workers for real cluster training.
 """
 
-import logging
 from helox_logger import get_logger
 import json
 import torch

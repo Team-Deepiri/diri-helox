@@ -5,7 +5,6 @@ Provides model fingerprinting, training metadata embedding,
 and ownership proof for IP protection.
 """
 
-import logging
 from helox_logger import get_logger
 import hashlib
 import json

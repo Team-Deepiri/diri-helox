@@ -5,7 +5,6 @@ Provides IterableDataset support, shard-aware sampling, and
 resume mid-epoch capabilities for multi-TB corpora.
 """
 
-import logging
 from helox_logger import get_logger
 from pathlib import Path
 from typing import Iterator, Optional, List, Dict, Any
