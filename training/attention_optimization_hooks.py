@@ -5,7 +5,6 @@ Provides FlashAttention fallback logic, sliding-window attention,
 and local + global attention mix for extended context.
 """
 
-import logging
 from helox_logger import get_logger
 import torch
 import torch.nn as nn

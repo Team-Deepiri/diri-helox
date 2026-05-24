@@ -5,7 +5,6 @@ Integrates all 38 features into a seamless training pipeline.
 This is the main entry point for production training.
 """
 
-import logging
 from helox_logger import get_logger
 import asyncio
 from pathlib import Path
@@ -574,8 +573,6 @@ class UnifiedTrainingOrchestrator:
         # Save dynamic scaler state
         if self.dynamic_scaler:
             dynamic_scaler_path = checkpoint_dir / "dynamic_scaler.json"
-            import json
-
             with open(dynamic_scaler_path, "w") as f:
                 json.dump(self.dynamic_scaler.get_state(), f, indent=2)
 
@@ -680,7 +677,7 @@ class UnifiedTrainingOrchestrator:
 
                 # Evaluation
                 if val_loader and (self.global_step + 1) % self.training_config.eval_steps == 0:
-                    eval_metrics = await self.evaluate(val_loader)
+                    await self.evaluate(val_loader)
                     self.training_stats["evaluations_run"] += 1
 
                     # Run parity tests

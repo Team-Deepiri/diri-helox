@@ -235,7 +235,6 @@ class ShardedDatasetManager:
             "position": position,
         }
 
-        import json
 
         with open(state_file, "w") as f:
             json.dump(state, f, indent=2)
@@ -250,8 +249,6 @@ class ShardedDatasetManager:
 
         if not state_file.exists():
             return None
-
-        import json
 
         with open(state_file, "r") as f:
             state = json.load(f)

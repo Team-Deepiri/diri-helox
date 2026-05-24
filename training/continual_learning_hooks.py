@@ -5,7 +5,6 @@ Enables adapter stacking, frozen base + rolling updates,
 and long-term model evolution without catastrophic forgetting.
 """
 
-import logging
 from helox_logger import get_logger
 import torch
 import torch.nn as nn
@@ -121,7 +120,6 @@ class ContinualLearningManager:
         """
         # Base forward
         outputs = self.base_model(input_ids=input_ids)
-        hidden_states = outputs.get("hidden_states", outputs["logits"])
 
         # Apply adapters
         if active_adapters:

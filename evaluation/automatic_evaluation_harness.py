@@ -5,7 +5,6 @@ Provides fixed eval prompts, domain-specific test sets, and
 regression tracking for comprehensive model evaluation.
 """
 
-import logging
 from helox_logger import get_logger
 import json
 from pathlib import Path
