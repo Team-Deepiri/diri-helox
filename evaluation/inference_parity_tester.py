@@ -5,12 +5,12 @@ Tests train vs inference output parity and quantized vs full-precision
 comparisons to prevent "works in training, breaks in prod" issues.
 """
 
-import logging
+from helox_logger import get_logger
 import torch
 import torch.nn as nn
 from typing import Dict, Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class InferenceParityTester:

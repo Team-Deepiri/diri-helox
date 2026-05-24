@@ -5,12 +5,12 @@ Enables per-layer precision, sensitive layers kept in FP32,
 and attention vs MLP precision split for optimal mixed precision.
 """
 
-import logging
+from helox_logger import get_logger
 import torch
 import torch.nn as nn
-from typing import Dict, Any, List, Optional
+from typing import Dict, List, Optional
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PrecisionAwareLayerControl:
@@ -60,18 +60,18 @@ class PrecisionAwareLayerControl:
         for name, module in model.named_modules():
             # Check if layer should be FP32
             if any(fp32_name in name for fp32_name in self.fp32_layers):
-                module = module.float()
+                module.float()
                 logger.debug(f"Layer {name} set to FP32")
 
             # Apply attention/MLP precision
             elif "attention" in name.lower() or "attn" in name.lower():
                 if self.attention_precision != self.default_precision:
-                    module = self._convert_module_precision(module, self.attention_precision)
+                    self._convert_module_precision(module, self.attention_precision)
                     logger.debug(f"Layer {name} (attention) set to {self.attention_precision}")
 
             elif "mlp" in name.lower() or "feed_forward" in name.lower():
                 if self.mlp_precision != self.default_precision:
-                    module = self._convert_module_precision(module, self.mlp_precision)
+                    self._convert_module_precision(module, self.mlp_precision)
                     logger.debug(f"Layer {name} (MLP) set to {self.mlp_precision}")
 
         return model

@@ -5,12 +5,12 @@ Provides adaptive batch sizing, dynamic sequence length curriculum,
 and difficulty-based sample progression for improved convergence.
 """
 
-import logging
+from helox_logger import get_logger
 import numpy as np
 from typing import Optional
 from collections import deque
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class CurriculumLearningScheduler:

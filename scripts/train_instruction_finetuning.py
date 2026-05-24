@@ -7,6 +7,7 @@ Fine-tunes a pretrained model on instruction-following data.
 
 import argparse
 import logging
+from helox_logger import get_logger
 import sys
 from pathlib import Path
 
@@ -14,7 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from core.device_manager import DeviceManager
 from core.training_config import TrainingConfig, ModelConfig
-from models.transformer_lm import create_model_from_config
+from models.transformer_lm import TransformerLanguageModel, create_model_from_config
 from training.instruction_finetuning_trainer import InstructionFinetuningTrainer
 from torch.utils.data import DataLoader
 import torch
@@ -24,7 +25,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def create_instruction_data_loader(

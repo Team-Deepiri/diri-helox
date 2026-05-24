@@ -11,10 +11,7 @@ from peft import PeftModel, LoraConfig, get_peft_model  # type: ignore
 try:
     from deepiri_modelkit.logging import get_logger  # type: ignore
 except Exception:  # pragma: no cover
-    import logging
-
-    def get_logger(name: str):
-        return logging.getLogger(name)
+    from helox_logger import get_logger  # type: ignore[misc]
 
 
 logger = get_logger(__name__)

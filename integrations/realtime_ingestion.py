@@ -38,6 +38,7 @@ Usage (from training scripts):
 import asyncio
 import json
 import logging
+from helox_logger import get_logger
 import os
 from datetime import datetime
 from pathlib import Path
@@ -48,7 +49,7 @@ try:
 except ImportError:
     aioredis = None
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 # ---------------------------------------------------------------------------
