@@ -5,7 +5,7 @@ Publishes training events to Synapse (Redis Streams) for integration
 with Cyrex and other platform services.
 """
 
-import logging
+from helox_logger import get_logger
 import os
 import json
 import asyncio
@@ -18,7 +18,7 @@ import grpc
 import redis.asyncio as redis
 from deepiri_modelkit.streaming.sidecar_utils import env_float, resolve_grpc_addr
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 # Generated stubs import `proto.synapse.v1...`, so add the gen root to sys.path.
 _GEN_ROOT = Path(__file__).resolve().parent / "streaming" / "gen"

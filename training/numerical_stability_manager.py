@@ -5,11 +5,11 @@ Provides dynamic loss scaling, NaN/Inf detection, and gradient overflow recovery
 for stable mixed precision training.
 """
 
-import logging
+from helox_logger import get_logger
 import torch
 from typing import Dict, Any
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DynamicLossScaler:

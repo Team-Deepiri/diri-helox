@@ -5,14 +5,14 @@ Provides fixed eval prompts, domain-specific test sets, and
 regression tracking for comprehensive model evaluation.
 """
 
-import logging
+from helox_logger import get_logger
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import torch
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AutomaticEvaluationHarness:
