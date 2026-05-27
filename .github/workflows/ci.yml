@@ -21,42 +21,12 @@ jobs:
       - name: Init submodules
         run: |
           set -euo pipefail
-          LOG_PATH="${GITHUB_WORKSPACE:-$PWD}/debug-88b17c.log"
-          #region agent log
-          dbg() {
-            local hyp="$1" msg="$2" data="$3"
-            local ts
-            ts=$(date +%s%3N 2>/dev/null || date +%s000)
-            printf '%s\n' "{\"sessionId\":\"88b17c\",\"runId\":\"${GITHUB_RUN_ID:-local}\",\"hypothesisId\":\"$hyp\",\"location\":\"ci.yml:Init submodules\",\"message\":\"$msg\",\"data\":$data,\"timestamp\":$ts}" >> "$LOG_PATH"
-          }
-          #endregion
-
           # Rewrite SSH/HTTPS GitHub URLs to token-authenticated HTTPS (--add keeps all rules).
           git config --global --add url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
           git config --global --add url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "ssh://git@github.com/"
           git config --global --add url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
-
-          #region agent log
-          INSTEAD_COUNT=$(git config --global --get-regexp '^url\..*\.insteadof$' 2>/dev/null | wc -l | tr -d ' ')
-          INSTEAD_COUNT=${INSTEAD_COUNT:-0}
-          dbg "H1" "url.insteadOf rules after --add config" "{\"insteadOfCount\":${INSTEAD_COUNT}}"
-          echo "::group::Git url.insteadOf rules"
-          git config --global --get-regexp '^url\..*\.insteadof$' || true
-          echo "::endgroup::"
-          #endregion
-
           git submodule sync --recursive
-
-          #region agent log
-          SUBURL=$(git config -f .gitmodules --get submodule.deepiri-dataset-processor.url 2>/dev/null || echo "missing")
-          dbg "H2" "submodule url after sync" "{\"datasetProcessorUrl\":\"${SUBURL}\"}"
-          #endregion
-
           git submodule update --init --recursive
-
-          #region agent log
-          dbg "H3" "submodule init completed" "{\"status\":\"ok\"}"
-          #endregion
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -70,26 +40,9 @@ jobs:
       - name: Configure Poetry
         run: |
           set -euo pipefail
-          LOG_PATH="${GITHUB_WORKSPACE:-$PWD}/debug-88b17c.log"
-          #region agent log
-          dbg() {
-            local hyp="$1" msg="$2" data="$3"
-            local ts
-            ts=$(date +%s%3N 2>/dev/null || date +%s000)
-            printf '%s\n' "{\"sessionId\":\"88b17c\",\"runId\":\"${GITHUB_RUN_ID:-local}\",\"hypothesisId\":\"$hyp\",\"location\":\"ci.yml:Configure Poetry\",\"message\":\"$msg\",\"data\":$data,\"timestamp\":$ts}" >> "$LOG_PATH"
-          }
-          POETRY_VERSION=$(poetry --version | sed 's/"/\\"/g')
-          dbg "H4" "poetry version before config" "{\"poetryVersion\":\"${POETRY_VERSION}\"}"
-          #endregion
-
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
           poetry config system-git-client true
-
-          #region agent log
-          SYSTEM_GIT_CLIENT=$(poetry config system-git-client 2>/dev/null || echo "missing")
-          dbg "H5" "poetry system git client configured" "{\"systemGitClient\":\"${SYSTEM_GIT_CLIENT}\"}"
-          #endregion
 
       - name: Install dependencies
         run: |
@@ -100,15 +53,7 @@ jobs:
         run: poetry run ruff check .
 
       - name: Format check (black)
-        run: |
-          LOG_PATH="${GITHUB_WORKSPACE:-$PWD}/debug-88b17c.log"
-          #region agent log
-          HELOX_TRACE_COUNT=$(find helox_trace_ml -type f -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
-          HELOX_TRACE_COUNT=${HELOX_TRACE_COUNT:-0}
-          ts=$(date +%s%3N 2>/dev/null || date +%s000)
-          printf '%s\n' "{\"sessionId\":\"88b17c\",\"runId\":\"${GITHUB_RUN_ID:-local}\",\"hypothesisId\":\"H6\",\"location\":\"ci.yml:Format check (black)\",\"message\":\"helox_trace_ml files before black\",\"data\":{\"heloxTracePythonFileCount\":${HELOX_TRACE_COUNT}},\"timestamp\":$ts}" >> "$LOG_PATH"
-          #endregion
-          poetry run black --check .
+        run: poetry run black --check .
 
       - name: Type check (mypy)
         run: poetry run mypy data_sources pipelines/training/dynamic_training_pipeline.py training/intent_classifier_trainer.py evaluation/model_evaluator.py scripts/pipelines/run_dynamic_pipeline.py
