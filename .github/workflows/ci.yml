@@ -100,7 +100,15 @@ jobs:
         run: poetry run ruff check .
 
       - name: Format check (black)
-        run: poetry run black --check .
+        run: |
+          LOG_PATH="${GITHUB_WORKSPACE:-$PWD}/debug-88b17c.log"
+          #region agent log
+          HELOX_TRACE_COUNT=$(find helox_trace_ml -type f -name '*.py' 2>/dev/null | wc -l | tr -d ' ')
+          HELOX_TRACE_COUNT=${HELOX_TRACE_COUNT:-0}
+          ts=$(date +%s%3N 2>/dev/null || date +%s000)
+          printf '%s\n' "{\"sessionId\":\"88b17c\",\"runId\":\"${GITHUB_RUN_ID:-local}\",\"hypothesisId\":\"H6\",\"location\":\"ci.yml:Format check (black)\",\"message\":\"helox_trace_ml files before black\",\"data\":{\"heloxTracePythonFileCount\":${HELOX_TRACE_COUNT}},\"timestamp\":$ts}" >> "$LOG_PATH"
+          #endregion
+          poetry run black --check .
 
       - name: Type check (mypy)
         run: poetry run mypy data_sources pipelines/training/dynamic_training_pipeline.py training/intent_classifier_trainer.py evaluation/model_evaluator.py scripts/pipelines/run_dynamic_pipeline.py
