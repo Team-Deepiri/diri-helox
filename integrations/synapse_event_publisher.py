@@ -61,8 +61,8 @@ class SynapseEventPublisher:
         )
         self.transport = (os.getenv("SYNAPSE_TRANSPORT", "redis") or "redis").strip().lower()
         self.use_sidecar = self.transport == "sidecar"
-        self.sidecar_url = (
-            os.getenv("SYNAPSE_SIDECAR_URL", "http://synapse-sidecar:8081").rstrip("/")
+        self.sidecar_url = os.getenv("SYNAPSE_SIDECAR_URL", "http://synapse-sidecar:8081").rstrip(
+            "/"
         )
         self.sidecar_grpc_addr = resolve_grpc_addr(self.sidecar_url)
         self.sidecar_timeout_sec = _env_float("SYNAPSE_SIDECAR_TIMEOUT_SEC", 5.0)
@@ -248,4 +248,6 @@ class SynapseEventPublisher:
                     event_type,
                 )
         except grpc.RpcError as err:
-            raise RuntimeError(f"sidecar publish failed ({err.code().name}): {err.details()}") from err
+            raise RuntimeError(
+                f"sidecar publish failed ({err.code().name}): {err.details()}"
+            ) from err
