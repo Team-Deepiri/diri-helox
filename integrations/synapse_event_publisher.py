@@ -8,11 +8,33 @@ with Cyrex and other platform services.
 import logging
 import os
 import json
+import asyncio
+import sys
 from typing import Dict, Any, Optional
 from datetime import datetime
+from pathlib import Path
+
+import grpc
 import redis.asyncio as redis
+from deepiri_modelkit.streaming.sidecar_utils import env_float, resolve_grpc_addr
 
 logger = logging.getLogger(__name__)
+
+# Generated stubs import `proto.synapse.v1...`, so add the gen root to sys.path.
+_GEN_ROOT = Path(__file__).resolve().parent / "streaming" / "gen"
+if str(_GEN_ROOT) not in sys.path:
+    sys.path.append(str(_GEN_ROOT))
+
+from proto.synapse.v1 import sugar_glider_pb2 as sidecar_pb2  # type: ignore
+from proto.synapse.v1 import sugar_glider_pb2_grpc as sidecar_pb2_grpc  # type: ignore
+
+
+def _env_float(name: str, default: float) -> float:
+    return env_float(
+        name,
+        default,
+        logger=lambda message: logger.warning(message),
+    )
 
 
 class SynapseEventPublisher:
@@ -37,11 +59,32 @@ class SynapseEventPublisher:
             "REDIS_URL",
             "redis://redis:6379",
         )
+        self.transport = (os.getenv("SYNAPSE_TRANSPORT", "redis") or "redis").strip().lower()
+        self.use_sidecar = self.transport == "sidecar"
+        self.sidecar_url = (
+            os.getenv("SYNAPSE_SIDECAR_URL", "http://synapse-sidecar:8081").rstrip("/")
+        )
+        self.sidecar_grpc_addr = resolve_grpc_addr(self.sidecar_url)
+        self.sidecar_timeout_sec = _env_float("SYNAPSE_SIDECAR_TIMEOUT_SEC", 5.0)
+        self.sidecar_sender = os.getenv("SYNAPSE_SIDECAR_SENDER", "helox")
         self.redis_client: Optional[redis.Redis] = None
         self._connected = False
 
     async def connect(self):
         """Connect to Redis."""
+        if self.use_sidecar:
+            try:
+                ready = await asyncio.to_thread(self._sidecar_ready_sync)
+                self._connected = ready
+                if ready:
+                    logger.info("Connected to Synapse sidecar at %s", self.sidecar_url)
+                else:
+                    logger.error("Synapse sidecar not ready at %s", self.sidecar_url)
+            except Exception as e:
+                logger.error(f"Failed to connect to Synapse sidecar: {e}")
+                self._connected = False
+            return
+
         try:
             self.redis_client = redis.from_url(
                 self.redis_url,
@@ -84,20 +127,16 @@ class SynapseEventPublisher:
             "model_name": model_name,
             "step": step,
             "timestamp": datetime.utcnow().isoformat(),
-            "metrics": json.dumps(metrics) if metrics else None,
+            "metrics": metrics if metrics else None,
             **kwargs,
         }
 
-        try:
-            await self.redis_client.xadd(
-                "training-events",
-                event,
-                maxlen=10000,
-                approximate=True,
-            )
-            logger.debug(f"Published training event: {event_type} for {model_name}")
-        except Exception as e:
-            logger.error(f"Failed to publish training event: {e}")
+        await self._publish(
+            stream="training-events",
+            event_type=event_type,
+            payload=event,
+        )
+        logger.debug(f"Published training event: {event_type} for {model_name}")
 
     async def publish_model_ready_event(
         self,
@@ -127,22 +166,86 @@ class SynapseEventPublisher:
             "version": version,
             "checkpoint_path": checkpoint_path,
             "timestamp": datetime.utcnow().isoformat(),
-            "metrics": json.dumps(metrics) if metrics else None,
+            "metrics": metrics if metrics else None,
         }
 
-        try:
-            await self.redis_client.xadd(
-                "model-events",
-                event,
-                maxlen=10000,
-                approximate=True,
-            )
-            logger.info(f"Published model-ready event: {model_name} v{version}")
-        except Exception as e:
-            logger.error(f"Failed to publish model-ready event: {e}")
+        await self._publish(
+            stream="model-events",
+            event_type="model-ready",
+            payload=event,
+        )
+        logger.info(f"Published model-ready event: {model_name} v{version}")
 
     async def close(self):
         """Close Redis connection."""
         if self.redis_client:
             await self.redis_client.close()
-            self._connected = False
+        self._connected = False
+
+    async def _publish(self, stream: str, event_type: str, payload: Dict[str, Any]):
+        if self.use_sidecar:
+            await asyncio.to_thread(
+                self._sidecar_publish_sync,
+                stream,
+                event_type,
+                payload,
+            )
+            return
+
+        if not self.redis_client:
+            raise RuntimeError("Redis client is not connected")
+
+        payload_for_redis: Dict[str, str] = {}
+        for key, value in payload.items():
+            if value is None:
+                payload_for_redis[key] = ""
+            elif isinstance(value, (dict, list)):
+                payload_for_redis[key] = json.dumps(value)
+            else:
+                payload_for_redis[key] = str(value)
+
+        try:
+            await self.redis_client.xadd(
+                stream,
+                payload_for_redis,
+                maxlen=10000,
+                approximate=True,
+            )
+        except Exception as e:
+            logger.error(f"Failed to publish event via Redis stream={stream}: {e}")
+            raise
+
+    def _sidecar_ready_sync(self) -> bool:
+        try:
+            with grpc.insecure_channel(self.sidecar_grpc_addr) as channel:
+                stub = sidecar_pb2_grpc.SynapseSidecarStub(channel)
+                response = stub.Health(
+                    sidecar_pb2.HealthRequest(),
+                    timeout=self.sidecar_timeout_sec,
+                )
+            return bool(response.healthy)
+        except Exception:
+            return False
+
+    def _sidecar_publish_sync(self, stream: str, event_type: str, payload: Dict[str, Any]):
+        try:
+            with grpc.insecure_channel(self.sidecar_grpc_addr) as channel:
+                stub = sidecar_pb2_grpc.SynapseSidecarStub(channel)
+                response = stub.Publish(
+                    sidecar_pb2.PublishRequest(
+                        stream=stream,
+                        event_type=event_type,
+                        sender=self.sidecar_sender,
+                        priority="normal",
+                        payload=json.dumps(payload).encode("utf-8"),
+                    ),
+                    timeout=self.sidecar_timeout_sec,
+                )
+            if not (response.entry_id or "").strip():
+                logger.warning(
+                    "Synapse sidecar queued event in WAL stream=%s event_type=%s",
+                    stream,
+                    event_type,
+                )
+        except grpc.RpcError as err:
+            raise RuntimeError(f"sidecar publish failed ({err.code().name}): {err.details()}") from err
