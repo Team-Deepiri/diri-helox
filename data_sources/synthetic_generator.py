@@ -22,6 +22,7 @@ try:
 
     HAS_SEMANTIC_ANALYZER = True
 except ImportError:
+    get_semantic_analyzer = None  # type: ignore[misc, assignment]
     HAS_SEMANTIC_ANALYZER = False
 
 
@@ -343,7 +344,7 @@ def generate_synthetic_dataset(
     remainder = total_examples % len(LABEL_MAPPING)
 
     semantic_analyzer = None
-    if use_ollama and HAS_SEMANTIC_ANALYZER:
+    if use_ollama and HAS_SEMANTIC_ANALYZER and get_semantic_analyzer is not None:
         try:
             semantic_analyzer = get_semantic_analyzer()
             if not (semantic_analyzer and semantic_analyzer.check_ollama_available()):
