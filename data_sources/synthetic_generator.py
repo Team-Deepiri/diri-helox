@@ -11,10 +11,13 @@ from __future__ import annotations
 
 import json
 import importlib
+import logging
 import random
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, cast
+
+logger = logging.getLogger(__name__)
 
 # Import semantic analyzer for dynamic analysis
 try:
@@ -211,8 +214,8 @@ def generate_variations(
                     for paraphrase in paraphrases:
                         if is_valid_sentence(paraphrase):
                             variations.append(paraphrase)
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Paraphrase augmentation failed for %r: %s", category, e)
 
             if len(variations) < num_variations:
                 semantic_verbs = semantic_analyzer.extract_semantic_verbs(base_text, category)
@@ -363,14 +366,6 @@ def generate_synthetic_dataset(
         extra_variations = num_examples % len(templates)
 
         category_data: List[Dict[str, Any]] = []
-        if use_ollama and semantic_analyzer is not None and templates:
-            try:
-                sample_template = templates[0]
-                _ = semantic_analyzer.generate_semantic_prefixes(sample_template, category)
-                _ = semantic_analyzer.generate_semantic_suffixes(sample_template, category)
-                _ = semantic_analyzer.extract_semantic_verbs(sample_template, category)
-            except Exception:
-                pass
 
         for i, template in enumerate(templates):
             num_variations = variations_per_template + (1 if i < extra_variations else 0)
