@@ -4,11 +4,8 @@ Train retrieval and generation components for production RAG
 """
 
 from sentence_transformers import SentenceTransformer, InputExample, losses
-from sentence_transformers.evaluation import InformationRetrievalEvaluator
 from torch.utils.data import DataLoader
 from typing import List, Dict
-import json
-from pathlib import Path
 from ...mlops.infrastructure.rag_pipeline import RAGPipeline
 from deepiri_modelkit.logging import get_logger
 

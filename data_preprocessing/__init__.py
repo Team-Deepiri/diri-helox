@@ -8,4 +8,3 @@ from pipelines.data_preprocessing.base import *  # noqa: F403
 from pipelines.data_preprocessing.base import __all__ as _base_all
 
 __all__ = list(_base_all)
-

@@ -7,7 +7,7 @@ Supports multiple data sources and formats.
 import json
 import logging
 from pathlib import Path
-from typing import List, Iterator, Optional
+from typing import List, Optional
 from .text_cleaner import TextCleaner
 
 logger = logging.getLogger(__name__)

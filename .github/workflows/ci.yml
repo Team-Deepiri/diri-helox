@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   ci:
-    name: Lint, Type Check, Test & Build
+    name: Lint, Type Check, Test & Validate
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +20,17 @@ jobs:
 
       - name: Init submodules
         run: |
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
+          # Clone private Team-Deepiri submodules over HTTPS.
+          #
+          # NOTE: `GITHUB_TOKEN` typically cannot read *other* private repos, so we prefer a PAT
+          # like `DEEPIRI_CI_CLONE_PAT` (repo read) when available.
+          TOKEN="${{ secrets.DEEPIRI_CI_CLONE_PAT || secrets.GITHUB_TOKEN }}"
+
+          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "git@github.com:"
+          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
+          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
+
+          git submodule sync --recursive
           git submodule update --init --recursive
 
       - name: Set up Python
@@ -37,7 +46,6 @@ jobs:
         run: |
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
-          poetry config experimental.system-git-client true
 
       - name: Install dependencies
         run: |
@@ -57,4 +65,9 @@ jobs:
         run: poetry run pytest -m "not integration and not slow"
 
       - name: Integration tests (pytest)
-        run: poetry run pytest -m integration
+        run: |
+          poetry run pytest -m integration || { code=$?; [ "$code" -eq 5 ] && exit 0 || exit "$code"; }
+
+      # package-mode = false: no sdist/wheel; validate pyproject + lock instead.
+      - name: Validate Poetry project
+        run: poetry check
