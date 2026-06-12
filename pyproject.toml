@@ -67,7 +67,7 @@ jupyter = "^1.0.0"
 notebook = "^7.0.0"
 ipython = "^8.0.0"
 pytest = ">=7,<10"
-black = ">=24.0.0,<25.0.0" # Pin to 24.x to avoid future breaking changes
+black = ">=24.0.0,<27.0.0" # Pin to 24.x to avoid future breaking changes
 mypy = "^1.0.0"
 ruff = ">=0.15.0,<0.16.0" # Update to latest stable 0.15.x
 # fakeredis: in-process Redis emulator used by StreamDataSource tests — lets the
