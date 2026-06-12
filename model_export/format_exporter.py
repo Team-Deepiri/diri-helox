@@ -55,8 +55,13 @@ class ModelFormatExporter:
             Path to exported ONNX file
         """
         try:
-            import onnx
-            import onnxruntime
+            import importlib.util
+
+            if (
+                importlib.util.find_spec("onnx") is None
+                or importlib.util.find_spec("onnxruntime") is None
+            ):
+                raise ImportError("onnx/onnxruntime")
         except ImportError:
             logger.error("ONNX not installed. Install with: pip install onnx onnxruntime")
             raise
@@ -143,7 +148,10 @@ class ModelFormatExporter:
             Path to exported TensorRT file
         """
         try:
-            import tensorrt as trt
+            import importlib.util
+
+            if importlib.util.find_spec("tensorrt") is None:
+                raise ImportError("tensorrt")
         except ImportError:
             logger.error("TensorRT not installed")
             raise

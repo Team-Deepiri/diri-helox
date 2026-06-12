@@ -4,9 +4,8 @@ Multi-GPU training with DeepSpeed ZeRO
 """
 
 import torch
-import torch.distributed as dist
 from deepspeed import init_distributed
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model
 import os
 from typing import Dict

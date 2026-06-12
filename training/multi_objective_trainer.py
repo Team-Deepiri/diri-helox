@@ -8,8 +8,7 @@ and complex training objectives beyond simple next-token prediction.
 import logging
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Optional, Callable
 
 logger = logging.getLogger(__name__)
 
