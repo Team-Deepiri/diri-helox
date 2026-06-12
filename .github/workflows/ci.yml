@@ -20,16 +20,11 @@ jobs:
 
       - name: Init submodules
         run: |
-          # Clone private Team-Deepiri submodules over HTTPS.
-          #
-          # NOTE: `GITHUB_TOKEN` typically cannot read *other* private repos, so we prefer a PAT
-          # like `DEEPIRI_CI_CLONE_PAT` (repo read) when available.
-          TOKEN="${{ secrets.DEEPIRI_CI_CLONE_PAT || secrets.GITHUB_TOKEN }}"
-
-          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "git@github.com:"
-          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "ssh://git@github.com/"
-          git config --global url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"
-
+          set -euo pipefail
+          # Rewrite SSH/HTTPS GitHub URLs to token-authenticated HTTPS (--add keeps all rules).
+          git config --global --add url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "git@github.com:"
+          git config --global --add url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "ssh://git@github.com/"
+          git config --global --add url."https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/".insteadOf "https://github.com/"
           git submodule sync --recursive
           git submodule update --init --recursive
 
@@ -44,8 +39,10 @@ jobs:
 
       - name: Configure Poetry
         run: |
+          set -euo pipefail
           poetry config virtualenvs.create true
           poetry config virtualenvs.in-project true
+          poetry config system-git-client true
 
       - name: Install dependencies
         run: |

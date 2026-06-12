@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "deepiri-helox-sdk"
+version = "0.1.0"
+description = "Lightweight installable helpers from diri-helox for other services (e.g. Mudspeed device policy)."
+authors = ["Deepiri Team"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "deepiri_helox_sdk" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.0.0"
+deepiri-gpu-utils = { git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"] }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
