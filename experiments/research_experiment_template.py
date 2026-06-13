@@ -5,9 +5,7 @@ For AI Research Scientists to test novel architectures and approaches
 
 import json
 from pathlib import Path
-from typing import Dict, List, Optional
-import torch
-import torch.nn as nn
+from typing import Dict
 from datetime import datetime
 
 

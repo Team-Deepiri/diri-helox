@@ -4,20 +4,16 @@ try:
 except ImportError:
     _confidence = None
 
-if _confidence is not None and hasattr(_confidence, "ConfidenceLevel"):
-    ConfidenceLevel = _confidence.ConfidenceLevel
-else:
-    ConfidenceLevel = None
+ConfidenceLevel = getattr(_confidence, "ConfidenceLevel", None)
+ConfidenceSource = getattr(_confidence, "ConfidenceSource", None)
+ConfidenceAttributes = getattr(_confidence, "ConfidenceAttributes", None)
+ConfidenceCalculator = getattr(_confidence, "ConfidenceCalculator", None)
+get_confidence_calculator = getattr(_confidence, "get_confidence_calculator", None)
 
-_OPTIONAL_EXPORTS = (
+__all__ = [
+    "ConfidenceLevel",
     "ConfidenceSource",
     "ConfidenceAttributes",
     "ConfidenceCalculator",
     "get_confidence_calculator",
-)
-
-for _name in _OPTIONAL_EXPORTS:
-    if _confidence is not None and hasattr(_confidence, _name):
-        globals()[_name] = getattr(_confidence, _name)
-
-__all__ = ["ConfidenceLevel"] + [name for name in _OPTIONAL_EXPORTS if name in globals()]
+]

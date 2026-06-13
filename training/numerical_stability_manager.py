@@ -7,8 +7,7 @@ for stable mixed precision training.
 
 import logging
 import torch
-import torch.nn as nn
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 logger = logging.getLogger(__name__)
 

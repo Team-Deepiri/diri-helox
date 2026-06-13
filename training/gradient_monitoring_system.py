@@ -8,7 +8,7 @@ and gradient explosion detection.
 import logging
 import torch
 import torch.nn as nn
-from typing import Optional, Dict, Any, List
+from typing import Dict, Any, List
 from collections import deque
 import numpy as np
 
