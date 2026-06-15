@@ -40,13 +40,11 @@ class DeviceManager:
 
     def __init__(self, force_device: Optional[str] = None) -> None:
         self.force_device = force_device
-        if force_device is not None:
-            self.device = detect_device(force=force_device)
-        elif resolve_torch_device is not None:
-            resolved = resolve_torch_device("auto")
-            self.device = torch.device(resolved.device)
+        if force_device is None and resolve_torch_device is not None:
+            decision = resolve_torch_device("auto")
+            self.device = torch.device(decision.device)
         else:
-            self.device = detect_device(force=None)
+            self.device = detect_device(force=force_device)
         self.device_info = get_gpu_info(self.device)
         logger.info("DeviceManager initialized: %s", self.device_info)
 
