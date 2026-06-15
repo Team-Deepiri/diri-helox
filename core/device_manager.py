@@ -22,6 +22,13 @@ from .gpu_utils import (
 
 logger = get_logger(__name__)
 
+# Backward-compatibility shim:
+# legacy tests and integrations patch `core.device_manager.resolve_torch_device`.
+try:
+    from deepiri_gpu_utils.torch_device import resolve_torch_device
+except ImportError:  # pragma: no cover - optional dependency
+    resolve_torch_device = None  # type: ignore[misc,assignment]
+
 
 class DeviceManager:
     """
