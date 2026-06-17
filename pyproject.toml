@@ -6,6 +6,7 @@ readme = "README.md"
 authors = ["Deepiri Team"]
 license = "MIT"
 package-mode = false
+
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"
 # Internal Deepiri deps pinned by git revision for deterministic builds.
@@ -50,7 +51,7 @@ redis = "^5.0.0"
 hiredis = "^2.2.0"
 
 # Embeddings for semantic deduplication
-sentence-transformers = "^2.2.0"
+sentence-transformers = ">=2.7.0,<3.0.0" # Pin to last stable 2.x to avoid potential conflicts with 3.x+
 
 # TUI / CLI display
 rich = "^13.0.0"
@@ -68,7 +69,7 @@ ipython = "^8.0.0"
 pytest = ">=7,<10"
 black = "^26.0.0"
 mypy = "^1.0.0"
-ruff = "^0.1.0"
+ruff = ">=0.15.0,<0.16.0" # Update to latest stable 0.15.x
 # fakeredis: in-process Redis emulator used by StreamDataSource tests — lets the
 # test suite inject a fake Redis client so tests run without a real Redis server.
 fakeredis = ">=2.20.0"
@@ -221,6 +222,7 @@ markers = [
 "pipelines/data_preprocessing/test_quality.py" = ["E402"]
 "test_versioning.py" = ["E402"]
 "tests/**/*.py" = ["E402"]
+"data_sources/synthetic_source.py" = ["E402"]
+"pipelines/training/dynamic_training_pipeline.py" = ["E402"]
 # Smoke script: imports exist only to verify the environment
 "tests/test_import.py" = ["F401"]
-
