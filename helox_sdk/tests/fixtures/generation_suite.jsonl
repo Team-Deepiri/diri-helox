@@ -1,0 +1,3 @@
+{"id": "gen-1", "prompt": "Classify intent:", "expected": "debugging", "type": "contains", "threshold": 0.5}
+{"id": "gen-2", "prompt": "Summarize:", "expected": "deployment complete", "type": "similarity", "threshold": 0.4}
+{"id": "gen-3", "prompt": "Return status:", "expected": "ok", "type": "exact_match", "threshold": 1.0}
