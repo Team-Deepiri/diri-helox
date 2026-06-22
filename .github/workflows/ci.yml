@@ -67,6 +67,12 @@ jobs:
       - name: Unit tests (pytest)
         run: poetry run pytest -m "not integration and not slow"
 
+      - name: Helox SDK tests (pytest)
+        run: |
+          cd helox_sdk
+          poetry install
+          poetry run pytest
+
       - name: Integration tests (pytest)
         run: |
           poetry run pytest -m integration || { code=$?; [ "$code" -eq 5 ] && exit 0 || exit "$code"; }
