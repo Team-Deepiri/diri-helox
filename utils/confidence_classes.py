@@ -7,8 +7,6 @@ try:
         get_confidence_calculator,
     )
 except ImportError:
-    ConfidenceAttributes = None
-    ConfidenceCalculator = None
     ConfidenceLevel = None
     ConfidenceSource = None
     ConfidenceAttributes = None
