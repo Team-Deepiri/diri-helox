@@ -258,7 +258,7 @@ class AutomaticEvaluationHarness:
                 }
 
             suite_summaries[suite_name]["count"] += 1
-            suite_summaries[suite_name]["scores"].append(eval_result["avg_score"])
+            suite_summaries[suite_name]["scores"].append(float(eval_result["avg_score"]))
 
         # Compute statistics
         for suite_name, summary in suite_summaries.items():
