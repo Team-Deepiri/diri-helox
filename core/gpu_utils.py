@@ -15,12 +15,13 @@ Usage:
 
 from __future__ import annotations
 
-import logging
 from typing import Optional
 
 import torch
 
-logger = logging.getLogger(__name__)
+from helox_logger import get_logger
+
+logger = get_logger(__name__)
 
 # ---------------------------------------------------------------------------
 # Core device detection — delegates to deepiri-gpu-utils
