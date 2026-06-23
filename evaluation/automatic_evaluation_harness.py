@@ -248,7 +248,7 @@ class AutomaticEvaluationHarness:
         if not self.evaluation_history:
             return {"total_evaluations": 0}
 
-        suite_summaries = {}
+        suite_summaries: Dict[str, Dict[str, Any]] = {}
         for eval_result in self.evaluation_history:
             suite_name = eval_result["suite_name"]
             if suite_name not in suite_summaries:
@@ -258,7 +258,7 @@ class AutomaticEvaluationHarness:
                 }
 
             suite_summaries[suite_name]["count"] += 1
-            suite_summaries[suite_name]["scores"].append(eval_result["avg_score"])
+            suite_summaries[suite_name]["scores"].append(float(eval_result["avg_score"]))
 
         # Compute statistics
         for suite_name, summary in suite_summaries.items():
