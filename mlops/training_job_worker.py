@@ -3,6 +3,7 @@ Training job worker — consumes Cyrex training-jobs Redis stream.
 
 LIVE priority jobs are processed before BATCH jobs.
 """
+
 from __future__ import annotations
 
 import os
