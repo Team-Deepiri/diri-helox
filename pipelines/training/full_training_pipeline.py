@@ -35,17 +35,12 @@ from typing import Dict, Optional
 import argparse
 from mlops.infrastructure.lora_training import LoRATrainer, QLoRATrainingPipeline
 from mlops.infrastructure.experiment_tracker import ExperimentTracker
-import logging
-
-def get_logger(name: str):
-    logger = logging.getLogger(name)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-    return logger
+from mlops.training_bridge import (
+    create_experiment_tracker,
+    prepare_training_dataset,
+    persist_manifest,
+)
+from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("helox.pipeline")
 
@@ -64,20 +59,23 @@ class FullTrainingPipeline:
         
     def setup_experiment_tracking(self):
         """Setup MLflow and W&B tracking."""
-        self.tracker = ExperimentTracker(
+        self.tracker = create_experiment_tracker(
             experiment_name=self.config.get("experiment_name", "deepiri_training"),
             tracking_uri=self.config.get("mlflow_uri", "file:./mlruns"),
-
             use_wandb=self.config.get("use_wandb", False),
-            wandb_project=self.config.get("wandb_project", "deepiri")
+            wandb_project=self.config.get("wandb_project", "deepiri"),
         )
         self.tracker.start_run()
-        #self.tracker.log_git_info()
         
     def load_and_prepare_data(self):
         """Load and prepare training dataset."""
         dataset_path = self.config["train_dataset_path"]
         logger.info(f"Loading dataset: {dataset_path}")
+        prep = prepare_training_dataset(dataset_path)
+        self._dataset_manifest = prep["manifest"]
+        manifest_dir = Path(self.config.get("output_dir", "./models")) / "manifests"
+        persist_manifest(prep["manifest"], manifest_dir)
+        logger.info("dataset_prepared", validation=prep["validation_report"])
         
         if dataset_path.endswith('.jsonl'):
             dataset = load_dataset('json', data_files=dataset_path, split='train')

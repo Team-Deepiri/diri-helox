@@ -51,6 +51,14 @@ from ..evaluation.inference_parity_tester import InferenceParityTester
 # Integrations
 from ..integrations.rag_aware_training_integration import RAGAwareTrainingIntegrator
 from ..integrations.synapse_event_publisher import SynapseEventPublisher
+from ..mlops.training_bridge import (
+    build_run_config,
+    create_orchestrator,
+    create_experiment_tracker,
+    make_run_context,
+    prepare_training_dataset,
+    publish_lifecycle,
+)
 
 # Model management
 from ..model_management.model_provenance_system import ModelProvenanceSystem
@@ -102,6 +110,11 @@ class UnifiedTrainingOrchestrator:
                 **training_config.to_dict(),
                 **data_config.to_dict(),
             }
+        )
+        self.run_context = make_run_context(
+            experiment_id="helox-unified-llm",
+            model_name="llm-training",
+            fingerprint=self.training_fingerprint,
         )
         
         # Initialize device manager
@@ -182,7 +195,14 @@ class UnifiedTrainingOrchestrator:
             max_context_length=training_config.max_sequence_length,
         ) if rag_pipeline else None
         
-        self.synapse_publisher = SynapseEventPublisher()
+        self.synapse_publisher = SynapseEventPublisher(
+            experiment_id=self.run_context.experiment_id,
+            correlation_id=self.training_fingerprint,
+        )
+        self.synapse_publisher.set_context(
+            model_name=self.run_context.model_name,
+            fingerprint=self.training_fingerprint,
+        )
         
         # Initialize model management
         self.provenance_system = ModelProvenanceSystem()
@@ -212,9 +232,15 @@ class UnifiedTrainingOrchestrator:
         """Initialize all async components."""
         logger.info("Initializing async components...")
         await self.synapse_publisher.connect()
+        publish_lifecycle(
+            self.run_context,
+            "started",
+            status="running",
+            metrics={"fingerprint": self.training_fingerprint},
+        )
         await self.synapse_publisher.publish_training_event(
             event_type="started",
-            model_name="llm-training",
+            model_name=self.run_context.model_name,
             step=0,
             metrics={"fingerprint": self.training_fingerprint},
         )
@@ -616,25 +642,48 @@ class UnifiedTrainingOrchestrator:
     ):
         """Main training loop — delegates loop/tracking to TrainingOrchestrator."""
         logger.info("Starting training via deepiri-training-orchestrator...")
-        from deepiri_training_orchestrator import ExperimentTracker, TrainingOrchestrator
 
-        tracker = ExperimentTracker(
+        dataset_provenance = None
+        train_path = self.data_config.processed_data_dir
+        if train_path and Path(train_path).exists():
+            try:
+                prep = prepare_training_dataset(train_path)
+                self.run_context.manifest = prep["manifest"]
+                dataset_provenance = prep["provenance"]
+            except Exception as exc:
+                logger.warning("dataset_prep_skipped: %s", exc)
+
+        tracker = create_experiment_tracker(
             experiment_name="helox-unified-llm",
             tracking_uri=os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns"),
+            use_wandb=self.training_config.use_wandb,
         )
 
-        orch = TrainingOrchestrator(
-            config={
+        run_config = build_run_config(
+            max_steps=self.training_config.total_steps,
+            seed=self.repro_controller.seed if hasattr(self.repro_controller, "seed") else 1337,
+            hyperparameters={
                 "model": self.model_config.to_dict(),
                 "training": self.training_config.to_dict(),
                 "data": self.data_config.to_dict(),
             },
+            correlation_id=self.training_fingerprint,
+            dataset_provenance=dataset_provenance,
+            use_wandb=self.training_config.use_wandb,
+        )
+
+        orch = create_orchestrator(
+            config=run_config.hyperparameters,
             reproducibility=self.repro_controller,
+            experiment_tracker=tracker,
             max_steps=self.training_config.total_steps,
             log_every=self.training_config.logging_steps,
             eval_every=self.training_config.eval_steps if val_loader else None,
-            experiment_tracker=tracker,
+            checkpoint_dir=str(self.training_config.checkpoint_dir),
             run_name=f"unified-{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            run_config=run_config,
+            dataset_provenance=dataset_provenance,
+            correlation_id=self.training_fingerprint,
         )
 
         def batch_iterator():
@@ -652,9 +701,10 @@ class UnifiedTrainingOrchestrator:
             if (self.global_step) % 1000 == 0:
                 await self.synapse_publisher.publish_training_event(
                     event_type="progress",
-                    model_name="llm-training",
+                    model_name=self.run_context.model_name,
                     step=self.global_step,
                     metrics=metrics,
+                    total_steps=self.training_config.total_steps,
                 )
             return metrics
 
@@ -682,9 +732,16 @@ class UnifiedTrainingOrchestrator:
         orch.fit(batch_iterator(), train_step=sync_train_step, eval_fn=eval_fn if val_loader else None)
 
         await self.save_checkpoint()
+        publish_lifecycle(
+            self.run_context,
+            "completed",
+            status="completed",
+            progress=1.0,
+            metrics=self.training_stats,
+        )
         await self.synapse_publisher.publish_training_event(
             event_type="completed",
-            model_name="llm-training",
+            model_name=self.run_context.model_name,
             step=self.global_step,
             metrics=self.training_stats,
         )

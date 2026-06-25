@@ -27,6 +27,12 @@ import argparse
 from ...utils.dataset_versioning import DatasetVersionManager, DatasetType
 from ...utils.dataset_validation import validate_dataset_quality
 from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
+from ...mlops.training_bridge import (
+    create_experiment_tracker,
+    persist_manifest,
+    prepare_training_dataset,
+)
+from deepiri_modelkit import validate_manifest_against_path
 from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("helox.versioned_pipeline")
@@ -56,13 +62,11 @@ class VersionedTrainingPipeline:
 
     def setup_experiment_tracking(self):
         """Setup experiment tracking with dataset version info."""
-        from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
-
-        self.tracker = ExperimentTracker(
+        self.tracker = create_experiment_tracker(
             experiment_name=self.config.get("experiment_name", "versioned_training"),
             tracking_uri=self.config.get("mlflow_uri", "http://localhost:5000"),
             use_wandb=self.config.get("use_wandb", False),
-            wandb_project=self.config.get("wandb_project", "deepiri")
+            wandb_project=self.config.get("wandb_project", "deepiri"),
         )
         self.tracker.start_run()
         self.tracker.log_git_info()
@@ -136,6 +140,16 @@ class VersionedTrainingPipeline:
         dataset_path = self.load_versioned_dataset()
 
         logger.info("Loading dataset from path", path=dataset_path)
+
+        try:
+            prep = prepare_training_dataset(dataset_path)
+            manifest_dir = Path(self.config.get("output_dir", "./models")) / "manifests"
+            persist_manifest(prep["manifest"], manifest_dir)
+            report = validate_manifest_against_path(prep["manifest"], str(dataset_path))
+            if not report.get("valid"):
+                logger.warning("manifest_validation_failed", report=report)
+        except Exception as exc:
+            logger.warning("dataset_manifest_prep_skipped", error=str(exc))
 
         # Load dataset
         if str(dataset_path).endswith('.jsonl'):
