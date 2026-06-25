@@ -14,19 +14,8 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from datasets import load_dataset
-import logging
 
-
-def get_logger(name: str):
-    logger = logging.getLogger(name)
-    if not logger.handlers:
-        handler = logging.StreamHandler()
-        formatter = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
-        handler.setFormatter(formatter)
-        logger.addHandler(handler)
-        logger.setLevel(logging.INFO)
-    return logger
-
+from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("lora.training")
 
@@ -184,7 +173,19 @@ class LoRATrainer:
             train_dataset=train_dataset,
         )
 
-        trainer.train()
+        from mlops.training_bridge import create_hf_orchestrator
+
+        orch, adapter = create_hf_orchestrator(
+            trainer,
+            max_steps=training_args.max_steps,
+            checkpoint_dir=output_dir,
+        )
+
+        def batch_iterator():
+            for batch in trainer.get_train_dataloader():
+                yield batch
+
+        orch.fit(batch_iterator(), train_step=adapter.train_step)
 
         self.model.save_pretrained(output_dir)
         self.tokenizer.save_pretrained(output_dir)

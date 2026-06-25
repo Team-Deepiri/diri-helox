@@ -6,14 +6,11 @@ import pytest
 
 from deepiri_helox_sdk.evaluation.samples import EvaluationSample, load_jsonl_suite
 
-
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
 def test_from_dict_classifier_fields():
-    sample = EvaluationSample.from_dict(
-        {"text": "hello", "label": 2, "label_name": "writing_code"}
-    )
+    sample = EvaluationSample.from_dict({"text": "hello", "label": 2, "label_name": "writing_code"})
     assert sample.text == "hello"
     assert sample.label == 2
     assert sample.label_name == "writing_code"

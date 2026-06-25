@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import statistics
 import time
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List
 
 
 class InferenceBenchmark:
