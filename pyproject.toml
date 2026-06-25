@@ -10,14 +10,15 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-deepiri-dataset-processor = {path = "./deepiri-dataset-processor", extras = ["all"], develop = true}
+deepiri-training-orchestrator = { git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", branch = "feat/v0.2.0-core", extras = ["modelkit", "wandb"] }
+deepiri-modelkit = { git = "https://github.com/Team-Deepiri/deepiri-modelkit.git", branch = "feat/training-contracts-v0.2" }
 
 # ML Training Dependencies
 torch = "^2.0.0"
 transformers = "^4.35.0"
 accelerate = "^0.24.0"
 datasets = "^2.14.0"
-mlflow = "^2.8.0"
+mlflow = ">=3.11.1,<4.0"
 optuna = "^3.4.0"
 wandb = "^0.15.0"
 

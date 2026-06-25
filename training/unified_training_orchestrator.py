@@ -7,6 +7,7 @@ This is the main entry point for production training.
 
 import logging
 import asyncio
+import os
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 import torch
@@ -613,104 +614,81 @@ class UnifiedTrainingOrchestrator:
         train_loader: DataLoader,
         val_loader: Optional[DataLoader] = None,
     ):
-        """Main training loop with all features integrated."""
-        logger.info("Starting training...")
-        
-        from tqdm import tqdm
-        
-        progress_bar = tqdm(
-            total=self.training_config.total_steps,
-            desc="Training",
-            initial=self.global_step,
+        """Main training loop — delegates loop/tracking to TrainingOrchestrator."""
+        logger.info("Starting training via deepiri-training-orchestrator...")
+        from deepiri_training_orchestrator import ExperimentTracker, TrainingOrchestrator
+
+        tracker = ExperimentTracker(
+            experiment_name="helox-unified-llm",
+            tracking_uri=os.getenv("MLFLOW_TRACKING_URI", "file:./mlruns"),
         )
-        
-        accumulated_loss = 0.0
-        
-        while self.global_step < self.training_config.total_steps:
-            for batch in train_loader:
-                if self.global_step >= self.training_config.total_steps:
-                    break
-                
-                # Training step
-                step_metrics = await self.training_step(batch)
-                accumulated_loss += step_metrics["loss"]
-                
-                # Update curriculum
-                current_seq_len = self.curriculum.get_current_sequence_length(self.global_step)
-                
-                # Update batch size
-                if self.global_step % 100 == 0:
-                    memory_usage = torch.cuda.memory_allocated() / torch.cuda.max_memory_allocated() if torch.cuda.is_available() else 0.0
-                    grad_norm = step_metrics.get("grad_norm", 0.0)
-                    new_batch_size = self.batch_scheduler.update_batch_size(
-                        grad_norm,
-                        memory_usage,
-                        self.global_step,
-                    )
-                    if new_batch_size != train_loader.batch_size:
-                        logger.info(f"Updated batch size to {new_batch_size}")
-                
-                # Logging
-                if (self.global_step + 1) % self.training_config.logging_steps == 0:
-                    avg_loss = accumulated_loss / self.training_config.logging_steps
-                    logger.info(
-                        f"Step {self.global_step}: loss={avg_loss:.4f}, "
-                        f"seq_len={current_seq_len}, samples={self.training_stats['total_samples']}"
-                    )
-                    accumulated_loss = 0.0
-                
-                # Evaluation
-                if val_loader and (self.global_step + 1) % self.training_config.eval_steps == 0:
-                    eval_metrics = await self.evaluate(val_loader)
-                    self.training_stats["evaluations_run"] += 1
-                    
-                    # Run parity tests
-                    sample_batch = next(iter(val_loader))
-                    sample_input = sample_batch["input_ids"][:1].to(self.device)
-                    parity_results = self.parity_tester.run_full_parity_suite(
-                        self.model,
-                        sample_input,
-                    )
-                    
-                    if not parity_results.get("all_tests_passed", False):
-                        logger.warning("Parity tests failed - check inference consistency")
-                
-                # Checkpointing
-                if (self.global_step + 1) % self.training_config.save_steps == 0:
-                    await self.save_checkpoint()
-                
-                # Publish progress event
-                if (self.global_step + 1) % 1000 == 0:
-                    await self.synapse_publisher.publish_training_event(
-                        event_type="progress",
-                        model_name="llm-training",
-                        step=self.global_step,
-                        metrics=step_metrics,
-                    )
-                
-                self.global_step += 1
-                progress_bar.update(1)
-                progress_bar.set_postfix({
-                    "loss": f"{step_metrics['loss']:.4f}",
-                    "step": self.global_step,
-                })
-        
-        progress_bar.close()
-        
-        # Final checkpoint
+
+        orch = TrainingOrchestrator(
+            config={
+                "model": self.model_config.to_dict(),
+                "training": self.training_config.to_dict(),
+                "data": self.data_config.to_dict(),
+            },
+            reproducibility=self.repro_controller,
+            max_steps=self.training_config.total_steps,
+            log_every=self.training_config.logging_steps,
+            eval_every=self.training_config.eval_steps if val_loader else None,
+            experiment_tracker=tracker,
+            run_name=f"unified-{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+        )
+
+        def batch_iterator():
+            while self.global_step < self.training_config.total_steps:
+                for batch in train_loader:
+                    if self.global_step >= self.training_config.total_steps:
+                        return
+                    yield batch
+
+        async def run_step(batch):
+            metrics = await self.training_step(batch)
+            self.global_step += 1
+            if (self.global_step) % self.training_config.save_steps == 0:
+                await self.save_checkpoint()
+            if (self.global_step) % 1000 == 0:
+                await self.synapse_publisher.publish_training_event(
+                    event_type="progress",
+                    model_name="llm-training",
+                    step=self.global_step,
+                    metrics=metrics,
+                )
+            return metrics
+
+        def sync_train_step(step: int, batch) -> Dict[str, float]:
+            import asyncio
+            loop = asyncio.new_event_loop()
+            try:
+                result = loop.run_until_complete(run_step(batch))
+                return {k: float(v) for k, v in result.items() if isinstance(v, (int, float))}
+            finally:
+                loop.close()
+
+        def eval_fn() -> Dict[str, float]:
+            if val_loader is None:
+                return {}
+            import asyncio
+            loop = asyncio.new_event_loop()
+            try:
+                metrics = loop.run_until_complete(self.evaluate(val_loader))
+                self.training_stats["evaluations_run"] += 1
+                return {k: float(v) for k, v in metrics.items() if isinstance(v, (int, float))}
+            finally:
+                loop.close()
+
+        orch.fit(batch_iterator(), train_step=sync_train_step, eval_fn=eval_fn if val_loader else None)
+
         await self.save_checkpoint()
-        
-        # Publish completion event
         await self.synapse_publisher.publish_training_event(
             event_type="completed",
             model_name="llm-training",
             step=self.global_step,
             metrics=self.training_stats,
         )
-        
-        # Export model
         await self.export_model()
-        
         logger.info("Training complete!")
     
     async def export_model(self):
