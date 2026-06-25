@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diri-helox"
-version = "0.1.0"
+version = "0.1.1"
 description = "ML training pipelines, model development, and research for Deepiri platform"
 readme = "README.md"
 authors = ["Deepiri Team"]
@@ -11,7 +11,7 @@ package-mode = false
 python = ">=3.11,<3.14"
 # Internal Deepiri deps pinned by git revision for deterministic builds.
 # NOTE: These repos are private Team-Deepiri repositories.
-deepiri-dataset-processor = {git = "https://github.com/Team-Deepiri/deepiri-dataset-processor.git", rev = "f564b41fc1e475be7fcd792703149daeb84056b7", extras = ["all"]}
+deepiri-dataset-processor = {git = "https://github.com/Team-Deepiri/deepiri-dataset-processor.git", rev = "6304e4ce49a8744c73f09c19869c50b103d17d6f", extras = ["all"]}
 deepiri-training-orchestrator = {git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", rev = "59d94bf3139ded5b307f0346776b3b1568be072f"}
 # deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
 # Deepiri services. Replaces deepiri-modelkit device utils in helox.
