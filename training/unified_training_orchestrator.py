@@ -5,11 +5,13 @@ Integrates all 38 features into a seamless training pipeline.
 This is the main entry point for production training.
 """
 
-import logging
+from helox_logger import get_logger
+import asyncio
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import torch
 from torch.utils.data import DataLoader
+import json
 from datetime import datetime
 
 # Core components
@@ -37,6 +39,7 @@ from ..training.curriculum_learning_scheduler import (
 )
 from ..training.failure_resilience_manager import FailureResilienceManager
 from ..training.precision_aware_layer_control import PrecisionAwareLayerControl
+from ..training.multi_objective_trainer import MultiObjectiveLoss
 from ..training.instruction_formatting_abstraction import InstructionFormatter
 
 # Observability
@@ -59,7 +62,7 @@ from ..model_export.format_exporter import ModelFormatExporter
 from ..models.transformer_lm import TransformerLanguageModel, create_model_from_config
 from ..tokenization.tokenizer_manager import TokenizerManager
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class UnifiedTrainingOrchestrator:
@@ -570,8 +573,6 @@ class UnifiedTrainingOrchestrator:
         # Save dynamic scaler state
         if self.dynamic_scaler:
             dynamic_scaler_path = checkpoint_dir / "dynamic_scaler.json"
-            import json
-
             with open(dynamic_scaler_path, "w") as f:
                 json.dump(self.dynamic_scaler.get_state(), f, indent=2)
 

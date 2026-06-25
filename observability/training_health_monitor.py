@@ -5,13 +5,13 @@ Detects early divergence, stagnation, dead heads/neurons, and other
 training anomalies to save weeks of wasted compute.
 """
 
-import logging
+from helox_logger import get_logger
 import numpy as np
 from typing import Dict, Any, List, Callable
 from collections import deque
 import torch
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TrainingHealthMonitor:

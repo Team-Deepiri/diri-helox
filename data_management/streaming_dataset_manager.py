@@ -5,7 +5,7 @@ Provides IterableDataset support, shard-aware sampling, and
 resume mid-epoch capabilities for multi-TB corpora.
 """
 
-import logging
+from helox_logger import get_logger
 from pathlib import Path
 from typing import Iterator, Optional, List, Dict, Any
 import json
@@ -13,7 +13,7 @@ import torch
 from torch.utils.data import IterableDataset, DataLoader
 import random
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class StreamingTextDataset(IterableDataset):
@@ -235,8 +235,6 @@ class ShardedDatasetManager:
             "position": position,
         }
 
-        import json
-
         with open(state_file, "w") as f:
             json.dump(state, f, indent=2)
 
@@ -250,8 +248,6 @@ class ShardedDatasetManager:
 
         if not state_file.exists():
             return None
-
-        import json
 
         with open(state_file, "r") as f:
             state = json.load(f)

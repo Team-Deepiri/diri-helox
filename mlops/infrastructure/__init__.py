@@ -20,4 +20,7 @@ __all__ = [
     "ExperimentTracker",
     "DatasetVersioning",
     "ModelRegistry",
+    "LayeredModelAdapter",
+    "LayerConfig",
+    "LayerType",
 ]

@@ -5,13 +5,13 @@ Converts cleaned text into tokenized, ready-to-train datasets.
 """
 
 import json
-import logging
+from helox_logger import get_logger
 from pathlib import Path
 from typing import List, Optional
 from datasets import Dataset, DatasetDict
 import sentencepiece as spm
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class DatasetBuilder:

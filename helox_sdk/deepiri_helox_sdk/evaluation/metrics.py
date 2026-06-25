@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Optional, Sequence
 
 import numpy as np
 
@@ -87,9 +87,7 @@ def classification_metrics(
     conf_arr = np.array(y_conf or [0.0] * len(y_true), dtype=float)
     correct_mask = np.array(y_true) == np.array(y_pred)
     avg_conf_correct = float(np.mean(conf_arr[correct_mask])) if correct_mask.any() else 0.0
-    avg_conf_incorrect = (
-        float(np.mean(conf_arr[~correct_mask])) if (~correct_mask).any() else 0.0
-    )
+    avg_conf_incorrect = float(np.mean(conf_arr[~correct_mask])) if (~correct_mask).any() else 0.0
 
     per_class = {
         CATEGORIES.get(i, f"category_{i}"): {

@@ -5,11 +5,11 @@ Provides pluggable prompt formats, role-based message handling,
 and format abstraction for fine-tuning once, deploying many personas.
 """
 
-import logging
+from helox_logger import get_logger
 from typing import Dict, List, Optional
 from enum import Enum
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class MessageRole(Enum):
