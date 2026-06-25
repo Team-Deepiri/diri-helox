@@ -2,6 +2,7 @@
 Versioned Training Pipeline
 Training pipeline that uses dataset versioning for reproducible training
 """
+
 import torch
 from transformers import (
     AutoModelForCausalLM,
@@ -250,9 +251,9 @@ class VersionedTrainingPipeline:
                     "lora_rank": lora_config.r,
                     "lora_alpha": lora_config.lora_alpha,
                     "use_qlora": use_qlora,
-                    "dataset_version": self.dataset_version.version
-                    if self.dataset_version
-                    else None,
+                    "dataset_version": (
+                        self.dataset_version.version if self.dataset_version else None
+                    ),
                 }
             )
 
@@ -324,9 +325,9 @@ class VersionedTrainingPipeline:
         training_metadata = {
             "dataset_name": self.dataset_version.dataset_name if self.dataset_version else None,
             "dataset_version": self.dataset_version.version if self.dataset_version else None,
-            "dataset_checksum": self.dataset_version.data_checksum
-            if self.dataset_version
-            else None,
+            "dataset_checksum": (
+                self.dataset_version.data_checksum if self.dataset_version else None
+            ),
             "total_samples": self.dataset_version.total_samples if self.dataset_version else None,
             "training_config": self.config,
             "output_dir": output_dir,

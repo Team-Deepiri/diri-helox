@@ -2,6 +2,7 @@
 Complete Training Pipeline
 Production-ready training with LoRA, QLoRA, distributed training, and experiment tracking
 """
+
 import torch
 import torch.distributed as dist
 from transformers import (
@@ -204,9 +205,9 @@ class FullTrainingPipeline:
             save_total_limit=3,
             load_best_model_at_end=True,
             report_to=["mlflow", "wandb"] if self.config.get("use_wandb") else ["mlflow"],
-            deepspeed=self.config.get("deepspeed_config")
-            if self.config.get("use_deepspeed")
-            else None,
+            deepspeed=(
+                self.config.get("deepspeed_config") if self.config.get("use_deepspeed") else None
+            ),
             warmup_steps=self.config.get("warmup_steps", 100),
             weight_decay=self.config.get("weight_decay", 0.01),
             lr_scheduler_type="cosine",
