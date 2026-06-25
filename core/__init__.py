@@ -10,4 +10,3 @@ __all__ = [
     "ModelConfig",
     "DataConfig",
 ]
-

@@ -10,7 +10,7 @@ from deepiri_modelkit.training.pipeline_factory import create_run_context
 
 class ModelRegistrar:
     """Registers models to registry and publishes events"""
-    
+
     def __init__(self):
         """Initialize model registrar"""
         self.registry = ModelRegistryClient(
@@ -19,25 +19,21 @@ class ModelRegistrar:
             s3_endpoint=os.getenv("S3_ENDPOINT_URL", "http://minio:9000"),
             s3_access_key=os.getenv("MINIO_ACCESS_KEY", "minioadmin"),
             s3_secret_key=os.getenv("MINIO_SECRET_KEY", "minioadmin"),
-            s3_bucket=os.getenv("S3_BUCKET", "mlflow-artifacts")
+            s3_bucket=os.getenv("S3_BUCKET", "mlflow-artifacts"),
         )
-    
+
     async def register_and_publish(
-        self,
-        model_name: str,
-        version: str,
-        model_path: str,
-        metadata: Dict[str, Any]
+        self, model_name: str, version: str, model_path: str, metadata: Dict[str, Any]
     ) -> bool:
         """
         Register model to registry and publish model-ready event
-        
+
         Args:
             model_name: Model name
             version: Model version
             model_path: Path to model file/directory
             metadata: Model metadata
-        
+
         Returns:
             True if successful
         """
@@ -66,4 +62,3 @@ class ModelRegistrar:
             size_mb=metadata.get("size_mb"),
             redis_url=os.getenv("REDIS_URL"),
         )
-

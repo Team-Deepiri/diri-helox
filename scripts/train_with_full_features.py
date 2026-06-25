@@ -32,11 +32,11 @@ logger = logging.getLogger(__name__)
 def load_configs(config_dir: Path):
     """Load all configuration files."""
     config_dir = Path(config_dir)
-    
+
     model_config = ModelConfig.from_file(config_dir / "model_config.json")
     data_config = DataConfig.from_file(config_dir / "data_config.json")
     training_config = TrainingConfig.from_file(config_dir / "training_config.json")
-    
+
     return model_config, data_config, training_config
 
 
@@ -45,7 +45,7 @@ def initialize_cyrex_rag() -> RAGPipeline:
     if not CYREX_AVAILABLE:
         logger.warning("Cyrex RAG not available - RAG-aware training disabled")
         return None
-    
+
     try:
         rag_pipeline = initialize_rag_system()
         logger.info("Cyrex RAG pipeline initialized")
@@ -98,17 +98,17 @@ async def main():
         default=None,
         help="Resume from checkpoint",
     )
-    
+
     args = parser.parse_args()
-    
+
     # Load configurations
     logger.info("Loading configurations...")
     model_config, data_config, training_config = load_configs(args.config_dir)
-    
+
     # Override resume checkpoint if provided
     if args.resume_from:
         training_config.resume_from_checkpoint = args.resume_from
-    
+
     # Initialize RAG bridge if requested
     rag_pipeline = None
     if args.enable_rag:
@@ -119,7 +119,7 @@ async def main():
             logger.info("RAG-aware training enabled")
         else:
             logger.warning("RAG requested but not available - continuing without RAG")
-    
+
     # Create orchestrator
     logger.info("Initializing unified training orchestrator...")
     orchestrator = UnifiedTrainingOrchestrator(
@@ -129,21 +129,21 @@ async def main():
         rag_pipeline=rag_pipeline,
         seed=args.seed,
     )
-    
+
     # Initialize async components
     await orchestrator.initialize()
-    
+
     # Load tokenizer
     logger.info(f"Loading tokenizer from {args.tokenizer}")
     orchestrator.tokenizer_manager = TokenizerManager(args.tokenizer)
-    
+
     # Create model
     logger.info("Creating model...")
     orchestrator.create_model()
-    
+
     # Create optimizer and scheduler
     orchestrator.create_optimizer_and_scheduler()
-    
+
     # Resume from checkpoint if provided
     if args.resume_from and args.resume_from.exists():
         logger.info(f"Resuming from checkpoint: {args.resume_from}")
@@ -155,18 +155,18 @@ async def main():
                 orchestrator.scheduler.load_state_dict(recovery_state["scheduler_state"])
             orchestrator.global_step = recovery_state.get("step", 0)
             logger.info(f"Resumed from step {orchestrator.global_step}")
-    
+
     # Create data loaders
     logger.info("Creating data loaders...")
     train_loader, val_loader = orchestrator.create_data_loaders(
         train_dataset_path=args.train_data,
         val_dataset_path=args.val_data,
     )
-    
+
     # Run data safety checks
     logger.info("Running data safety checks...")
     # (Would load sample data for leakage detection)
-    
+
     # Start training
     logger.info("Starting training with all features enabled...")
     try:
@@ -182,10 +182,9 @@ async def main():
         raise
     finally:
         await orchestrator.cleanup()
-    
+
     logger.info("Training complete!")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
-

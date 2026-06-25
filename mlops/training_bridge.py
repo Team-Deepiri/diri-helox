@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterator, List, Optional
+from typing import Any, Dict, List, Optional
 
 from deepiri_modelkit import (
     TrainingRunContext,
@@ -29,12 +29,9 @@ from deepiri_training_orchestrator import (
     TorchCheckpointCallback,
     TrainingOrchestrator,
     TrainingRunConfig,
-    build_dataset_manifest,
     init_distributed,
     prepare_training_run,
-    provenance_from_manifest,
 )
-from deepiri_modelkit.training.job_queue import TrainingJobQueue
 from deepiri_modelkit.contracts.training import TrainingPriority, TrainingRunRequest
 
 logger = get_logger("helox.training_bridge")
@@ -288,4 +285,3 @@ def consume_training_job(payload: Dict[str, Any]) -> Dict[str, Any]:
         ),
         "hyperparameters": request.hyperparameters or {},
     }
-

@@ -9,14 +9,9 @@ from transformers import (
     TrainingArguments,
     Trainer,
     DataCollatorForLanguageModeling,
-    BitsAndBytesConfig
+    BitsAndBytesConfig,
 )
-from peft import (
-    LoraConfig,
-    get_peft_model,
-    prepare_model_for_kbit_training,
-    TaskType
-)
+from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, TaskType
 from datasets import load_dataset, Dataset
 import json
 from pathlib import Path
@@ -53,7 +48,7 @@ class VersionedTrainingPipeline:
         self.config = config
         self.version_manager = DatasetVersionManager(
             db_url=config.get("version_db_url", "sqlite:///dataset_versions.db"),
-            storage_backend=config.get("storage_backend", "local")
+            storage_backend=config.get("storage_backend", "local"),
         )
         self.tracker = None
         self.model = None
@@ -73,13 +68,15 @@ class VersionedTrainingPipeline:
 
         # Log dataset version info
         if self.dataset_version:
-            self.tracker.log_params({
-                "dataset_name": self.dataset_version.dataset_name,
-                "dataset_version": self.dataset_version.version,
-                "dataset_checksum": self.dataset_version.data_checksum,
-                "total_samples": self.dataset_version.total_samples,
-                "dataset_type": self.dataset_version.dataset_type.value
-            })
+            self.tracker.log_params(
+                {
+                    "dataset_name": self.dataset_version.dataset_name,
+                    "dataset_version": self.dataset_version.version,
+                    "dataset_checksum": self.dataset_version.data_checksum,
+                    "total_samples": self.dataset_version.total_samples,
+                    "dataset_type": self.dataset_version.dataset_type.value,
+                }
+            )
 
     def load_versioned_dataset(self):
         """
@@ -114,10 +111,12 @@ class VersionedTrainingPipeline:
 
             # Use versioned dataset path
             dataset_path = self.dataset_version.storage_path
-            logger.info("Using versioned dataset",
-                       name=self.dataset_version.dataset_name,
-                       version=self.dataset_version.version,
-                       path=dataset_path)
+            logger.info(
+                "Using versioned dataset",
+                name=self.dataset_version.dataset_name,
+                version=self.dataset_version.version,
+                path=dataset_path,
+            )
 
         else:
             # Regular path - optionally create version for tracking
@@ -129,7 +128,7 @@ class VersionedTrainingPipeline:
                     dataset_type=dataset_type,
                     data_path=Path(dataset_path),
                     change_summary=f"Auto-versioned for training run",
-                    tags=["auto_versioned", "training"]
+                    tags=["auto_versioned", "training"],
                 )
                 dataset_path = self.dataset_version.storage_path
 
@@ -152,44 +151,48 @@ class VersionedTrainingPipeline:
             logger.warning("dataset_manifest_prep_skipped", error=str(exc))
 
         # Load dataset
-        if str(dataset_path).endswith('.jsonl'):
-            dataset = load_dataset('json', data_files=str(dataset_path), split='train')
+        if str(dataset_path).endswith(".jsonl"):
+            dataset = load_dataset("json", data_files=str(dataset_path), split="train")
         else:
             # Handle directory with multiple files
             jsonl_files = list(Path(dataset_path).glob("*.jsonl"))
             if jsonl_files:
-                dataset = load_dataset('json', data_files=[str(f) for f in jsonl_files], split='train')
+                dataset = load_dataset(
+                    "json", data_files=[str(f) for f in jsonl_files], split="train"
+                )
             else:
                 raise ValueError(f"No .jsonl files found in {dataset_path}")
 
         def tokenize_function(examples):
-            texts = examples.get('text', examples.get('input', []))
+            texts = examples.get("text", examples.get("input", []))
             return self.tokenizer(
                 texts,
                 truncation=True,
                 padding="max_length",
                 max_length=self.config.get("max_length", 512),
-                return_tensors="pt"
+                return_tensors="pt",
             )
 
         tokenized = dataset.map(
-            tokenize_function,
-            batched=True,
-            remove_columns=dataset.column_names
+            tokenize_function, batched=True, remove_columns=dataset.column_names
         )
 
         # Create validation split
         if "validation_dataset_spec" in self.config:
             val_dataset_path = self.config["validation_dataset_spec"]
-            if val_dataset_path.endswith('.jsonl'):
-                val_dataset = load_dataset('json', data_files=val_dataset_path, split='train')
+            if val_dataset_path.endswith(".jsonl"):
+                val_dataset = load_dataset("json", data_files=val_dataset_path, split="train")
             else:
                 val_jsonl_files = list(Path(val_dataset_path).glob("*.jsonl"))
-                val_dataset = load_dataset('json', data_files=[str(f) for f in val_jsonl_files], split='train')
+                val_dataset = load_dataset(
+                    "json", data_files=[str(f) for f in val_jsonl_files], split="train"
+                )
 
-            val_tokenized = val_dataset.map(tokenize_function, batched=True, remove_columns=val_dataset.column_names)
+            val_tokenized = val_dataset.map(
+                tokenize_function, batched=True, remove_columns=val_dataset.column_names
+            )
         else:
-            val_tokenized = tokenized.train_test_split(test_size=0.1)['test']
+            val_tokenized = tokenized.train_test_split(test_size=0.1)["test"]
 
         return tokenized, val_tokenized
 
@@ -205,7 +208,7 @@ class VersionedTrainingPipeline:
                 load_in_4bit=True,
                 bnb_4bit_quant_type="nf4",
                 bnb_4bit_compute_dtype=torch.bfloat16,
-                bnb_4bit_use_double_quant=True
+                bnb_4bit_use_double_quant=True,
             )
 
             self.model = AutoModelForCausalLM.from_pretrained(
@@ -213,15 +216,13 @@ class VersionedTrainingPipeline:
                 quantization_config=bnb_config,
                 device_map="auto",
                 trust_remote_code=True,
-                torch_dtype=torch.bfloat16
+                torch_dtype=torch.bfloat16,
             )
 
             self.model = prepare_model_for_kbit_training(self.model)
         else:
             self.model = AutoModelForCausalLM.from_pretrained(
-                model_name,
-                torch_dtype=torch.bfloat16,
-                device_map="auto"
+                model_name, torch_dtype=torch.bfloat16, device_map="auto"
             )
 
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -231,23 +232,29 @@ class VersionedTrainingPipeline:
         lora_config = LoraConfig(
             r=self.config.get("lora_rank", 16),
             lora_alpha=self.config.get("lora_alpha", 32),
-            target_modules=self.config.get("target_modules", ["q_proj", "v_proj", "k_proj", "o_proj"]),
+            target_modules=self.config.get(
+                "target_modules", ["q_proj", "v_proj", "k_proj", "o_proj"]
+            ),
             lora_dropout=self.config.get("lora_dropout", 0.05),
             bias="none",
-            task_type=TaskType.CAUSAL_LM
+            task_type=TaskType.CAUSAL_LM,
         )
 
         self.model = get_peft_model(self.model, lora_config)
         self.model.print_trainable_parameters()
 
         if self.tracker:
-            self.tracker.log_params({
-                "model": model_name,
-                "lora_rank": lora_config.r,
-                "lora_alpha": lora_config.lora_alpha,
-                "use_qlora": use_qlora,
-                "dataset_version": self.dataset_version.version if self.dataset_version else None
-            })
+            self.tracker.log_params(
+                {
+                    "model": model_name,
+                    "lora_rank": lora_config.r,
+                    "lora_alpha": lora_config.lora_alpha,
+                    "use_qlora": use_qlora,
+                    "dataset_version": self.dataset_version.version
+                    if self.dataset_version
+                    else None,
+                }
+            )
 
     def train(self, train_dataset, val_dataset):
         """Train the model with versioned dataset tracking."""
@@ -276,25 +283,24 @@ class VersionedTrainingPipeline:
             report_to=["mlflow", "wandb"] if self.config.get("use_wandb") else ["mlflow"],
             warmup_steps=self.config.get("warmup_steps", 100),
             weight_decay=self.config.get("weight_decay", 0.01),
-            lr_scheduler_type="cosine"
+            lr_scheduler_type="cosine",
         )
 
-        data_collator = DataCollatorForLanguageModeling(
-            tokenizer=self.tokenizer,
-            mlm=False
-        )
+        data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm=False)
 
         trainer = Trainer(
             model=self.model,
             args=training_args,
             train_dataset=train_dataset,
             eval_dataset=val_dataset,
-            data_collator=data_collator
+            data_collator=data_collator,
         )
 
-        logger.info("Starting versioned training",
-                   dataset=self.dataset_version.dataset_name if self.dataset_version else "unknown",
-                   version=self.dataset_version.version if self.dataset_version else "unknown")
+        logger.info(
+            "Starting versioned training",
+            dataset=self.dataset_version.dataset_name if self.dataset_version else "unknown",
+            version=self.dataset_version.version if self.dataset_version else "unknown",
+        )
 
         from mlops.training_bridge import create_hf_orchestrator
 
@@ -318,14 +324,16 @@ class VersionedTrainingPipeline:
         training_metadata = {
             "dataset_name": self.dataset_version.dataset_name if self.dataset_version else None,
             "dataset_version": self.dataset_version.version if self.dataset_version else None,
-            "dataset_checksum": self.dataset_version.data_checksum if self.dataset_version else None,
+            "dataset_checksum": self.dataset_version.data_checksum
+            if self.dataset_version
+            else None,
             "total_samples": self.dataset_version.total_samples if self.dataset_version else None,
             "training_config": self.config,
-            "output_dir": output_dir
+            "output_dir": output_dir,
         }
 
         metadata_path = Path(output_dir) / "training_metadata.json"
-        with open(metadata_path, 'w') as f:
+        with open(metadata_path, "w") as f:
             json.dump(training_metadata, f, indent=2, default=str)
 
         if self.tracker:
@@ -337,9 +345,11 @@ class VersionedTrainingPipeline:
             if self.dataset_version:
                 self.tracker.log_artifact(str(metadata_path))
 
-        logger.info("Versioned training complete",
-                   output_dir=output_dir,
-                   dataset_version=self.dataset_version.version if self.dataset_version else "unknown")
+        logger.info(
+            "Versioned training complete",
+            output_dir=output_dir,
+            dataset_version=self.dataset_version.version if self.dataset_version else "unknown",
+        )
 
         return output_dir, training_metadata
 
@@ -361,7 +371,7 @@ def main():
     parser.add_argument("--config", type=str, required=True, help="Config JSON file")
     args = parser.parse_args()
 
-    with open(args.config, 'r') as f:
+    with open(args.config, "r") as f:
         config = json.load(f)
 
     pipeline = VersionedTrainingPipeline(config)

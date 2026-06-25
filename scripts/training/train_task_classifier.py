@@ -10,10 +10,11 @@ from pathlib import Path
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
+
 def train_task_classifier():
     """
     Train a model to classify and understand user tasks.
-    
+
     This script should be implemented by AI Research Scientists to:
     1. Load training data from train/data/
     2. Fine-tune a transformer model (e.g., BERT, RoBERTa)
@@ -37,6 +38,6 @@ def train_task_classifier():
     print("- ML Engineers: Fine-tune and optimize models")
     return
 
+
 if __name__ == "__main__":
     train_task_classifier()
-

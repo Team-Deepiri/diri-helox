@@ -5,7 +5,6 @@ LIVE priority jobs are processed before BATCH jobs.
 """
 from __future__ import annotations
 
-import json
 import os
 import time
 from typing import Any, Dict, List, Optional, Tuple

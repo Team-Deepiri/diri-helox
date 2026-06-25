@@ -87,7 +87,7 @@ def run_demo(force_mock: bool = False) -> None:
         training_coverage=0.8,
         feature_quality=0.9,
         context_match=0.7,
-        historical_accuracy={1: 0.85}
+        historical_accuracy={1: 0.85},
     )
 
     print("Confidence attributes:")
