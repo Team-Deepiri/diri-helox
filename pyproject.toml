@@ -10,7 +10,7 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-deepiri-training-orchestrator = { git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", branch = "feat/v0.2.0-core", extras = ["modelkit", "wandb"] }
+deepiri-training-orchestrator = { git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", branch = "feat/v0.4.0-dataset-first", extras = ["modelkit", "wandb", "distributed"] }
 deepiri-modelkit = { git = "https://github.com/Team-Deepiri/deepiri-modelkit.git", branch = "feat/training-contracts-v0.2" }
 
 # ML Training Dependencies

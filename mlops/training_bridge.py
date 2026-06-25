@@ -23,6 +23,7 @@ from deepiri_modelkit import (
 from deepiri_training_orchestrator import (
     DistributedConfig,
     ExperimentTracker,
+    HFTrainingAdapter,
     LoggingCallback,
     ReproducibilityController,
     TorchCheckpointCallback,
@@ -30,9 +31,11 @@ from deepiri_training_orchestrator import (
     TrainingRunConfig,
     build_dataset_manifest,
     init_distributed,
-    prepare_dataset,
+    prepare_training_run,
     provenance_from_manifest,
 )
+from deepiri_modelkit.training.job_queue import TrainingJobQueue
+from deepiri_modelkit.contracts.training import TrainingPriority, TrainingRunRequest
 
 logger = get_logger("helox.training_bridge")
 
@@ -59,27 +62,24 @@ def make_run_context(
 def prepare_training_dataset(
     dataset_path: str | Path,
     *,
-    clean: bool = True,
-    validate: bool = True,
+    preset: str = "training",
+    eval_path: Optional[str | Path] = None,
 ) -> Dict[str, Any]:
-    """
-    Prepare a dataset via orchestrator and return manifest + provenance.
-
-    Returns dict with keys: path, manifest, provenance, validation_report.
-    """
-    path = Path(dataset_path)
-    prepared = prepare_dataset(path, clean=clean, validate=validate)
-    prepared_path = path if isinstance(prepared, Path) else path
-    manifest = build_dataset_manifest(prepared_path)
-    provenance = provenance_from_manifest(manifest)
-    validation = validate_manifest_against_path(manifest, str(prepared_path))
+    """Prepare a dataset via orchestrator prepare_training_run preset."""
+    prepared = prepare_training_run(
+        dataset_path,
+        preset=preset,  # type: ignore[arg-type]
+        eval_path=eval_path,
+    )
+    validation = validate_manifest_against_path(prepared.manifest, str(prepared.path))
     if not validation.get("valid"):
         logger.warning("dataset_manifest_validation_failed", report=validation)
     return {
-        "path": prepared_path,
-        "manifest": manifest,
-        "provenance": provenance,
+        "path": prepared.path,
+        "manifest": prepared.manifest,
+        "provenance": prepared.provenance,
         "validation_report": validation,
+        "quality_report": prepared.quality_report,
     }
 
 
@@ -229,3 +229,59 @@ def register_trained_model(
         accuracy=extra_metadata.get("accuracy") if extra_metadata else None,
         redis_url=os.getenv("REDIS_URL"),
     )
+
+
+def create_hf_orchestrator(
+    trainer: Any,
+    *,
+    experiment_tracker: Optional[ExperimentTracker] = None,
+    max_steps: Optional[int] = None,
+    checkpoint_dir: Optional[str] = None,
+    run_config: Optional[TrainingRunConfig] = None,
+) -> tuple[TrainingOrchestrator, HFTrainingAdapter]:
+    """Build TrainingOrchestrator + HFTrainingAdapter for a HF Trainer instance."""
+    adapter = HFTrainingAdapter(trainer)
+    repro = ReproducibilityController()
+    repro.set_seeds()
+    max_s = max_steps or getattr(trainer.args, "max_steps", 1000)
+    orch = create_orchestrator(
+        config={"trainer": "huggingface"},
+        reproducibility=repro,
+        experiment_tracker=experiment_tracker,
+        max_steps=max_s,
+        checkpoint_dir=checkpoint_dir,
+        run_config=run_config,
+    )
+    return orch, adapter
+
+
+def consume_training_job(payload: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Dispatch a training job payload by priority.
+
+    Accepts TrainingRunRequest JSON or AgentTrainingJob-shaped dict.
+    """
+    request = TrainingRunRequest.model_validate(payload.get("training_run_request", payload))
+    preset = "feedback" if request.priority == TrainingPriority.LIVE else "training"
+    manifest = request.dataset_manifest
+    prepared = prepare_training_run(
+        manifest.path,
+        preset=preset,
+        dataset_id=manifest.id,
+    )
+    ctx = make_run_context(
+        request.experiment_id,
+        request.model_name,
+        fingerprint=request.fingerprint,
+        correlation_id=request.fingerprint,
+    )
+    publish_lifecycle(ctx, "started", status="running")
+    return {
+        "experiment_id": request.experiment_id,
+        "model_name": request.model_name,
+        "priority": request.priority.value,
+        "prepared_path": str(prepared.path),
+        "provenance": prepared.provenance.model_dump() if hasattr(prepared.provenance, "model_dump") else prepared.provenance,
+        "hyperparameters": request.hyperparameters or {},
+    }
+

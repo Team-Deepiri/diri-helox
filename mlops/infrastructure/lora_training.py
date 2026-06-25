@@ -181,9 +181,21 @@ class LoRATrainer:
             args=training_args,
             train_dataset=train_dataset,
         )
-        
-        trainer.train()
-        
+
+        from mlops.training_bridge import create_hf_orchestrator
+
+        orch, adapter = create_hf_orchestrator(
+            trainer,
+            max_steps=training_args.max_steps,
+            checkpoint_dir=output_dir,
+        )
+
+        def batch_iterator():
+            for batch in trainer.get_train_dataloader():
+                yield batch
+
+        orch.fit(batch_iterator(), train_step=adapter.train_step)
+
         self.model.save_pretrained(output_dir)
         self.tokenizer.save_pretrained(output_dir)
         

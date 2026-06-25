@@ -296,7 +296,20 @@ class VersionedTrainingPipeline:
                    dataset=self.dataset_version.dataset_name if self.dataset_version else "unknown",
                    version=self.dataset_version.version if self.dataset_version else "unknown")
 
-        trainer.train()
+        from mlops.training_bridge import create_hf_orchestrator
+
+        orch, adapter = create_hf_orchestrator(
+            trainer,
+            experiment_tracker=self.tracker,
+            max_steps=training_args.max_steps,
+            checkpoint_dir=output_dir,
+        )
+
+        def batch_iterator():
+            for batch in trainer.get_train_dataloader():
+                yield batch
+
+        orch.fit(batch_iterator(), train_step=adapter.train_step, eval_fn=adapter.eval_fn)
 
         self.model.save_pretrained(output_dir)
         self.tokenizer.save_pretrained(output_dir)
