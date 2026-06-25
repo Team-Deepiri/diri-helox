@@ -67,5 +67,10 @@ class PipelineOrchestrator:
                 current_data = result.processed_data.data
                 
         return result
-    
-                
+
+
+def prepare_dataset_via_bridge(dataset_path: str, preset: str = "training"):
+    """Delegate dataset preparation to mlops.training_bridge (preferred)."""
+    from mlops.training_bridge import prepare_training_dataset
+
+    return prepare_training_dataset(dataset_path, preset=preset)

@@ -281,7 +281,11 @@ def consume_training_job(payload: Dict[str, Any]) -> Dict[str, Any]:
         "model_name": request.model_name,
         "priority": request.priority.value,
         "prepared_path": str(prepared.path),
-        "provenance": prepared.provenance.model_dump() if hasattr(prepared.provenance, "model_dump") else prepared.provenance,
+        "provenance": (
+            prepared.provenance.model_dump()
+            if hasattr(prepared.provenance, "model_dump")
+            else prepared.provenance
+        ),
         "hyperparameters": request.hyperparameters or {},
     }
 
