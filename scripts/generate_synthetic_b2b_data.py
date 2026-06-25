@@ -360,9 +360,10 @@ def generate_b2b_dataset(
 
     tenants_info = [(f"tenant-{i:03d}", f"TenantCorp{i:03d}") for i in range(1, tenants + 1)]
 
-    with open(artifacts_file, "w") as af, open(training_file, "w") if derive_training else open(
-        artifacts_file, "a"
-    ) as tf:
+    with (
+        open(artifacts_file, "w") as af,
+        open(training_file, "w") if derive_training else open(artifacts_file, "a") as tf,
+    ):
         for tenant_id, tenant_name in tenants_info:
             for category in CATEGORIES:
                 for _ in range(artifacts_per_category):

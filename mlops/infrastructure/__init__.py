@@ -1,4 +1,5 @@
 """Training infrastructure package"""
+
 try:
     from .rag_pipeline import RAGPipeline, RAGDataPipeline, initialize_rag_system
 except ModuleNotFoundError:

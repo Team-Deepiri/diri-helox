@@ -1,0 +1,50 @@
+{
+  "pipeline_name": "challenge_bandit_training",
+  "description": "Train a contextual multi-armed bandit (Thompson sampling) for Cyrex challenge selection. Samples must carry challenge_type and reward in metadata — sourced from user engagement feedback via the Language Intelligence Service stream.",
+  "data_sources": [
+    {
+      "source_type": "stream",
+      "name": "engagement_feedback_stream",
+      "params": {
+        "mode": "subscribe",
+        "stream_type": "structured",
+        "redis_url": "${REDIS_URL}",
+        "idle_timeout_s": 30,
+        "fallback_mode": "file",
+        "pipeline_dir": "data/datasets/pipeline"
+      }
+    }
+  ],
+  "preprocessing": {
+    "use_text_cleaner": false,
+    "use_deduplication": true,
+    "min_text_length": 1
+  },
+  "training": {
+    "trainer_type": "bandit",
+    "output_dir": "models/bandit",
+    "challenge_types": [
+      "quiz", "code", "creative", "analysis", "debugging", "design",
+      "documentation", "testing", "refactoring", "planning"
+    ],
+    "context_dim": 10
+  },
+  "evaluation": {
+    "enabled": false
+  },
+  "export": {
+    "mlflow": {
+      "enabled": true,
+      "tracking_uri": "${MLFLOW_TRACKING_URI}",
+      "experiment_name": "challenge_bandit_training",
+      "register_model": false
+    },
+    "publish_model_ready": false
+  },
+  "split": {
+    "train_ratio": 0.90,
+    "val_ratio": 0.05,
+    "test_ratio": 0.05,
+    "seed": 42
+  }
+}

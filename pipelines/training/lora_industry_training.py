@@ -15,6 +15,7 @@ Architecture:
 - Uses industry-specific training data
 - Exports to model registry (MLflow/S3) for Cyrex consumption
 """
+
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum

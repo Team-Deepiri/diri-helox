@@ -3,6 +3,7 @@
 Simple standalone test for dataset versioning system within Helox
 This test uses only standard Python libraries and doesn't require external dependencies
 """
+
 import sys
 import os
 import json
@@ -77,8 +78,7 @@ def test_basic_versioning():
         conn = sqlite3.connect(db_name)
         cursor = conn.cursor()
 
-        cursor.execute(
-            """
+        cursor.execute("""
             CREATE TABLE dataset_versions (
                 id INTEGER PRIMARY KEY,
                 dataset_name TEXT NOT NULL,
@@ -89,8 +89,7 @@ def test_basic_versioning():
                 data_checksum TEXT NOT NULL,
                 created_at TEXT NOT NULL
             )
-        """
-        )
+        """)
 
         # Insert test data
         cursor.execute(

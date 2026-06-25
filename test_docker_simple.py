@@ -2,8 +2,9 @@
 """
 Simple Docker test for dataset versioning system
 """
+
+import importlib
 import sys
-import os
 
 sys.path.insert(0, "/app/diri-helox")
 
@@ -16,16 +17,16 @@ try:
 
     print("✅ Successfully imported DatasetVersionManager")
 
-    from utils.dataset_validation import validate_dataset_quality
+    importlib.import_module("utils.dataset_validation")
 
     print("✅ Successfully imported dataset validation")
 
-    from utils.dataset_monitoring import DatasetMonitor
+    importlib.import_module("utils.dataset_monitoring")
 
     print("✅ Successfully imported monitoring")
 
     # Test basic functionality
-    manager = DatasetVersionManager(db_url="sqlite:////tmp/docker_test.db", storage_backend="local")
+    DatasetVersionManager(db_url="sqlite:////tmp/docker_test.db", storage_backend="local")
     print("✅ DatasetVersionManager initialized")
 
     # Test dataset types

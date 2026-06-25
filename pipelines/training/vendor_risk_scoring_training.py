@@ -7,6 +7,7 @@ Model Type: Regression/Classification
 - Uses vendor history, cross-industry data, invoice patterns
 - Exports to registry for Cyrex consumption
 """
+
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 import os

@@ -2,21 +2,16 @@
 Distributed Training Pipeline
 Multi-GPU training with DeepSpeed ZeRO
 """
+
 import torch
-import torch.distributed as dist
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from deepspeed import init_distributed
+from transformers import AutoModelForCausalLM
 from peft import LoraConfig, get_peft_model
 import os
 from typing import Dict
 from deepiri_modelkit.logging import get_logger
-from mlops.training_bridge import setup_distributed
 
 logger = get_logger("helox.distributed")
-
-try:
-    from deepspeed import init_distributed as deepspeed_init_distributed
-except ModuleNotFoundError:
-    deepspeed_init_distributed = None
 
 
 class DistributedTrainer:
@@ -29,9 +24,7 @@ class DistributedTrainer:
         self.local_rank = int(os.environ.get("LOCAL_RANK", 0))
 
         if self.world_size > 1:
-            ctx = setup_distributed(local_rank=self.local_rank)
-            if ctx is None and deepspeed_init_distributed is not None:
-                deepspeed_init_distributed()
+            init_distributed()
             torch.cuda.set_device(self.local_rank)
 
         logger.info("Distributed training setup", rank=self.rank, world_size=self.world_size)

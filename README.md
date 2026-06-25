@@ -71,6 +71,23 @@ Models trained in Helox are:
 2. Published via streaming service (`model-ready` event)
 3. Auto-loaded by Cyrex runtime
 
+### Synapse Transport Toggle
+
+Helox defaults to direct Redis publishing. To route through the Go sidecar:
+
+```bash
+export SYNAPSE_TRANSPORT=sidecar
+export SYNAPSE_SIDECAR_URL=http://localhost:8081
+export SYNAPSE_SIDECAR_TIMEOUT_SEC=5
+export SYNAPSE_SIDECAR_SENDER=helox
+```
+
+To revert:
+
+```bash
+export SYNAPSE_TRANSPORT=redis
+```
+
 ## Usage
 
 ```bash

@@ -1,0 +1,40 @@
+[tool.poetry]
+name = "deepiri-helox-sdk"
+version = "0.2.0"
+description = "Installable Helox SDK: device helpers and post-training evaluation harness for cross-repo consumers."
+authors = ["Deepiri Team"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "deepiri_helox_sdk" }]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+torch = "^2.0.0"
+transformers = ">=4.40.0,<5.0.0"
+numpy = "^2.1.0"
+scikit-learn = "^1.3.0"
+evaluate = "^0.4.0"
+rouge-score = "^0.1.2"
+deepiri-gpu-utils = { git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"] }
+
+[tool.poetry.group.dev.dependencies]
+pytest = ">=7,<10"
+
+[tool.poetry.scripts]
+helox-eval = "deepiri_helox_sdk.evaluation.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "--import-mode=importlib"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]

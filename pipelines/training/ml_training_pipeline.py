@@ -2,6 +2,7 @@
 Complete ML Training Pipeline
 Train models from collected data with local/API model support
 """
+
 import json
 import asyncio
 from pathlib import Path
@@ -11,7 +12,6 @@ from .data_collection_pipeline import get_data_collector
 from mlops.infrastructure.lora_training import QLoRATrainingPipeline
 from .bandit_training import train_bandit_from_data
 from mlops.infrastructure.experiment_tracker import ExperimentTracker
-from mlops.training_bridge import prepare_training_dataset, persist_manifest, make_run_context
 from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("helox.ml_pipeline")
@@ -59,16 +59,14 @@ class MLTrainingPipeline:
         raw_challenges = self._load_raw_data("data/datasets/raw/challenges.json")
 
         if raw_classification:
-            out_path = "data/datasets/raw/task_classification.jsonl"
-            preparer.prepare_task_classification(raw_classification, out_path)
-            prep = prepare_training_dataset(out_path)
-            persist_manifest(prep["manifest"], "data/datasets/manifests")
+            preparer.prepare_task_classification(
+                raw_classification, "data/datasets/raw/task_classification.jsonl"
+            )
 
         if raw_challenges:
-            out_path = "data/datasets/raw/challenge_generation.jsonl"
-            preparer.prepare_challenge_generation(raw_challenges, out_path)
-            prep = prepare_training_dataset(out_path)
-            persist_manifest(prep["manifest"], "data/datasets/manifests")
+            preparer.prepare_challenge_generation(
+                raw_challenges, "data/datasets/raw/challenge_generation.jsonl"
+            )
 
     def _load_raw_data(self, path: str) -> Optional[list]:
         """Load raw data file."""

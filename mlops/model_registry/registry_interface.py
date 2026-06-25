@@ -2,6 +2,7 @@
 Model registry interface for Helox
 Wraps deepiri-modelkit registry client
 """
+
 import os
 from deepiri_modelkit import ModelRegistryClient
 

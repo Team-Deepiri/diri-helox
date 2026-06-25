@@ -7,7 +7,7 @@ training anomalies to save weeks of wasted compute.
 
 import logging
 import numpy as np
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, List, Callable
 from collections import deque
 import torch
 
@@ -208,9 +208,11 @@ class TrainingHealthMonitor:
         recent_losses = list(self.loss_history)[-100:]
 
         return {
-            "status": "healthy"
-            if not (self.divergence_detected or self.stagnation_detected)
-            else "unhealthy",
+            "status": (
+                "healthy"
+                if not (self.divergence_detected or self.stagnation_detected)
+                else "unhealthy"
+            ),
             "loss_count": len(self.loss_history),
             "current_loss": recent_losses[-1] if recent_losses else 0.0,
             "mean_loss": np.mean(recent_losses) if recent_losses else 0.0,

@@ -15,6 +15,8 @@ import logging
 import sys
 from pathlib import Path
 
+import torch
+
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -24,10 +26,9 @@ from data_processing.data_collector import DataCollector
 from data_processing.text_cleaner import TextCleaner
 from data_processing.dataset_builder import DatasetBuilder
 from tokenization.tokenizer_trainer import TokenizerTrainer
-from tokenization.tokenizer_manager import TokenizerManager
 from models.transformer_lm import create_model_from_config
 from training.pretraining_trainer import PretrainingTrainer
-from training.instruction_finetuning_trainer import InstructionFinetuningTrainer
+import torch
 from torch.utils.data import DataLoader
 from datasets import load_from_disk
 

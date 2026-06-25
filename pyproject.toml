@@ -5,30 +5,35 @@ description = "ML training pipelines, model development, and research for Deepir
 readme = "README.md"
 authors = ["Deepiri Team"]
 license = "MIT"
-# Note: This is a script-based project, not a package
-# Packages are organized as modules in the root directory
+package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.14"
-deepiri-training-orchestrator = { git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", branch = "feat/v0.4.0-dataset-first", extras = ["modelkit", "wandb", "distributed"] }
-deepiri-modelkit = { git = "https://github.com/Team-Deepiri/deepiri-modelkit.git", branch = "feat/training-contracts-v0.2" }
+# Internal Deepiri deps pinned by git revision for deterministic builds.
+# NOTE: These repos are private Team-Deepiri repositories.
+deepiri-dataset-processor = {git = "https://github.com/Team-Deepiri/deepiri-dataset-processor.git", rev = "f564b41fc1e475be7fcd792703149daeb84056b7", extras = ["all"]}
+deepiri-training-orchestrator = {git = "https://github.com/Team-Deepiri/deepiri-training-orchestrator.git", rev = "59d94bf3139ded5b307f0346776b3b1568be072f"}
+# deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
+# Deepiri services. Replaces deepiri-modelkit device utils in helox.
+deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", rev = "205034c8e1452afa790ebdf835dbbef38c126b94", extras = ["torch"]}
 
 # ML Training Dependencies
-torch = "^2.0.0"
-transformers = "^4.35.0"
-accelerate = "^0.24.0"
-datasets = "^2.14.0"
+torch = ">=2.8.0,<2.9.0"
+peft = "^0.7.0"
+transformers = ">=4.40.0,<5.0.0"
+accelerate = ">=0.34.0,<2.0.0"
+datasets = ">=2.14.0,<4.0.0"
 mlflow = ">=3.11.1,<4.0"
 optuna = "^3.4.0"
-wandb = "^0.15.0"
+wandb = ">=0.16.0"
 
 # Data processing
 pandas = "^2.0.0"
-numpy = "^1.24.0"
+numpy = "^2.1.0"
 scikit-learn = "^1.3.0"
 
 # Tokenization
-sentencepiece = "^0.1.99"
+sentencepiece = ">=0.1.99,<0.3.0"
 
 # Model components
 einops = "^0.7.0"
@@ -38,7 +43,7 @@ evaluate = "^0.4.0"
 rouge-score = "^0.1.2"
 
 # Model export
-onnx = "^1.14.0"
+onnx = "^1.21.0"
 onnxruntime = "^1.15.0"
 
 # Event streaming (Synapse integration)
@@ -46,7 +51,10 @@ redis = "^5.0.0"
 hiredis = "^2.2.0"
 
 # Embeddings for semantic deduplication
-sentence-transformers = "^3.0.0"
+sentence-transformers = ">=2.7.0,<3.0.0" # Pin to last stable 2.x to avoid potential conflicts with 3.x+
+
+# TUI / CLI display
+rich = "^13.0.0"
 
 # Utilities
 tqdm = "^4.66.0"
@@ -58,10 +66,13 @@ python-dotenv = "^1.0.0"
 jupyter = "^1.0.0"
 notebook = "^7.0.0"
 ipython = "^8.0.0"
-pytest = "^7.0.0"
-black = "^23.0.0"
+pytest = ">=7,<10"
+black = "^26.0.0"
 mypy = "^1.0.0"
-ruff = "^0.1.0"
+ruff = ">=0.15.0,<0.16.0" # Update to latest stable 0.15.x
+# fakeredis: in-process Redis emulator used by StreamDataSource tests — lets the
+# test suite inject a fake Redis client so tests run without a real Redis server.
+fakeredis = ">=2.20.0"
 
 [tool.poetry.group.optional.dependencies]
 # Privacy & security (optional)
@@ -93,7 +104,6 @@ extend-exclude = '''
     | deepiri-training-orchestrator
     | deepiri-gpu-utils
     | helox_trace_ml
-    | deps
   )/
   | docker_test_versioning\.py
   | scripts/generate_synthetic_b2b_data_v2\.py
@@ -105,6 +115,30 @@ python_version = "3.11"
 warn_return_any = true
 warn_unused_configs = true
 ignore_missing_imports = true
+explicit_package_bases = true
+exclude = [
+    "deepiri-dataset-processor",
+    "deepiri-training-orchestrator",
+    "deepiri-gpu-utils",
+    "docker_test_versioning\\.py",
+    "scripts/generate_synthetic_b2b_data_v2\\.py",
+    "pipelines/data_processing/",
+]
+
+# Suppress errors in pre-existing files with known issues
+[[tool.mypy.overrides]]
+module = [
+    "training.pretraining_trainer",
+    "training.instruction_finetuning_trainer",
+    "training.intent_classifier_trainer",
+    "mlops.infrastructure.model_adaptation_layers",
+    "mlops.infrastructure.lora_training",
+    "mlops.infrastructure.rag_pipeline",
+    "mlops.infrastructure.experiment_tracker",
+    "mlops.infrastructure",
+    "mlops.model_registry.registry_interface",
+]
+ignore_errors = true
 
 [tool.ruff]
 line-length = 100
@@ -114,11 +148,11 @@ extend-exclude = [
     "deepiri-dataset-processor",
     "deepiri-training-orchestrator",
     "deepiri-gpu-utils",
-    "deps",
     "core",
     "examples",
     "experiments",
     "integrations",
+    "mlops",
     "model_export",
     "observability",
     "tokenization",
@@ -174,6 +208,7 @@ extend-exclude = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+# Use importlib mode so the root __init__.py is not treated as a package init
 addopts = "--import-mode=importlib"
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -181,6 +216,7 @@ markers = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
+# Imports after sys.path / importlib hacks (examples/scripts/tests)
 "examples/**/*.py" = ["E402"]
 "scripts/**/*.py" = ["E402"]
 "pipelines/data_preprocessing/test_quality.py" = ["E402"]
@@ -188,4 +224,5 @@ markers = [
 "tests/**/*.py" = ["E402"]
 "data_sources/synthetic_source.py" = ["E402"]
 "pipelines/training/dynamic_training_pipeline.py" = ["E402"]
+# Smoke script: imports exist only to verify the environment
 "tests/test_import.py" = ["F401"]

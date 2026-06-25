@@ -1,0 +1,67 @@
+{
+  "pipeline_name": "intent_classifier_stream",
+  "description": "Train on Cyrex Redis stream data + synthetic supplement.",
+
+  "data_sources": [
+    {
+      "source_type": "stream",
+      "name": "cyrex_pipeline_data",
+      "weight": 0.7,
+      "params": {
+        "mode": "file",
+        "pipeline_dir": "data/datasets/pipeline",
+        "stream_type": "structured",
+        "min_quality": 0.4
+      }
+    },
+    {
+      "source_type": "synthetic",
+      "name": "synthetic_supplement",
+      "weight": 0.3,
+      "params": {
+        "total_examples": 50,
+        "use_ollama": false
+      }
+    }
+  ],
+
+  "preprocessing": {
+    "use_text_cleaner": true,
+    "use_deduplication": true,
+    "min_text_length": 10
+  },
+
+  "training": {
+    "trainer_type": "intent_classifier",
+    "model_name": "bert-base-uncased",
+    "num_labels": 31,
+    "num_epochs": 3,
+    "batch_size": 16,
+    "learning_rate": 1e-5,
+    "max_length": 128,
+    "output_dir": "models/intent_classifier_stream"
+  },
+
+  "evaluation": {
+    "enabled": true,
+    "report_path": "models/intent_classifier_stream/evaluation_report.json"
+  },
+
+  "export": {
+    "mlflow": {
+      "enabled": true,
+      "tracking_uri": "http://localhost:5000",
+      "experiment_name": "intent_classifier_stream",
+      "register_model": true,
+      "model_name": "intent-classifier"
+    },
+    "publish_model_ready": true
+  },
+
+  "split": {
+    "train_ratio": 0.70,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15,
+    "seed": 42
+  }
+}

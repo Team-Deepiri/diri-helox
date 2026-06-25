@@ -2,6 +2,7 @@
 """
 Test script to validate sentence generation fixes
 """
+
 import sys
 from pathlib import Path
 

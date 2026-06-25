@@ -2,11 +2,10 @@
 Transformer Model Training for Task Classification
 ML Engineer 2 (Lennon Shikham): Fine-tune transformer models
 """
+
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
-    TrainingArguments,
-    Trainer,
 )
 from transformers import DataCollatorWithPadding
 from datasets import load_dataset
