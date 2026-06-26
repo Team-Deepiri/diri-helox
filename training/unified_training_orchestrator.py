@@ -723,8 +723,6 @@ class UnifiedTrainingOrchestrator:
             return metrics
 
         def sync_train_step(step: int, batch) -> Dict[str, float]:
-            import asyncio
-
             loop = asyncio.new_event_loop()
             try:
                 result = loop.run_until_complete(run_step(batch))
@@ -735,7 +733,6 @@ class UnifiedTrainingOrchestrator:
         def eval_fn() -> Dict[str, float]:
             if val_loader is None:
                 return {}
-            import asyncio
 
             loop = asyncio.new_event_loop()
             try:
