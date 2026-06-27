@@ -51,7 +51,7 @@ redis = "^5.0.0"
 hiredis = "^2.2.0"
 
 # Embeddings for semantic deduplication
-sentence-transformers = ">=2.7.0,<4.0.0" # Loosened to allow 3.x for deepiri-dataset-processor compatibility
+sentence-transformers = ">=2.7.0,<3.0.0" # Pin to last stable 2.x to avoid potential conflicts with 3.x+
 
 # TUI / CLI display
 rich = "^13.0.0"
