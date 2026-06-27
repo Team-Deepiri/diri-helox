@@ -440,7 +440,7 @@ vision = ["Pillow (>=9.4.0)"]
 
 [[package]]
 name = "deepiri-gpu-utils"
-version = "0.1.0"
+version = "0.1.1"
 description = "Deepiri Hybrid LLM Build & Dev Toolkit (GPU detection, setup, and device helpers)"
 optional = false
 python-versions = ">=3.11"
@@ -458,8 +458,8 @@ torch = ["torch (>=2.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git"
-reference = "205034c8e1452afa790ebdf835dbbef38c126b94"
-resolved_reference = "205034c8e1452afa790ebdf835dbbef38c126b94"
+reference = "bf8599e33d5e23849928e5d047d08bca1784e428"
+resolved_reference = "bf8599e33d5e23849928e5d047d08bca1784e428"
 
 [[package]]
 name = "dill"
@@ -3082,4 +3082,4 @@ propcache = ">=0.2.1"
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "fe3cd3fbbb518360ec07b5d47b192f5bfee2ac868f03ed998068cde8d12ff905"
+content-hash = "d4ff891f46fc328481a29005439307b0e1801d7fe8b6a5d96858b79ee3ab6982"
