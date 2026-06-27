@@ -109,9 +109,7 @@ class PostTrainingEvalHarness:
     def _resolve_mode(self, samples: List[EvaluationSample], mode: str) -> str:
         if mode in {"classifier", "generation"}:
             return mode
-        has_labels = any(
-            sample.label is not None or sample.label_name for sample in samples
-        )
+        has_labels = any(sample.label is not None or sample.label_name for sample in samples)
         has_generation = any(sample.prompt or sample.expected for sample in samples)
         if has_labels and not has_generation:
             return "classifier"
