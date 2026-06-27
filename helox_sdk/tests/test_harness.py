@@ -107,11 +107,7 @@ def test_harness_threshold_failure(tmp_path: Path):
         config,
         suites={"default": [EvaluationSample(text="x", label=0)]},
     )
-    fake_metrics = {
-        "overall": {"f1": 0.5, "accuracy": 0.5},
-        "per_class": {},
-        "confusion_matrix": [],
-    }
+    fake_metrics = {"overall": {"f1": 0.5, "accuracy": 0.5}, "per_class": {}, "confusion_matrix": []}
     with patch.object(harness.classifier, "evaluate", return_value=fake_metrics):
         result = harness.run(mode="classifier")
     assert result.passed is False
