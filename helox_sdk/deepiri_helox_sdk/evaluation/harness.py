@@ -13,7 +13,7 @@ from .parity import InferenceParityTester
 from .regression import RegressionTracker
 from .report import save_eval_report
 from .samples import EvaluationSample, load_jsonl_suite
-from .schemas import EvalRunConfig, EvalRunResult, EvalThresholds
+from .schemas import EvalRunConfig, EvalRunResult
 
 
 class PostTrainingEvalHarness:
