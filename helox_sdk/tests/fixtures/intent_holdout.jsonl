@@ -1,0 +1,4 @@
+{"text": "Fix the authentication bug in login flow", "label": 0, "label_name": "debugging"}
+{"text": "Refactor the payment module for clarity", "label": 1, "label_name": "refactoring"}
+{"text": "Write unit tests for the API gateway", "label": 23, "label_name": "testing"}
+{"text": "Document the deployment runbook", "label": 26, "label_name": "documentation"}

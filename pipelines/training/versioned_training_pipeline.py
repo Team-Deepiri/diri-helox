@@ -23,6 +23,12 @@ import argparse
 from ...utils.dataset_versioning import DatasetVersionManager, DatasetType
 from ...utils.dataset_validation import validate_dataset_quality
 from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
+from ...mlops.training_bridge import (
+    create_experiment_tracker,
+    persist_manifest,
+    prepare_training_dataset,
+)
+from deepiri_modelkit import validate_manifest_against_path
 from deepiri_modelkit.logging import get_logger
 
 logger = get_logger("helox.versioned_pipeline")
@@ -52,9 +58,7 @@ class VersionedTrainingPipeline:
 
     def setup_experiment_tracking(self):
         """Setup experiment tracking with dataset version info."""
-        from ...mlops.infrastructure.experiment_tracker import ExperimentTracker
-
-        self.tracker = ExperimentTracker(
+        self.tracker = create_experiment_tracker(
             experiment_name=self.config.get("experiment_name", "versioned_training"),
             tracking_uri=self.config.get("mlflow_uri", "http://localhost:5000"),
             use_wandb=self.config.get("use_wandb", False),
@@ -136,6 +140,16 @@ class VersionedTrainingPipeline:
         dataset_path = self.load_versioned_dataset()
 
         logger.info("Loading dataset from path", path=dataset_path)
+
+        try:
+            prep = prepare_training_dataset(dataset_path)
+            manifest_dir = Path(self.config.get("output_dir", "./models")) / "manifests"
+            persist_manifest(prep["manifest"], manifest_dir)
+            report = validate_manifest_against_path(prep["manifest"], str(dataset_path))
+            if not report.get("valid"):
+                logger.warning("manifest_validation_failed", report=report)
+        except Exception as exc:
+            logger.warning("dataset_manifest_prep_skipped", error=str(exc))
 
         # Load dataset
         if str(dataset_path).endswith(".jsonl"):
@@ -289,7 +303,20 @@ class VersionedTrainingPipeline:
             version=self.dataset_version.version if self.dataset_version else "unknown",
         )
 
-        trainer.train()
+        from mlops.training_bridge import create_hf_orchestrator
+
+        orch, adapter = create_hf_orchestrator(
+            trainer,
+            experiment_tracker=self.tracker,
+            max_steps=training_args.max_steps,
+            checkpoint_dir=output_dir,
+        )
+
+        def batch_iterator():
+            for batch in trainer.get_train_dataloader():
+                yield batch
+
+        orch.fit(batch_iterator(), train_step=adapter.train_step, eval_fn=adapter.eval_fn)
 
         self.model.save_pretrained(output_dir)
         self.tokenizer.save_pretrained(output_dir)
@@ -310,17 +337,14 @@ class VersionedTrainingPipeline:
         with open(metadata_path, "w") as f:
             json.dump(training_metadata, f, indent=2, default=str)
 
-        eval_results = trainer.evaluate()
         if self.tracker:
             self.tracker.log_model(self.model, "model")
+            eval_results = trainer.evaluate()
             self.tracker.log_metrics(eval_results)
 
             # Log dataset version as artifact
             if self.dataset_version:
                 self.tracker.log_artifact(str(metadata_path))
-
-        # Include eval metric for HPO (e.g. minimize eval_loss)
-        training_metadata["eval_results"] = eval_results
 
         logger.info(
             "Versioned training complete",

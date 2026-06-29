@@ -248,7 +248,7 @@ class AutomaticEvaluationHarness:
         if not self.evaluation_history:
             return {"total_evaluations": 0}
 
-        suite_summaries = {}
+        suite_summaries: Dict[str, Dict[str, Any]] = {}
         for eval_result in self.evaluation_history:
             suite_name = eval_result["suite_name"]
             if suite_name not in suite_summaries:
