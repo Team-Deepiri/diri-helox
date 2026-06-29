@@ -233,7 +233,7 @@ class InferenceParityTester:
         Returns:
             Complete parity test results
         """
-        results: dict[str, Any] = {
+        results: Dict[str, Any] = {
             "train_inference": self.test_train_inference_parity(model, input_ids),
             "quantization": self.test_quantization_parity(model, input_ids),
             "batch_size": self.test_batch_size_parity(model, input_ids),
