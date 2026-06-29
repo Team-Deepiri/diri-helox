@@ -357,7 +357,7 @@ class TestPostgresDataSource:
             "pg",
             {
                 "stream_type": "structured",
-                "producer": "language_intelligence",
+                "producer": "cyrex_realtime_pipeline",
                 "max_samples": 50,
             },
         )
@@ -373,7 +373,7 @@ class TestPostgresDataSource:
             "pg",
             {
                 "stream_type": "structured",
-                "producer": "language_intelligence",
+                "producer": "cyrex_realtime_pipeline",
             },
         )
         src = PostgresDataSource(cfg)
@@ -436,7 +436,7 @@ class TestPostgresDataSource:
             "quality_score": 0.91,
             "record_id": "rec-123",
             "stream_type": "structured",
-            "producer": "language_intelligence",
+            "producer": "cyrex_realtime_pipeline",
         }
         sample = src._row_to_sample(row_map)
         assert sample is not None
@@ -444,7 +444,7 @@ class TestPostgresDataSource:
         assert sample.label_name == "testing"
         assert sample.metadata["record_id"] == "rec-123"
         assert sample.metadata["stream_type"] == "structured"
-        assert sample.metadata["producer"] == "language_intelligence"
+        assert sample.metadata["producer"] == "cyrex_realtime_pipeline"
 
     def test_row_to_sample_handles_optional_columns_missing(self):
         cfg = DataSourceConfig("postgres", "pg", {})
