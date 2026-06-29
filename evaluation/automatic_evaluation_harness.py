@@ -262,7 +262,7 @@ class AutomaticEvaluationHarness:
 
         # Compute statistics
         for suite_name, summary in suite_summaries.items():
-            scores = summary["scores"]
+            scores: list[float] = summary["scores"]
             summary["mean_score"] = sum(scores) / len(scores)
             summary["max_score"] = max(scores)
             summary["min_score"] = min(scores)
