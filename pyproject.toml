@@ -19,7 +19,7 @@ deepiri-modelkit = {git = "https://github.com/Team-Deepiri/deepiri-modelkit.git"
 deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.1.1", extras = ["torch"]}
 
 # ML Training Dependencies
-torch = ">=2.8.0,<2.9.0"
+torch = ">=2.8.0,<2.13.0"
 peft = "^0.7.0"
 transformers = ">=4.40.0,<5.0.0"
 accelerate = ">=0.34.0,<2.0.0"
