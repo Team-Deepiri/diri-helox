@@ -2,7 +2,7 @@
   "pipeline_name": "intent_classifier_stream_live",
   "data_sources": [
     {
-      "source_type": "stream",
+      "source_type": "cyrex_training_stream",
       "name": "cyrex_pipeline_data",
       "weight": 0.7,
       "params": {
