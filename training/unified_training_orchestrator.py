@@ -600,7 +600,6 @@ class UnifiedTrainingOrchestrator:
         # Save dynamic scaler state
         if self.dynamic_scaler:
             dynamic_scaler_path = checkpoint_dir / "dynamic_scaler.json"
-            import json
 
             with open(dynamic_scaler_path, "w") as f:
                 json.dump(self.dynamic_scaler.get_state(), f, indent=2)
