@@ -14,11 +14,17 @@ sys.path.insert(0, str(_HELOX_ROOT))
 
 from data_sources.base import DataSample, DataSourceConfig
 from data_sources.composite_source import CompositeDataSource
+from data_sources.cyrex_training_source import (
+    CYREX_HELOX_CONTRACT,
+    CYREX_REALTIME_PIPELINE_PRODUCER,
+    CyrexTrainingPostgresSource,
+    CyrexTrainingStreamSource,
+)
+from data_sources.factory import create_data_source, create_data_sources_from_config
 from data_sources.postgres_source import PostgresDataSource
 from data_sources.self_feedback_source import SelfFeedbackDataSource
 from data_sources.static_source import StaticDataSource
 from data_sources.stream_source import StreamDataSource
-from data_sources.factory import create_data_source, create_data_sources_from_config
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -240,6 +246,44 @@ class TestStreamDataSource:
         )
         samples = StreamDataSource(cfg).load()
         assert samples == []
+
+
+# ---------------------------------------------------------------------------
+# Cyrex-specific source aliases
+# ---------------------------------------------------------------------------
+
+
+class TestCyrexTrainingSources:
+    def test_cyrex_training_stream_defaults_to_training_contract(self, tmp_path):
+        cfg = DataSourceConfig(
+            "cyrex_training_stream",
+            "cyrex_live",
+            {
+                "mode": "file",
+                "pipeline_dir": str(tmp_path),
+                "stream_type": "structured",
+            },
+        )
+        src = CyrexTrainingStreamSource(cfg)
+        info = src.get_info()
+        assert isinstance(src, StreamDataSource)
+        assert info["source_type"] == "cyrex_training_stream"
+        assert info["producer"] == CYREX_REALTIME_PIPELINE_PRODUCER
+        assert info["contract"] == CYREX_HELOX_CONTRACT
+        assert info["structured_stream"] == "pipeline.helox-training.structured"
+
+    def test_cyrex_training_postgres_defaults_to_durable_training_table(self):
+        cfg = DataSourceConfig("cyrex_training_postgres", "cyrex_history", {})
+        src = CyrexTrainingPostgresSource(cfg)
+        info = src.get_info()
+        query = src._build_query()
+        assert isinstance(src, PostgresDataSource)
+        assert info["source_type"] == "cyrex_training_postgres"
+        assert info["producer"] == CYREX_REALTIME_PIPELINE_PRODUCER
+        assert info["contract"] == CYREX_HELOX_CONTRACT
+        assert info["durable_table"] == "cyrex.helox_training_samples"
+        assert "FROM cyrex.helox_training_samples" in query
+        assert "producer = %s" in query
 
 
 # ---------------------------------------------------------------------------
@@ -513,6 +557,16 @@ class TestFactory:
         cfg = DataSourceConfig("stream", "s", {"mode": "file", "pipeline_dir": str(tmp_path)})
         src = create_data_source(cfg)
         assert isinstance(src, StreamDataSource)
+
+    def test_create_cyrex_training_sources(self, tmp_path):
+        stream_cfg = DataSourceConfig(
+            "cyrex_training_stream",
+            "cyrex_live",
+            {"mode": "file", "pipeline_dir": str(tmp_path)},
+        )
+        postgres_cfg = DataSourceConfig("cyrex_training_postgres", "cyrex_history", {})
+        assert isinstance(create_data_source(stream_cfg), CyrexTrainingStreamSource)
+        assert isinstance(create_data_source(postgres_cfg), CyrexTrainingPostgresSource)
 
     def test_invalid_type_raises(self):
         cfg = DataSourceConfig("nonexistent_type", "s", {})
