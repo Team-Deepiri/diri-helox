@@ -9,7 +9,7 @@ from helox_logger import get_logger
 import asyncio
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any, List
+from typing import Optional, Dict, Any
 import torch
 from torch.utils.data import DataLoader
 import json
