@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diri-helox"
-version = "0.1.1"
+version = "0.1.2"
 description = "ML training pipelines, model development, and research for Deepiri platform"
 readme = "README.md"
 authors = ["Deepiri Team"]
@@ -16,7 +16,7 @@ deepiri-training-orchestrator = {git = "https://github.com/Team-Deepiri/deepiri-
 deepiri-modelkit = {git = "https://github.com/Team-Deepiri/deepiri-modelkit.git", tag = "v0.2.0"}
 # deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
 # Deepiri services. Replaces deepiri-modelkit device utils in helox.
-deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.1.1", extras = ["torch"]}
+deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.2.0", extras = ["torch"]}
 
 # ML Training Dependencies
 torch = ">=2.8.0,<2.13.0"
