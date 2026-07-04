@@ -85,7 +85,7 @@ diri-helox/
 ├── integrations/
 │   ├── cyrex_rag_bridge.py     # RAG-aware training from Cyrex
 │   └── synapse_event_publisher.py
-├── http/
+├── helox_http/
 │   ├── app.py                  # FastAPI training API surface
 │   └── training_api.py         # POST /training/runs (deepiri-jobs helox.train)
 ├── model_export/               # PyTorch, ONNX export
@@ -213,7 +213,7 @@ HELOX_WORKER_NAME=helox-worker-1 poetry run python -m mlops.training_job_worker
 
 ### Path 2: HTTP trigger (deepiri-jobs)
 
-`POST /training/runs` on the Helox FastAPI surface (`http/training_api.py`):
+`POST /training/runs` on the Helox FastAPI surface (`helox_http/training_api.py`):
 
 - Used by `deepiri-jobs` `helox.train` task
 - Runs `TrainingOrchestrator` in-process

@@ -2,6 +2,7 @@
 HTTP training trigger for deepiri-jobs helox.train → POST /training/runs
 Uses deepiri-training-orchestrator in-process and publishes Synapse training.* events.
 """
+
 from __future__ import annotations
 
 import logging
