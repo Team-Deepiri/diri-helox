@@ -1,6 +1,9 @@
 """
-HTTP training trigger for deepiri-jobs helox.train → POST /training/runs
-Uses deepiri-training-orchestrator in-process and publishes Synapse training.* events.
+HTTP training trigger for deepiri-jobs helox.train -> POST /training/runs.
+
+This is currently a contract-validation scaffold: it proves the HTTP surface,
+run registry, and Synapse training event flow before the endpoint is wired to
+Helox's production UnifiedTrainingOrchestrator.
 """
 
 from __future__ import annotations
@@ -21,6 +24,7 @@ router = APIRouter(prefix="/training", tags=["training"])
 
 _publisher = SynapseEventPublisher()
 _runs: Dict[str, Dict[str, Any]] = {}
+_CONTRACT_VALIDATION_MODE = "contract_validation"
 
 
 class TrainingRunRequest(BaseModel):
@@ -37,6 +41,7 @@ class TrainingRunResponse(BaseModel):
 
 
 def _noop_batches(max_steps: int):
+    """Yield deterministic placeholder batches for HTTP/event contract validation."""
     for i in range(max_steps):
         yield {"step": i, "loss": 1.0 / (i + 1)}
 
@@ -44,11 +49,21 @@ def _noop_batches(max_steps: int):
 async def _execute_run(run_id: str, req: TrainingRunRequest) -> None:
     run = _runs[run_id]
     run["status"] = "running"
+    run["mode"] = _CONTRACT_VALIDATION_MODE
     model = req.model_name
     try:
-        await _publisher.publish_training_event("training.started", model, 0, jobId=req.jobId)
+        await _publisher.publish_training_event(
+            "training.started",
+            model,
+            0,
+            metrics={"run_id": run_id, "mode": _CONTRACT_VALIDATION_MODE},
+            jobId=req.jobId,
+        )
         repro = ReproducibilityController(seed=int(req.config.get("seed", 42)))
         repro.set_seeds()
+
+        # TODO: replace this contract-validation shim with UnifiedTrainingOrchestrator
+        # once deepiri-jobs passes the approved dataset/model/config contract.
         orch = TrainingOrchestrator(
             config=req.config,
             reproducibility=repro,
@@ -66,7 +81,7 @@ async def _execute_run(run_id: str, req: TrainingRunRequest) -> None:
             "training.completed",
             model,
             req.max_steps,
-            metrics={"run_id": run_id},
+            metrics={"run_id": run_id, "mode": _CONTRACT_VALIDATION_MODE},
             jobId=req.jobId,
         )
     except Exception as exc:
@@ -92,6 +107,7 @@ async def create_training_run(
         "run_id": run_id,
         "job_id": body.jobId,
         "status": "queued",
+        "mode": _CONTRACT_VALIDATION_MODE,
         "request": body.model_dump(),
     }
     background_tasks.add_task(_execute_run, run_id, body)

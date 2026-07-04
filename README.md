@@ -141,15 +141,28 @@ diri-helox/
 └──────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Lifecycle events published during a run
+### Lifecycle events published by the HTTP contract scaffold
+
+`POST /training/runs` currently validates the deepiri-jobs HTTP contract and
+Synapse event flow. It does not run production model training yet; the endpoint
+must be wired to `UnifiedTrainingOrchestrator` before callers treat a completed
+HTTP run as a trained/exported model.
 
 | Event | Stream | When |
 |-------|--------|------|
 | `training.started` | `training-events` | Run begins |
-| `training.progress` | `training-events` | Periodic step updates |
-| `training.checkpoint` | `training-events` | Checkpoint saved |
 | `training.completed` | `training-events` | Run finishes successfully |
 | `training.failed` | `training-events` | Run errors out |
+
+### Lifecycle events published by the full unified training path
+
+These events belong to `training/unified_training_orchestrator.py` and should be
+depended on only after the HTTP trigger is wired into that path.
+
+| Event | Stream | When |
+|-------|--------|------|
+| `training.progress` | `training-events` | Periodic step updates |
+| `training.checkpoint` | `training-events` | Checkpoint saved |
 | `model-ready` | `model-events` | Model registered and available for Cyrex |
 
 ---
@@ -216,8 +229,13 @@ HELOX_WORKER_NAME=helox-worker-1 poetry run python -m mlops.training_job_worker
 `POST /training/runs` on the Helox FastAPI surface (`helox_http/training_api.py`):
 
 - Used by `deepiri-jobs` `helox.train` task
-- Runs `TrainingOrchestrator` in-process
-- Publishes Synapse `training.*` events
+- Currently runs a deterministic contract-validation scaffold with
+  `TrainingOrchestrator`; this proves request handling and Synapse event
+  publication but does not train or export a real model
+- Publishes Synapse `training.started`, `training.completed`, and
+  `training.failed` events with `mode: contract_validation`
+- Must be wired to `UnifiedTrainingOrchestrator` before this path is considered
+  production training
 
 ### Path 3: Direct script / pipeline invocation
 
