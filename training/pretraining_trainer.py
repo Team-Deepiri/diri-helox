@@ -11,7 +11,8 @@ from typing import Optional, Dict
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, get_constant_schedule_with_warmup
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR
+from transformers import get_constant_schedule_with_warmup
 from tqdm import tqdm
 import wandb
 
