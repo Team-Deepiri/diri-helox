@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "deepiri-helox-training"
+version = "0.1.0"
+description = "Generic training-infrastructure primitives (interfaces and base classes) shared by Deepiri services such as Mudspeed and Cyrex."
+authors = ["Deepiri Team"]
+license = "MIT"
+readme = "README.md"
+packages = [{ include = "deepiri_helox_training" }]
+
+[tool.poetry.dependencies]
+# Intentionally stdlib-only: the abstraction layer must stay framework-agnostic so any
+# service (PyTorch, JAX, sklearn, ...) can specialize it.
+python = "^3.10"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
