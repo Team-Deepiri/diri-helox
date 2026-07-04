@@ -4,7 +4,6 @@ Uses deepiri-training-orchestrator in-process and publishes Synapse training.* e
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 import uuid
 from typing import Any, Dict, Optional
