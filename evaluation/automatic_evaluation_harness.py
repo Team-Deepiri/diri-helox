@@ -5,14 +5,14 @@ Provides fixed eval prompts, domain-specific test sets, and
 regression tracking for comprehensive model evaluation.
 """
 
-import logging
+from helox_logger import get_logger
 import json
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 import torch
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class AutomaticEvaluationHarness:
@@ -258,7 +258,7 @@ class AutomaticEvaluationHarness:
                 }
 
             suite_summaries[suite_name]["count"] += 1
-            suite_summaries[suite_name]["scores"].append(eval_result["avg_score"])
+            suite_summaries[suite_name]["scores"].append(float(eval_result["avg_score"]))
 
         # Compute statistics
         for suite_name, summary in suite_summaries.items():

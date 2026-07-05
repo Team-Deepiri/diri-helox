@@ -8,14 +8,14 @@ and training run fingerprinting for complete reproducibility.
 import random
 import hashlib
 import json
-import logging
+from helox_logger import get_logger
 from pathlib import Path
 from typing import Optional, Dict, Any
 import numpy as np
 import torch
 import torch.backends.cudnn as cudnn
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ReproducibilityController:

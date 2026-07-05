@@ -11,13 +11,14 @@ from __future__ import annotations
 
 import json
 import importlib
-import logging
 import random
 from collections import Counter
 from pathlib import Path
 from typing import Any, Dict, List, cast
 
-logger = logging.getLogger(__name__)
+from helox_logger import get_logger
+
+logger = get_logger(__name__)
 
 # Import semantic analyzer for dynamic analysis
 try:
