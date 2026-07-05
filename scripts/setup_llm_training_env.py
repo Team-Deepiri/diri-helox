@@ -14,9 +14,10 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from core.device_manager import DeviceManager
 from core.training_config import DataConfig, ModelConfig, TrainingConfig
 import logging
+from helox_logger import get_logger
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def setup_directories():

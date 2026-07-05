@@ -11,7 +11,8 @@ from typing import Optional, Dict
 import torch
 from torch.utils.data import DataLoader
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR, get_constant_schedule_with_warmup
+from torch.optim.lr_scheduler import CosineAnnealingLR, LinearLR
+from transformers import get_constant_schedule_with_warmup
 from tqdm import tqdm
 import wandb
 
@@ -19,7 +20,9 @@ from ..core.device_manager import DeviceManager
 from ..core.training_config import TrainingConfig, ModelConfig
 from ..models.transformer_lm import TransformerLanguageModel
 
-logger = logging.getLogger(__name__)
+from helox_logger import get_logger
+
+logger = get_logger(__name__)
 
 
 class PretrainingTrainer:

@@ -4,12 +4,12 @@ Tokenizer management and utilities.
 Handles loading, saving, and using trained tokenizers.
 """
 
-import logging
+from helox_logger import get_logger
 from pathlib import Path
 from typing import List, Optional
 import sentencepiece as spm
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TokenizerManager:

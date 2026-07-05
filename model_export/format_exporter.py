@@ -5,13 +5,13 @@ Supports ONNX, GGUF, TensorRT, and other deployment formats
 for CPU, edge, mobile, and server deployments.
 """
 
-import logging
+from helox_logger import get_logger
 from pathlib import Path
 from typing import Dict, Any, Optional
 import torch
 import torch.nn as nn
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class ModelFormatExporter:
@@ -55,13 +55,8 @@ class ModelFormatExporter:
             Path to exported ONNX file
         """
         try:
-            import importlib.util
-
-            if (
-                importlib.util.find_spec("onnx") is None
-                or importlib.util.find_spec("onnxruntime") is None
-            ):
-                raise ImportError("onnx/onnxruntime")
+            import onnx  # noqa: F401
+            import onnxruntime  # noqa: F401
         except ImportError:
             logger.error("ONNX not installed. Install with: pip install onnx onnxruntime")
             raise
@@ -148,10 +143,7 @@ class ModelFormatExporter:
             Path to exported TensorRT file
         """
         try:
-            import importlib.util
-
-            if importlib.util.find_spec("tensorrt") is None:
-                raise ImportError("tensorrt")
+            import tensorrt as trt  # noqa: F401
         except ImportError:
             logger.error("TensorRT not installed")
             raise

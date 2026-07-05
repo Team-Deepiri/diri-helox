@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "diri-helox"
-version = "0.1.0"
+version = "0.1.2"
 description = "ML training pipelines, model development, and research for Deepiri platform"
 readme = "README.md"
 authors = ["Deepiri Team"]
@@ -16,10 +16,10 @@ deepiri-training-orchestrator = {git = "https://github.com/Team-Deepiri/deepiri-
 deepiri-modelkit = {git = "https://github.com/Team-Deepiri/deepiri-modelkit.git", tag = "v0.2.0"}
 # deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
 # Deepiri services. Replaces deepiri-modelkit device utils in helox.
-deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.1.1", extras = ["torch"]}
+deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.2.0", extras = ["torch"]}
 
 # ML Training Dependencies
-torch = ">=2.8.0,<2.9.0"
+torch = ">=2.8.0,<2.13.0"
 peft = "^0.7.0"
 transformers = ">=4.40.0,<5.0.0"
 accelerate = ">=0.34.0,<2.0.0"
@@ -52,7 +52,7 @@ redis = "^5.0.0"
 hiredis = "^2.2.0"
 
 # Embeddings for semantic deduplication
-sentence-transformers = "^3.0.0"
+sentence-transformers = ">=2.7.0,<4.0.0" # Loosened to allow 3.x for deepiri-dataset-processor compatibility
 
 # TUI / CLI display
 rich = "^13.0.0"
@@ -105,6 +105,7 @@ extend-exclude = '''
     | deepiri-training-orchestrator
     | deepiri-gpu-utils
     | helox_trace_ml
+    | deps
   )/
   | docker_test_versioning\.py
   | scripts/generate_synthetic_b2b_data_v2\.py
@@ -149,6 +150,7 @@ extend-exclude = [
     "deepiri-dataset-processor",
     "deepiri-training-orchestrator",
     "deepiri-gpu-utils",
+    "deps",
     "core",
     "examples",
     "experiments",
