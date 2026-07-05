@@ -4,13 +4,12 @@ SentencePiece tokenizer training.
 Trains custom tokenizers optimized for your data.
 """
 
-import logging
-import subprocess
+from helox_logger import get_logger
 from pathlib import Path
 from typing import Optional, List
 import sentencepiece as spm
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class TokenizerTrainer:
