@@ -5,7 +5,7 @@ Publishes training events to Synapse (Redis Streams) for integration
 with Cyrex and other platform services.
 """
 
-import logging
+from helox_logger import get_logger
 import os
 import json
 import asyncio
@@ -18,15 +18,35 @@ import grpc
 import redis.asyncio as redis
 from deepiri_modelkit.streaming.sidecar_utils import env_float, resolve_grpc_addr
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
-# Generated stubs import `proto.synapse.v1...`, so add the gen root to sys.path.
 _GEN_ROOT = Path(__file__).resolve().parent / "streaming" / "gen"
-if str(_GEN_ROOT) not in sys.path:
-    sys.path.append(str(_GEN_ROOT))
+_sidecar_stubs: Optional[tuple[Any, Any]] = None
 
-from proto.synapse.v1 import sugar_glider_pb2 as sidecar_pb2  # type: ignore
-from proto.synapse.v1 import sugar_glider_pb2_grpc as sidecar_pb2_grpc  # type: ignore
+
+def _load_sidecar_stubs() -> tuple[Any, Any]:
+    """Load generated Synapse gRPC stubs only when sidecar transport is used."""
+    global _sidecar_stubs
+
+    if _sidecar_stubs is not None:
+        return _sidecar_stubs
+
+    # Generated stubs import `proto.synapse.v1...`; prefer Helox's generated
+    # package over the third-party `proto` package when sidecar mode is enabled.
+    gen_root = str(_GEN_ROOT)
+    if gen_root not in sys.path:
+        sys.path.insert(0, gen_root)
+
+    loaded_proto = sys.modules.get("proto")
+    loaded_proto_file = getattr(loaded_proto, "__file__", "") if loaded_proto else ""
+    if loaded_proto and not str(loaded_proto_file).startswith(gen_root):
+        del sys.modules["proto"]
+
+    from proto.synapse.v1 import sugar_glider_pb2 as sidecar_pb2  # type: ignore
+    from proto.synapse.v1 import sugar_glider_pb2_grpc as sidecar_pb2_grpc  # type: ignore
+
+    _sidecar_stubs = (sidecar_pb2, sidecar_pb2_grpc)
+    return _sidecar_stubs
 
 
 def _env_float(name: str, default: float) -> float:
@@ -217,6 +237,7 @@ class SynapseEventPublisher:
 
     def _sidecar_ready_sync(self) -> bool:
         try:
+            sidecar_pb2, sidecar_pb2_grpc = _load_sidecar_stubs()
             with grpc.insecure_channel(self.sidecar_grpc_addr) as channel:
                 stub = sidecar_pb2_grpc.SynapseSidecarStub(channel)
                 response = stub.Health(
@@ -229,6 +250,7 @@ class SynapseEventPublisher:
 
     def _sidecar_publish_sync(self, stream: str, event_type: str, payload: Dict[str, Any]):
         try:
+            sidecar_pb2, sidecar_pb2_grpc = _load_sidecar_stubs()
             with grpc.insecure_channel(self.sidecar_grpc_addr) as channel:
                 stub = sidecar_pb2_grpc.SynapseSidecarStub(channel)
                 response = stub.Publish(

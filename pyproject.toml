@@ -108,6 +108,7 @@ extend-exclude = '''
     | deepiri-training-orchestrator
     | deepiri-gpu-utils
     | helox_trace_ml
+    | deps
   )/
   | docker_test_versioning\.py
   | scripts/generate_synthetic_b2b_data_v2\.py
@@ -152,6 +153,7 @@ extend-exclude = [
     "deepiri-dataset-processor",
     "deepiri-training-orchestrator",
     "deepiri-gpu-utils",
+    "deps",
     "core",
     "examples",
     "experiments",
