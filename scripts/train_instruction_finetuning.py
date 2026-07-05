@@ -7,6 +7,7 @@ Fine-tunes a pretrained model on instruction-following data.
 
 import argparse
 import logging
+from helox_logger import get_logger
 import sys
 from pathlib import Path
 
@@ -24,7 +25,7 @@ logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 def create_instruction_data_loader(

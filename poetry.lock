@@ -1503,7 +1503,7 @@ resolved_reference = "9315f265fc11d74281afeed2fa485dee134e4174"
 
 [[package]]
 name = "deepiri-gpu-utils"
-version = "0.1.1"
+version = "0.2.0"
 description = "Deepiri Hybrid LLM Build & Dev Toolkit (GPU detection, setup, and device helpers)"
 optional = false
 python-versions = ">=3.11"
@@ -1521,8 +1521,8 @@ torch = ["torch (>=2.0.0)"]
 [package.source]
 type = "git"
 url = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git"
-reference = "v0.1.1"
-resolved_reference = "bf8599e33d5e23849928e5d047d08bca1784e428"
+reference = "v0.2.0"
+resolved_reference = "d1f8e92d5ec38f9a839ac9bade04cd71edd219b1"
 
 [[package]]
 name = "deepiri-modelkit"
@@ -5625,7 +5625,7 @@ description = "Run a subprocess in a pseudo terminal"
 optional = false
 python-versions = "*"
 groups = ["dev"]
-markers = "sys_platform != \"win32\" and sys_platform != \"emscripten\" or os_name != \"nt\""
+markers = "os_name != \"nt\" or sys_platform != \"win32\" and sys_platform != \"emscripten\""
 files = [
     {file = "ptyprocess-0.7.0-py2.py3-none-any.whl", hash = "sha256:4b41f3967fce3af57cc7e94b888626c18bf37a083e3651ca8feeb66d492fef35"},
     {file = "ptyprocess-0.7.0.tar.gz", hash = "sha256:5c5d0a3b48ceee0b48485e0c26037c0acd7d29765ca3fbb5cb3831d347423220"},
@@ -8873,4 +8873,4 @@ type = ["pytest-mypy (>=1.0.1) ; platform_python_implementation != \"PyPy\""]
 [metadata]
 lock-version = "2.1"
 python-versions = ">=3.11,<3.14"
-content-hash = "22850812cb0bddc5b9754f802eec672a2e8a701331fa2421b228b67c961f0222"
+content-hash = "50dc1592fe6520152b45efd5ae6c4ec1f99a785a053fb99f2b1d3e0f5cc99b4f"

@@ -6,10 +6,10 @@ retrieval-conditioned prompts, and chunk boundary awareness
 for RAG-native model training.
 """
 
-import logging
+from helox_logger import get_logger
 from typing import Dict, Any, List
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class RAGAwareTrainingIntegrator:

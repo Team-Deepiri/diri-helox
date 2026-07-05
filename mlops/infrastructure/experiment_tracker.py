@@ -10,10 +10,11 @@ import hashlib
 from datetime import datetime
 from typing import Dict, Optional, List
 import logging
+from helox_logger import get_logger
 
 
 def get_logger(name: str):
-    logger = logging.getLogger(name)
+    logger = get_logger(name)
     if not logger.handlers:
         handler = logging.StreamHandler()
         formatter = logging.Formatter("[%(levelname)s] %(name)s: %(message)s")
