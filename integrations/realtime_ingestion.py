@@ -293,7 +293,8 @@ class HeloxRealtimeIngestion:
                     await self._flush_structured()
 
         except asyncio.CancelledError:
-            pass
+            # Expected during shutdown; suppress and let `finally` run cleanup.
+            logger.debug("Ingestion start loop cancelled; proceeding with graceful shutdown.")
         finally:
             flush_task.cancel()
             stats_task.cancel()
