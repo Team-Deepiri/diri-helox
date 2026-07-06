@@ -293,7 +293,8 @@ class HeloxRealtimeIngestion:
                     await self._flush_structured()
 
         except asyncio.CancelledError:
-            pass
+            # Expected during shutdown; suppress and let `finally` run cleanup.
+            logger.debug("Ingestion start loop cancelled; proceeding with graceful shutdown.")
         finally:
             flush_task.cancel()
             stats_task.cancel()
@@ -456,8 +457,8 @@ class HeloxRealtimeIngestion:
                     with open(jsonl_file, "r", encoding="utf-8") as f:
                         line_count = sum(1 for _ in f)
                     counts[category] = counts.get(category, 0) + line_count
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.debug("Skipping unreadable JSONL file %s: %s", jsonl_file, e)
         return counts
 
 
