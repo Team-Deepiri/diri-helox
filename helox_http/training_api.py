@@ -92,6 +92,7 @@ async def _execute_run(run_id: str, req: TrainingRunRequest) -> None:
             "training.failed",
             model,
             0,
+            metrics={"run_id": run_id, "mode": _CONTRACT_VALIDATION_MODE},
             error=str(exc),
             jobId=req.jobId,
         )
