@@ -233,6 +233,8 @@ class _DeviceAwareTrainer(Trainer):
                     num_items_in_batch=num_items_in_batch,
                 )
             except TypeError:
+                # Transformers versions before the num_items_in_batch Trainer
+                # signature still call compute_loss(model, inputs, return_outputs).
                 return super().compute_loss(
                     model,
                     inputs,

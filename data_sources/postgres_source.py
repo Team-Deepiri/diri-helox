@@ -38,6 +38,16 @@ DEFAULT_TABLE = "cyrex.helox_training_samples"
 _IDENTIFIER_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
 
 
+def _quote_dsn_component(value: str) -> str:
+    return quote(value, safe="")
+
+
+def _validate_port(port: str) -> str:
+    if not port.isdigit():
+        raise ValueError(f"Invalid Postgres port: {port!r}")
+    return port
+
+
 def _default_cyrex_postgres_dsn() -> str:
     """
     Build the default DSN for the split Cyrex Postgres database.
@@ -63,7 +73,10 @@ def _default_cyrex_postgres_dsn() -> str:
         or "deepiripassword"
     )
 
-    return f"postgresql://{quote(user)}:{quote(password)}" f"@{host}:{port}/{quote(db_name)}"
+    return (
+        f"postgresql://{_quote_dsn_component(user)}:{_quote_dsn_component(password)}"
+        f"@{_quote_dsn_component(host)}:{_validate_port(port)}/{_quote_dsn_component(db_name)}"
+    )
 
 
 class PostgresDataSource(DataSource):
@@ -193,10 +206,14 @@ class PostgresDataSource(DataSource):
         query = f"SELECT {', '.join(select_cols)} FROM {self._table}{where_clause}{order_clause}{limit_clause}"
         return query, tuple(params)
 
-    def _build_query(self) -> str:
+    def _build_query_for_tests(self) -> str:
         """
-        Backward-compatible debug helper used in unit tests.
-        Uses a representative schema shape; execution always uses _build_query_and_params().
+        Test-only debug helper that returns parameterized query text.
+
+        Runtime execution always uses _build_query_and_params() with real
+        information_schema columns and separate value params. This helper uses a
+        representative schema shape so unit tests can assert the query contract
+        without opening a database connection.
         """
         default_columns = {
             self._text_col,
@@ -209,6 +226,10 @@ class PostgresDataSource(DataSource):
         }
         query, _ = self._build_query_and_params(default_columns)
         return query
+
+    def _build_query(self) -> str:
+        """Backward-compatible alias for older tests; not used by runtime loading."""
+        return self._build_query_for_tests()
 
     @staticmethod
     def _row_value(row_map: Dict[str, Any], key: str, default: Any = None) -> Any:

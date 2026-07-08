@@ -136,7 +136,7 @@ class StreamDataSource(DataSource):
             except json.JSONDecodeError:
                 # Some fallback/export payloads are plain strings (not JSON).
                 # Keep the decoded envelope as-is when payload parsing fails.
-                pass
+                return decoded
         return decoded
 
     def _parse_raw_record(self, item: Dict) -> Optional[DataSample]:

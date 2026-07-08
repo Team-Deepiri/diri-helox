@@ -220,6 +220,22 @@ class TestStreamDataSource:
         assert samples[0].metadata["response"] == "I'm doing well, thank you!"
         assert samples[0].label_name == "communication"
 
+    def test_decode_message_keeps_envelope_when_payload_string_is_not_json(self):
+        cfg = DataSourceConfig("stream", "s", {"mode": "live"})
+        src = StreamDataSource(cfg)
+
+        decoded = src._decode_message(
+            {
+                b"payload": b"plain text payload",
+                b"text": b"fallback text",
+                b"quality_score": b"0.9",
+            }
+        )
+
+        assert decoded["payload"] == "plain text payload"
+        assert decoded["text"] == "fallback text"
+        assert decoded["quality_score"] == "0.9"
+
     def test_both_mode_does_not_double_count_same_file_pattern_match(self, tmp_path):
         records = [{"text": "single-row", "quality_score": 0.9}]
         _write_jsonl(tmp_path / "raw_structured_mix.jsonl", records)
@@ -276,7 +292,7 @@ class TestCyrexTrainingSources:
         cfg = DataSourceConfig("cyrex_training_postgres", "cyrex_history", {})
         src = CyrexTrainingPostgresSource(cfg)
         info = src.get_info()
-        query = src._build_query()
+        query = src._build_query_for_tests()
         assert isinstance(src, PostgresDataSource)
         assert info["source_type"] == "cyrex_training_postgres"
         assert info["producer"] == CYREX_REALTIME_PIPELINE_PRODUCER
@@ -387,10 +403,34 @@ class TestPostgresDataSource:
         src = PostgresDataSource(cfg)
         assert src._dsn == ("postgresql://deepiri_cyrex:cyrex-secret@postgres-cyrex:5434/cyrex_db")
 
+    def test_default_dsn_url_quotes_env_components(self, monkeypatch):
+        monkeypatch.delenv("POSTGRES_DSN", raising=False)
+        monkeypatch.delenv("CYREX_POSTGRES_DSN", raising=False)
+        monkeypatch.setenv("POSTGRES_CYREX_HOST", "postgres cyrex")
+        monkeypatch.setenv("POSTGRES_CYREX_PORT", "5434")
+        monkeypatch.setenv("POSTGRES_CYREX_DB", "cyrex db")
+        monkeypatch.setenv("POSTGRES_CYREX_USER", "deepiri/user")
+        monkeypatch.setenv("POSTGRES_CYREX_PASSWORD", "p@ss/word")
+
+        cfg = DataSourceConfig("postgres", "pg", {})
+        src = PostgresDataSource(cfg)
+
+        assert src._dsn == (
+            "postgresql://deepiri%2Fuser:p%40ss%2Fword" "@postgres%20cyrex:5434/cyrex%20db"
+        )
+
+    def test_default_dsn_rejects_invalid_port(self, monkeypatch):
+        monkeypatch.delenv("POSTGRES_DSN", raising=False)
+        monkeypatch.delenv("CYREX_POSTGRES_DSN", raising=False)
+        monkeypatch.setenv("POSTGRES_CYREX_PORT", "54/34")
+
+        with pytest.raises(ValueError, match="Invalid Postgres port"):
+            PostgresDataSource(DataSourceConfig("postgres", "pg", {}))
+
     def test_build_query_defaults_to_durable_table(self):
         cfg = DataSourceConfig("postgres", "pg", {})
         src = PostgresDataSource(cfg)
-        query = src._build_query()
+        query = src._build_query_for_tests()
         assert "FROM cyrex.helox_training_samples" in query
         assert "quality_score >= %s" in query
         assert "ORDER BY created_at DESC" in query
@@ -406,7 +446,7 @@ class TestPostgresDataSource:
             },
         )
         src = PostgresDataSource(cfg)
-        query = src._build_query()
+        query = src._build_query_for_tests()
         assert "stream_type = %s" in query
         assert "producer = %s" in query
         assert "LIMIT 50" in query
@@ -435,7 +475,7 @@ class TestPostgresDataSource:
             },
         )
         src = PostgresDataSource(cfg)
-        query = src._build_query()
+        query = src._build_query_for_tests()
         assert "status = 'approved'" not in query
 
     def test_build_query_allows_raw_where_when_explicitly_enabled(self):
@@ -448,7 +488,7 @@ class TestPostgresDataSource:
             },
         )
         src = PostgresDataSource(cfg)
-        query = src._build_query()
+        query = src._build_query_for_tests()
         assert "status = 'approved'" in query
 
     def test_invalid_identifier_raises(self):
