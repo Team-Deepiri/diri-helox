@@ -16,7 +16,7 @@ pytest.importorskip("transformers")
 pytest.importorskip("torch")
 
 from datasets import Dataset
-from training.intent_classifier_trainer import IntentClassifierTrainer
+from training.intent_classifier_trainer import IntentClassifierTrainer, _DeviceAwareTrainer
 
 
 class TestClassWeightComputation:
@@ -61,3 +61,41 @@ class TestClassWeightComputation:
         train_hf = Dataset.from_dict({"label": [0, 1], "input_ids": [[1], [2]]})
         with pytest.raises(ValueError, match="Unsupported class_weighting mode"):
             trainer._resolve_class_weights(train_hf)
+
+
+class TestDeviceAwareTrainerLossCompatibility:
+    def test_compute_loss_falls_back_for_older_transformers_signature(self, monkeypatch):
+        calls = []
+
+        def fake_compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+            calls.append(kwargs.copy())
+            if "num_items_in_batch" in kwargs:
+                raise TypeError(
+                    "Trainer.compute_loss() got an unexpected keyword argument "
+                    "'num_items_in_batch'"
+                )
+            return "loss"
+
+        monkeypatch.setattr(
+            "training.intent_classifier_trainer.Trainer.compute_loss",
+            fake_compute_loss,
+        )
+        trainer = object.__new__(_DeviceAwareTrainer)
+        trainer._class_weights = None
+
+        assert trainer.compute_loss(object(), {"input_ids": [1]}, num_items_in_batch=4) == "loss"
+        assert calls == [{"num_items_in_batch": 4}, {}]
+
+    def test_compute_loss_reraises_unrelated_type_errors(self, monkeypatch):
+        def fake_compute_loss(self, model, inputs, return_outputs=False, **kwargs):
+            raise TypeError("real loss computation failed")
+
+        monkeypatch.setattr(
+            "training.intent_classifier_trainer.Trainer.compute_loss",
+            fake_compute_loss,
+        )
+        trainer = object.__new__(_DeviceAwareTrainer)
+        trainer._class_weights = None
+
+        with pytest.raises(TypeError, match="real loss computation failed"):
+            trainer.compute_loss(object(), {"input_ids": [1]}, num_items_in_batch=4)

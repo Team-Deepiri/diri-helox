@@ -217,6 +217,17 @@ class _DeviceAwareTrainer(Trainer):
         )
         super().__init__(*args, **kwargs)
 
+    @staticmethod
+    def _is_num_items_in_batch_signature_error(error: TypeError) -> bool:
+        message = str(error)
+        return (
+            "num_items_in_batch" in message
+            and (
+                "unexpected keyword argument" in message
+                or "got an unexpected keyword" in message
+            )
+        )
+
     def compute_loss(
         self,
         model: Any,
@@ -232,7 +243,9 @@ class _DeviceAwareTrainer(Trainer):
                     return_outputs=return_outputs,
                     num_items_in_batch=num_items_in_batch,
                 )
-            except TypeError:
+            except TypeError as exc:
+                if not self._is_num_items_in_batch_signature_error(exc):
+                    raise
                 # Transformers versions before the num_items_in_batch Trainer
                 # signature still call compute_loss(model, inputs, return_outputs).
                 return super().compute_loss(
