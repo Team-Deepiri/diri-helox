@@ -220,12 +220,8 @@ class _DeviceAwareTrainer(Trainer):
     @staticmethod
     def _is_num_items_in_batch_signature_error(error: TypeError) -> bool:
         message = str(error)
-        return (
-            "num_items_in_batch" in message
-            and (
-                "unexpected keyword argument" in message
-                or "got an unexpected keyword" in message
-            )
+        return "num_items_in_batch" in message and (
+            "unexpected keyword argument" in message or "got an unexpected keyword" in message
         )
 
     def compute_loss(
