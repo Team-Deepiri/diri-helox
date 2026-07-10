@@ -54,30 +54,6 @@ jobs:
         run: |
           poetry install --with dev
 
-      - name: Capture gpu-utils hardware snapshot
-        run: |
-          set -euo pipefail
-          mkdir -p .artifacts/gpu
-          poetry run deepiri-gpu snapshot save --json .artifacts/gpu/current.json
-
-          baseline=.github/gpu-snapshot-baseline.json
-          if [[ -f "$baseline" ]]; then
-            poetry run deepiri-gpu snapshot diff --json \
-              "$baseline" .artifacts/gpu/current.json \
-              | tee .artifacts/gpu/diff.json
-          else
-            echo "No GPU snapshot baseline is checked in; diff skipped." \
-              | tee .artifacts/gpu/diff-skipped.txt
-          fi
-
-      - name: Upload gpu-utils hardware snapshot
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: helox-gpu-snapshot
-          path: .artifacts/gpu/
-          if-no-files-found: warn
-
       - name: Lint (ruff)
         run: poetry run ruff check .
 

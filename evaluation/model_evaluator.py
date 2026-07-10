@@ -19,6 +19,7 @@ if str(_HELOX_ROOT) not in sys.path:
 
 try:
     import torch
+    from core.gpu_utils import detect_device
     from sklearn.metrics import (
         accuracy_score,
         confusion_matrix,
@@ -180,7 +181,7 @@ class ModelEvaluator:
             self._tokenizer = AutoTokenizer.from_pretrained(str(self.model_path))
             self._model = AutoModelForSequenceClassification.from_pretrained(str(self.model_path))
             self._model.eval()
-            self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self._device = detect_device()
             self._model.to(self._device)
         return self._model, self._tokenizer, self._device
 

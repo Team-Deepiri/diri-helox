@@ -92,6 +92,7 @@ diri-helox/
 ├── helox_sdk/                  # Post-training eval harness (deepiri-helox-sdk)
 ├── deepiri-training-orchestrator/  # Reproducibility, HF adapter, experiment tracking
 ├── deepiri-dataset-processor/      # Dataset versioning database and validation
+├── deepiri-gpu-utils/              # GPU detection, Ollama tiers, torch device helpers
 ├── scripts/                    # Training entrypoints and CLI tools
 ├── experiments/                # Research notebooks and configs
 ├── data/                       # Raw, processed, and synthetic datasets
@@ -647,43 +648,6 @@ Postgres mirror (for `PostgresDataSource`):
 ## Setup & Usage
 
 This project uses [Poetry](https://python-poetry.org/) for dependency management.
-
-### GPU-aware Compose and environment guidance
-
-`deepiri-gpu` is provided by HeloX's existing `deepiri-gpu-utils` Poetry
-dependency. Run `poetry install` first, or install a compatible
-`deepiri-gpu-utils` build so that `deepiri-gpu` is on `PATH`.
-
-This repository does not own a Compose manifest. When a development stack has
-a Compose service for HeloX, use the optional wrapper with that service and the
-stack's Compose file:
-
-```bash
-export HELOX_COMPOSE_SERVICE=<helox-service-name>
-scripts/gpu-compose.sh \
-  --compose-file /path/to/compose.yml \
-  -- up "$HELOX_COMPOSE_SERVICE"
-```
-
-The wrapper calls `deepiri-gpu compose-gpu`, creates a temporary override for
-the detected CUDA or ROCm backend, prints `deepiri-gpu env-hints`, and then runs
-Docker Compose. Use `--backend cuda|rocm|mps|cpu` only when an explicit override
-is needed. MPS and CPU detection produce no container GPU reservation.
-
-Normal `docker compose` commands are unchanged and remain the default CPU-safe
-path. To inspect the recommendations without starting containers:
-
-```bash
-poetry run deepiri-gpu compose-gpu
-poetry run deepiri-gpu env-hints
-```
-
-CI saves the CPU/GPU runner state with `deepiri-gpu snapshot save` and uploads
-`.artifacts/gpu/` as the `helox-gpu-snapshot` artifact. If
-`.github/gpu-snapshot-baseline.json` exists, CI also runs
-`deepiri-gpu snapshot diff` against it. No machine-specific baseline is checked
-in by default; without one, CI records that the diff was skipped. Snapshot
-capture is informational and does not require a GPU.
 
 ### Prerequisites
 
