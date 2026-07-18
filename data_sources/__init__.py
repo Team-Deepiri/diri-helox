@@ -6,9 +6,11 @@ service, which processes documents → stores in Postgres/Milvus → publishes t
 Redis streams. Subscribe to those streams here.
 
 Primary sources (live data):
-  - StreamDataSource   : Redis stream subscription (pipeline.helox-training.*)
-  - PostgresDataSource : Structured data from the language intelligence Postgres tables
-  - MilvusDataSource   : Vector-indexed documents from Milvus collections
+  - CyrexTrainingStreamSource   : Cyrex Redis streams (pipeline.helox-training.*)
+  - CyrexTrainingPostgresSource : Cyrex durable replay table (cyrex.helox_training_samples)
+  - StreamDataSource            : reusable Redis stream primitive
+  - PostgresDataSource          : reusable Postgres primitive
+  - MilvusDataSource            : Vector-indexed documents from Milvus collections
 
 Supplementary sources (when live data isn't available):
   - SyntheticDataSource  : Template-based synthetic generation
@@ -25,6 +27,12 @@ from .milvus_source import MilvusDataSource
 from .synthetic_source import SyntheticDataSource
 from .self_feedback_source import SelfFeedbackDataSource
 from .composite_source import CompositeDataSource
+from .cyrex_training_source import (
+    CYREX_HELOX_CONTRACT,
+    CYREX_REALTIME_PIPELINE_PRODUCER,
+    CyrexTrainingPostgresSource,
+    CyrexTrainingStreamSource,
+)
 from .factory import create_data_source, create_data_sources_from_config
 
 __all__ = [
@@ -35,6 +43,10 @@ __all__ = [
     # Live data sources
     "StreamDataSource",
     "PostgresDataSource",
+    "CyrexTrainingStreamSource",
+    "CyrexTrainingPostgresSource",
+    "CYREX_HELOX_CONTRACT",
+    "CYREX_REALTIME_PIPELINE_PRODUCER",
     "MilvusDataSource",
     # Supplementary sources
     "SyntheticDataSource",

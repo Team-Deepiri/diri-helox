@@ -79,11 +79,13 @@ class SynapseEventPublisher:
             "REDIS_URL",
             "redis://redis:6379",
         )
-        self.transport = (os.getenv("SYNAPSE_TRANSPORT", "redis") or "redis").strip().lower()
+        self.transport = (os.getenv("SYNAPSE_TRANSPORT", "sidecar") or "sidecar").strip().lower()
         self.use_sidecar = self.transport == "sidecar"
-        self.sidecar_url = os.getenv("SYNAPSE_SIDECAR_URL", "http://synapse-sidecar:8081").rstrip(
-            "/"
-        )
+        self.sidecar_url = (
+            os.getenv("SYNAPSE_SUGAR_GLIDER_URL")
+            or os.getenv("SYNAPSE_SIDECAR_URL")
+            or "http://synapse-sugar-glider:8081"
+        ).rstrip("/")
         self.sidecar_grpc_addr = resolve_grpc_addr(self.sidecar_url)
         self.sidecar_timeout_sec = _env_float("SYNAPSE_SIDECAR_TIMEOUT_SEC", 5.0)
         self.sidecar_sender = os.getenv("SYNAPSE_SIDECAR_SENDER", "helox")

@@ -297,9 +297,9 @@ class DataCollectionPipeline:
 
         cursor.execute(
             """
-            INSERT INTO task_classifications 
-            (task_text, description, user_role, predicted_type, predicted_complexity, 
-             predicted_duration, predicted_confidence, actual_type, actual_complexity, 
+            INSERT INTO task_classifications
+            (task_text, description, user_role, predicted_type, predicted_complexity,
+             predicted_duration, predicted_confidence, actual_type, actual_complexity,
              actual_duration, user_feedback)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
