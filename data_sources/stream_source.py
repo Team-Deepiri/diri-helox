@@ -90,6 +90,16 @@ class StreamDataSource(DataSource):
         self._block_ms: int = config.params.get("block_ms", 2000)
         self._idle_timeout_s: float = config.params.get("idle_timeout_s", 30.0)
         self._last_id: str = config.params.get("last_id", "0")
+        # Durable consumer group (preferred for production / Sugar Glider alignment)
+        self._consumer_group: Optional[str] = config.params.get(
+            "consumer_group", "helox-train-live"
+        )
+        self._consumer_name: str = config.params.get(
+            "consumer_name", "helox-stream-1"
+        )
+        self._use_consumer_group: bool = bool(
+            config.params.get("use_consumer_group", True)
+        )
 
         # Injectable Redis client (used in tests via fakeredis)
         self._injected_client: Any = _redis_client
@@ -294,7 +304,8 @@ class StreamDataSource(DataSource):
     def _stream_live(self) -> Iterator[DataSample]:
         """
         Blocking generator that continuously yields DataSamples from Redis streams.
-        Uses xread with blocking to wait for new messages.
+        Prefers XREADGROUP (consumer group helox-train-live) for durable ACK semantics.
+        Falls back to xread when use_consumer_group=false.
         Stops after idle_timeout_s seconds with no new messages.
         """
         try:
@@ -305,47 +316,86 @@ class StreamDataSource(DataSource):
             return
 
         streams = self._streams_for_type()
-        # Track the last seen ID per stream; "0" replays all, "$" = new only
-        last_ids: Dict[str, str] = {s: self._last_id for s in streams}
         last_message_time = time.monotonic()
         count = 0
 
-        print(
-            f"  [subscribe] Listening on {streams} "
-            f"(idle_timeout={self._idle_timeout_s}s, block={self._block_ms}ms)"
-        )
+        if self._use_consumer_group and self._consumer_group:
+            for stream_name in streams:
+                try:
+                    r.xgroup_create(
+                        stream_name,
+                        self._consumer_group,
+                        id="0",
+                        mkstream=True,
+                    )
+                except Exception:
+                    # Group already exists
+                    pass
+            print(
+                f"  [subscribe] XREADGROUP group={self._consumer_group} "
+                f"consumer={self._consumer_name} on {streams} "
+                f"(idle_timeout={self._idle_timeout_s}s, block={self._block_ms}ms)"
+            )
+        else:
+            last_ids: Dict[str, str] = {s: self._last_id for s in streams}
+            print(
+                f"  [subscribe] Listening on {streams} "
+                f"(idle_timeout={self._idle_timeout_s}s, block={self._block_ms}ms)"
+            )
 
         while True:
-            # Check idle timeout
             idle_s = time.monotonic() - last_message_time
             if idle_s >= self._idle_timeout_s:
                 print(f"  [subscribe] Idle timeout reached ({idle_s:.1f}s) — stopping")
                 break
 
-            # Check sample cap
             if self._max_samples and count >= self._max_samples:
                 print(f"  [subscribe] max_samples={self._max_samples} reached — stopping")
                 break
 
             try:
-                results = r.xread(last_ids, block=self._block_ms, count=self._batch_size)
+                if self._use_consumer_group and self._consumer_group:
+                    results = r.xreadgroup(
+                        self._consumer_group,
+                        self._consumer_name,
+                        streams={s: ">" for s in streams},
+                        block=self._block_ms,
+                        count=self._batch_size,
+                    )
+                else:
+                    results = r.xread(
+                        last_ids, block=self._block_ms, count=self._batch_size
+                    )
             except Exception as exc:
                 print(f"  Warning: xread error ({exc}) — stopping subscribe loop")
                 break
 
             if not results:
-                continue  # timed out with no messages, loop again (idle check will catch timeout)
+                continue
 
             for stream_name, messages in results:
-                stream_key = stream_name.decode() if isinstance(stream_name, bytes) else stream_name
+                stream_key = (
+                    stream_name.decode()
+                    if isinstance(stream_name, bytes)
+                    else stream_name
+                )
                 for msg_id, data in messages:
-                    last_ids[stream_key] = msg_id.decode() if isinstance(msg_id, bytes) else msg_id
+                    msg_id_str = (
+                        msg_id.decode() if isinstance(msg_id, bytes) else msg_id
+                    )
+                    if not (self._use_consumer_group and self._consumer_group):
+                        last_ids[stream_key] = msg_id_str
                     item = self._decode_message(data)
                     sample = self._parse_item(item)
                     if sample:
                         count += 1
                         last_message_time = time.monotonic()
                         yield sample
+                        if self._use_consumer_group and self._consumer_group:
+                            try:
+                                r.xack(stream_key, self._consumer_group, msg_id_str)
+                            except Exception:
+                                pass
                         if self._max_samples and count >= self._max_samples:
                             return
 
