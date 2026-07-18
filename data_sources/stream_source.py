@@ -67,6 +67,10 @@ class StreamDataSource(DataSource):
         idle_timeout_s    (float): stop after N seconds with no new messages (default: 30)
         last_id           (str):   starting stream ID — "$" = new only, "0" = replay all
                                    (default: "0")
+        consumer_group    (str):   Redis consumer group for durable subscribe mode
+                                   (default: "helox-train-live")
+        consumer_name     (str):   Redis consumer name (default: "helox-stream-1")
+        use_consumer_group (bool): use XREADGROUP/XACK instead of XREAD (default: true)
     """
 
     def __init__(
@@ -94,12 +98,8 @@ class StreamDataSource(DataSource):
         self._consumer_group: Optional[str] = config.params.get(
             "consumer_group", "helox-train-live"
         )
-        self._consumer_name: str = config.params.get(
-            "consumer_name", "helox-stream-1"
-        )
-        self._use_consumer_group: bool = bool(
-            config.params.get("use_consumer_group", True)
-        )
+        self._consumer_name: str = config.params.get("consumer_name", "helox-stream-1")
+        self._use_consumer_group: bool = bool(config.params.get("use_consumer_group", True))
 
         # Injectable Redis client (used in tests via fakeredis)
         self._injected_client: Any = _redis_client
@@ -325,12 +325,15 @@ class StreamDataSource(DataSource):
                     r.xgroup_create(
                         stream_name,
                         self._consumer_group,
-                        id="0",
+                        id=self._last_id,
                         mkstream=True,
                     )
-                except Exception:
-                    # Group already exists
-                    pass
+                except Exception as exc:
+                    # Redis reports BUSYGROUP when the durable group already exists.
+                    # Surface every other setup failure instead of pretending the group
+                    # is available and failing later in the read loop.
+                    if "BUSYGROUP" not in str(exc):
+                        raise
             print(
                 f"  [subscribe] XREADGROUP group={self._consumer_group} "
                 f"consumer={self._consumer_name} on {streams} "
@@ -363,9 +366,7 @@ class StreamDataSource(DataSource):
                         count=self._batch_size,
                     )
                 else:
-                    results = r.xread(
-                        last_ids, block=self._block_ms, count=self._batch_size
-                    )
+                    results = r.xread(last_ids, block=self._block_ms, count=self._batch_size)
             except Exception as exc:
                 print(f"  Warning: xread error ({exc}) — stopping subscribe loop")
                 break
@@ -374,30 +375,33 @@ class StreamDataSource(DataSource):
                 continue
 
             for stream_name, messages in results:
-                stream_key = (
-                    stream_name.decode()
-                    if isinstance(stream_name, bytes)
-                    else stream_name
-                )
+                stream_key = stream_name.decode() if isinstance(stream_name, bytes) else stream_name
                 for msg_id, data in messages:
-                    msg_id_str = (
-                        msg_id.decode() if isinstance(msg_id, bytes) else msg_id
-                    )
+                    msg_id_str = msg_id.decode() if isinstance(msg_id, bytes) else msg_id
                     if not (self._use_consumer_group and self._consumer_group):
                         last_ids[stream_key] = msg_id_str
                     item = self._decode_message(data)
                     sample = self._parse_item(item)
-                    if sample:
-                        count += 1
-                        last_message_time = time.monotonic()
-                        yield sample
+                    if sample is None:
+                        # The quality gate intentionally discards this record. ACK it so
+                        # it does not remain permanently pending for this consumer group.
                         if self._use_consumer_group and self._consumer_group:
                             try:
                                 r.xack(stream_key, self._consumer_group, msg_id_str)
-                            except Exception:
-                                pass
-                        if self._max_samples and count >= self._max_samples:
-                            return
+                            except Exception as exc:
+                                print(f"  Warning: xack failed ({exc})")
+                        continue
+
+                    count += 1
+                    last_message_time = time.monotonic()
+                    yield sample
+                    if self._use_consumer_group and self._consumer_group:
+                        try:
+                            r.xack(stream_key, self._consumer_group, msg_id_str)
+                        except Exception as exc:
+                            print(f"  Warning: xack failed ({exc})")
+                    if self._max_samples and count >= self._max_samples:
+                        return
 
     # ------------------------------------------------------------------
     # Fallback
