@@ -45,6 +45,9 @@ def _quote_dsn_component(value: str) -> str:
 def _validate_port(port: str) -> str:
     if not port.isdigit():
         raise ValueError(f"Invalid Postgres port: {port!r}")
+    value = int(port)
+    if not 1 <= value <= 65535:
+        raise ValueError(f"Invalid Postgres port out of range: {port!r}")
     return port
 
 
