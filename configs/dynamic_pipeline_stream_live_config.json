@@ -2,7 +2,7 @@
   "pipeline_name": "intent_classifier_stream_live",
   "data_sources": [
     {
-      "source_type": "stream",
+      "source_type": "cyrex_training_stream",
       "name": "cyrex_pipeline_data",
       "weight": 0.7,
       "params": {
@@ -12,6 +12,9 @@
         "block_ms": 2000,
         "idle_timeout_s": 30,
         "last_id": "0",
+        "consumer_group": "helox-train-live",
+        "consumer_name": "helox-stream-1",
+        "use_consumer_group": true,
         "max_samples": 500,
         "min_quality": 0.4,
         "fallback_mode": "synthetic",

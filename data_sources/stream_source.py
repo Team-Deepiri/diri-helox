@@ -1,16 +1,22 @@
 """
-StreamDataSource: reads training data published by the Language Intelligence Service.
+StreamDataSource: reads Cyrex runtime training signals for Helox.
 
 Data flow:
-  Language Intelligence Service (Cyrex)
-    → parses/cleans documents via deepiri-dataset-processor
-    → stores structured data in Postgres / Milvus
-    → publishes cleaned samples to Redis Streams (realtime_data_pipeline.py)
-  Helox (this source) subscribes to those Redis channels for training.
+  Cyrex runtime
+    → scores runtime agent interactions
+    → publishes eligible training signals to Redis Streams
+    → writes durable replay rows to cyrex.helox_training_samples
+  Helox subscribes to the Redis streams for live training and can use Postgres
+  for historical replay/backfill.
 
 Two Redis Streams (published by Cyrex's HeloxRealtimeIngestion pipeline):
   - pipeline.helox-training.raw        → {id, text, source, quality_score, timestamp}
   - pipeline.helox-training.structured → {id, instruction, input, output, category, ...}
+
+These `pipeline.*` streams are intentionally separate from LIS document-routing
+streams (`document.vectorize`, `document.training`, `document.structured`).
+`document.training` is a follow-up document-routing consumer surface, not the
+live stream source implemented by this PR.
 
 Three reading modes:
   - "file"      (default): reads pre-ingested JSONL snapshots from data/datasets/pipeline/
@@ -61,6 +67,10 @@ class StreamDataSource(DataSource):
         idle_timeout_s    (float): stop after N seconds with no new messages (default: 30)
         last_id           (str):   starting stream ID — "$" = new only, "0" = replay all
                                    (default: "0")
+        consumer_group    (str):   Redis consumer group for durable subscribe mode
+                                   (default: "helox-train-live")
+        consumer_name     (str):   Redis consumer name (default: "helox-stream-1")
+        use_consumer_group (bool): use XREADGROUP/XACK instead of XREAD (default: true)
     """
 
     def __init__(
@@ -84,6 +94,12 @@ class StreamDataSource(DataSource):
         self._block_ms: int = config.params.get("block_ms", 2000)
         self._idle_timeout_s: float = config.params.get("idle_timeout_s", 30.0)
         self._last_id: str = config.params.get("last_id", "0")
+        # Durable consumer group (preferred for production / Sugar Glider alignment)
+        self._consumer_group: Optional[str] = config.params.get(
+            "consumer_group", "helox-train-live"
+        )
+        self._consumer_name: str = config.params.get("consumer_name", "helox-stream-1")
+        self._use_consumer_group: bool = bool(config.params.get("use_consumer_group", True))
 
         # Injectable Redis client (used in tests via fakeredis)
         self._injected_client: Any = _redis_client
@@ -128,11 +144,16 @@ class StreamDataSource(DataSource):
             try:
                 return json.loads(payload_str)  # type: ignore[no-any-return]
             except json.JSONDecodeError:
-                pass
+                # Some fallback/export payloads are plain strings (not JSON).
+                # Keep the decoded envelope as-is when payload parsing fails.
+                return decoded
         return decoded
 
     def _parse_raw_record(self, item: Dict) -> Optional[DataSample]:
-        quality = float(item.get("quality_score", 1.0))
+        try:
+            quality = float(item.get("quality_score", 1.0))
+        except (TypeError, ValueError):
+            quality = 0.0
         if quality < self._min_quality:
             return None
         text = item.get("text", "")
@@ -147,7 +168,10 @@ class StreamDataSource(DataSource):
         )
 
     def _parse_structured_record(self, item: Dict) -> Optional[DataSample]:
-        quality = float(item.get("quality_score", 1.0))
+        try:
+            quality = float(item.get("quality_score", 1.0))
+        except (TypeError, ValueError):
+            quality = 0.0
         if quality < self._min_quality:
             return None
         instruction = item.get("instruction", "")
@@ -162,6 +186,11 @@ class StreamDataSource(DataSource):
             label_name=item.get("category"),
             metadata={
                 "source_stream": "structured",
+                "record_id": item.get("id"),
+                # Keep both canonical instruction-tuning keys and the original fields.
+                "instruction": instruction,
+                "input": inp,
+                "response": output,
                 "output": output,
                 "quality_score": quality,
                 "category": item.get("category"),
@@ -169,7 +198,30 @@ class StreamDataSource(DataSource):
             source=f"stream:{self.name}",
         )
 
+    def _unwrap_payload(self, item: Dict) -> Dict:
+        """
+        Unwrap payload records from file fallbacks and bridge formats.
+
+        Cyrex fallback exports may contain envelope fields like:
+          {"event_type": "...", "payload": {...}}
+        or payload as a JSON-encoded string.
+        """
+        payload = item.get("payload")
+        if isinstance(payload, dict):
+            return payload
+        if isinstance(payload, str):
+            try:
+                decoded = json.loads(payload)
+                if isinstance(decoded, dict):
+                    return decoded
+            except json.JSONDecodeError:
+                # Payload strings from fallback/export files are not guaranteed to be
+                # JSON; on decode failure we intentionally keep the original envelope.
+                return item
+        return item
+
     def _parse_item(self, item: Dict) -> Optional[DataSample]:
+        item = self._unwrap_payload(item)
         if "instruction" in item or "input" in item:
             return self._parse_structured_record(item)
         return self._parse_raw_record(item)
@@ -186,10 +238,19 @@ class StreamDataSource(DataSource):
             patterns.append("*raw*.jsonl")
         if self._stream_type in ("structured", "both"):
             patterns.append("*structured*.jsonl")
+
+        matched: List[Path] = []
         for pattern in patterns:
-            yield from sorted(self._pipeline_dir.glob(pattern))
-        if not patterns:
-            yield from sorted(self._pipeline_dir.glob("*.jsonl"))
+            matched.extend(sorted(self._pipeline_dir.glob(pattern)))
+        matched = sorted(set(matched))
+
+        # If stream-specific filenames do not exist, gracefully fall back to any JSONL file.
+        # This helps interop with fallback exporters that use names like events_training.jsonl.
+        if matched:
+            yield from matched
+            return
+
+        yield from sorted(self._pipeline_dir.glob("*.jsonl"))
 
     def _load_file_mode(self) -> List[DataSample]:
         samples: List[DataSample] = []
@@ -199,7 +260,10 @@ class StreamDataSource(DataSource):
                     line = line.strip()
                     if not line:
                         continue
-                    item = json.loads(line)
+                    try:
+                        item = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
                     sample = self._parse_item(item)
                     if sample:
                         samples.append(sample)
@@ -240,7 +304,8 @@ class StreamDataSource(DataSource):
     def _stream_live(self) -> Iterator[DataSample]:
         """
         Blocking generator that continuously yields DataSamples from Redis streams.
-        Uses xread with blocking to wait for new messages.
+        Prefers XREADGROUP (consumer group helox-train-live) for durable ACK semantics.
+        Falls back to xread when use_consumer_group=false.
         Stops after idle_timeout_s seconds with no new messages.
         """
         try:
@@ -251,49 +316,92 @@ class StreamDataSource(DataSource):
             return
 
         streams = self._streams_for_type()
-        # Track the last seen ID per stream; "0" replays all, "$" = new only
-        last_ids: Dict[str, str] = {s: self._last_id for s in streams}
         last_message_time = time.monotonic()
         count = 0
 
-        print(
-            f"  [subscribe] Listening on {streams} "
-            f"(idle_timeout={self._idle_timeout_s}s, block={self._block_ms}ms)"
-        )
+        if self._use_consumer_group and self._consumer_group:
+            for stream_name in streams:
+                try:
+                    r.xgroup_create(
+                        stream_name,
+                        self._consumer_group,
+                        id=self._last_id,
+                        mkstream=True,
+                    )
+                except Exception as exc:
+                    # Redis reports BUSYGROUP when the durable group already exists.
+                    # Surface every other setup failure instead of pretending the group
+                    # is available and failing later in the read loop.
+                    if "BUSYGROUP" not in str(exc):
+                        raise
+            print(
+                f"  [subscribe] XREADGROUP group={self._consumer_group} "
+                f"consumer={self._consumer_name} on {streams} "
+                f"(idle_timeout={self._idle_timeout_s}s, block={self._block_ms}ms)"
+            )
+        else:
+            last_ids: Dict[str, str] = {s: self._last_id for s in streams}
+            print(
+                f"  [subscribe] Listening on {streams} "
+                f"(idle_timeout={self._idle_timeout_s}s, block={self._block_ms}ms)"
+            )
 
         while True:
-            # Check idle timeout
             idle_s = time.monotonic() - last_message_time
             if idle_s >= self._idle_timeout_s:
                 print(f"  [subscribe] Idle timeout reached ({idle_s:.1f}s) — stopping")
                 break
 
-            # Check sample cap
             if self._max_samples and count >= self._max_samples:
                 print(f"  [subscribe] max_samples={self._max_samples} reached — stopping")
                 break
 
             try:
-                results = r.xread(last_ids, block=self._block_ms, count=self._batch_size)
+                if self._use_consumer_group and self._consumer_group:
+                    results = r.xreadgroup(
+                        self._consumer_group,
+                        self._consumer_name,
+                        streams={s: ">" for s in streams},
+                        block=self._block_ms,
+                        count=self._batch_size,
+                    )
+                else:
+                    results = r.xread(last_ids, block=self._block_ms, count=self._batch_size)
             except Exception as exc:
                 print(f"  Warning: xread error ({exc}) — stopping subscribe loop")
                 break
 
             if not results:
-                continue  # timed out with no messages, loop again (idle check will catch timeout)
+                continue
 
             for stream_name, messages in results:
                 stream_key = stream_name.decode() if isinstance(stream_name, bytes) else stream_name
                 for msg_id, data in messages:
-                    last_ids[stream_key] = msg_id.decode() if isinstance(msg_id, bytes) else msg_id
+                    msg_id_str = msg_id.decode() if isinstance(msg_id, bytes) else msg_id
+                    if not (self._use_consumer_group and self._consumer_group):
+                        last_ids[stream_key] = msg_id_str
                     item = self._decode_message(data)
                     sample = self._parse_item(item)
-                    if sample:
-                        count += 1
-                        last_message_time = time.monotonic()
-                        yield sample
-                        if self._max_samples and count >= self._max_samples:
-                            return
+                    if sample is None:
+                        # The quality gate intentionally discards this record. ACK it so
+                        # it does not remain permanently pending for this consumer group.
+                        if self._use_consumer_group and self._consumer_group:
+                            try:
+                                r.xack(stream_key, self._consumer_group, msg_id_str)
+                            except Exception as exc:
+                                print(f"  Warning: xack failed ({exc})")
+                        continue
+
+                    count += 1
+                    last_message_time = time.monotonic()
+                    yield sample
+                    if self._use_consumer_group and self._consumer_group:
+                        try:
+                            r.xack(stream_key, self._consumer_group, msg_id_str)
+                        except Exception as exc:
+                            print(f"  Warning: xack failed ({exc})")
+                    if self._max_samples and count >= self._max_samples:
+                        return
 
     # ------------------------------------------------------------------
     # Fallback
