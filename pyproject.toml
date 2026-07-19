@@ -164,7 +164,7 @@ extend-exclude = [
     "tokenization",
     "docker_test_versioning.py",
     "test_docker_simple.py",
-    "test_simple_standalone.py",
+    "run_simple_standalone_tests.py",
     "test_standalone_versioning.py",
     "test_versioning.py",
     "pipelines/data_preprocessing",
