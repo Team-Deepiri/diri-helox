@@ -1,4 +1,4 @@
-"""HeloX runtime device selection uses deepiri_gpu_utils.torch_device."""
+"""Tests for HeloX runtime device selection through deepiri-gpu-utils."""
 
 from __future__ import annotations
 

@@ -19,13 +19,14 @@ if str(_HELOX_ROOT) not in sys.path:
 
 try:
     import torch
-    from core.gpu_utils import detect_device
     from sklearn.metrics import (
         accuracy_score,
         confusion_matrix,
         precision_recall_fscore_support,
     )
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
+
+    from core.gpu_utils import detect_device
 
     _IMPORTS_OK = True
 except ImportError as exc:
