@@ -1,4 +1,4 @@
-"""DeviceManager uses deepiri_gpu_utils.torch_device when installed."""
+"""Tests for HeloX runtime device selection through deepiri-gpu-utils."""
 
 from __future__ import annotations
 
@@ -14,6 +14,22 @@ except ImportError:
 
 @unittest.skipUnless(torch is not None, "torch required (poetry install / requirements.txt)")
 class TestDeviceManagerGpuUtils(unittest.TestCase):
+    @patch("core.gpu_utils.resolve_torch_device")
+    def test_detect_device_maps_cpu_and_supported_accelerators(self, mock_resolve) -> None:
+        from core.gpu_utils import detect_device
+
+        for device_name in ("cpu", "cuda", "mps"):
+            with self.subTest(device=device_name):
+                mock_resolve.reset_mock()
+                mock_resolve.return_value = SimpleNamespace(
+                    device=device_name,
+                    notes=[f"detect backend={device_name}"],
+                    torch_available=True,
+                )
+
+                self.assertEqual(detect_device().type, device_name)
+                mock_resolve.assert_called_once_with("auto")
+
     @patch("core.device_manager.resolve_torch_device")
     def test_auto_uses_resolve_torch_device(self, mock_resolve) -> None:
         from core.device_manager import DeviceManager
