@@ -4,7 +4,7 @@
 
   "data_sources": [
     {
-      "source_type": "stream",
+      "source_type": "cyrex_training_stream",
       "name": "cyrex_live_stream",
       "weight": 0.8,
       "params": {
@@ -18,14 +18,14 @@
       }
     },
     {
-      "source_type": "postgres",
+      "source_type": "cyrex_training_postgres",
       "name": "cyrex_durable_history",
       "weight": 0.2,
       "params": {
         "dsn": "${POSTGRES_DSN}",
         "table": "cyrex.helox_training_samples",
         "stream_type": "structured",
-        "producer": "language_intelligence",
+        "producer": "cyrex_realtime_pipeline",
         "min_quality": 0.4,
         "max_samples": 5000
       }

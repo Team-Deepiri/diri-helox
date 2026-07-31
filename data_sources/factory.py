@@ -14,12 +14,16 @@ from .synthetic_source import SyntheticDataSource
 from .self_feedback_source import SelfFeedbackDataSource
 from .composite_source import CompositeDataSource
 from .static_source import StaticDataSource
+from .cyrex_training_source import CyrexTrainingPostgresSource, CyrexTrainingStreamSource
 
 _REGISTRY: Dict[str, type[DataSource]] = {
-    # Live data sources (primary)
+    # Generic data-source primitives.
     "stream": StreamDataSource,
     "postgres": PostgresDataSource,
     "milvus": MilvusDataSource,
+    # Domain-specific Cyrex -> Helox training sources built on the primitives.
+    "cyrex_training_stream": CyrexTrainingStreamSource,
+    "cyrex_training_postgres": CyrexTrainingPostgresSource,
     # Supplementary / fallback
     "synthetic": SyntheticDataSource,
     "self_feedback": SelfFeedbackDataSource,

@@ -26,6 +26,8 @@ try:
     )
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+    from core.gpu_utils import detect_device
+
     _IMPORTS_OK = True
 except ImportError as exc:
     _IMPORTS_OK = False
@@ -180,7 +182,7 @@ class ModelEvaluator:
             self._tokenizer = AutoTokenizer.from_pretrained(str(self.model_path))
             self._model = AutoModelForSequenceClassification.from_pretrained(str(self.model_path))
             self._model.eval()
-            self._device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+            self._device = detect_device()
             self._model.to(self._device)
         return self._model, self._tokenizer, self._device
 

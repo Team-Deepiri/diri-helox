@@ -21,9 +21,11 @@ from __future__ import annotations
 
 import json
 import os
+import socket
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
+from urllib.parse import urlparse
 
 from deepiri_training_orchestrator import (
     CheckpointCallback,
@@ -84,6 +86,24 @@ class DynamicTrainingPipeline:
         if isinstance(obj, list):
             return [DynamicTrainingPipeline._expand_env_vars(v) for v in obj]
         return obj
+
+    @staticmethod
+    def _is_network_mlflow_uri(tracking_uri: str) -> bool:
+        scheme = urlparse(tracking_uri).scheme.lower()
+        return scheme in {"http", "https"}
+
+    @staticmethod
+    def _is_mlflow_endpoint_reachable(tracking_uri: str, timeout_s: float) -> bool:
+        parsed = urlparse(tracking_uri)
+        host = parsed.hostname
+        if not host:
+            return False
+        port = parsed.port or (443 if parsed.scheme == "https" else 80)
+        try:
+            with socket.create_connection((host, port), timeout=timeout_s):
+                return True
+        except OSError:
+            return False
 
     # ------------------------------------------------------------------
     # Public API
@@ -149,7 +169,7 @@ class DynamicTrainingPipeline:
 
     def preprocess(self, samples: List[DataSample]) -> List[DataSample]:
         """
-        Apply text cleaning and deduplication via deepiri-dataset-processor.
+        Apply cleaning + deduplication + optional quality/safety checks.
         Falls back gracefully if the package is unavailable.
 
         Optional (off by default): quality scoring via deepiri-dataset-processor
@@ -205,6 +225,63 @@ class DynamicTrainingPipeline:
             except ImportError:
                 print("  Warning: deepiri-dataset-processor not available, skipping deduplication")
 
+        # Optional semantic deduplication (off by default).
+        # NOTE: The underlying processor has a hash-based fallback embedding mode that may over-merge.
+        # We therefore skip unless a real embedding model is configured or explicit fallback is allowed.
+        if cfg.get("use_semantic_deduplication", False):
+            semantic_cfg = cfg.get("semantic_deduplication", {})
+            allow_hash_fallback = bool(semantic_cfg.get("allow_hash_embedding_fallback", False))
+            model_name = semantic_cfg.get("embedding_model_name")
+            similarity_threshold = float(semantic_cfg.get("similarity_threshold", 0.95))
+            cache_dir = Path(semantic_cfg.get("cache_dir", "data/deduplication_cache"))
+
+            try:
+                from collections import Counter
+
+                from deepiri_dataset_processor.deduplication.semantic_dedup import (
+                    SemanticDeduplicationEngine,
+                )
+
+                embedding_model = None
+                if model_name:
+                    try:
+                        from sentence_transformers import SentenceTransformer
+
+                        embedding_model = SentenceTransformer(model_name)
+                    except Exception as exc:
+                        print(
+                            f"  Warning: failed to load embedding model '{model_name}' ({exc}) "
+                            "— skipping semantic dedup"
+                        )
+                        embedding_model = None
+
+                if embedding_model is None and not allow_hash_fallback:
+                    print(
+                        "  Warning: semantic dedup requested without embedding_model_name; "
+                        "skipping to avoid hash-embedding over-deduplication. "
+                        "Set semantic_deduplication.allow_hash_embedding_fallback=true to force."
+                    )
+                else:
+                    dedup = SemanticDeduplicationEngine(
+                        similarity_threshold=similarity_threshold,
+                        embedding_model=embedding_model,
+                        cache_dir=cache_dir,
+                    )
+                    texts = [s.text for s in samples]
+                    deduped_texts = dedup.filter_duplicates(texts)
+                    keep_budget = Counter(deduped_texts)
+                    before = len(samples)
+                    semantic_filtered_samples: List[DataSample] = []
+                    for sample in samples:
+                        if keep_budget[sample.text] <= 0:
+                            continue
+                        semantic_filtered_samples.append(sample)
+                        keep_budget[sample.text] -= 1
+                    samples = semantic_filtered_samples
+                    print(f"  Semantic deduplication: {before} -> {len(samples)} samples")
+            except ImportError:
+                print("  Warning: deepiri-dataset-processor semantic dedup unavailable, skipping")
+
         # Optional quality scoring stage (non-blocking unless explicitly enforced).
         if cfg.get("use_quality_checker", False):
             try:
@@ -247,6 +324,47 @@ class DynamicTrainingPipeline:
             except ImportError:
                 print("  Warning: quality checker unavailable, skipping quality scoring")
 
+        # Optional dataset snapshot + versioning (off by default).
+        if cfg.get("create_dataset_version", False):
+            try:
+                from deepiri_dataset_processor.versioning.filesystem import DatasetVersioningSystem
+
+                pipeline_name = self.config.get("pipeline_name", "dynamic_training_pipeline")
+                snapshot_path = Path(
+                    cfg.get(
+                        "dataset_snapshot_path",
+                        f"data/datasets/processed/{pipeline_name}_preprocessed.jsonl",
+                    )
+                )
+                snapshot_path.parent.mkdir(parents=True, exist_ok=True)
+
+                with open(snapshot_path, "w", encoding="utf-8") as f:
+                    for s in samples:
+                        row = {
+                            "text": s.text,
+                            "label": s.label,
+                            "label_name": s.label_name,
+                            "source": s.source,
+                            "metadata": s.metadata,
+                        }
+                        f.write(json.dumps(row, default=str) + "\n")
+
+                metadata_dir = Path(cfg.get("dataset_metadata_dir", "data/metadata"))
+                versioning = DatasetVersioningSystem(metadata_dir=metadata_dir)
+                version_record = versioning.create_dataset_version(
+                    dataset_path=snapshot_path,
+                    dataset_id=pipeline_name,
+                    metadata={"sample_count": len(samples), "stage": "preprocess"},
+                )
+                print(
+                    "  Dataset versioned: "
+                    f"{version_record.get('dataset_id')}@{version_record.get('version')}"
+                )
+            except ImportError:
+                print("  Warning: dataset versioning unavailable, skipping dataset version record")
+            except Exception as exc:
+                print(f"  Warning: dataset versioning failed ({exc}) — continuing")
+
         if self._ingestion_logger:
             self._ingestion_logger.record("preprocess", samples)
 
@@ -266,24 +384,167 @@ class DynamicTrainingPipeline:
         train_ratio = split_cfg.get("train_ratio", 0.70)
         val_ratio = split_cfg.get("val_ratio", 0.15)
         seed = split_cfg.get("seed", 42)
+        test_ratio = 1.0 - float(train_ratio) - float(val_ratio)
+
+        if train_ratio <= 0 or val_ratio < 0 or test_ratio < 0:
+            raise ValueError(
+                "Invalid split ratios. Expect train_ratio > 0 and " "train_ratio + val_ratio <= 1.0"
+            )
 
         initialize_deterministic_training(seed=seed)
 
         import random
+        from collections import Counter
 
         rng = random.Random(seed)
         shuffled = list(samples)
         rng.shuffle(shuffled)
 
         n = len(shuffled)
-        n_train = int(n * train_ratio)
-        n_val = int(n * val_ratio)
+        n_train = int(n * float(train_ratio))
+        n_val = int(n * float(val_ratio))
 
-        train = shuffled[:n_train]
-        val = shuffled[n_train : n_train + n_val]
-        test = shuffled[n_train + n_val :]
+        # Optional stratified split for better class-balance in train/val/test.
+        # Enabled by split.strategy in {"stratified","auto"} (default: auto).
+        split_strategy = str(split_cfg.get("strategy", "auto")).lower()
+        can_try_stratified = split_strategy in {"stratified", "auto"}
+        labels: List[Any] = [s.label if s.label is not None else s.label_name for s in shuffled]
+        labeled = all(label is not None for label in labels)
 
-        print(f"  Split: {len(train)} train / {len(val)} val / {len(test)} test")
+        train: List[DataSample]
+        val: List[DataSample]
+        test: List[DataSample]
+
+        used_stratified = False
+        if can_try_stratified and labeled and n > 0 and test_ratio > 0:
+            label_counts = Counter(labels)
+            min_count = min(label_counts.values()) if label_counts else 0
+            temp_ratio = float(val_ratio) + float(test_ratio)
+            estimated_temp_count = int(round(n * temp_ratio))
+            # Need at least 2 examples per class to have a chance at stratified splitting.
+            if len(label_counts) >= 2 and min_count >= 2:
+                if estimated_temp_count < len(label_counts):
+                    if split_strategy == "stratified":
+                        raise ValueError(
+                            "Stratified split requested but eval pool is too small for label "
+                            f"cardinality: eval_count≈{estimated_temp_count}, classes={len(label_counts)}."
+                        )
+                    print(
+                        "  Warning: stratified split skipped "
+                        f"(eval_count≈{estimated_temp_count} < classes={len(label_counts)}) — using random"
+                    )
+                    train = shuffled[:n_train]
+                    val = shuffled[n_train : n_train + n_val]
+                    test = shuffled[n_train + n_val :]
+                else:
+                    try:
+                        from sklearn.model_selection import train_test_split
+
+                        indices = list(range(n))
+                        train_idx, temp_idx = train_test_split(
+                            indices,
+                            test_size=temp_ratio,
+                            random_state=seed,
+                            stratify=labels,
+                        )
+                        temp_labels = [labels[i] for i in temp_idx]
+
+                        if float(val_ratio) == 0:
+                            val_idx = []
+                            test_idx = temp_idx
+                        elif float(test_ratio) == 0:
+                            val_idx = temp_idx
+                            test_idx = []
+                        else:
+                            test_share_of_temp = float(test_ratio) / temp_ratio
+                            try:
+                                val_idx, test_idx = train_test_split(
+                                    temp_idx,
+                                    test_size=test_share_of_temp,
+                                    random_state=seed,
+                                    stratify=temp_labels,
+                                )
+                            except Exception as exc:
+                                if split_strategy == "stratified":
+                                    raise
+                                print(
+                                    "  Warning: stratified val/test split failed "
+                                    f"({exc}) — using random val/test split"
+                                )
+                                val_idx, test_idx = train_test_split(
+                                    temp_idx,
+                                    test_size=test_share_of_temp,
+                                    random_state=seed,
+                                    stratify=None,
+                                )
+
+                        train = [shuffled[i] for i in train_idx]
+                        val = [shuffled[i] for i in val_idx]
+                        test = [shuffled[i] for i in test_idx]
+                        used_stratified = True
+                    except Exception as exc:
+                        if split_strategy == "stratified":
+                            raise ValueError(f"Stratified split failed: {exc}") from exc
+                        print(
+                            f"  Warning: stratified split unavailable/failed ({exc}) — using random"
+                        )
+                        train = shuffled[:n_train]
+                        val = shuffled[n_train : n_train + n_val]
+                        test = shuffled[n_train + n_val :]
+            elif split_strategy == "stratified":
+                raise ValueError(
+                    "Stratified split requested but data is insufficiently balanced. "
+                    "Need at least 2 classes with >=2 samples each."
+                )
+            else:
+                train = shuffled[:n_train]
+                val = shuffled[n_train : n_train + n_val]
+                test = shuffled[n_train + n_val :]
+        else:
+            train = shuffled[:n_train]
+            val = shuffled[n_train : n_train + n_val]
+            test = shuffled[n_train + n_val :]
+
+        if split_cfg.get("run_leakage_check", False):
+            try:
+                from deepiri_dataset_processor.safety.leakage_detector import DataLeakageDetector
+
+                detector = DataLeakageDetector(
+                    ngram_size=int(split_cfg.get("leakage_ngram_size", 5)),
+                    overlap_threshold=float(split_cfg.get("leakage_overlap_threshold", 0.8)),
+                )
+                train_texts = [s.text for s in train]
+                val_report = detector.detect_train_eval_contamination(
+                    train_texts=train_texts,
+                    eval_texts=[s.text for s in val],
+                )
+                test_report = detector.detect_train_eval_contamination(
+                    train_texts=train_texts,
+                    eval_texts=[s.text for s in test],
+                )
+                val_rate = float(val_report.get("contamination_rate", 0.0))
+                test_rate = float(test_report.get("contamination_rate", 0.0))
+                worst_rate = max(val_rate, test_rate)
+                print(
+                    "  Leakage check: "
+                    f"val={val_rate:.2%}, test={test_rate:.2%}, worst={worst_rate:.2%}"
+                )
+
+                max_rate = float(split_cfg.get("max_contamination_rate", 1.0))
+                if split_cfg.get("enforce_leakage_threshold", False) and worst_rate > max_rate:
+                    raise ValueError(
+                        "Data leakage threshold exceeded: "
+                        f"{worst_rate:.2%} > max_contamination_rate={max_rate:.2%}"
+                    )
+            except ImportError:
+                print("  Warning: leakage detector unavailable, skipping leakage check")
+            except Exception as exc:
+                print(f"  Warning: leakage check failed ({exc}) — continuing")
+
+        strategy_used = "stratified" if used_stratified else "random"
+        print(
+            f"  Split ({strategy_used}): " f"{len(train)} train / {len(val)} val / {len(test)} test"
+        )
         if self._ingestion_logger:
             self._ingestion_logger.record("split_train", train)
             self._ingestion_logger.record("split_val", val)
@@ -469,11 +730,26 @@ class DynamicTrainingPipeline:
         model_path = self._trainer.get_model_path() if self._trainer else ""
         pipeline_name = self.config.get("pipeline_name", "dynamic_pipeline")
 
+        can_attempt_mlflow = True
         if mlflow_cfg.get("enabled", False):
+            tracking_uri = mlflow_cfg.get("tracking_uri", "http://localhost:5000")
+            connect_timeout_s = float(mlflow_cfg.get("connect_timeout_s", 2.0))
+            if self._is_network_mlflow_uri(tracking_uri):
+                can_attempt_mlflow = self._is_mlflow_endpoint_reachable(
+                    tracking_uri=tracking_uri,
+                    timeout_s=connect_timeout_s,
+                )
+                if not can_attempt_mlflow:
+                    print(
+                        "  Warning: MLflow endpoint unreachable at "
+                        f"{tracking_uri} (timeout={connect_timeout_s}s) — skipping MLflow export"
+                    )
+
+        if mlflow_cfg.get("enabled", False) and can_attempt_mlflow:
             try:
                 tracker = ExperimentTracker(
                     experiment_name=mlflow_cfg.get("experiment_name", pipeline_name),
-                    tracking_uri=mlflow_cfg.get("tracking_uri", "http://localhost:5000"),
+                    tracking_uri=tracking_uri,
                     use_wandb=mlflow_cfg.get("use_wandb", False),
                     wandb_project=mlflow_cfg.get("wandb_project"),
                 )

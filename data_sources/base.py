@@ -31,7 +31,11 @@ class DataSample:
 class DataSourceConfig:
     """Configuration for a single data source."""
 
-    source_type: str  # "stream", "postgres", "milvus", "synthetic", "self_feedback", "composite"
+    # Generic primitives include "stream", "postgres", "milvus", "synthetic",
+    # "self_feedback", and "composite". Domain-specific aliases such as
+    # "cyrex_training_stream" and "cyrex_training_postgres" can wrap primitives
+    # without changing the core DataSource contract.
+    source_type: str
     name: str
     params: Dict[str, Any] = field(default_factory=dict)
     weight: float = 1.0
