@@ -731,7 +731,8 @@ class AutomaticEvaluationHarness:
             latency_ms = (time.perf_counter() - start) * 1000.0
             latencies.append(latency_ms)
             if latency_ms > 0:
-                tokens_per_sec.append(counter(text) if counter is not None else len(text.split()))
+                tokens = counter(text) if counter is not None else len(text.split())
+                tokens_per_sec.append(tokens / (latency_ms / 1000.0))
 
         lat_arr = np.array(latencies)
         return {

@@ -7,6 +7,7 @@ noise floor), summaries, run comparison, and latency benchmarking.
 """
 
 import json
+import time
 
 import pytest
 import torch
@@ -272,6 +273,25 @@ class TestGenerationEvaluation:
         assert stats["num_runs"] == 3
         assert stats["avg_latency_ms"] >= 0
         assert stats["p95_latency_ms"] >= stats["p50_latency_ms"]
+
+    def test_benchmark_reports_rate_not_token_count(self, tmp_path):
+        """avg_tokens_per_sec must be a rate, not the raw token count."""
+        words = 10
+
+        def slow_generate(prompt, max_new_tokens=100):
+            time.sleep(0.05)
+            return " ".join(str(i) for i in range(words))
+
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        stats = harness.benchmark_subject(
+            CallableGenerator(slow_generate, name="slow"), "p", num_runs=3
+        )
+
+        # A ~50ms call producing 10 words is ~200 tok/s; returning 10 would mean
+        # the elapsed-time division was dropped.
+        expected = words / (stats["avg_latency_ms"] / 1000.0)
+        assert stats["avg_tokens_per_sec"] == pytest.approx(expected, rel=0.2)
+        assert stats["avg_tokens_per_sec"] > words
 
 
 # ---------------------------------------------------------------------------
