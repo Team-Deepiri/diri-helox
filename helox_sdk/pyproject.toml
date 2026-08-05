@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "deepiri-helox-sdk"
-version = "0.3.0"
+version = "0.3.1"
 description = "Installable Helox SDK: device helpers and post-training evaluation harness for cross-repo consumers."
 authors = ["Deepiri Team"]
 license = "MIT"
@@ -8,7 +8,7 @@ readme = "README.md"
 packages = [{ include = "deepiri_helox_sdk" }]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = ">=3.10,<4.0"
 torch = "^2.0.0"
 transformers = ">=4.40.0,<6.0.0"
 numpy = "^2.1.0"
@@ -34,8 +34,8 @@ addopts = "--import-mode=importlib"
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py310"
 
 [tool.black]
 line-length = 100
-target-version = ["py311"]
+target-version = ["py310"]
