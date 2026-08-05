@@ -20,9 +20,23 @@ import torch
 
 from helox_logger import get_logger
 
+from .subjects import CallablePredictor, LabelPredictor, ResponseGenerator
+
 logger = get_logger(__name__)
 
 _NUMBER_RE = re.compile(r"-?\d+(?:\.\d+)?")
+
+_VALID_TEST_TYPES = {
+    "exact_match",
+    "contains",
+    "contains_any",
+    "similarity",
+    "rouge_l",
+    "token_f1",
+    "numeric_match",
+    "regex_match",
+    "json_match",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -353,9 +367,64 @@ class AutomaticEvaluationHarness:
             raise ValueError(f"Test suite not found: {suite_name}")
         return self.test_suites[suite_name]
 
+    def validate_suite(self, suite_name: str) -> Dict[str, Any]:
+        """
+        Validate a suite and report issues.
+
+        Checks that each test carries usable content, a known scoring type,
+        and a numeric threshold in [0, 1]. Does not raise; issues are returned.
+        """
+        tests = self.get_suite(suite_name)
+        issues: List[str] = []
+
+        if not tests:
+            return {"suite_name": suite_name, "valid": False, "issues": ["empty_suite"]}
+
+        for index, test in enumerate(tests):
+            location = f"test[{index}] (id={test.get('id', '')!r})"
+            test_type = test.get("type", "similarity")
+            if test_type not in _VALID_TEST_TYPES:
+                issues.append(f"{location}: unknown test type {test_type!r}")
+            try:
+                threshold = float(test.get("threshold", 0.5))
+            except (TypeError, ValueError):
+                issues.append(f"{location}: non-numeric threshold {test.get('threshold')!r}")
+            else:
+                if not 0.0 <= threshold <= 1.0:
+                    issues.append(f"{location}: threshold {threshold} outside [0, 1]")
+            has_input = bool(test.get("prompt") or test.get("text"))
+            has_expected = bool(test.get("expected"))
+            has_label = test.get("label") is not None or bool(test.get("label_name"))
+            if not (has_input or has_expected or has_label):
+                issues.append(f"{location}: empty test (no prompt/text/expected/label)")
+
+        return {
+            "suite_name": suite_name,
+            "valid": not issues,
+            "total_tests": len(tests),
+            "issues": issues,
+        }
+
     # ------------------------------------------------------------------
     # Evaluation entry points
     # ------------------------------------------------------------------
+
+    @staticmethod
+    def _resolve_mode(tests: List[Dict[str, Any]], mode: str) -> str:
+        if mode in {"generation", "classifier"}:
+            return mode
+        has_labels = any(
+            test.get("label") is not None or test.get("label_name")
+            for test in tests
+        )
+        has_generation = any(
+            test.get("prompt") or test.get("expected") for test in tests
+        )
+        if has_labels and not has_generation:
+            return "classifier"
+        if has_generation:
+            return "generation"
+        return "classifier" if has_labels else "generation"
 
     def evaluate_model(
         self,
@@ -368,7 +437,7 @@ class AutomaticEvaluationHarness:
         collect_latency: bool = True,
     ) -> Dict[str, Any]:
         """
-        Evaluate model on a test suite.
+        Evaluate a model (with a tokenizer manager) on a test suite.
 
         Args:
             model: Model to evaluate (causal LM for generation; unused when a
@@ -386,23 +455,9 @@ class AutomaticEvaluationHarness:
             Evaluation results dict
         """
         tests = self.get_suite(suite_name)
+        resolved_mode = self._resolve_mode(tests, mode)
 
-        if mode == "auto":
-            has_labels = any(
-                test.get("label") is not None or test.get("label_name")
-                for test in tests
-            )
-            has_generation = any(
-                test.get("prompt") or test.get("expected") for test in tests
-            )
-            if has_labels and not has_generation:
-                mode = "classifier"
-            elif has_generation:
-                mode = "generation"
-            else:
-                mode = "classifier" if has_labels else "generation"
-
-        if mode == "classifier":
+        if resolved_mode == "classifier":
             if predict_fn is None:
                 raise ValueError(
                     "Suite contains labeled classification tests; pass a predict_fn "
@@ -410,14 +465,216 @@ class AutomaticEvaluationHarness:
                 )
             result = self._evaluate_classifier(tests, predict_fn)
         else:
+            if not tests:
+                return self._empty_generation_result(suite_name, "generation")
+            model.eval()
             result = self._evaluate_generation(
-                model,
-                tokenizer_manager,
+                self._legacy_generate_fn(model, tokenizer_manager),
                 tests,
                 max_new_tokens=max_new_tokens,
                 collect_latency=collect_latency,
+                token_counter=self._legacy_token_counter(tokenizer_manager),
             )
 
+        return self._finalize_result(result, suite_name, resolved_mode)
+
+    def evaluate_subject(
+        self,
+        subject: ResponseGenerator,
+        suite_name: str,
+        max_new_tokens: int = 100,
+        collect_latency: bool = True,
+    ) -> Dict[str, Any]:
+        """
+        Evaluate any subject (a model or an agent) on a generation suite.
+
+        ``subject`` is a :class:`ResponseGenerator` — e.g.
+        :class:`HFModelGenerator` for a HuggingFace causal LM or
+        :class:`AgentGenerator` / :class:`CallableGenerator` for an agent.
+
+        Args:
+            subject: The model or agent to evaluate
+            suite_name: Test suite name
+            max_new_tokens: Maximum tokens to generate
+            collect_latency: Measure per-sample generation latency
+
+        Returns:
+            Evaluation results dict
+        """
+        tests = self.get_suite(suite_name)
+        if not tests:
+            return self._empty_generation_result(suite_name, "generation")
+        result = self._evaluate_generation(
+            self._subject_generate_fn(subject),
+            tests,
+            max_new_tokens=max_new_tokens,
+            collect_latency=collect_latency,
+        )
+        return self._finalize_result(result, suite_name, "generation")
+
+    def evaluate_predictor(
+        self,
+        predictor: LabelPredictor,
+        suite_name: str,
+    ) -> Dict[str, Any]:
+        """
+        Evaluate a classifier subject (a model or an agent) on a labeled suite.
+
+        Args:
+            predictor: A :class:`LabelPredictor` (e.g. CallablePredictor or
+                HFClassifierPredictor)
+            suite_name: Test suite name
+
+        Returns:
+            Evaluation results dict
+        """
+        tests = self.get_suite(suite_name)
+        result = self._evaluate_classifier(tests, predictor.predict)
+        return self._finalize_result(result, suite_name, "classifier")
+
+    def evaluate_classifier_suite(
+        self,
+        suite_name: str,
+        predict_fn: Callable[[List[str]], List[Any]],
+    ) -> Dict[str, Any]:
+        """Evaluate a classification suite using a predict_fn."""
+        return self.evaluate_predictor(
+            CallablePredictor(predict_fn),
+            suite_name,
+        )
+
+    def run_full_evaluation(
+        self,
+        model,
+        tokenizer_manager,
+        suite_names: Optional[List[str]] = None,
+        max_new_tokens: int = 100,
+        mode: str = "auto",
+        predict_fn: Optional[Callable[[List[str]], List[Any]]] = None,
+    ) -> Dict[str, Dict[str, Any]]:
+        """Run every loaded suite (or a subset) and return per-suite results."""
+        suite_names = suite_names or self.list_suites()
+        results: Dict[str, Dict[str, Any]] = {}
+        for name in suite_names:
+            results[name] = self.evaluate_model(
+                model,
+                tokenizer_manager,
+                name,
+                max_new_tokens=max_new_tokens,
+                mode=mode,
+                predict_fn=predict_fn,
+            )
+        return results
+
+    def run_full_subject_evaluation(
+        self,
+        subject: ResponseGenerator,
+        suite_names: Optional[List[str]] = None,
+        max_new_tokens: int = 100,
+    ) -> Dict[str, Dict[str, Any]]:
+        """Run every loaded generation suite against a model or agent subject."""
+        suite_names = suite_names or self.list_suites()
+        results: Dict[str, Dict[str, Any]] = {}
+        for name in suite_names:
+            results[name] = self.evaluate_subject(
+                subject, name, max_new_tokens=max_new_tokens
+            )
+        return results
+
+    def compare_models(
+        self,
+        model_a,
+        tokenizer_a,
+        model_b,
+        tokenizer_b,
+        suite_name: str,
+        max_new_tokens: int = 100,
+    ) -> Dict[str, Any]:
+        """Evaluate two models on the same suite and compare per-test scores."""
+        result_a = self.evaluate_model(
+            model_a, tokenizer_a, suite_name, max_new_tokens=max_new_tokens
+        )
+        result_b = self.evaluate_model(
+            model_b, tokenizer_b, suite_name, max_new_tokens=max_new_tokens
+        )
+        return self._compare_results(result_a, result_b)
+
+    def compare_subjects(
+        self,
+        subject_a: ResponseGenerator,
+        subject_b: ResponseGenerator,
+        suite_name: str,
+        max_new_tokens: int = 100,
+    ) -> Dict[str, Any]:
+        """Evaluate two model/agent subjects on the same suite and compare."""
+        result_a = self.evaluate_subject(
+            subject_a, suite_name, max_new_tokens=max_new_tokens
+        )
+        result_b = self.evaluate_subject(
+            subject_b, suite_name, max_new_tokens=max_new_tokens
+        )
+        return self._compare_results(result_a, result_b, names=(subject_a.name, subject_b.name))
+
+    def _compare_results(
+        self,
+        result_a: Dict[str, Any],
+        result_b: Dict[str, Any],
+        names: Optional[Tuple[str, str]] = None,
+    ) -> Dict[str, Any]:
+        per_test = []
+        rows_a = result_a.get("results", [])
+        rows_b = result_b.get("results", [])
+        for row_a, row_b in zip(rows_a, rows_b):
+            per_test.append(
+                {
+                    "test_id": row_a.get("test_id", ""),
+                    "score_a": row_a.get("score"),
+                    "score_b": row_b.get("score"),
+                    "delta": (row_b.get("score") or 0.0) - (row_a.get("score") or 0.0),
+                    "passed_a": row_a.get("passed"),
+                    "passed_b": row_b.get("passed"),
+                }
+            )
+        return {
+            "suite_name": result_a.get("suite_name", ""),
+            "subject_a": names[0] if names else "a",
+            "subject_b": names[1] if names else "b",
+            "avg_score_a": result_a.get("avg_score", 0.0),
+            "avg_score_b": result_b.get("avg_score", 0.0),
+            "avg_score_delta": (result_b.get("avg_score", 0.0) - result_a.get("avg_score", 0.0)),
+            "pass_rate_a": result_a.get("pass_rate", 0.0),
+            "pass_rate_b": result_b.get("pass_rate", 0.0),
+            "per_test": per_test,
+        }
+
+    # ------------------------------------------------------------------
+    # Finalization shared by every evaluation entry point
+    # ------------------------------------------------------------------
+
+    def _empty_generation_result(self, suite_name: str, mode: str) -> Dict[str, Any]:
+        logger.warning(f"Suite {suite_name!r} is empty; returning empty result")
+        return self._finalize_result(
+            {
+                "total_tests": 0,
+                "passed_tests": 0,
+                "pass_rate": 0.0,
+                "avg_score": 0.0,
+                "score_std": 0.0,
+                "min_score": 0.0,
+                "max_score": 0.0,
+                "results": [],
+            },
+            suite_name,
+            mode,
+        )
+
+    def _finalize_result(
+        self,
+        result: Dict[str, Any],
+        suite_name: str,
+        mode: str,
+    ) -> Dict[str, Any]:
+        """Attach metadata, apply gates, check regression, and persist."""
         result["suite_name"] = suite_name
         result["timestamp"] = datetime.now(timezone.utc).isoformat()
         result["mode"] = mode
@@ -452,112 +709,102 @@ class AutomaticEvaluationHarness:
         )
         return result
 
-    def evaluate_classifier_suite(
-        self,
-        suite_name: str,
-        predict_fn: Callable[[List[str]], List[Any]],
-    ) -> Dict[str, Any]:
-        """Evaluate a classification suite using a predict_fn."""
-        return self.evaluate_model(
-            model=None,
-            tokenizer_manager=None,
-            suite_name=suite_name,
-            mode="classifier",
-            predict_fn=predict_fn,
-        )
-
-    def run_full_evaluation(
-        self,
-        model,
-        tokenizer_manager,
-        suite_names: Optional[List[str]] = None,
-        max_new_tokens: int = 100,
-        mode: str = "auto",
-        predict_fn: Optional[Callable[[List[str]], List[Any]]] = None,
-    ) -> Dict[str, Dict[str, Any]]:
-        """Run every loaded suite (or a subset) and return per-suite results."""
-        suite_names = suite_names or self.list_suites()
-        results: Dict[str, Dict[str, Any]] = {}
-        for name in suite_names:
-            results[name] = self.evaluate_model(
-                model,
-                tokenizer_manager,
-                name,
-                max_new_tokens=max_new_tokens,
-                mode=mode,
-                predict_fn=predict_fn,
-            )
-        return results
-
     # ------------------------------------------------------------------
     # Generation evaluation
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _generate(
+    def _generate_text(
         model,
         tokenizer_manager,
         prompt: str,
         max_new_tokens: int = 100,
-    ) -> Tuple[str, int, float]:
-        """Generate text for a prompt, returning (text, new_tokens, latency_ms)."""
+    ) -> str:
+        """Generate text for a prompt using a legacy model + tokenizer manager."""
         input_ids = tokenizer_manager.encode(prompt, add_bos=True, add_eos=False)
         input_tensor = torch.tensor([input_ids], dtype=torch.long)
-
-        start = time.perf_counter()
         generated = model.generate(
             input_tensor,
             max_length=len(input_ids) + max_new_tokens,
         )
-        latency_ms = (time.perf_counter() - start) * 1000.0
-
         new_token_ids = generated[0][len(input_ids):].tolist()
-        generated_text = tokenizer_manager.decode(new_token_ids)
-        return generated_text, len(new_token_ids), latency_ms
+        return str(tokenizer_manager.decode(new_token_ids))
+
+    def _legacy_generate_fn(self, model, tokenizer_manager):
+        def _fn(prompt: str, max_new_tokens: int) -> str:
+            return self._generate_text(model, tokenizer_manager, prompt, max_new_tokens)
+
+        return _fn
+
+    @staticmethod
+    def _legacy_token_counter(tokenizer_manager):
+        def _count(text: str) -> int:
+            return len(
+                tokenizer_manager.encode(text, add_bos=False, add_eos=False)
+            )
+
+        return _count
+
+    @staticmethod
+    def _subject_generate_fn(subject: ResponseGenerator):
+        def _fn(prompt: str, max_new_tokens: int) -> str:
+            return subject.generate(prompt, max_new_tokens)
+
+        return _fn
 
     def _evaluate_generation(
         self,
-        model,
-        tokenizer_manager,
+        generate_fn: Callable[[str, int], str],
         tests: List[Dict[str, Any]],
         max_new_tokens: int = 100,
         collect_latency: bool = True,
+        token_counter: Optional[Callable[[str], int]] = None,
     ) -> Dict[str, Any]:
+        """
+        Score a generation subject (model or agent) against a suite.
+
+        ``generate_fn(prompt, max_new_tokens) -> str`` abstracts the subject so
+        models and agents are evaluated through the same path.
+        """
         results: List[Dict[str, Any]] = []
         latencies_ms: List[float] = []
         tokens_per_sec: List[float] = []
 
-        model.eval()
-        with torch.no_grad():
-            for test in tests:
-                prompt = test.get("prompt") or test.get("text") or ""
-                expected = test.get("expected", "")
-                test_type = test.get("type", "similarity")
-                threshold = float(test.get("threshold", 0.5))
+        for test in tests:
+            prompt = test.get("prompt") or test.get("text") or ""
+            expected = test.get("expected", "")
+            test_type = test.get("type", "similarity")
+            threshold = float(test.get("threshold", 0.5))
 
-                generated_text, new_tokens, latency_ms = self._generate(
-                    model, tokenizer_manager, prompt, max_new_tokens=max_new_tokens
-                )
-                if collect_latency:
-                    latencies_ms.append(latency_ms)
-                    if latency_ms > 0:
-                        tokens_per_sec.append(new_tokens / (latency_ms / 1000.0))
+            start = time.perf_counter()
+            generated_text = generate_fn(prompt, max_new_tokens)
+            latency_ms = (time.perf_counter() - start) * 1000.0
 
-                score = self._score_response(generated_text, expected, test_type)
+            if token_counter is not None:
+                new_tokens = token_counter(generated_text)
+            else:
+                new_tokens = len(generated_text.split())
 
-                results.append(
-                    {
-                        "test_id": test.get("id", ""),
-                        "prompt": prompt,
-                        "expected": expected,
-                        "generated": generated_text,
-                        "score": score,
-                        "passed": score >= threshold,
-                        "test_type": test_type,
-                        "latency_ms": latency_ms,
-                        "tokens_generated": new_tokens,
-                    }
-                )
+            if collect_latency:
+                latencies_ms.append(latency_ms)
+                if latency_ms > 0:
+                    tokens_per_sec.append(new_tokens / (latency_ms / 1000.0))
+
+            score = self._score_response(generated_text, expected, test_type)
+
+            results.append(
+                {
+                    "test_id": test.get("id", ""),
+                    "prompt": prompt,
+                    "expected": expected,
+                    "generated": generated_text,
+                    "score": score,
+                    "passed": score >= threshold,
+                    "test_type": test_type,
+                    "latency_ms": latency_ms,
+                    "tokens_generated": new_tokens,
+                }
+            )
 
         scores = [r["score"] for r in results]
         total = len(results)
@@ -590,6 +837,40 @@ class AutomaticEvaluationHarness:
 
         return result
 
+    def benchmark_subject(
+        self,
+        subject: ResponseGenerator,
+        prompt: str,
+        max_new_tokens: int = 50,
+        num_runs: int = 5,
+    ) -> Dict[str, Any]:
+        """Benchmark generation latency and throughput for a model/agent subject."""
+        if num_runs < 1:
+            raise ValueError("num_runs must be >= 1")
+
+        latencies: List[float] = []
+        tokens_per_sec: List[float] = []
+        for _ in range(num_runs):
+            start = time.perf_counter()
+            text = subject.generate(prompt, max_new_tokens)
+            latency_ms = (time.perf_counter() - start) * 1000.0
+            latencies.append(latency_ms)
+            if latency_ms > 0:
+                tokens_per_sec.append(len(text.split()) / (latency_ms / 1000.0))
+
+        lat_arr = np.array(latencies)
+        return {
+            "subject": subject.name,
+            "prompt": prompt,
+            "num_runs": num_runs,
+            "avg_latency_ms": float(lat_arr.mean()),
+            "p50_latency_ms": float(np.percentile(lat_arr, 50)),
+            "p95_latency_ms": float(np.percentile(lat_arr, 95)),
+            "max_latency_ms": float(lat_arr.max()),
+            "min_latency_ms": float(lat_arr.min()),
+            "avg_tokens_per_sec": float(np.mean(tokens_per_sec)) if tokens_per_sec else None,
+        }
+
     def benchmark_latency(
         self,
         model,
@@ -598,19 +879,21 @@ class AutomaticEvaluationHarness:
         max_new_tokens: int = 50,
         num_runs: int = 5,
     ) -> Dict[str, Any]:
-        """Benchmark generation latency and throughput for a prompt."""
+        """Benchmark generation latency and throughput for a model."""
         if num_runs < 1:
             raise ValueError("num_runs must be >= 1")
 
         latencies: List[float] = []
         tokens_per_sec: List[float] = []
+        counter = self._legacy_token_counter(tokenizer_manager)
+        generate_fn = self._legacy_generate_fn(model, tokenizer_manager)
         for _ in range(num_runs):
-            _, new_tokens, latency_ms = self._generate(
-                model, tokenizer_manager, prompt, max_new_tokens=max_new_tokens
-            )
+            start = time.perf_counter()
+            text = generate_fn(prompt, max_new_tokens)
+            latency_ms = (time.perf_counter() - start) * 1000.0
             latencies.append(latency_ms)
             if latency_ms > 0:
-                tokens_per_sec.append(new_tokens / (latency_ms / 1000.0))
+                tokens_per_sec.append(counter(text) / (latency_ms / 1000.0))
 
         lat_arr = np.array(latencies)
         return {
@@ -940,3 +1223,48 @@ class AutomaticEvaluationHarness:
         with open(report_path, "r", encoding="utf-8") as f:
             payload = json.load(f)
         return payload if isinstance(payload, dict) else {"payload": payload}
+
+    def write_aggregate_report(
+        self,
+        results: Dict[str, Dict[str, Any]],
+        output_path: Optional[Path] = None,
+    ) -> Path:
+        """
+        Combine per-suite results into a single aggregate JSON report.
+
+        Args:
+            results: Mapping of suite name to evaluation result dict
+                (e.g. from ``run_full_evaluation``)
+            output_path: Destination path; defaults to
+                ``eval_dir/aggregate_report.json``
+
+        Returns:
+            The report path
+        """
+        summary = {
+            "total_suites": len(results),
+            "passed_suites": sum(1 for r in results.values() if r.get("passed")),
+            "overall_pass_rate": float(
+                np.mean([r.get("pass_rate", 0.0) for r in results.values()])
+                if results
+                else 0.0
+            ),
+            "overall_avg_score": float(
+                np.mean([r.get("avg_score", 0.0) for r in results.values()])
+                if results
+                else 0.0
+            ),
+        }
+        aggregate = {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "summary": summary,
+            "suites": results,
+        }
+        output_path = Path(output_path) if output_path is not None else (
+            self.eval_dir / "aggregate_report.json"
+        )
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(output_path, "w", encoding="utf-8") as f:
+            json.dump(aggregate, f, indent=2)
+        logger.info(f"Aggregate report saved: {output_path}")
+        return output_path

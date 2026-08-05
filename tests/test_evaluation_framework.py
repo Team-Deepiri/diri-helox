@@ -19,6 +19,12 @@ from evaluation.automatic_evaluation_harness import (
     token_f1_score,
     word_overlap_score,
 )
+from evaluation.subjects import (
+    AgentGenerator,
+    CallableGenerator,
+    CallablePredictor,
+    HFModelGenerator,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -478,3 +484,209 @@ class TestFullEvaluation:
         results = harness.run_full_evaluation(FakeLM(shared), FakeTokenizer(shared))
         assert set(results) == {"a", "b"}
         assert results["a"]["passed_tests"] == 1
+
+
+# ---------------------------------------------------------------------------
+# Class-based subjects: agents and models
+# ---------------------------------------------------------------------------
+
+
+class TestHFModelGenerator:
+    def test_generates_text(self, tmp_path):
+        shared = {"text": "def add(a, b): return a + b"}
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite(
+            "gen",
+            [{"prompt": "write add", "expected": "def add", "type": "contains"}],
+        )
+
+        class FakeHFTokenizer:
+            def __init__(self):
+                self.pad_token = None
+                self.eos_token = "</s>"
+
+            def __call__(self, prompt, return_tensors="pt", **kwargs):
+                return {"input_ids": torch.tensor([[1, 2, 3]])}
+
+            def decode(self, token_ids, skip_special_tokens=True):
+                return shared["text"]
+
+        class FakeHFModel(torch.nn.Module):
+            _name_or_path = "fake-model"
+
+            def eval(self):
+                return self
+
+            def generate(self, **inputs):
+                n = inputs["input_ids"].shape[1]
+                return torch.zeros((1, n + 5), dtype=torch.long)
+
+        subject = HFModelGenerator(FakeHFModel(), FakeHFTokenizer())
+        result = harness.evaluate_subject(subject, "gen")
+        assert result["passed_tests"] == 1
+        assert result["results"][0]["generated"] == shared["text"]
+
+
+class TestAgentEvaluation:
+    @pytest.fixture
+    def harness(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite(
+            "gen",
+            [
+                {"id": "ok", "prompt": "write add", "expected": "def add", "type": "contains"},
+                {"id": "no", "prompt": "write add", "expected": "unrelated", "type": "contains"},
+            ],
+        )
+        return harness
+
+    def test_callable_generator(self, harness):
+        subject = CallableGenerator(
+            lambda prompt, max_new_tokens: "def add(a, b): return a + b",
+            name="lambda-agent",
+        )
+        result = harness.evaluate_subject(subject, "gen")
+        assert result["avg_score"] == 0.5
+        assert result["passed_tests"] == 1
+
+    def test_agent_respond_with_kwarg_passthrough(self, harness):
+        class FakeAgent:
+            name = "fake-agent"
+
+            def __init__(self):
+                self.calls = []
+
+            def respond(self, prompt, max_new_tokens=None):
+                self.calls.append((prompt, max_new_tokens))
+                return "def add(a, b): return a + b"
+
+        agent = FakeAgent()
+        subject = AgentGenerator(agent)
+        result = harness.evaluate_subject(subject, "gen", max_new_tokens=77)
+        assert result["passed_tests"] == 1
+        assert all(max_tokens == 77 for _, max_tokens in agent.calls)
+
+    def test_agent_chat_without_kwarg(self, harness):
+        class FakeAgent:
+            name = "chat-agent"
+
+            def __init__(self):
+                self.calls = []
+
+            def chat(self, prompt):
+                self.calls.append(prompt)
+                return "def add(a, b): return a + b"
+
+        agent = FakeAgent()
+        subject = AgentGenerator(agent)
+        assert subject.generate("hi", 123) == "def add(a, b): return a + b"
+        assert len(agent.calls) == 1
+        assert subject.name == "chat-agent"
+
+    def test_agent_callable_object(self, harness):
+        class CallableAgent:
+            def __call__(self, prompt):
+                return "def add(a, b): return a + b"
+
+        subject = AgentGenerator(CallableAgent())
+        result = harness.evaluate_subject(subject, "gen")
+        assert result["passed_tests"] == 1
+
+    def test_agent_without_methods_raises(self):
+        class BrokenAgent:
+            pass
+
+        with pytest.raises(TypeError):
+            AgentGenerator(BrokenAgent())
+
+    def test_run_full_subject_evaluation(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite("a", [{"prompt": "p", "expected": "def add", "type": "contains"}])
+        harness.add_test_suite("b", [{"prompt": "p", "expected": "def add", "type": "contains"}])
+        subject = CallableGenerator(lambda prompt, max_new_tokens: "def add()")
+        results = harness.run_full_subject_evaluation(subject)
+        assert set(results) == {"a", "b"}
+        assert results["a"]["passed_tests"] == 1
+
+
+class TestPredictorEvaluation:
+    def test_callable_predictor(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite(
+            "intent",
+            [
+                {"text": "fix the bug", "label": 0},
+                {"text": "write tests", "label": 1},
+            ],
+        )
+        predictor = CallablePredictor(lambda texts: [0, 1], name="fake-classifier")
+        result = harness.evaluate_predictor(predictor, "intent")
+        assert result["mode"] == "classifier"
+        assert result["passed_tests"] == 2
+        assert result["overall"]["accuracy"] == 1.0
+
+
+class TestSubjectComparison:
+    def test_compare_subjects(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite(
+            "gen",
+            [
+                {"prompt": "p", "expected": "def add", "type": "contains"},
+                {"prompt": "p", "expected": "def add", "type": "contains"},
+            ],
+        )
+        good = CallableGenerator(lambda prompt, max_new_tokens: "def add()", name="good")
+        bad = CallableGenerator(lambda prompt, max_new_tokens: "nothing", name="bad")
+        comparison = harness.compare_subjects(good, bad, "gen")
+        assert comparison["avg_score_a"] == 1.0
+        assert comparison["avg_score_b"] == 0.0
+        assert comparison["avg_score_delta"] == -1.0
+        assert len(comparison["per_test"]) == 2
+
+
+class TestValidateSuite:
+    def test_valid_suite(self, harness):
+        harness.add_test_suite("ok", [{"prompt": "p", "expected": "e", "type": "contains"}])
+        report = harness.validate_suite("ok")
+        assert report["valid"] is True
+        assert report["issues"] == []
+
+    def test_invalid_suite_reports_issues(self, harness):
+        harness.add_test_suite(
+            "bad",
+            [
+                {"expected": "e", "type": "unknown_type", "threshold": 5},
+                {},
+            ],
+        )
+        report = harness.validate_suite("bad")
+        assert report["valid"] is False
+        issue_text = " ".join(report["issues"])
+        assert "unknown test type" in issue_text
+        assert "outside [0, 1]" in issue_text
+        assert "empty test" in issue_text
+
+
+class TestAggregateReport:
+    def test_write_aggregate_report(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        results = {
+            "a": {"suite_name": "a", "passed": True, "pass_rate": 1.0, "avg_score": 0.9},
+            "b": {"suite_name": "b", "passed": False, "pass_rate": 0.5, "avg_score": 0.4},
+        }
+        path = harness.write_aggregate_report(results)
+        report = AutomaticEvaluationHarness.load_report(path)
+        assert report["summary"]["total_suites"] == 2
+        assert report["summary"]["passed_suites"] == 1
+        assert report["summary"]["overall_pass_rate"] == pytest.approx(0.75)
+
+
+class TestEmptySuite:
+    def test_empty_suite_returns_empty_result(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite("empty", [])
+        subject = CallableGenerator(lambda prompt, max_new_tokens: "x")
+        result = harness.evaluate_subject(subject, "empty")
+        assert result["total_tests"] == 0
+        assert result["passed"] is False
