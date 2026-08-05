@@ -79,6 +79,7 @@ data/
 datasets/
 *.jsonl
 !helox_sdk/tests/fixtures/*.jsonl
+!helox_sdk/deepiri_helox_sdk/evaluation/suites/*.jsonl
 *.parquet
 *.arrow
 *.feather

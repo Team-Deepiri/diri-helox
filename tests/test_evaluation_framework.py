@@ -26,7 +26,6 @@ from evaluation.subjects import (
     HFModelGenerator,
 )
 
-
 # ---------------------------------------------------------------------------
 # Fixtures / fakes
 # ---------------------------------------------------------------------------
@@ -241,7 +240,12 @@ class TestGenerationEvaluation:
 
     def test_generation_scoring_per_type(self, tmp_path, fake_generator):
         tests = [
-            {"id": "em", "prompt": "p", "expected": "def add(a, b): return a + b", "type": "exact_match"},
+            {
+                "id": "em",
+                "prompt": "p",
+                "expected": "def add(a, b): return a + b",
+                "type": "exact_match",
+            },
             {"id": "rg", "prompt": "p", "expected": r"def add", "type": "regex_match"},
             {"id": "num", "prompt": "p", "expected": "5", "type": "numeric_match"},
         ]
@@ -349,7 +353,9 @@ class TestGates:
 
     def test_classifier_gates(self, tmp_path):
         harness = AutomaticEvaluationHarness(eval_dir=tmp_path, min_accuracy=1.0, min_f1=1.0)
-        harness.add_test_suite("intent", [{"text": "fix", "label": 0}, {"text": "test", "label": 1}])
+        harness.add_test_suite(
+            "intent", [{"text": "fix", "label": 0}, {"text": "test", "label": 1}]
+        )
         result = harness.evaluate_classifier_suite("intent", lambda texts: [0, 0])
         assert result["passed"] is False
         assert any("accuracy_below_threshold" in f for f in result["failures"])
@@ -706,3 +712,56 @@ class TestEmptySuite:
         result = harness.evaluate_subject(subject, "empty")
         assert result["total_tests"] == 0
         assert result["passed"] is False
+
+
+class TestEvaluationMatrixAndReport:
+    def test_run_evaluation_matrix(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])
+        harness.add_test_suite("b", [{"prompt": "p", "expected": "miss", "type": "contains"}])
+        subjects = {
+            "agent1": CallableGenerator(lambda prompt, max_new_tokens: "good answer"),
+            "agent2": CallableGenerator(lambda prompt, max_new_tokens: "wrong"),
+        }
+        matrix = harness.run_evaluation_matrix(subjects)
+        assert matrix["subjects"] == ["agent1", "agent2"]
+        assert matrix["suites"] == ["a", "b"]
+        assert matrix["matrix"]["a"]["agent1"]["passed_tests"] == 1
+        assert matrix["matrix"]["a"]["agent2"]["passed_tests"] == 0
+        assert matrix["matrix"]["b"]["agent1"]["passed_tests"] == 0
+
+    def test_export_markdown_report(self, tmp_path):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        results = {
+            "gen": {
+                "suite_name": "gen",
+                "passed": True,
+                "pass_rate": 1.0,
+                "avg_score": 0.85,
+                "total_tests": 2,
+                "passed_tests": 2,
+                "mode": "generation",
+                "avg_latency_ms": 12.5,
+            }
+        }
+        report = harness.export_markdown_report(results, output_path=tmp_path / "report.md")
+        assert "# Evaluation Report" in report
+        assert "## gen" in report
+        assert "| avg_score | 0.850 |" in report
+        assert (tmp_path / "report.md").exists()
+
+
+class TestSdkDelegation:
+    def test_in_repo_harness_is_sdk_harness(self):
+        from evaluation.automatic_evaluation_harness import AutomaticEvaluationHarness as InRepo
+        from deepiri_helox_sdk.evaluation.automatic_evaluation_harness import (
+            AutomaticEvaluationHarness as Sdk,
+        )
+
+        assert InRepo is Sdk
+
+    def test_in_repo_subjects_are_sdk_subjects(self):
+        from deepiri_helox_sdk.evaluation.subjects import CallableGenerator as SdkCG
+        from evaluation.subjects import CallableGenerator as InRepoCG
+
+        assert InRepoCG is SdkCG
