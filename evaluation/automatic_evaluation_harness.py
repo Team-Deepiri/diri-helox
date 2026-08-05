@@ -13,14 +13,19 @@ import re
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, cast
 
 import numpy as np
 import torch
 
 from helox_logger import get_logger
 
-from .subjects import CallablePredictor, LabelPredictor, ResponseGenerator
+from .subjects import (
+    CallablePredictor,
+    LabelPredictor,
+    LegacyModelGenerator,
+    ResponseGenerator,
+)
 
 logger = get_logger(__name__)
 
@@ -467,13 +472,11 @@ class AutomaticEvaluationHarness:
         else:
             if not tests:
                 return self._empty_generation_result(suite_name, "generation")
-            model.eval()
-            result = self._evaluate_generation(
-                self._legacy_generate_fn(model, tokenizer_manager),
+            result = self._evaluate_subject_raw(
+                LegacyModelGenerator(model, tokenizer_manager),
                 tests,
                 max_new_tokens=max_new_tokens,
                 collect_latency=collect_latency,
-                token_counter=self._legacy_token_counter(tokenizer_manager),
             )
 
         return self._finalize_result(result, suite_name, resolved_mode)
@@ -504,13 +507,46 @@ class AutomaticEvaluationHarness:
         tests = self.get_suite(suite_name)
         if not tests:
             return self._empty_generation_result(suite_name, "generation")
-        result = self._evaluate_generation(
-            self._subject_generate_fn(subject),
+        result = self._evaluate_subject_raw(
+            subject,
             tests,
             max_new_tokens=max_new_tokens,
             collect_latency=collect_latency,
         )
         return self._finalize_result(result, suite_name, "generation")
+
+    def _evaluate_subject_raw(
+        self,
+        subject: ResponseGenerator,
+        tests: List[Dict[str, Any]],
+        max_new_tokens: int = 100,
+        collect_latency: bool = True,
+    ) -> Dict[str, Any]:
+        """Score a subject against an already-loaded suite (no history write)."""
+        return self._evaluate_generation(
+            self._subject_generate_fn(subject),
+            tests,
+            max_new_tokens=max_new_tokens,
+            collect_latency=collect_latency,
+            token_counter=self._subject_token_counter(subject),
+        )
+
+    @staticmethod
+    def _subject_token_counter(
+        subject: ResponseGenerator,
+    ) -> Optional[Callable[[str], int]]:
+        count = getattr(subject, "count_tokens", None)
+        if not callable(count):
+            return None
+        count = cast(Callable[[str], Optional[int]], count)
+
+        def _count(text: str) -> int:
+            counted = count(text)
+            if counted is None:
+                return len(text.split())
+            return counted
+
+        return _count
 
     def evaluate_predictor(
         self,
@@ -714,38 +750,6 @@ class AutomaticEvaluationHarness:
     # ------------------------------------------------------------------
 
     @staticmethod
-    def _generate_text(
-        model,
-        tokenizer_manager,
-        prompt: str,
-        max_new_tokens: int = 100,
-    ) -> str:
-        """Generate text for a prompt using a legacy model + tokenizer manager."""
-        input_ids = tokenizer_manager.encode(prompt, add_bos=True, add_eos=False)
-        input_tensor = torch.tensor([input_ids], dtype=torch.long)
-        generated = model.generate(
-            input_tensor,
-            max_length=len(input_ids) + max_new_tokens,
-        )
-        new_token_ids = generated[0][len(input_ids):].tolist()
-        return str(tokenizer_manager.decode(new_token_ids))
-
-    def _legacy_generate_fn(self, model, tokenizer_manager):
-        def _fn(prompt: str, max_new_tokens: int) -> str:
-            return self._generate_text(model, tokenizer_manager, prompt, max_new_tokens)
-
-        return _fn
-
-    @staticmethod
-    def _legacy_token_counter(tokenizer_manager):
-        def _count(text: str) -> int:
-            return len(
-                tokenizer_manager.encode(text, add_bos=False, add_eos=False)
-            )
-
-        return _count
-
-    @staticmethod
     def _subject_generate_fn(subject: ResponseGenerator):
         def _fn(prompt: str, max_new_tokens: int) -> str:
             return subject.generate(prompt, max_new_tokens)
@@ -850,13 +854,16 @@ class AutomaticEvaluationHarness:
 
         latencies: List[float] = []
         tokens_per_sec: List[float] = []
+        counter = self._subject_token_counter(subject)
         for _ in range(num_runs):
             start = time.perf_counter()
             text = subject.generate(prompt, max_new_tokens)
             latency_ms = (time.perf_counter() - start) * 1000.0
             latencies.append(latency_ms)
             if latency_ms > 0:
-                tokens_per_sec.append(len(text.split()) / (latency_ms / 1000.0))
+                tokens_per_sec.append(
+                    counter(text) if counter is not None else len(text.split())
+                )
 
         lat_arr = np.array(latencies)
         return {
@@ -880,32 +887,12 @@ class AutomaticEvaluationHarness:
         num_runs: int = 5,
     ) -> Dict[str, Any]:
         """Benchmark generation latency and throughput for a model."""
-        if num_runs < 1:
-            raise ValueError("num_runs must be >= 1")
-
-        latencies: List[float] = []
-        tokens_per_sec: List[float] = []
-        counter = self._legacy_token_counter(tokenizer_manager)
-        generate_fn = self._legacy_generate_fn(model, tokenizer_manager)
-        for _ in range(num_runs):
-            start = time.perf_counter()
-            text = generate_fn(prompt, max_new_tokens)
-            latency_ms = (time.perf_counter() - start) * 1000.0
-            latencies.append(latency_ms)
-            if latency_ms > 0:
-                tokens_per_sec.append(counter(text) / (latency_ms / 1000.0))
-
-        lat_arr = np.array(latencies)
-        return {
-            "prompt": prompt,
-            "num_runs": num_runs,
-            "avg_latency_ms": float(lat_arr.mean()),
-            "p50_latency_ms": float(np.percentile(lat_arr, 50)),
-            "p95_latency_ms": float(np.percentile(lat_arr, 95)),
-            "max_latency_ms": float(lat_arr.max()),
-            "min_latency_ms": float(lat_arr.min()),
-            "avg_tokens_per_sec": float(np.mean(tokens_per_sec)) if tokens_per_sec else None,
-        }
+        return self.benchmark_subject(
+            LegacyModelGenerator(model, tokenizer_manager),
+            prompt,
+            max_new_tokens=max_new_tokens,
+            num_runs=num_runs,
+        )
 
     # ------------------------------------------------------------------
     # Classification evaluation

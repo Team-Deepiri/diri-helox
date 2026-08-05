@@ -223,6 +223,22 @@ class TestGenerationEvaluation:
         assert model.eval_called is True
         assert result["results"][0]["generated"] == fake_generator["text"]
 
+    def test_evaluate_model_routes_through_subject_token_counter(self, tmp_path, fake_generator):
+        tests = [{"id": "t1", "prompt": "write add", "expected": "def add", "type": "contains"}]
+        harness, model, tokenizer = self._make_harness(tmp_path, fake_generator["text"], tests)
+        result = harness.evaluate_model(model, tokenizer, "gen")
+        assert result["results"][0]["tokens_generated"] == 3
+        assert model.eval_called is True
+
+    def test_subject_generic_estimates_tokens_when_no_counter(self, tmp_path, fake_generator):
+        tests = [{"id": "t1", "prompt": "write add", "expected": "def add", "type": "contains"}]
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+        harness.add_test_suite("gen", tests)
+        subject = CallableGenerator(lambda p, **kwargs: fake_generator["text"])
+        result = harness.evaluate_subject(subject, "gen")
+        assert result["results"][0]["tokens_generated"] == len(fake_generator["text"].split())
+        assert result["passed_tests"] == 1
+
     def test_generation_scoring_per_type(self, tmp_path, fake_generator):
         tests = [
             {"id": "em", "prompt": "p", "expected": "def add(a, b): return a + b", "type": "exact_match"},

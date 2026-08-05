@@ -5,6 +5,7 @@ The harness evaluates *subjects*: anything that can respond to a prompt.
 Two concrete kinds are supported:
 
 - **Models** — HuggingFace causal LMs wrapped by :class:`HFModelGenerator`,
+  legacy models + tokenizer managers wrapped by :class:`LegacyModelGenerator`,
   plus HuggingFace sequence classifiers wrapped by :class:`HFClassifierPredictor`.
 - **Agents** — agent/chat backends wrapped by :class:`AgentGenerator` or
   :class:`CallableGenerator`.
@@ -62,6 +63,47 @@ class ResponseGenerator(ABC):
     def generate(self, prompt: str, max_new_tokens: int = 100) -> str:
         """Return a text response for the given prompt."""
         raise NotImplementedError
+
+    def count_tokens(self, text: str) -> Optional[int]:
+        """Return an exact token count for ``text``, or None to estimate."""
+        return None
+
+
+class LegacyModelGenerator(ResponseGenerator):
+    """
+    ResponseGenerator backed by a legacy model + tokenizer manager.
+
+    The tokenizer manager exposes ``encode``/``decode`` with ``add_bos`` /
+    ``add_eos`` kwargs rather than the HuggingFace ``__call__`` interface, so
+    this subject lets the harness route legacy models through the same unified
+    subject path as :class:`HFModelGenerator` and agents.
+    """
+
+    def __init__(
+        self,
+        model,
+        tokenizer_manager,
+        name: Optional[str] = None,
+    ) -> None:
+        self.model = model
+        self.tokenizer_manager = tokenizer_manager
+        self.name = name or str(getattr(model, "_name_or_path", None) or "legacy_model")
+        self.model.eval()
+
+    def generate(self, prompt: str, max_new_tokens: int = 100) -> str:
+        input_ids = self.tokenizer_manager.encode(prompt, add_bos=True, add_eos=False)
+        input_tensor = torch.tensor([input_ids], dtype=torch.long)
+        generated = self.model.generate(
+            input_tensor,
+            max_length=len(input_ids) + max_new_tokens,
+        )
+        new_token_ids = generated[0][len(input_ids):].tolist()
+        return str(self.tokenizer_manager.decode(new_token_ids))
+
+    def count_tokens(self, text: str) -> int:
+        return len(
+            self.tokenizer_manager.encode(text, add_bos=False, add_eos=False)
+        )
 
 
 class HFModelGenerator(ResponseGenerator):
@@ -258,5 +300,6 @@ __all__ = [
     "HFClassifierPredictor",
     "HFModelGenerator",
     "LabelPredictor",
+    "LegacyModelGenerator",
     "ResponseGenerator",
 ]

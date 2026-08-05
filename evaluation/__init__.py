@@ -38,5 +38,6 @@ from .subjects import (  # noqa: F401
     HFClassifierPredictor,
     HFModelGenerator,
     LabelPredictor,
+    LegacyModelGenerator,
     ResponseGenerator,
 )
