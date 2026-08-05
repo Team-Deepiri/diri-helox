@@ -4,6 +4,9 @@
 deepiri-dataset-processor[all] @ git+https://github.com/Team-Deepiri/deepiri-dataset-processor.git@main
 deepiri-training-orchestrator @ git+https://github.com/Team-Deepiri/deepiri-training-orchestrator.git@main
 deepiri-gpu-utils[torch] @ git+https://github.com/Team-Deepiri/deepiri-gpu-utils.git@main
+# deepiri-helox-sdk: in-repo package (helox_sdk/) providing the evaluation harness
+# that `evaluation/` re-exports. Installed editable from the working tree.
+-e ./helox_sdk
 
 # ML Training Dependencies
 torch>=2.0.0
