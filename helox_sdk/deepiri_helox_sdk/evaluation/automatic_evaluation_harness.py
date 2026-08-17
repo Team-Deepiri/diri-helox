@@ -557,6 +557,8 @@ class AutomaticEvaluationHarness:
             lines.append(f"| passed_tests | {result.get('passed_tests', 0)} |")
             lines.append(f"| pass_rate | {result.get('pass_rate', 0.0):.3f} |")
             lines.append(f"| avg_score | {result.get('avg_score', 0.0):.3f} |")
+            if result.get("score_stderr") is not None:
+                lines.append(f"| score_stderr | {result.get('score_stderr', 0.0):.3f} |")
             if result.get("mode") == "classifier":
                 overall = result.get("overall") or {}
                 lines.append(f"| accuracy | {overall.get('accuracy', 0.0):.3f} |")
@@ -624,6 +626,7 @@ class AutomaticEvaluationHarness:
                 "pass_rate": 0.0,
                 "avg_score": 0.0,
                 "score_std": 0.0,
+                "score_stderr": 0.0,
                 "min_score": 0.0,
                 "max_score": 0.0,
                 "results": [],
@@ -799,6 +802,7 @@ class AutomaticEvaluationHarness:
             "pass_rate": passed / total if total else 0.0,
             "avg_score": sum(scores) / total if total else 0.0,
             "score_std": float(np.std(scores)) if scores else 0.0,
+            "score_stderr": self._score_stderr(scores),
             "min_score": float(min(scores)) if scores else 0.0,
             "max_score": float(max(scores)) if scores else 0.0,
             "results": results,
@@ -817,6 +821,22 @@ class AutomaticEvaluationHarness:
             result["avg_latency_ms"] = float(lat_arr.mean())
 
         return result
+
+    @staticmethod
+    def _score_stderr(scores: List[float]) -> float:
+        """
+        Standard error of the mean score.
+
+        Uses the sample standard deviation (n-1), since the suite is a sample of
+        the behaviour being measured rather than the whole population. This is
+        the uncertainty on ``avg_score`` itself, so it says how far the mean
+        could move on a re-run — which ``score_std`` (the spread across tests)
+        does not. Undefined for a single test, reported as 0.0.
+        """
+        n = len(scores)
+        if n < 2:
+            return 0.0
+        return float(np.std(scores, ddof=1) / np.sqrt(n))
 
     def benchmark_subject(
         self,
@@ -1011,6 +1031,7 @@ class AutomaticEvaluationHarness:
             "passed_tests": result.get("passed_tests", 0),
             "pass_rate": result.get("pass_rate", 0.0),
             "avg_score": result.get("avg_score", 0.0),
+            "score_stderr": result.get("score_stderr", 0.0),
         }
         overall = result.get("overall") or {}
         if overall:

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import pytest
+
 from deepiri_helox_sdk.evaluation import AutomaticEvaluationHarness
 from deepiri_helox_sdk.evaluation.metrics import (
     classification_metrics,
@@ -135,6 +137,39 @@ def test_suite_edit_resets_baseline_instead_of_flagging_regression(tmp_path, cap
 
     # The new config builds its own baseline, and drops within it still fire.
     assert len(harness.get_history(suite_name="gen", config_hash=harder["config_hash"])) == 1
+
+
+def test_score_stderr_shrinks_with_more_tests(tmp_path):
+    """stderr is the uncertainty on the mean, so it must fall as the suite grows."""
+    subject = CallableGenerator(lambda p, **kw: "good" if p == "hit" else "no", name="model_a")
+
+    def run(repeats):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path / f"n{repeats}")
+        # Half the tests score 1.0 and half 0.0, so the spread is fixed at 0.5.
+        harness.add_test_suite(
+            "gen",
+            [
+                {"prompt": "hit" if i % 2 else "miss", "expected": "good", "type": "contains"}
+                for i in range(repeats)
+            ],
+        )
+        return harness.evaluate_subject(subject, "gen")
+
+    small, large = run(4), run(64)
+
+    assert small["avg_score"] == large["avg_score"] == 0.5
+    # Spread across tests is unchanged; only the confidence in the mean improves.
+    assert small["score_std"] == pytest.approx(large["score_std"], abs=0.01)
+    assert large["score_stderr"] < small["score_stderr"]
+    assert large["score_stderr"] == pytest.approx(0.5 / 64**0.5, rel=0.05)
+
+
+def test_score_stderr_is_zero_for_a_single_test(tmp_path):
+    """A one-test suite has no sample spread, so stderr is undefined and reported as 0."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    result = harness.evaluate_subject(CallableGenerator(lambda p, **kw: "good", name="m"), "gen")
+    assert result["score_stderr"] == 0.0
 
 
 def test_run_evaluation_matrix(tmp_path):
