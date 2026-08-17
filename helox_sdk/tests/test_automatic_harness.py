@@ -7,6 +7,10 @@ import json
 import pytest
 
 from deepiri_helox_sdk.evaluation import AutomaticEvaluationHarness
+from deepiri_helox_sdk.evaluation.automatic_evaluation_harness import (
+    is_retryable_error,
+    retry_after_seconds,
+)
 from deepiri_helox_sdk.evaluation.metrics import (
     classification_metrics,
     score_response,
@@ -265,6 +269,118 @@ def test_across_run_floor_uses_sample_stddev(tmp_path):
 
     # Well past either estimate, so it must still be reported.
     assert check(0.30)["detected"] is True
+
+
+class _RateLimited(Exception):
+    """Stand-in for a provider rate-limit exception."""
+
+    status_code = 429
+
+
+class _BadPrompt(Exception):
+    """Stand-in for a caller error the provider will never accept."""
+
+    status_code = 400
+
+
+def _no_backoff_harness(tmp_path, **kwargs):
+    return AutomaticEvaluationHarness(
+        eval_dir=tmp_path, retry_initial_backoff=0.0, retry_max_backoff=0.0, **kwargs
+    )
+
+
+def test_retryable_error_classification():
+    assert is_retryable_error(_RateLimited()) is True
+    assert is_retryable_error(TimeoutError()) is True
+    assert is_retryable_error(ConnectionError()) is True
+    # A 400 is our fault; retrying it just burns quota.
+    assert is_retryable_error(_BadPrompt()) is False
+    assert is_retryable_error(ValueError("bad prompt")) is False
+
+
+def test_retry_after_header_wins_over_backoff():
+    class _WithHeader(Exception):
+        status_code = 429
+        response = type("R", (), {"headers": {"retry-after": "2.5"}})()
+
+    assert retry_after_seconds(_WithHeader()) == 2.5
+    assert retry_after_seconds(_RateLimited()) is None
+
+
+def test_transient_failures_are_retried(tmp_path):
+    """A rate limit must cost a retry, not the whole run."""
+    harness = _no_backoff_harness(tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    attempts = {"n": 0}
+
+    def flaky(prompt, **kwargs):
+        attempts["n"] += 1
+        if attempts["n"] < 3:
+            raise _RateLimited("slow down")
+        return "good"
+
+    result = harness.evaluate_subject(CallableGenerator(flaky, name="model_a"), "gen")
+
+    assert result["avg_score"] == 1.0
+    assert result["total_retries"] == 2
+    assert result["results"][0]["retries"] == 2
+
+
+def test_retries_are_capped(tmp_path):
+    """Past max_retries the error surfaces instead of looping forever."""
+    harness = _no_backoff_harness(tmp_path, max_retries=2)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    attempts = {"n": 0}
+
+    def always_limited(prompt, **kwargs):
+        attempts["n"] += 1
+        raise _RateLimited("slow down")
+
+    with pytest.raises(_RateLimited):
+        harness.evaluate_subject(CallableGenerator(always_limited, name="model_a"), "gen")
+
+    assert attempts["n"] == 3  # the original call plus two retries
+
+
+def test_non_retryable_error_fails_fast(tmp_path):
+    """A caller error must not be retried at all."""
+    harness = _no_backoff_harness(tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    attempts = {"n": 0}
+
+    def bad(prompt, **kwargs):
+        attempts["n"] += 1
+        raise _BadPrompt("malformed")
+
+    with pytest.raises(_BadPrompt):
+        harness.evaluate_subject(CallableGenerator(bad, name="model_a"), "gen")
+
+    assert attempts["n"] == 1
+
+
+def test_retry_backoff_is_excluded_from_latency(tmp_path):
+    """Latency must describe the model, not the time we spent waiting on it."""
+    harness = AutomaticEvaluationHarness(
+        eval_dir=tmp_path, retry_initial_backoff=0.2, retry_max_backoff=0.2
+    )
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    attempts = {"n": 0}
+
+    def flaky(prompt, **kwargs):
+        attempts["n"] += 1
+        if attempts["n"] == 1:
+            raise _RateLimited("slow down")
+        return "good"
+
+    result = harness.evaluate_subject(CallableGenerator(flaky, name="model_a"), "gen")
+
+    assert result["results"][0]["retries"] == 1
+    # The backoff slept at least 100ms; a fast local call must stay well under it.
+    assert result["results"][0]["latency_ms"] < 50
 
 
 def test_run_evaluation_matrix(tmp_path):

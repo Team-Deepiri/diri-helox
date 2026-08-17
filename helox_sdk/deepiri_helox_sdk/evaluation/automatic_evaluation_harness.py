@@ -15,6 +15,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import random
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,6 +42,87 @@ logger = logging.getLogger(__name__)
 # Scoring primitives (module-level so they can be reused and unit-tested).
 # Invariant: every score is dimensionless and bounded in [0, 1].
 # ---------------------------------------------------------------------------
+
+
+# Transient HTTP conditions worth another attempt: rate limits, request
+# timeouts, and server-side faults. 4xx codes outside this set mean the request
+# itself is wrong, so retrying only wastes quota.
+_RETRYABLE_STATUS = frozenset({408, 409, 425, 429, 500, 502, 503, 504})
+
+# Provider SDKs rarely share a base exception, but they do converge on names.
+_RETRYABLE_NAME_HINTS = (
+    "ratelimit",
+    "toomanyrequests",
+    "timeout",
+    "serviceunavailable",
+    "internalserver",
+    "apiconnection",
+    "apistatus",
+    "overloaded",
+    "unavailable",
+)
+
+
+def _error_status_code(exc: BaseException) -> Optional[int]:
+    """Best-effort extraction of an HTTP status code from a provider exception."""
+    candidates = [
+        getattr(exc, "status_code", None),
+        getattr(exc, "status", None),
+        getattr(getattr(exc, "response", None), "status_code", None),
+        getattr(getattr(exc, "response", None), "status", None),
+    ]
+    for candidate in candidates:
+        if candidate is None:
+            continue
+        try:
+            return int(candidate)
+        except (TypeError, ValueError):
+            continue
+    return None
+
+
+def is_retryable_error(exc: BaseException) -> bool:
+    """
+    Decide whether a failed generation is worth another attempt.
+
+    Retries are deliberately narrow: a transient status code, a connection or
+    timeout failure, or a provider exception whose class name names one of
+    those conditions. Anything else — a bad prompt, a missing model, a bug in
+    the subject — fails immediately rather than being retried three times.
+    """
+    if isinstance(exc, (TimeoutError, ConnectionError)):
+        return True
+    status = _error_status_code(exc)
+    if status is not None:
+        return status in _RETRYABLE_STATUS
+    name = type(exc).__name__.lower()
+    return any(hint in name for hint in _RETRYABLE_NAME_HINTS)
+
+
+def retry_after_seconds(exc: BaseException) -> Optional[float]:
+    """
+    Read a provider's ``Retry-After`` hint, in seconds, when it supplies one.
+
+    A server that tells us when to come back knows better than our backoff
+    curve, so this takes precedence over the computed delay.
+    """
+    headers = getattr(getattr(exc, "response", None), "headers", None)
+    if headers is not None and hasattr(headers, "get"):
+        for key in ("retry-after", "Retry-After"):
+            value = headers.get(key)
+            if value is None:
+                continue
+            try:
+                return max(0.0, float(value))
+            except (TypeError, ValueError):
+                continue
+    value = getattr(exc, "retry_after", None)
+    if value is not None:
+        try:
+            return max(0.0, float(value))
+        except (TypeError, ValueError):
+            return None
+    return None
 
 
 def stable_hash(payload: Any) -> str:
@@ -98,6 +180,10 @@ class AutomaticEvaluationHarness:
         min_accuracy: Optional[float] = None,
         min_f1: Optional[float] = None,
         history_file: Optional[Path] = None,
+        max_retries: int = 3,
+        retry_initial_backoff: float = 1.0,
+        retry_max_backoff: float = 60.0,
+        retry_backoff_multiplier: float = 2.0,
     ):
         """
         Initialize evaluation harness.
@@ -112,6 +198,10 @@ class AutomaticEvaluationHarness:
             min_accuracy: Optional minimum accuracy gate for classifier evals
             min_f1: Optional minimum F1 gate for classifier evals
             history_file: Optional override for the persistent history file
+            max_retries: Extra attempts for a transiently failing generation
+            retry_initial_backoff: Delay before the first retry, in seconds
+            retry_max_backoff: Ceiling on the computed backoff, in seconds
+            retry_backoff_multiplier: Growth factor between retries
         """
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
@@ -121,6 +211,10 @@ class AutomaticEvaluationHarness:
         self.min_avg_score = min_avg_score
         self.min_accuracy = min_accuracy
         self.min_f1 = min_f1
+        self.max_retries = max_retries
+        self.retry_initial_backoff = retry_initial_backoff
+        self.retry_max_backoff = retry_max_backoff
+        self.retry_backoff_multiplier = retry_backoff_multiplier
 
         self.test_suites: Dict[str, List[Dict[str, Any]]] = {}
         self.history_file = (
@@ -631,6 +725,7 @@ class AutomaticEvaluationHarness:
                 "avg_score": 0.0,
                 "score_std": 0.0,
                 "score_stderr": 0.0,
+                "total_retries": 0,
                 "min_score": 0.0,
                 "max_score": 0.0,
                 "results": [],
@@ -743,6 +838,49 @@ class AutomaticEvaluationHarness:
 
         return _fn
 
+    def _backoff_delay(self, attempt: int) -> float:
+        """Exponential backoff for ``attempt`` (0-based), with jitter."""
+        delay = min(
+            self.retry_initial_backoff * (self.retry_backoff_multiplier**attempt),
+            self.retry_max_backoff,
+        )
+        # Full jitter over [0.5x, 1.5x): without it, a batch of samples that all
+        # hit the same rate limit would retry in lockstep and trip it again.
+        return delay * (0.5 + random.random())
+
+    def _generate_with_retries(
+        self,
+        generate_fn: Callable[[str, int], str],
+        prompt: str,
+        max_new_tokens: int,
+    ) -> Tuple[str, float, int]:
+        """
+        Generate one response, retrying transient failures.
+
+        Returns ``(text, latency_ms, retries)``. The latency covers only the
+        attempt that succeeded — backoff sleeps are excluded, so a run that hit
+        a rate limit does not report inflated per-sample latency.
+        """
+        attempt = 0
+        while True:
+            start = time.perf_counter()
+            try:
+                text = generate_fn(prompt, max_new_tokens)
+            except Exception as exc:
+                if attempt >= self.max_retries or not is_retryable_error(exc):
+                    raise
+                delay = retry_after_seconds(exc)
+                if delay is None:
+                    delay = self._backoff_delay(attempt)
+                attempt += 1
+                logger.warning(
+                    f"Generation failed ({type(exc).__name__}: {exc}); "
+                    f"retry {attempt}/{self.max_retries} in {delay:.2f}s"
+                )
+                time.sleep(delay)
+                continue
+            return text, (time.perf_counter() - start) * 1000.0, attempt
+
     def _evaluate_generation(
         self,
         generate_fn: Callable[[str, int], str],
@@ -767,9 +905,9 @@ class AutomaticEvaluationHarness:
             test_type = test.get("type", "similarity")
             threshold = float(test.get("threshold", 0.5))
 
-            start = time.perf_counter()
-            generated_text = generate_fn(prompt, max_new_tokens)
-            latency_ms = (time.perf_counter() - start) * 1000.0
+            generated_text, latency_ms, retries = self._generate_with_retries(
+                generate_fn, prompt, max_new_tokens
+            )
 
             if token_counter is not None:
                 new_tokens = token_counter(generated_text)
@@ -794,6 +932,7 @@ class AutomaticEvaluationHarness:
                     "test_type": test_type,
                     "latency_ms": latency_ms,
                     "tokens_generated": new_tokens,
+                    "retries": retries,
                 }
             )
 
@@ -810,6 +949,7 @@ class AutomaticEvaluationHarness:
             "score_stderr": self._score_stderr(scores),
             "min_score": float(min(scores)) if scores else 0.0,
             "max_score": float(max(scores)) if scores else 0.0,
+            "total_retries": sum(r["retries"] for r in results),
             "results": results,
         }
 
