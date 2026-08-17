@@ -383,6 +383,85 @@ def test_retry_backoff_is_excluded_from_latency(tmp_path):
     assert result["results"][0]["latency_ms"] < 50
 
 
+def _failing_on(harness, failing_prompts, size=10):
+    """Suite of ``size`` tests plus a subject that fails on the named prompts."""
+    harness.add_test_suite(
+        "gen",
+        [
+            {"id": str(i), "prompt": str(i), "expected": "good", "type": "contains"}
+            for i in range(size)
+        ],
+    )
+
+    def generate(prompt, **kwargs):
+        if prompt in failing_prompts:
+            raise _RateLimited("slow down")
+        return "good"
+
+    return CallableGenerator(generate, name="model_a")
+
+
+def test_fail_on_error_true_aborts_on_first_failure(tmp_path):
+    """The default must stay strict: one failure ends the run."""
+    harness = _no_backoff_harness(tmp_path)
+    subject = _failing_on(harness, {"3"})
+    with pytest.raises(_RateLimited):
+        harness.evaluate_subject(subject, "gen")
+
+
+def test_fail_on_error_false_completes_the_run(tmp_path):
+    """Failed samples are skipped, reported, and kept out of the score."""
+    harness = _no_backoff_harness(tmp_path, fail_on_error=False, min_pass_rate=0.0)
+    subject = _failing_on(harness, {"3", "7"})
+
+    result = harness.evaluate_subject(subject, "gen")
+
+    assert result["total_tests"] == 10
+    assert result["scored_tests"] == 8
+    assert result["errored_tests"] == 2
+    assert result["error_rate"] == pytest.approx(0.2)
+    # The 8 samples that ran all passed; the 2 failures must not drag the
+    # score down as if the model had answered badly.
+    assert result["avg_score"] == 1.0
+    assert result["pass_rate"] == 1.0
+
+    errored = [row for row in result["results"] if row["errored"]]
+    assert len(errored) == 2
+    assert errored[0]["score"] is None
+    assert "_RateLimited" in errored[0]["error"]
+
+
+def test_fail_on_error_proportion(tmp_path):
+    """A proportion aborts only once the share of failures passes the bar."""
+    within = _no_backoff_harness(tmp_path / "within", fail_on_error=0.3, min_pass_rate=0.0)
+    result = within.evaluate_subject(_failing_on(within, {"1", "2"}), "gen")
+    assert result["errored_tests"] == 2  # 0.2 <= 0.3, tolerated
+
+    over = _no_backoff_harness(tmp_path / "over", fail_on_error=0.3, min_pass_rate=0.0)
+    with pytest.raises(_RateLimited):
+        over.evaluate_subject(_failing_on(over, {"1", "2", "3", "4"}), "gen")
+
+
+def test_fail_on_error_absolute_count(tmp_path):
+    """A value >= 1 is a count of failures, not a proportion."""
+    within = _no_backoff_harness(tmp_path / "within", fail_on_error=2, min_pass_rate=0.0)
+    result = within.evaluate_subject(_failing_on(within, {"1", "2"}), "gen")
+    assert result["errored_tests"] == 2
+
+    over = _no_backoff_harness(tmp_path / "over", fail_on_error=2, min_pass_rate=0.0)
+    with pytest.raises(_RateLimited):
+        over.evaluate_subject(_failing_on(over, {"1", "2", "3"}), "gen")
+
+
+def test_error_rate_is_recorded_in_history(tmp_path):
+    """An operator reading history must be able to see the run was degraded."""
+    harness = _no_backoff_harness(tmp_path, fail_on_error=False, min_pass_rate=0.0)
+    harness.evaluate_subject(_failing_on(harness, {"3", "7"}), "gen")
+    row = harness.get_history(suite_name="gen")[-1]
+    assert row["errored_tests"] == 2
+    assert row["error_rate"] == pytest.approx(0.2)
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])

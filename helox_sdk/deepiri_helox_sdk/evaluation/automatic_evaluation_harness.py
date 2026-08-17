@@ -184,6 +184,7 @@ class AutomaticEvaluationHarness:
         retry_initial_backoff: float = 1.0,
         retry_max_backoff: float = 60.0,
         retry_backoff_multiplier: float = 2.0,
+        fail_on_error: bool | float = True,
     ):
         """
         Initialize evaluation harness.
@@ -202,6 +203,10 @@ class AutomaticEvaluationHarness:
             retry_initial_backoff: Delay before the first retry, in seconds
             retry_max_backoff: Ceiling on the computed backoff, in seconds
             retry_backoff_multiplier: Growth factor between retries
+            fail_on_error: How much sample failure to tolerate. ``True`` aborts
+                on the first failure, ``False`` never aborts, a value in (0, 1)
+                aborts above that *proportion* of the suite, and a value >= 1
+                aborts above that *count* of failures.
         """
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
@@ -215,6 +220,7 @@ class AutomaticEvaluationHarness:
         self.retry_initial_backoff = retry_initial_backoff
         self.retry_max_backoff = retry_max_backoff
         self.retry_backoff_multiplier = retry_backoff_multiplier
+        self.fail_on_error = fail_on_error
 
         self.test_suites: Dict[str, List[Dict[str, Any]]] = {}
         self.history_file = (
@@ -657,6 +663,9 @@ class AutomaticEvaluationHarness:
             lines.append(f"| avg_score | {result.get('avg_score', 0.0):.3f} |")
             if result.get("score_stderr") is not None:
                 lines.append(f"| score_stderr | {result.get('score_stderr', 0.0):.3f} |")
+            if result.get("errored_tests"):
+                lines.append(f"| errored_tests | {result.get('errored_tests', 0)} |")
+                lines.append(f"| error_rate | {result.get('error_rate', 0.0):.3f} |")
             if result.get("mode") == "classifier":
                 overall = result.get("overall") or {}
                 lines.append(f"| accuracy | {overall.get('accuracy', 0.0):.3f} |")
@@ -720,6 +729,9 @@ class AutomaticEvaluationHarness:
         return self._finalize_result(
             {
                 "total_tests": 0,
+                "scored_tests": 0,
+                "errored_tests": 0,
+                "error_rate": 0.0,
                 "passed_tests": 0,
                 "pass_rate": 0.0,
                 "avg_score": 0.0,
@@ -848,6 +860,26 @@ class AutomaticEvaluationHarness:
         # hit the same rate limit would retry in lockstep and trip it again.
         return delay * (0.5 + random.random())
 
+    def _error_budget_exceeded(self, error_count: int, total_tests: int) -> bool:
+        """
+        Decide whether accumulated sample failures should abort the run.
+
+        See ``fail_on_error`` in :meth:`__init__` for the accepted forms. The
+        bool cases are checked by identity first, since ``True`` and ``False``
+        are also ints in Python and would otherwise be read as counts.
+        """
+        tolerance = self.fail_on_error
+        if tolerance is True:
+            return True
+        if tolerance is False:
+            return False
+        value = float(tolerance)
+        if value <= 0:
+            return True
+        if value < 1:
+            return total_tests > 0 and (error_count / total_tests) > value
+        return error_count > value
+
     def _generate_with_retries(
         self,
         generate_fn: Callable[[str, int], str],
@@ -868,6 +900,9 @@ class AutomaticEvaluationHarness:
                 text = generate_fn(prompt, max_new_tokens)
             except Exception as exc:
                 if attempt >= self.max_retries or not is_retryable_error(exc):
+                    # Let the caller report how much was spent before giving up
+                    # without changing the exception type it sees.
+                    exc.helox_retries = attempt  # type: ignore[attr-defined]
                     raise
                 delay = retry_after_seconds(exc)
                 if delay is None:
@@ -898,6 +933,7 @@ class AutomaticEvaluationHarness:
         results: List[Dict[str, Any]] = []
         latencies_ms: List[float] = []
         tokens_per_sec: List[float] = []
+        error_count = 0
 
         for test in tests:
             prompt = test.get("prompt") or test.get("text") or ""
@@ -905,9 +941,40 @@ class AutomaticEvaluationHarness:
             test_type = test.get("type", "similarity")
             threshold = float(test.get("threshold", 0.5))
 
-            generated_text, latency_ms, retries = self._generate_with_retries(
-                generate_fn, prompt, max_new_tokens
-            )
+            try:
+                generated_text, latency_ms, retries = self._generate_with_retries(
+                    generate_fn, prompt, max_new_tokens
+                )
+            except Exception as exc:
+                error_count += 1
+                if self._error_budget_exceeded(error_count, len(tests)):
+                    logger.error(
+                        f"Aborting run: {error_count} sample failure(s) of {len(tests)} "
+                        f"exceeds fail_on_error={self.fail_on_error!r} "
+                        f"({type(exc).__name__}: {exc})"
+                    )
+                    raise
+                logger.warning(
+                    f"Sample {test.get('id', '')!r} failed and was skipped "
+                    f"({type(exc).__name__}: {exc})"
+                )
+                results.append(
+                    {
+                        "test_id": test.get("id", ""),
+                        "prompt": prompt,
+                        "expected": expected,
+                        "generated": None,
+                        "score": None,
+                        "passed": False,
+                        "errored": True,
+                        "error": f"{type(exc).__name__}: {exc}",
+                        "test_type": test_type,
+                        "latency_ms": None,
+                        "tokens_generated": 0,
+                        "retries": getattr(exc, "helox_retries", 0),
+                    }
+                )
+                continue
 
             if token_counter is not None:
                 new_tokens = token_counter(generated_text)
@@ -929,6 +996,7 @@ class AutomaticEvaluationHarness:
                     "generated": generated_text,
                     "score": score,
                     "passed": score >= threshold,
+                    "errored": False,
                     "test_type": test_type,
                     "latency_ms": latency_ms,
                     "tokens_generated": new_tokens,
@@ -936,15 +1004,25 @@ class AutomaticEvaluationHarness:
                 }
             )
 
-        scores = [r["score"] for r in results]
+        # Failed samples are excluded from the score rather than counted as
+        # zero: an outage is not a quality signal, and scoring it would make
+        # regression detection fire on infrastructure rather than the model.
+        # They stay visible via errored_tests / error_rate so the exclusion is
+        # never silent.
+        scored = [r for r in results if not r["errored"]]
+        scores = [r["score"] for r in scored]
         total = len(results)
-        passed = sum(1 for r in results if r["passed"])
+        scored_count = len(scored)
+        passed = sum(1 for r in scored if r["passed"])
 
         result: Dict[str, Any] = {
             "total_tests": total,
+            "scored_tests": scored_count,
+            "errored_tests": error_count,
+            "error_rate": error_count / total if total else 0.0,
             "passed_tests": passed,
-            "pass_rate": passed / total if total else 0.0,
-            "avg_score": sum(scores) / total if total else 0.0,
+            "pass_rate": passed / scored_count if scored_count else 0.0,
+            "avg_score": sum(scores) / scored_count if scored_count else 0.0,
             "score_std": float(np.std(scores)) if scores else 0.0,
             "score_stderr": self._score_stderr(scores),
             "min_score": float(min(scores)) if scores else 0.0,
@@ -1177,6 +1255,8 @@ class AutomaticEvaluationHarness:
             "pass_rate": result.get("pass_rate", 0.0),
             "avg_score": result.get("avg_score", 0.0),
             "score_stderr": result.get("score_stderr", 0.0),
+            "errored_tests": result.get("errored_tests", 0),
+            "error_rate": result.get("error_rate", 0.0),
         }
         overall = result.get("overall") or {}
         if overall:
