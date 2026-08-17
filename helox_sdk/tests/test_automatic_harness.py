@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 
 import pytest
 
@@ -460,6 +461,98 @@ def test_error_rate_is_recorded_in_history(tmp_path):
     row = harness.get_history(suite_name="gen")[-1]
     assert row["errored_tests"] == 2
     assert row["error_rate"] == pytest.approx(0.2)
+
+
+def test_concurrent_run_preserves_suite_order(tmp_path):
+    """Results arrive out of order under a pool; rows must still line up."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, min_pass_rate=0.0)
+    harness.add_test_suite(
+        "gen",
+        [
+            {"id": str(i), "prompt": str(i), "expected": str(i), "type": "exact_match"}
+            for i in range(20)
+        ],
+    )
+
+    def generate(prompt, **kwargs):
+        # Later prompts finish first, so completion order is the reverse of
+        # suite order and a naive append would scramble the rows.
+        time.sleep((20 - int(prompt)) * 0.002)
+        return prompt
+
+    result = harness.evaluate_subject(
+        CallableGenerator(generate, name="model_a"), "gen", max_workers=8
+    )
+
+    assert result["max_workers"] == 8
+    assert result["avg_score"] == 1.0
+    assert [row["test_id"] for row in result["results"]] == [str(i) for i in range(20)]
+    assert all(row["prompt"] == row["expected"] for row in result["results"])
+
+
+def test_concurrency_does_not_change_scores(tmp_path):
+    """Worker count is an execution detail; the score must be identical."""
+    suite = [
+        {"id": str(i), "prompt": str(i), "expected": "good" if i % 3 else "no", "type": "contains"}
+        for i in range(12)
+    ]
+
+    def run(workers):
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path / f"w{workers}", min_pass_rate=0.0)
+        harness.add_test_suite("gen", suite)
+        return harness.evaluate_subject(
+            CallableGenerator(lambda p, **kw: "good", name="model_a"), "gen", max_workers=workers
+        )
+
+    sequential, concurrent = run(1), run(6)
+
+    assert sequential["avg_score"] == concurrent["avg_score"]
+    assert sequential["pass_rate"] == concurrent["pass_rate"]
+    assert [r["score"] for r in sequential["results"]] == [
+        r["score"] for r in concurrent["results"]
+    ]
+    # Scores are unaffected, but the config hash must not encode worker count
+    # either, or the two runs would land in separate regression baselines.
+    assert sequential["config_hash"] == concurrent["config_hash"]
+
+
+def test_concurrent_run_is_faster(tmp_path):
+    """The point of the pool is wall-clock; prove it actually overlaps."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, min_pass_rate=0.0)
+    harness.add_test_suite(
+        "gen",
+        [{"id": str(i), "prompt": "p", "expected": "good", "type": "contains"} for i in range(16)],
+    )
+    subject = CallableGenerator(lambda p, **kw: time.sleep(0.02) or "good", name="model_a")
+
+    start = time.perf_counter()
+    harness.evaluate_subject(subject, "gen", max_workers=8)
+    elapsed = time.perf_counter() - start
+
+    # 16 x 20ms is 320ms sequentially; across 8 workers it should be nearer 40ms.
+    assert elapsed < 0.2
+
+
+def test_concurrent_errors_respect_the_budget(tmp_path):
+    """Tolerated failures still land in the right rows under a pool."""
+    harness = _no_backoff_harness(tmp_path, fail_on_error=False, min_pass_rate=0.0, max_workers=4)
+    subject = _failing_on(harness, {"3", "7"})
+
+    result = harness.evaluate_subject(subject, "gen")
+
+    assert result["errored_tests"] == 2
+    assert result["scored_tests"] == 8
+    errored_ids = {row["test_id"] for row in result["results"] if row["errored"]}
+    assert errored_ids == {"3", "7"}
+
+
+def test_concurrent_run_aborts_when_budget_spent(tmp_path):
+    """Exceeding the budget mid-pool must surface the original exception."""
+    harness = _no_backoff_harness(tmp_path, fail_on_error=1, min_pass_rate=0.0, max_workers=4)
+    subject = _failing_on(harness, {"1", "2", "3", "4", "5"})
+
+    with pytest.raises(_RateLimited):
+        harness.evaluate_subject(subject, "gen")
 
 
 def test_run_evaluation_matrix(tmp_path):

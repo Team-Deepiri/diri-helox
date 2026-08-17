@@ -17,9 +17,10 @@ import json
 import logging
 import random
 import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple, cast
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 import numpy as np
 
@@ -185,6 +186,7 @@ class AutomaticEvaluationHarness:
         retry_max_backoff: float = 60.0,
         retry_backoff_multiplier: float = 2.0,
         fail_on_error: bool | float = True,
+        max_workers: int = 1,
     ):
         """
         Initialize evaluation harness.
@@ -207,6 +209,9 @@ class AutomaticEvaluationHarness:
                 on the first failure, ``False`` never aborts, a value in (0, 1)
                 aborts above that *proportion* of the suite, and a value >= 1
                 aborts above that *count* of failures.
+            max_workers: Samples generated concurrently. Defaults to 1 (fully
+                sequential); raise it for API-backed subjects, and leave it at
+                1 for a local GPU model that is already saturating the device.
         """
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
@@ -221,6 +226,7 @@ class AutomaticEvaluationHarness:
         self.retry_max_backoff = retry_max_backoff
         self.retry_backoff_multiplier = retry_backoff_multiplier
         self.fail_on_error = fail_on_error
+        self.max_workers = max_workers
 
         self.test_suites: Dict[str, List[Dict[str, Any]]] = {}
         self.history_file = (
@@ -429,6 +435,7 @@ class AutomaticEvaluationHarness:
         suite_name: str,
         max_new_tokens: int = 100,
         collect_latency: bool = True,
+        max_workers: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Evaluate any subject (a model or an agent) on a generation suite.
@@ -442,6 +449,7 @@ class AutomaticEvaluationHarness:
             suite_name: Test suite name
             max_new_tokens: Maximum tokens to generate
             collect_latency: Measure per-sample generation latency
+            max_workers: Override the harness-level concurrency for this run
 
         Returns:
             Evaluation results dict
@@ -457,6 +465,7 @@ class AutomaticEvaluationHarness:
             tests,
             max_new_tokens=max_new_tokens,
             collect_latency=collect_latency,
+            max_workers=max_workers,
         )
         return self._finalize_result(
             result, suite_name, "generation", subject_name=subject.name, config=config
@@ -468,6 +477,7 @@ class AutomaticEvaluationHarness:
         tests: List[Dict[str, Any]],
         max_new_tokens: int = 100,
         collect_latency: bool = True,
+        max_workers: Optional[int] = None,
     ) -> Dict[str, Any]:
         """Score a subject against an already-loaded suite (no history write)."""
         return self._evaluate_generation(
@@ -476,6 +486,7 @@ class AutomaticEvaluationHarness:
             max_new_tokens=max_new_tokens,
             collect_latency=collect_latency,
             token_counter=self._subject_token_counter(subject),
+            max_workers=max_workers,
         )
 
     @staticmethod
@@ -916,6 +927,104 @@ class AutomaticEvaluationHarness:
                 continue
             return text, (time.perf_counter() - start) * 1000.0, attempt
 
+    def _evaluate_one(
+        self,
+        test: Dict[str, Any],
+        generate_fn: Callable[[str, int], str],
+        max_new_tokens: int,
+        token_counter: Optional[Callable[[str], int]] = None,
+    ) -> Dict[str, Any]:
+        """
+        Generate and score a single sample.
+
+        Runs on a worker thread when ``max_workers > 1``, so it must not touch
+        shared harness state — everything it needs is passed in and everything
+        it produces is returned.
+        """
+        prompt = test.get("prompt") or test.get("text") or ""
+        expected = test.get("expected", "")
+        test_type = test.get("type", "similarity")
+        threshold = float(test.get("threshold", 0.5))
+
+        generated_text, latency_ms, retries = self._generate_with_retries(
+            generate_fn, prompt, max_new_tokens
+        )
+
+        if token_counter is not None:
+            new_tokens = token_counter(generated_text)
+        else:
+            new_tokens = len(generated_text.split())
+
+        score = self._score_response(generated_text, expected, test_type)
+
+        return {
+            "test_id": test.get("id", ""),
+            "prompt": prompt,
+            "expected": expected,
+            "generated": generated_text,
+            "score": score,
+            "passed": score >= threshold,
+            "errored": False,
+            "test_type": test_type,
+            "latency_ms": latency_ms,
+            "tokens_generated": new_tokens,
+            "retries": retries,
+        }
+
+    @staticmethod
+    def _errored_row(test: Dict[str, Any], exc: BaseException) -> Dict[str, Any]:
+        """Placeholder row for a sample that exhausted its retries."""
+        return {
+            "test_id": test.get("id", ""),
+            "prompt": test.get("prompt") or test.get("text") or "",
+            "expected": test.get("expected", ""),
+            "generated": None,
+            "score": None,
+            "passed": False,
+            "errored": True,
+            "error": f"{type(exc).__name__}: {exc}",
+            "test_type": test.get("type", "similarity"),
+            "latency_ms": None,
+            "tokens_generated": 0,
+            "retries": getattr(exc, "helox_retries", 0),
+        }
+
+    @staticmethod
+    def _dispatch(
+        tests: List[Dict[str, Any]],
+        task: Callable[[Dict[str, Any]], Dict[str, Any]],
+        workers: int,
+    ) -> Iterator[Tuple[int, Optional[Dict[str, Any]], Optional[BaseException]]]:
+        """
+        Run ``task`` over ``tests``, yielding ``(index, row, error)``.
+
+        Results arrive in completion order, not suite order, so the caller
+        places each row by its index. With ``workers == 1`` no pool is created
+        at all, keeping the sequential path identical to a plain loop.
+        """
+        if workers == 1:
+            for index, test in enumerate(tests):
+                try:
+                    yield index, task(test), None
+                except Exception as exc:
+                    yield index, None, exc
+            return
+
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = {pool.submit(task, test): index for index, test in enumerate(tests)}
+            try:
+                for future in as_completed(futures):
+                    index = futures[future]
+                    try:
+                        yield index, future.result(), None
+                    except Exception as exc:
+                        yield index, None, exc
+            finally:
+                # Abandoning the run (error budget spent, or the caller stopped
+                # consuming) should not keep paying for work nobody will read.
+                for future in futures:
+                    future.cancel()
+
     def _evaluate_generation(
         self,
         generate_fn: Callable[[str, int], str],
@@ -923,29 +1032,30 @@ class AutomaticEvaluationHarness:
         max_new_tokens: int = 100,
         collect_latency: bool = True,
         token_counter: Optional[Callable[[str], int]] = None,
+        max_workers: Optional[int] = None,
     ) -> Dict[str, Any]:
         """
         Score a generation subject (model or agent) against a suite.
 
         ``generate_fn(prompt, max_new_tokens) -> str`` abstracts the subject so
         models and agents are evaluated through the same path.
+
+        ``max_workers`` overrides the harness default. Above 1, samples are
+        generated concurrently; scores are unaffected, but per-sample latency
+        reflects contention, so latency figures are only comparable between
+        runs that used the same worker count.
         """
-        results: List[Dict[str, Any]] = []
+        workers = max(1, int(self.max_workers if max_workers is None else max_workers))
+        rows: List[Optional[Dict[str, Any]]] = [None] * len(tests)
         latencies_ms: List[float] = []
         tokens_per_sec: List[float] = []
         error_count = 0
 
-        for test in tests:
-            prompt = test.get("prompt") or test.get("text") or ""
-            expected = test.get("expected", "")
-            test_type = test.get("type", "similarity")
-            threshold = float(test.get("threshold", 0.5))
+        def task(test: Dict[str, Any]) -> Dict[str, Any]:
+            return self._evaluate_one(test, generate_fn, max_new_tokens, token_counter)
 
-            try:
-                generated_text, latency_ms, retries = self._generate_with_retries(
-                    generate_fn, prompt, max_new_tokens
-                )
-            except Exception as exc:
+        for index, row, exc in self._dispatch(tests, task, workers):
+            if exc is not None:
                 error_count += 1
                 if self._error_budget_exceeded(error_count, len(tests)):
                     logger.error(
@@ -953,56 +1063,24 @@ class AutomaticEvaluationHarness:
                         f"exceeds fail_on_error={self.fail_on_error!r} "
                         f"({type(exc).__name__}: {exc})"
                     )
-                    raise
+                    raise exc
                 logger.warning(
-                    f"Sample {test.get('id', '')!r} failed and was skipped "
+                    f"Sample {tests[index].get('id', '')!r} failed and was skipped "
                     f"({type(exc).__name__}: {exc})"
                 )
-                results.append(
-                    {
-                        "test_id": test.get("id", ""),
-                        "prompt": prompt,
-                        "expected": expected,
-                        "generated": None,
-                        "score": None,
-                        "passed": False,
-                        "errored": True,
-                        "error": f"{type(exc).__name__}: {exc}",
-                        "test_type": test_type,
-                        "latency_ms": None,
-                        "tokens_generated": 0,
-                        "retries": getattr(exc, "helox_retries", 0),
-                    }
-                )
-                continue
+                row = self._errored_row(tests[index], exc)
+            rows[index] = row
 
-            if token_counter is not None:
-                new_tokens = token_counter(generated_text)
-            else:
-                new_tokens = len(generated_text.split())
+        results = [row for row in rows if row is not None]
 
-            if collect_latency:
+        if collect_latency:
+            for row in results:
+                latency_ms = row["latency_ms"]
+                if latency_ms is None:
+                    continue
                 latencies_ms.append(latency_ms)
                 if latency_ms > 0:
-                    tokens_per_sec.append(new_tokens / (latency_ms / 1000.0))
-
-            score = self._score_response(generated_text, expected, test_type)
-
-            results.append(
-                {
-                    "test_id": test.get("id", ""),
-                    "prompt": prompt,
-                    "expected": expected,
-                    "generated": generated_text,
-                    "score": score,
-                    "passed": score >= threshold,
-                    "errored": False,
-                    "test_type": test_type,
-                    "latency_ms": latency_ms,
-                    "tokens_generated": new_tokens,
-                    "retries": retries,
-                }
-            )
+                    tokens_per_sec.append(row["tokens_generated"] / (latency_ms / 1000.0))
 
         # Failed samples are excluded from the score rather than counted as
         # zero: an outage is not a quality signal, and scoring it would make
@@ -1028,6 +1106,7 @@ class AutomaticEvaluationHarness:
             "min_score": float(min(scores)) if scores else 0.0,
             "max_score": float(max(scores)) if scores else 0.0,
             "total_retries": sum(r["retries"] for r in results),
+            "max_workers": workers,
             "results": results,
         }
 
