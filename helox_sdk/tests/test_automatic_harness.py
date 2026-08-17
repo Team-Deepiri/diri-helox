@@ -661,6 +661,74 @@ def test_clear_cache(tmp_path):
     assert calls["n"] == 2
 
 
+PRICING = {"model_a": {"input_per_1m": 1.0, "output_per_1m": 10.0}}
+
+
+def test_tokens_are_counted_without_pricing(tmp_path):
+    """Token usage is always reported; cost stays zero until rates are given."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "a b c", "expected": "good", "type": "contains"}])
+    subject = CallableGenerator(lambda p, **kw: "good enough", name="model_a")
+
+    result = harness.evaluate_subject(subject, "gen")
+
+    assert result["total_prompt_tokens"] == 3
+    assert result["total_completion_tokens"] == 2
+    assert result["total_cost_usd"] == 0.0
+
+
+def test_cost_is_priced_per_million_tokens(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, pricing=PRICING)
+    harness.add_test_suite("gen", [{"prompt": "a b c", "expected": "good", "type": "contains"}])
+    subject = CallableGenerator(lambda p, **kw: "good enough", name="model_a")
+
+    result = harness.evaluate_subject(subject, "gen")
+
+    expected = (3 / 1_000_000) * 1.0 + (2 / 1_000_000) * 10.0
+    assert result["total_cost_usd"] == pytest.approx(expected)
+    assert result["results"][0]["cost_usd"] == pytest.approx(expected)
+    # Output tokens are the expensive half; a flat per-token rate would miss it.
+    assert result["results"][0]["cost_usd"] > (5 / 1_000_000) * 1.0
+
+
+def test_unpriced_model_costs_nothing(tmp_path):
+    """An unknown model reports usage but must not be assigned invented rates."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, pricing=PRICING)
+    harness.add_test_suite("gen", [{"prompt": "a b c", "expected": "good", "type": "contains"}])
+    subject = CallableGenerator(lambda p, **kw: "good enough", name="model_zzz")
+
+    result = harness.evaluate_subject(subject, "gen")
+
+    assert result["total_completion_tokens"] == 2
+    assert result["total_cost_usd"] == 0.0
+
+
+def test_cached_samples_are_not_billed(tmp_path):
+    """A cache hit never reached the provider, so it costs nothing."""
+    harness = AutomaticEvaluationHarness(
+        eval_dir=tmp_path, pricing=PRICING, cache_enabled=True, min_pass_rate=0.0
+    )
+    harness.add_test_suite("gen", [{"prompt": "a b c", "expected": "good", "type": "contains"}])
+    subject = CallableGenerator(lambda p, **kw: "good enough", name="model_a")
+
+    first = harness.evaluate_subject(subject, "gen")
+    second = harness.evaluate_subject(subject, "gen")
+
+    assert first["total_cost_usd"] > 0
+    assert second["cache_hits"] == 1
+    assert second["total_cost_usd"] == 0.0
+    assert second["total_prompt_tokens"] == 0
+    assert second["total_completion_tokens"] == 0
+
+
+def test_cost_is_recorded_in_history(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, pricing=PRICING)
+    harness.add_test_suite("gen", [{"prompt": "a b c", "expected": "good", "type": "contains"}])
+    harness.evaluate_subject(CallableGenerator(lambda p, **kw: "good", name="model_a"), "gen")
+
+    assert harness.get_history(suite_name="gen")[-1]["total_cost_usd"] > 0
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])

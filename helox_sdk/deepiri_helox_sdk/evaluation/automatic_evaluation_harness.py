@@ -192,6 +192,7 @@ class AutomaticEvaluationHarness:
         cache_enabled: bool = False,
         cache_dir: Optional[Path] = None,
         cache_ttl: Optional[float] = None,
+        pricing: Optional[Dict[str, Dict[str, float]]] = None,
     ):
         """
         Initialize evaluation harness.
@@ -223,6 +224,12 @@ class AutomaticEvaluationHarness:
             cache_dir: Where cached responses live; defaults to ``eval_dir/cache``
             cache_ttl: Seconds before a cached response is considered stale;
                 ``None`` keeps entries indefinitely
+            pricing: Token rates per model, as
+                ``{model: {"input_per_1m": float, "output_per_1m": float}}``.
+                Rates are deliberately not shipped with the harness — vendor
+                prices change without notice, and a stale built-in table would
+                report confident numbers that are simply wrong. Without this,
+                token counts are still reported and costs stay at zero.
         """
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
@@ -241,6 +248,7 @@ class AutomaticEvaluationHarness:
         self.cache_enabled = cache_enabled
         self.cache_dir = Path(cache_dir) if cache_dir is not None else self.eval_dir / "cache"
         self.cache_ttl = cache_ttl
+        self.pricing = pricing or {}
         if self.cache_enabled:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -704,6 +712,8 @@ class AutomaticEvaluationHarness:
             if result.get("errored_tests"):
                 lines.append(f"| errored_tests | {result.get('errored_tests', 0)} |")
                 lines.append(f"| error_rate | {result.get('error_rate', 0.0):.3f} |")
+            if result.get("total_cost_usd"):
+                lines.append(f"| total_cost_usd | {result.get('total_cost_usd', 0.0):.4f} |")
             if result.get("mode") == "classifier":
                 overall = result.get("overall") or {}
                 lines.append(f"| accuracy | {overall.get('accuracy', 0.0):.3f} |")
@@ -770,6 +780,9 @@ class AutomaticEvaluationHarness:
                 "scored_tests": 0,
                 "errored_tests": 0,
                 "error_rate": 0.0,
+                "total_prompt_tokens": 0,
+                "total_completion_tokens": 0,
+                "total_cost_usd": 0.0,
                 "passed_tests": 0,
                 "pass_rate": 0.0,
                 "avg_score": 0.0,
@@ -897,6 +910,36 @@ class AutomaticEvaluationHarness:
         # Full jitter over [0.5x, 1.5x): without it, a batch of samples that all
         # hit the same rate limit would retry in lockstep and trip it again.
         return delay * (0.5 + random.random())
+
+    # ------------------------------------------------------------------
+    # Cost accounting
+    # ------------------------------------------------------------------
+
+    def _rates_for(self, scope: Dict[str, Any]) -> Optional[Dict[str, float]]:
+        """
+        Find the token rates for a subject.
+
+        The provider model id is tried before the display name, since two
+        subjects may be named for their role ("judge", "candidate") while
+        billing against the same model.
+        """
+        for key in (scope.get("model"), scope.get("subject")):
+            if key is not None and key in self.pricing:
+                return self.pricing[str(key)]
+        return None
+
+    @staticmethod
+    def _sample_cost(
+        rates: Optional[Dict[str, float]],
+        prompt_tokens: int,
+        completion_tokens: int,
+    ) -> float:
+        """Cost of one call, in USD. Zero when no rates are configured."""
+        if not rates:
+            return 0.0
+        return (prompt_tokens / 1_000_000.0) * float(rates.get("input_per_1m", 0.0)) + (
+            completion_tokens / 1_000_000.0
+        ) * float(rates.get("output_per_1m", 0.0))
 
     # ------------------------------------------------------------------
     # Response cache
@@ -1039,6 +1082,7 @@ class AutomaticEvaluationHarness:
         max_new_tokens: int,
         token_counter: Optional[Callable[[str], int]] = None,
         cache_scope: Optional[Dict[str, Any]] = None,
+        rates: Optional[Dict[str, float]] = None,
     ) -> Dict[str, Any]:
         """
         Generate and score a single sample.
@@ -1067,8 +1111,13 @@ class AutomaticEvaluationHarness:
 
         if token_counter is not None:
             new_tokens = token_counter(generated_text)
+            prompt_tokens = token_counter(prompt)
         else:
             new_tokens = len(generated_text.split())
+            prompt_tokens = len(prompt.split())
+
+        # A cache hit never reached the provider, so it is billed at nothing.
+        cost_usd = 0.0 if from_cache else self._sample_cost(rates, prompt_tokens, new_tokens)
 
         score = self._score_response(generated_text, expected, test_type)
 
@@ -1083,7 +1132,9 @@ class AutomaticEvaluationHarness:
             "cached": from_cache,
             "test_type": test_type,
             "latency_ms": latency_ms,
+            "prompt_tokens": prompt_tokens,
             "tokens_generated": new_tokens,
+            "cost_usd": cost_usd,
             "retries": retries,
         }
 
@@ -1102,7 +1153,11 @@ class AutomaticEvaluationHarness:
             "error": f"{type(exc).__name__}: {exc}",
             "test_type": test.get("type", "similarity"),
             "latency_ms": None,
+            "prompt_tokens": 0,
             "tokens_generated": 0,
+            # Abandoned attempts may well have been billed, but the provider
+            # never returned a usage figure, so claiming one would be a guess.
+            "cost_usd": 0.0,
             "retries": getattr(exc, "helox_retries", 0),
         }
 
@@ -1169,9 +1224,11 @@ class AutomaticEvaluationHarness:
         tokens_per_sec: List[float] = []
         error_count = 0
 
+        rates = self._rates_for(cache_scope or {})
+
         def task(test: Dict[str, Any]) -> Dict[str, Any]:
             return self._evaluate_one(
-                test, generate_fn, max_new_tokens, token_counter, cache_scope
+                test, generate_fn, max_new_tokens, token_counter, cache_scope, rates
             )
 
         for index, row, exc in self._dispatch(tests, task, workers):
@@ -1208,6 +1265,7 @@ class AutomaticEvaluationHarness:
         # They stay visible via errored_tests / error_rate so the exclusion is
         # never silent.
         scored = [r for r in results if not r["errored"]]
+        billed = [r for r in scored if not r["cached"]]
         scores = [r["score"] for r in scored]
         total = len(results)
         scored_count = len(scored)
@@ -1227,6 +1285,11 @@ class AutomaticEvaluationHarness:
             "max_score": float(max(scores)) if scores else 0.0,
             "total_retries": sum(r["retries"] for r in results),
             "cache_hits": sum(1 for r in results if r["cached"]),
+            # Token totals count only calls that actually reached the provider,
+            # so they line up with what the invoice will say.
+            "total_prompt_tokens": sum(r["prompt_tokens"] for r in billed),
+            "total_completion_tokens": sum(r["tokens_generated"] for r in billed),
+            "total_cost_usd": sum(r["cost_usd"] for r in results),
             "max_workers": workers,
             "results": results,
         }
@@ -1457,6 +1520,7 @@ class AutomaticEvaluationHarness:
             "score_stderr": result.get("score_stderr", 0.0),
             "errored_tests": result.get("errored_tests", 0),
             "error_rate": result.get("error_rate", 0.0),
+            "total_cost_usd": result.get("total_cost_usd", 0.0),
         }
         overall = result.get("overall") or {}
         if overall:
