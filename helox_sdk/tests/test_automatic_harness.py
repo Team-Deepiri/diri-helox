@@ -49,6 +49,46 @@ def test_evaluate_subject_end_to_end(tmp_path):
     assert result["passed"] is True
 
 
+def test_regression_history_is_scoped_to_subject(tmp_path):
+    """A weak subject must not be flagged against a *different* subject's history."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    strong = CallableGenerator(lambda p, **kw: "good", name="model_a")
+    weak = CallableGenerator(lambda p, **kw: "bad", name="model_b")
+
+    for _ in range(2):
+        assert harness.evaluate_subject(strong, "gen")["avg_score"] == 1.0
+
+    # model_b has no history of its own, so its low score is a baseline, not a drop.
+    first_b = harness.evaluate_subject(weak, "gen")
+    assert first_b["avg_score"] == 0.0
+    assert "regression" not in first_b
+
+    assert [row["subject"] for row in harness.get_history(suite_name="gen")] == [
+        "model_a",
+        "model_a",
+        "model_b",
+    ]
+    assert len(harness.get_history(suite_name="gen", subject_name="model_a")) == 2
+
+
+def test_regression_still_detected_within_one_subject(tmp_path):
+    """Scoping by subject must not stop a real drop by the same subject firing."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    responses = iter(["good", "bad"])
+    subject = CallableGenerator(lambda p, **kw: next(responses), name="model_a")
+
+    harness.evaluate_subject(subject, "gen")
+    dropped = harness.evaluate_subject(subject, "gen")
+
+    assert dropped["regression"]["detected"] is True
+    assert dropped["regression"]["previous_best"] == 1.0
+    assert dropped["passed"] is False
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])
