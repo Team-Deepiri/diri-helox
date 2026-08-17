@@ -92,6 +92,7 @@ class AutomaticEvaluationHarness:
         self,
         eval_dir: Path = Path("evaluation"),
         regression_threshold: float = 0.05,
+        regression_sigma: float = 2.0,
         min_pass_rate: float = 0.5,
         min_avg_score: float = 0.0,
         min_accuracy: Optional[float] = None,
@@ -104,6 +105,8 @@ class AutomaticEvaluationHarness:
         Args:
             eval_dir: Directory for evaluation data and history
             regression_threshold: Threshold for regression detection
+            regression_sigma: How many combined standard errors a drop must
+                clear before it counts as a regression rather than noise
             min_pass_rate: Minimum pass rate to pass threshold gates
             min_avg_score: Minimum average score to pass threshold gates
             min_accuracy: Optional minimum accuracy gate for classifier evals
@@ -113,6 +116,7 @@ class AutomaticEvaluationHarness:
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
         self.regression_threshold = regression_threshold
+        self.regression_sigma = regression_sigma
         self.min_pass_rate = min_pass_rate
         self.min_avg_score = min_avg_score
         self.min_accuracy = min_accuracy
@@ -710,6 +714,7 @@ class AutomaticEvaluationHarness:
                 metric_name="avg_score",
                 subject_name=subject_name,
                 config_hash=config_hash,
+                current_stderr=float(result.get("score_stderr") or 0.0),
             )
 
         if regression:
@@ -1116,6 +1121,7 @@ class AutomaticEvaluationHarness:
         metric_name: str = "avg_score",
         subject_name: Optional[str] = None,
         config_hash: Optional[str] = None,
+        current_stderr: float = 0.0,
     ) -> Optional[Dict[str, Any]]:
         """
         Detect regression against the best and mean of prior runs.
@@ -1130,21 +1136,26 @@ class AutomaticEvaluationHarness:
         reset is logged so it is visible in CI rather than silent.
 
         Dropping below the historical best by more than ``regression_threshold``
-        is a *necessary* condition. Once enough prior runs exist (n >= 2), the
-        drop must also exceed the historical noise floor (max of the configured
-        threshold and one sample standard deviation) so that a single lucky best
-        run cannot set an unreachable bar.
+        is a *necessary* condition. Two noise floors then have to be cleared:
+
+        1. **Within-run uncertainty.** Both this run and the best prior run
+           estimate a mean from a finite suite, so the drop must exceed
+           ``regression_sigma`` times their combined standard error. This
+           applies from the *second* run onward, where the across-run floor
+           below cannot yet be computed.
+        2. **Across-run spread.** Once n >= 2 prior runs exist, the drop from
+           the historical *mean* must also exceed one standard deviation of
+           those runs, so a single lucky best run cannot set an unreachable bar.
         """
         comparable = self._load_history(
             suite_name=suite_name,
             subject_name=subject_name,
             config_hash=config_hash,
         )
-        prior_scores = [
-            float(row[metric_name])
-            for row in comparable
-            if metric_name in row and row[metric_name] is not None
+        prior_rows = [
+            row for row in comparable if metric_name in row and row[metric_name] is not None
         ]
+        prior_scores = [float(row[metric_name]) for row in prior_rows]
         if not prior_scores:
             if config_hash is not None:
                 superseded = self._load_history(suite_name=suite_name, subject_name=subject_name)
@@ -1157,9 +1168,22 @@ class AutomaticEvaluationHarness:
                     )
             return None
 
-        best_previous = max(prior_scores)
+        best_row = max(prior_rows, key=lambda row: float(row[metric_name]))
+        best_previous = float(best_row[metric_name])
         score_drop = best_previous - current_score
         if score_drop <= self.regression_threshold:
+            return None
+
+        # Both means carry sampling error; the error on their difference is the
+        # quadrature sum, not the sum, of the two.
+        best_stderr = float(best_row.get("score_stderr") or 0.0)
+        stderr_floor = self.regression_sigma * ((current_stderr**2 + best_stderr**2) ** 0.5)
+        if score_drop <= stderr_floor:
+            logger.info(
+                f"Drop of {score_drop:.4f} in {suite_name!r} is within "
+                f"{self.regression_sigma}x the combined standard error "
+                f"({stderr_floor:.4f}); treating as noise"
+            )
             return None
 
         if len(prior_scores) >= 2:
@@ -1176,6 +1200,7 @@ class AutomaticEvaluationHarness:
             "current_score": current_score,
             "previous_best": best_previous,
             "score_drop": score_drop,
+            "stderr_floor": stderr_floor,
         }
 
     # ------------------------------------------------------------------

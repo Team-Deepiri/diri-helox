@@ -172,6 +172,60 @@ def test_score_stderr_is_zero_for_a_single_test(tmp_path):
     assert result["score_stderr"] == 0.0
 
 
+def _fixed_suite(harness, size=10):
+    """A constant suite, so the config hash stays stable across runs."""
+    harness.add_test_suite(
+        "gen",
+        [{"prompt": "p", "expected": "good", "type": "contains"} for _ in range(size)],
+    )
+
+
+def _subject_scoring(*hits_per_run, size=10):
+    """Subject that lands exactly ``hits`` of ``size`` tests on each successive run."""
+    responses = iter(["good"] * hits + ["no"] * (size - hits) for hits in hits_per_run)
+    current = iter([])
+
+    def generate(prompt, **kwargs):
+        nonlocal current
+        try:
+            return next(current)
+        except StopIteration:
+            current = iter(next(responses))
+            return next(current)
+
+    return CallableGenerator(generate, name="model_a")
+
+
+def test_noisy_suite_drop_is_treated_as_noise(tmp_path):
+    """On a small, high-variance suite a modest drop must not fire on run two."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, min_pass_rate=0.0)
+    _fixed_suite(harness)
+    subject = _subject_scoring(6, 5)
+
+    assert harness.evaluate_subject(subject, "gen")["avg_score"] == 0.6
+
+    # 0.6 -> 0.5 clears regression_threshold (0.05) but is well inside the
+    # combined standard error of two runs that each carry ~0.16 stderr.
+    second = harness.evaluate_subject(subject, "gen")
+    assert second["avg_score"] == 0.5
+    assert second["score_stderr"] > 0.1
+    assert "regression" not in second
+
+
+def test_real_drop_still_fires_on_run_two(tmp_path):
+    """The stderr floor must not swallow a drop far larger than the noise."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, min_pass_rate=0.0)
+    _fixed_suite(harness)
+    subject = _subject_scoring(10, 1)
+
+    harness.evaluate_subject(subject, "gen")
+    dropped = harness.evaluate_subject(subject, "gen")
+
+    assert dropped["regression"]["detected"] is True
+    assert dropped["regression"]["score_drop"] == pytest.approx(0.9)
+    assert dropped["regression"]["score_drop"] > dropped["regression"]["stderr_floor"]
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])
