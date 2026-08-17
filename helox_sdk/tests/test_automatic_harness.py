@@ -115,6 +115,28 @@ def test_config_hash_tracks_score_affecting_settings(tmp_path):
     assert all(row["config_hash"] for row in harness.get_history(suite_name="gen"))
 
 
+def test_suite_edit_resets_baseline_instead_of_flagging_regression(tmp_path, caplog):
+    """A harder suite is a new baseline, not a model regression."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    subject = CallableGenerator(lambda p, **kw: "good", name="model_a")
+
+    for _ in range(2):
+        assert harness.evaluate_subject(subject, "gen")["avg_score"] == 1.0
+
+    # Same model, but now asked for something it does not produce.
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "unreachable", "type": "contains"}])
+    with caplog.at_level("WARNING"):
+        harder = harness.evaluate_subject(subject, "gen")
+
+    assert harder["avg_score"] == 0.0
+    assert "regression" not in harder
+    assert "baseline reset" in caplog.text
+
+    # The new config builds its own baseline, and drops within it still fire.
+    assert len(harness.get_history(suite_name="gen", config_hash=harder["config_hash"])) == 1
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])

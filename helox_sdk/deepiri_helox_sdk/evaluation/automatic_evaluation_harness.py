@@ -685,12 +685,17 @@ class AutomaticEvaluationHarness:
 
         self._apply_gates(result)
 
+        config_hash = result.get("config_hash")
         if mode == "classifier":
             overall = result.get("overall") or {}
             f1 = overall.get("f1")
             regression = (
                 self._check_regression(
-                    suite_name, float(f1), metric_name="f1", subject_name=subject_name
+                    suite_name,
+                    float(f1),
+                    metric_name="f1",
+                    subject_name=subject_name,
+                    config_hash=config_hash,
                 )
                 if f1 is not None
                 else None
@@ -701,6 +706,7 @@ class AutomaticEvaluationHarness:
                 result.get("avg_score", 0.0),
                 metric_name="avg_score",
                 subject_name=subject_name,
+                config_hash=config_hash,
             )
 
         if regression:
@@ -1033,14 +1039,16 @@ class AutomaticEvaluationHarness:
         self,
         suite_name: Optional[str] = None,
         subject_name: Optional[str] = None,
+        config_hash: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """
         Load persisted evaluation records, optionally filtered.
 
-        Filtering by ``subject_name`` keeps only rows recorded for that subject.
-        Records written before subjects were tracked carry no ``subject`` and
-        are therefore excluded: their model is unknown, so treating them as a
-        match would compare one model's score against another's history.
+        Filtering by ``subject_name`` keeps only rows recorded for that subject,
+        and by ``config_hash`` only rows measured the same way. Records written
+        before those fields were tracked carry neither and are therefore
+        excluded: what they measured is unknown, so treating them as a match
+        would compare one model's score against another's history.
         """
         if not self.history_file.exists():
             return []
@@ -1058,6 +1066,8 @@ class AutomaticEvaluationHarness:
                     continue
                 if subject_name is not None and row.get("subject") != subject_name:
                     continue
+                if config_hash is not None and row.get("config_hash") != config_hash:
+                    continue
                 records.append(row)
         return records
 
@@ -1065,9 +1075,14 @@ class AutomaticEvaluationHarness:
         self,
         suite_name: Optional[str] = None,
         subject_name: Optional[str] = None,
+        config_hash: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
         """Return persisted evaluation history, optionally filtered."""
-        return self._load_history(suite_name=suite_name, subject_name=subject_name)
+        return self._load_history(
+            suite_name=suite_name,
+            subject_name=subject_name,
+            config_hash=config_hash,
+        )
 
     # ------------------------------------------------------------------
     # Regression tracking
@@ -1079,6 +1094,7 @@ class AutomaticEvaluationHarness:
         current_score: float,
         metric_name: str = "avg_score",
         subject_name: Optional[str] = None,
+        config_hash: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Detect regression against the best and mean of prior runs.
@@ -1086,8 +1102,11 @@ class AutomaticEvaluationHarness:
         Invariant: scores are dimensionless and bounded in [0, 1], so the drop
         is measured in the same units as ``regression_threshold``.
 
-        History is scoped to ``subject_name`` when given, so a run is only ever
-        compared against prior runs of the same model or agent.
+        History is scoped to ``subject_name`` and ``config_hash`` when given, so
+        a run is only ever compared against prior runs of the same model or
+        agent measured the same way. Editing a suite therefore resets the
+        baseline rather than reporting the change as a model regression; the
+        reset is logged so it is visible in CI rather than silent.
 
         Dropping below the historical best by more than ``regression_threshold``
         is a *necessary* condition. Once enough prior runs exist (n >= 2), the
@@ -1095,12 +1114,26 @@ class AutomaticEvaluationHarness:
         threshold and one sample standard deviation) so that a single lucky best
         run cannot set an unreachable bar.
         """
+        comparable = self._load_history(
+            suite_name=suite_name,
+            subject_name=subject_name,
+            config_hash=config_hash,
+        )
         prior_scores = [
             float(row[metric_name])
-            for row in self._load_history(suite_name=suite_name, subject_name=subject_name)
+            for row in comparable
             if metric_name in row and row[metric_name] is not None
         ]
         if not prior_scores:
+            if config_hash is not None:
+                superseded = self._load_history(suite_name=suite_name, subject_name=subject_name)
+                if superseded:
+                    logger.warning(
+                        f"Regression baseline reset for {suite_name!r}"
+                        f"{f' / {subject_name}' if subject_name else ''}: "
+                        f"{len(superseded)} prior run(s) were measured under a different "
+                        f"config, so none are comparable to config {config_hash}"
+                    )
             return None
 
         best_previous = max(prior_scores)
