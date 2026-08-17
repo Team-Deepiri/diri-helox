@@ -89,6 +89,32 @@ def test_regression_still_detected_within_one_subject(tmp_path):
     assert dropped["passed"] is False
 
 
+def test_config_hash_tracks_score_affecting_settings(tmp_path):
+    """The hash must move when the suite or generation settings move, and only then."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    tests = [
+        {"id": "t1", "prompt": "p1", "expected": "good", "type": "contains"},
+        {"id": "t2", "prompt": "p2", "expected": "good", "type": "contains"},
+    ]
+    harness.add_test_suite("gen", tests)
+    subject = CallableGenerator(lambda p, **kw: "good", name="model_a")
+
+    baseline = harness.evaluate_subject(subject, "gen")["config_hash"]
+
+    # Reordering the same tests is not a change of what is measured.
+    harness.add_test_suite("gen", list(reversed(tests)))
+    assert harness.evaluate_subject(subject, "gen")["config_hash"] == baseline
+
+    # Changing generation settings is.
+    assert harness.evaluate_subject(subject, "gen", max_new_tokens=999)["config_hash"] != baseline
+
+    # So is editing a prompt.
+    harness.add_test_suite("gen", [{**tests[0], "prompt": "edited"}, tests[1]])
+    assert harness.evaluate_subject(subject, "gen")["config_hash"] != baseline
+
+    assert all(row["config_hash"] for row in harness.get_history(suite_name="gen"))
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])

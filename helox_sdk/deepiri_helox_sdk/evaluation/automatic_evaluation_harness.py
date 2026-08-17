@@ -12,6 +12,7 @@ threshold gates, and persistence on top of that shared logic.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import logging
 import time
@@ -40,6 +41,35 @@ logger = logging.getLogger(__name__)
 # Scoring primitives (module-level so they can be reused and unit-tested).
 # Invariant: every score is dimensionless and bounded in [0, 1].
 # ---------------------------------------------------------------------------
+
+
+def stable_hash(payload: Any) -> str:
+    """Return a short, stable hash of a JSON-serializable payload."""
+    encoded = json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()[:12]
+
+
+def suite_fingerprint(tests: List[Dict[str, Any]]) -> str:
+    """
+    Hash the scoring-relevant content of a suite.
+
+    Only fields that can change a score are included, and tests are sorted
+    before hashing, so reordering a suite or editing an unrelated field does
+    not invalidate a baseline while changing a prompt or threshold does.
+    """
+    payload = [
+        {
+            "id": test.get("id", ""),
+            "prompt": test.get("prompt", "") or test.get("text", ""),
+            "expected": test.get("expected", ""),
+            "type": test.get("type", "similarity"),
+            "threshold": test.get("threshold", 0.5),
+            "label": test.get("label"),
+        }
+        for test in tests
+    ]
+    payload.sort(key=lambda entry: json.dumps(entry, sort_keys=True, default=str))
+    return stable_hash(payload)
 
 
 class AutomaticEvaluationHarness:
@@ -268,13 +298,15 @@ class AutomaticEvaluationHarness:
                     "(mapping texts to labels) or use mode='generation'."
                 )
             subject_name = CallablePredictor(predict_fn).name
+            config = self._run_config(resolved_mode, tests)
             result = self._evaluate_classifier(tests, predict_fn)
         else:
             subject = LegacyModelGenerator(model, tokenizer_manager)
             subject_name = subject.name
+            config = self._run_config(resolved_mode, tests, max_new_tokens=max_new_tokens)
             if not tests:
                 return self._empty_generation_result(
-                    suite_name, "generation", subject_name=subject_name
+                    suite_name, "generation", subject_name=subject_name, config=config
                 )
             result = self._evaluate_subject_raw(
                 subject,
@@ -283,7 +315,9 @@ class AutomaticEvaluationHarness:
                 collect_latency=collect_latency,
             )
 
-        return self._finalize_result(result, suite_name, resolved_mode, subject_name=subject_name)
+        return self._finalize_result(
+            result, suite_name, resolved_mode, subject_name=subject_name, config=config
+        )
 
     def evaluate_subject(
         self,
@@ -309,9 +343,10 @@ class AutomaticEvaluationHarness:
             Evaluation results dict
         """
         tests = self.get_suite(suite_name)
+        config = self._run_config("generation", tests, max_new_tokens=max_new_tokens)
         if not tests:
             return self._empty_generation_result(
-                suite_name, "generation", subject_name=subject.name
+                suite_name, "generation", subject_name=subject.name, config=config
             )
         result = self._evaluate_subject_raw(
             subject,
@@ -319,7 +354,9 @@ class AutomaticEvaluationHarness:
             max_new_tokens=max_new_tokens,
             collect_latency=collect_latency,
         )
-        return self._finalize_result(result, suite_name, "generation", subject_name=subject.name)
+        return self._finalize_result(
+            result, suite_name, "generation", subject_name=subject.name, config=config
+        )
 
     def _evaluate_subject_raw(
         self,
@@ -372,7 +409,13 @@ class AutomaticEvaluationHarness:
         """
         tests = self.get_suite(suite_name)
         result = self._evaluate_classifier(tests, predictor.predict)
-        return self._finalize_result(result, suite_name, "classifier", subject_name=predictor.name)
+        return self._finalize_result(
+            result,
+            suite_name,
+            "classifier",
+            subject_name=predictor.name,
+            config=self._run_config("classifier", tests),
+        )
 
     def evaluate_classifier_suite(
         self,
@@ -571,6 +614,7 @@ class AutomaticEvaluationHarness:
         suite_name: str,
         mode: str,
         subject_name: Optional[str] = None,
+        config: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         logger.warning(f"Suite {suite_name!r} is empty; returning empty result")
         return self._finalize_result(
@@ -587,7 +631,29 @@ class AutomaticEvaluationHarness:
             suite_name,
             mode,
             subject_name=subject_name,
+            config=config,
         )
+
+    @staticmethod
+    def _run_config(
+        mode: str,
+        tests: List[Dict[str, Any]],
+        max_new_tokens: Optional[int] = None,
+    ) -> Dict[str, Any]:
+        """
+        Describe the score-affecting settings of a run.
+
+        Only inputs that can move a score belong here — gates and thresholds
+        are excluded, since tightening a gate should not look like a new
+        baseline.
+        """
+        config: Dict[str, Any] = {
+            "mode": mode,
+            "suite_fingerprint": suite_fingerprint(tests),
+        }
+        if max_new_tokens is not None:
+            config["max_new_tokens"] = max_new_tokens
+        return config
 
     def _finalize_result(
         self,
@@ -595,6 +661,7 @@ class AutomaticEvaluationHarness:
         suite_name: str,
         mode: str,
         subject_name: Optional[str] = None,
+        config: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Attach metadata, apply gates, check regression, and persist.
@@ -602,12 +669,19 @@ class AutomaticEvaluationHarness:
         ``subject_name`` identifies the model/agent under test. It is recorded
         with the run and used to scope regression detection, so a run of model
         B is never compared against model A's history.
+
+        ``config`` captures the score-affecting settings of the run; it is
+        stored alongside a short ``config_hash`` so two runs can be told apart
+        when the suite or generation settings changed underneath them.
         """
         result["suite_name"] = suite_name
         result["timestamp"] = datetime.now(timezone.utc).isoformat()
         result["mode"] = mode
         if subject_name is not None:
             result["subject"] = subject_name
+        if config is not None:
+            result["config"] = config
+            result["config_hash"] = stable_hash(config)
 
         self._apply_gates(result)
 
@@ -924,6 +998,7 @@ class AutomaticEvaluationHarness:
         record: Dict[str, Any] = {
             "suite_name": result.get("suite_name", ""),
             "subject": result.get("subject", ""),
+            "config_hash": result.get("config_hash", ""),
             "mode": result.get("mode", ""),
             "timestamp": result.get("timestamp", ""),
             "total_tests": result.get("total_tests", 0),
