@@ -1188,7 +1188,11 @@ class AutomaticEvaluationHarness:
 
         if len(prior_scores) >= 2:
             mean = sum(prior_scores) / len(prior_scores)
-            variance = sum((s - mean) ** 2 for s in prior_scores) / len(prior_scores)
+            # Sample standard deviation (n-1): prior runs are a sample of the
+            # subject's behaviour, not the whole population of possible runs.
+            # Dividing by n instead understates the spread and would flag
+            # in-band variation as a regression.
+            variance = sum((s - mean) ** 2 for s in prior_scores) / (len(prior_scores) - 1)
             std = variance**0.5
             noise_floor = max(self.regression_threshold, std)
             if mean - current_score <= noise_floor:

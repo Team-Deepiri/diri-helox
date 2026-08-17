@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from deepiri_helox_sdk.evaluation import AutomaticEvaluationHarness
@@ -224,6 +226,45 @@ def test_real_drop_still_fires_on_run_two(tmp_path):
     assert dropped["regression"]["detected"] is True
     assert dropped["regression"]["score_drop"] == pytest.approx(0.9)
     assert dropped["regression"]["score_drop"] > dropped["regression"]["stderr_floor"]
+
+
+def _seed_history(harness, scores, suite="gen", subject="model_a", config_hash="cfg"):
+    """Append prior runs straight to the history file, with no sampling noise."""
+    with open(harness.history_file, "a", encoding="utf-8") as handle:
+        for score in scores:
+            handle.write(
+                json.dumps(
+                    {
+                        "suite_name": suite,
+                        "subject": subject,
+                        "config_hash": config_hash,
+                        "mode": "generation",
+                        "avg_score": score,
+                        "score_stderr": 0.0,
+                    }
+                )
+                + "\n"
+            )
+
+
+def test_across_run_floor_uses_sample_stddev(tmp_path):
+    """Prior runs are a sample, so the spread must be the n-1 estimate."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+
+    # Prior runs of 0.9 and 0.5: mean 0.7, population sd 0.200, sample sd 0.283.
+    _seed_history(harness, [0.9, 0.5])
+
+    def check(current):
+        return harness._check_regression(
+            "gen", current, subject_name="model_a", config_hash="cfg", current_stderr=0.0
+        )
+
+    # A drop to 0.45 is 0.25 below the mean — outside the population sd but
+    # inside the sample sd, so only the n-1 estimate correctly calls it noise.
+    assert check(0.45) is None
+
+    # Well past either estimate, so it must still be reported.
+    assert check(0.30)["detected"] is True
 
 
 def test_run_evaluation_matrix(tmp_path):
