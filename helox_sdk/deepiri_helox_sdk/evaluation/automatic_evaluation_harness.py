@@ -15,8 +15,10 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import os
 import random
 import time
+import uuid
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -126,10 +128,10 @@ def retry_after_seconds(exc: BaseException) -> Optional[float]:
     return None
 
 
-def stable_hash(payload: Any) -> str:
-    """Return a short, stable hash of a JSON-serializable payload."""
+def stable_hash(payload: Any, length: int = 12) -> str:
+    """Return a stable hash of a JSON-serializable payload."""
     encoded = json.dumps(payload, sort_keys=True, default=str).encode("utf-8")
-    return hashlib.sha256(encoded).hexdigest()[:12]
+    return hashlib.sha256(encoded).hexdigest()[:length]
 
 
 def suite_fingerprint(tests: List[Dict[str, Any]]) -> str:
@@ -187,6 +189,9 @@ class AutomaticEvaluationHarness:
         retry_backoff_multiplier: float = 2.0,
         fail_on_error: bool | float = True,
         max_workers: int = 1,
+        cache_enabled: bool = False,
+        cache_dir: Optional[Path] = None,
+        cache_ttl: Optional[float] = None,
     ):
         """
         Initialize evaluation harness.
@@ -212,6 +217,12 @@ class AutomaticEvaluationHarness:
             max_workers: Samples generated concurrently. Defaults to 1 (fully
                 sequential); raise it for API-backed subjects, and leave it at
                 1 for a local GPU model that is already saturating the device.
+            cache_enabled: Reuse previously generated responses. Off by
+                default: a cache makes a run reproducible-looking whether or
+                not the model actually ran, so it must be asked for.
+            cache_dir: Where cached responses live; defaults to ``eval_dir/cache``
+            cache_ttl: Seconds before a cached response is considered stale;
+                ``None`` keeps entries indefinitely
         """
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
@@ -227,6 +238,11 @@ class AutomaticEvaluationHarness:
         self.retry_backoff_multiplier = retry_backoff_multiplier
         self.fail_on_error = fail_on_error
         self.max_workers = max_workers
+        self.cache_enabled = cache_enabled
+        self.cache_dir = Path(cache_dir) if cache_dir is not None else self.eval_dir / "cache"
+        self.cache_ttl = cache_ttl
+        if self.cache_enabled:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
 
         self.test_suites: Dict[str, List[Dict[str, Any]]] = {}
         self.history_file = (
@@ -487,7 +503,18 @@ class AutomaticEvaluationHarness:
             collect_latency=collect_latency,
             token_counter=self._subject_token_counter(subject),
             max_workers=max_workers,
+            cache_scope=self._subject_cache_scope(subject),
         )
+
+    @staticmethod
+    def _subject_cache_scope(subject: ResponseGenerator) -> Dict[str, Any]:
+        """Ask the subject to identify itself for caching, with a safe fallback."""
+        key = getattr(subject, "cache_key", None)
+        if callable(key):
+            scope = key()
+            if isinstance(scope, dict):
+                return scope
+        return {"subject": subject.name, "type": type(subject).__name__}
 
     @staticmethod
     def _subject_token_counter(
@@ -871,6 +898,84 @@ class AutomaticEvaluationHarness:
         # hit the same rate limit would retry in lockstep and trip it again.
         return delay * (0.5 + random.random())
 
+    # ------------------------------------------------------------------
+    # Response cache
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _cache_key(scope: Dict[str, Any], prompt: str, max_new_tokens: int) -> str:
+        """
+        Key a cached response by everything that determines it.
+
+        ``scope`` is the subject's own :meth:`ResponseGenerator.cache_key`, so
+        the model identity and its decoding parameters are part of the key —
+        without them a cache hit would serve one model's answers while the
+        report named another. The full digest is used rather than a short
+        prefix, since a collision here silently corrupts a score.
+        """
+        return stable_hash(
+            {"scope": scope, "prompt": prompt, "max_new_tokens": max_new_tokens},
+            length=64,
+        )
+
+    def _cache_get(self, scope: Dict[str, Any], prompt: str, max_new_tokens: int) -> Optional[str]:
+        """Return a cached response, or None on a miss, stale entry, or bad file."""
+        if not self.cache_enabled:
+            return None
+        path = self.cache_dir / f"{self._cache_key(scope, prompt, max_new_tokens)}.json"
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            return None
+        if self.cache_ttl is not None:
+            created = payload.get("created")
+            if not isinstance(created, (int, float)) or (time.time() - created) > self.cache_ttl:
+                return None
+        response = payload.get("response")
+        return response if isinstance(response, str) else None
+
+    def _cache_put(
+        self,
+        scope: Dict[str, Any],
+        prompt: str,
+        max_new_tokens: int,
+        response: str,
+    ) -> None:
+        """Store a response. Cache writes are best effort and never fail a run."""
+        if not self.cache_enabled:
+            return
+        key = self._cache_key(scope, prompt, max_new_tokens)
+        path = self.cache_dir / f"{key}.json"
+        payload = {
+            "scope": scope,
+            "prompt": prompt,
+            "max_new_tokens": max_new_tokens,
+            "response": response,
+            "created": time.time(),
+        }
+        try:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+            # Write-then-rename: workers share this directory, and a reader must
+            # never see a half-written entry.
+            temp_path = path.with_suffix(f".{uuid.uuid4().hex}.tmp")
+            temp_path.write_text(json.dumps(payload), encoding="utf-8")
+            os.replace(temp_path, path)
+        except OSError as exc:
+            logger.warning(f"Could not cache response for {prompt[:40]!r}: {exc}")
+
+    def clear_cache(self) -> int:
+        """Delete every cached response, returning how many were removed."""
+        if not self.cache_dir.exists():
+            return 0
+        removed = 0
+        for path in self.cache_dir.glob("*.json"):
+            try:
+                path.unlink()
+            except OSError:
+                continue
+            removed += 1
+        return removed
+
     def _error_budget_exceeded(self, error_count: int, total_tests: int) -> bool:
         """
         Decide whether accumulated sample failures should abort the run.
@@ -933,6 +1038,7 @@ class AutomaticEvaluationHarness:
         generate_fn: Callable[[str, int], str],
         max_new_tokens: int,
         token_counter: Optional[Callable[[str], int]] = None,
+        cache_scope: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Generate and score a single sample.
@@ -946,9 +1052,18 @@ class AutomaticEvaluationHarness:
         test_type = test.get("type", "similarity")
         threshold = float(test.get("threshold", 0.5))
 
-        generated_text, latency_ms, retries = self._generate_with_retries(
-            generate_fn, prompt, max_new_tokens
-        )
+        scope = cache_scope if cache_scope is not None else {}
+        cached = self._cache_get(scope, prompt, max_new_tokens)
+        if cached is not None:
+            # A cache hit measures the disk, not the model, so it contributes
+            # no latency sample rather than a misleadingly fast one.
+            generated_text, latency_ms, retries, from_cache = cached, None, 0, True
+        else:
+            generated_text, latency_ms, retries = self._generate_with_retries(
+                generate_fn, prompt, max_new_tokens
+            )
+            from_cache = False
+            self._cache_put(scope, prompt, max_new_tokens, generated_text)
 
         if token_counter is not None:
             new_tokens = token_counter(generated_text)
@@ -965,6 +1080,7 @@ class AutomaticEvaluationHarness:
             "score": score,
             "passed": score >= threshold,
             "errored": False,
+            "cached": from_cache,
             "test_type": test_type,
             "latency_ms": latency_ms,
             "tokens_generated": new_tokens,
@@ -982,6 +1098,7 @@ class AutomaticEvaluationHarness:
             "score": None,
             "passed": False,
             "errored": True,
+            "cached": False,
             "error": f"{type(exc).__name__}: {exc}",
             "test_type": test.get("type", "similarity"),
             "latency_ms": None,
@@ -1033,6 +1150,7 @@ class AutomaticEvaluationHarness:
         collect_latency: bool = True,
         token_counter: Optional[Callable[[str], int]] = None,
         max_workers: Optional[int] = None,
+        cache_scope: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         Score a generation subject (model or agent) against a suite.
@@ -1052,7 +1170,9 @@ class AutomaticEvaluationHarness:
         error_count = 0
 
         def task(test: Dict[str, Any]) -> Dict[str, Any]:
-            return self._evaluate_one(test, generate_fn, max_new_tokens, token_counter)
+            return self._evaluate_one(
+                test, generate_fn, max_new_tokens, token_counter, cache_scope
+            )
 
         for index, row, exc in self._dispatch(tests, task, workers):
             if exc is not None:
@@ -1106,6 +1226,7 @@ class AutomaticEvaluationHarness:
             "min_score": float(min(scores)) if scores else 0.0,
             "max_score": float(max(scores)) if scores else 0.0,
             "total_retries": sum(r["retries"] for r in results),
+            "cache_hits": sum(1 for r in results if r["cached"]),
             "max_workers": workers,
             "results": results,
         }

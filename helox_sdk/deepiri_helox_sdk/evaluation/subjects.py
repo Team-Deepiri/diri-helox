@@ -68,6 +68,17 @@ class ResponseGenerator(ABC):
         """Return an exact token count for ``text``, or None to estimate."""
         return None
 
+    def cache_key(self) -> Dict[str, Any]:
+        """
+        Identify this subject for response caching.
+
+        Everything that changes what :meth:`generate` returns belongs here.
+        A subject that omits a decoding parameter will serve another
+        configuration's responses from cache, so subclasses carrying their own
+        settings must extend this rather than rely on the name alone.
+        """
+        return {"subject": self.name, "type": type(self).__name__}
+
 
 class LegacyModelGenerator(ResponseGenerator):
     """
@@ -319,6 +330,17 @@ class ApiGenerator(ResponseGenerator):
 
     def chat(self, messages: List[Dict[str, str]], max_tokens: int) -> Any:
         raise NotImplementedError
+
+    def cache_key(self) -> Dict[str, Any]:
+        key = super().cache_key()
+        key.update(
+            {
+                "model": self.model,
+                "temperature": self.temperature,
+                "base_url": self.base_url,
+            }
+        )
+        return key
 
     def generate(self, prompt: str, max_new_tokens: int = 100) -> str:
         messages = [{"role": "user", "content": prompt}]

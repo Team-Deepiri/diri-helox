@@ -555,6 +555,112 @@ def test_concurrent_run_aborts_when_budget_spent(tmp_path):
         harness.evaluate_subject(subject, "gen")
 
 
+def _counting_subject(name, response):
+    """Subject that records how many times it was actually asked to generate."""
+    calls = {"n": 0}
+
+    def generate(prompt, **kwargs):
+        calls["n"] += 1
+        return response
+
+    return CallableGenerator(generate, name=name), calls
+
+
+def test_cache_is_off_by_default(tmp_path):
+    """Caching must be opt-in, or a rerun silently stops testing the model."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    subject, calls = _counting_subject("model_a", "good")
+
+    harness.evaluate_subject(subject, "gen")
+    harness.evaluate_subject(subject, "gen")
+
+    assert calls["n"] == 2
+    assert not (tmp_path / "cache").exists()
+
+
+def test_cache_hit_skips_the_model(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, cache_enabled=True)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    subject, calls = _counting_subject("model_a", "good")
+
+    first = harness.evaluate_subject(subject, "gen")
+    second = harness.evaluate_subject(subject, "gen")
+
+    assert calls["n"] == 1
+    assert first["cache_hits"] == 0
+    assert second["cache_hits"] == 1
+    assert second["avg_score"] == first["avg_score"] == 1.0
+    # A cache hit times the disk, not the model, so it must not enter latency.
+    assert second["results"][0]["latency_ms"] is None
+    assert "latency" not in second
+
+
+def test_cache_key_separates_models(tmp_path):
+    """Two models must never share an entry, however alike their prompts."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, cache_enabled=True, min_pass_rate=0.0)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+
+    good, good_calls = _counting_subject("model_a", "good")
+    bad, bad_calls = _counting_subject("model_b", "totally wrong")
+
+    assert harness.evaluate_subject(good, "gen")["avg_score"] == 1.0
+    second = harness.evaluate_subject(bad, "gen")
+
+    assert bad_calls["n"] == 1  # not served model_a's answer
+    assert second["cache_hits"] == 0
+    assert second["avg_score"] == 0.0
+    assert good_calls["n"] == 1
+
+
+def test_cache_key_separates_generation_params(tmp_path):
+    """max_new_tokens changes the output, so it must change the key."""
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, cache_enabled=True)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    subject, calls = _counting_subject("model_a", "good")
+
+    harness.evaluate_subject(subject, "gen", max_new_tokens=10)
+    harness.evaluate_subject(subject, "gen", max_new_tokens=10)
+    assert calls["n"] == 1
+
+    harness.evaluate_subject(subject, "gen", max_new_tokens=500)
+    assert calls["n"] == 2
+
+
+def test_api_subject_cache_key_covers_temperature():
+    """A decoding parameter left out of the key would serve the wrong responses."""
+    hot = OpenAIGenerator.__new__(OpenAIGenerator)
+    hot.name, hot.model, hot.temperature, hot.base_url = "gpt", "gpt-4o", 1.0, None
+    cold = OpenAIGenerator.__new__(OpenAIGenerator)
+    cold.name, cold.model, cold.temperature, cold.base_url = "gpt", "gpt-4o", 0.0, None
+
+    assert hot.cache_key() != cold.cache_key()
+    assert hot.cache_key()["temperature"] == 1.0
+
+
+def test_expired_cache_entry_is_refetched(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, cache_enabled=True, cache_ttl=-1.0)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    subject, calls = _counting_subject("model_a", "good")
+
+    harness.evaluate_subject(subject, "gen")
+    harness.evaluate_subject(subject, "gen")
+
+    assert calls["n"] == 2  # every entry is already stale
+
+
+def test_clear_cache(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, cache_enabled=True)
+    harness.add_test_suite("gen", [{"prompt": "p", "expected": "good", "type": "contains"}])
+    subject, calls = _counting_subject("model_a", "good")
+
+    harness.evaluate_subject(subject, "gen")
+    assert harness.clear_cache() == 1
+
+    harness.evaluate_subject(subject, "gen")
+    assert calls["n"] == 2
+
+
 def test_run_evaluation_matrix(tmp_path):
     harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
     harness.add_test_suite("a", [{"prompt": "p", "expected": "good", "type": "contains"}])
