@@ -267,18 +267,23 @@ class AutomaticEvaluationHarness:
                     "Suite contains labeled classification tests; pass a predict_fn "
                     "(mapping texts to labels) or use mode='generation'."
                 )
+            subject_name = CallablePredictor(predict_fn).name
             result = self._evaluate_classifier(tests, predict_fn)
         else:
+            subject = LegacyModelGenerator(model, tokenizer_manager)
+            subject_name = subject.name
             if not tests:
-                return self._empty_generation_result(suite_name, "generation")
+                return self._empty_generation_result(
+                    suite_name, "generation", subject_name=subject_name
+                )
             result = self._evaluate_subject_raw(
-                LegacyModelGenerator(model, tokenizer_manager),
+                subject,
                 tests,
                 max_new_tokens=max_new_tokens,
                 collect_latency=collect_latency,
             )
 
-        return self._finalize_result(result, suite_name, resolved_mode)
+        return self._finalize_result(result, suite_name, resolved_mode, subject_name=subject_name)
 
     def evaluate_subject(
         self,
@@ -305,14 +310,16 @@ class AutomaticEvaluationHarness:
         """
         tests = self.get_suite(suite_name)
         if not tests:
-            return self._empty_generation_result(suite_name, "generation")
+            return self._empty_generation_result(
+                suite_name, "generation", subject_name=subject.name
+            )
         result = self._evaluate_subject_raw(
             subject,
             tests,
             max_new_tokens=max_new_tokens,
             collect_latency=collect_latency,
         )
-        return self._finalize_result(result, suite_name, "generation")
+        return self._finalize_result(result, suite_name, "generation", subject_name=subject.name)
 
     def _evaluate_subject_raw(
         self,
@@ -365,7 +372,7 @@ class AutomaticEvaluationHarness:
         """
         tests = self.get_suite(suite_name)
         result = self._evaluate_classifier(tests, predictor.predict)
-        return self._finalize_result(result, suite_name, "classifier")
+        return self._finalize_result(result, suite_name, "classifier", subject_name=predictor.name)
 
     def evaluate_classifier_suite(
         self,
@@ -559,7 +566,12 @@ class AutomaticEvaluationHarness:
     # Finalization shared by every evaluation entry point
     # ------------------------------------------------------------------
 
-    def _empty_generation_result(self, suite_name: str, mode: str) -> Dict[str, Any]:
+    def _empty_generation_result(
+        self,
+        suite_name: str,
+        mode: str,
+        subject_name: Optional[str] = None,
+    ) -> Dict[str, Any]:
         logger.warning(f"Suite {suite_name!r} is empty; returning empty result")
         return self._finalize_result(
             {
@@ -574,6 +586,7 @@ class AutomaticEvaluationHarness:
             },
             suite_name,
             mode,
+            subject_name=subject_name,
         )
 
     def _finalize_result(
@@ -581,11 +594,20 @@ class AutomaticEvaluationHarness:
         result: Dict[str, Any],
         suite_name: str,
         mode: str,
+        subject_name: Optional[str] = None,
     ) -> Dict[str, Any]:
-        """Attach metadata, apply gates, check regression, and persist."""
+        """
+        Attach metadata, apply gates, check regression, and persist.
+
+        ``subject_name`` identifies the model/agent under test. It is recorded
+        with the run and used to scope regression detection, so a run of model
+        B is never compared against model A's history.
+        """
         result["suite_name"] = suite_name
         result["timestamp"] = datetime.now(timezone.utc).isoformat()
         result["mode"] = mode
+        if subject_name is not None:
+            result["subject"] = subject_name
 
         self._apply_gates(result)
 
@@ -593,13 +615,18 @@ class AutomaticEvaluationHarness:
             overall = result.get("overall") or {}
             f1 = overall.get("f1")
             regression = (
-                self._check_regression(suite_name, float(f1), metric_name="f1")
+                self._check_regression(
+                    suite_name, float(f1), metric_name="f1", subject_name=subject_name
+                )
                 if f1 is not None
                 else None
             )
         else:
             regression = self._check_regression(
-                suite_name, result.get("avg_score", 0.0), metric_name="avg_score"
+                suite_name,
+                result.get("avg_score", 0.0),
+                metric_name="avg_score",
+                subject_name=subject_name,
             )
 
         if regression:
@@ -896,6 +923,7 @@ class AutomaticEvaluationHarness:
     def _history_record(result: Dict[str, Any]) -> Dict[str, Any]:
         record: Dict[str, Any] = {
             "suite_name": result.get("suite_name", ""),
+            "subject": result.get("subject", ""),
             "mode": result.get("mode", ""),
             "timestamp": result.get("timestamp", ""),
             "total_tests": result.get("total_tests", 0),
@@ -926,8 +954,19 @@ class AutomaticEvaluationHarness:
 
         return result_file
 
-    def _load_history(self, suite_name: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Load persisted evaluation records, optionally filtered by suite."""
+    def _load_history(
+        self,
+        suite_name: Optional[str] = None,
+        subject_name: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """
+        Load persisted evaluation records, optionally filtered.
+
+        Filtering by ``subject_name`` keeps only rows recorded for that subject.
+        Records written before subjects were tracked carry no ``subject`` and
+        are therefore excluded: their model is unknown, so treating them as a
+        match would compare one model's score against another's history.
+        """
         if not self.history_file.exists():
             return []
         records: List[Dict[str, Any]] = []
@@ -942,12 +981,18 @@ class AutomaticEvaluationHarness:
                     continue
                 if suite_name is not None and row.get("suite_name") != suite_name:
                     continue
+                if subject_name is not None and row.get("subject") != subject_name:
+                    continue
                 records.append(row)
         return records
 
-    def get_history(self, suite_name: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Return persisted evaluation history, optionally filtered by suite."""
-        return self._load_history(suite_name=suite_name)
+    def get_history(
+        self,
+        suite_name: Optional[str] = None,
+        subject_name: Optional[str] = None,
+    ) -> List[Dict[str, Any]]:
+        """Return persisted evaluation history, optionally filtered."""
+        return self._load_history(suite_name=suite_name, subject_name=subject_name)
 
     # ------------------------------------------------------------------
     # Regression tracking
@@ -958,12 +1003,16 @@ class AutomaticEvaluationHarness:
         suite_name: str,
         current_score: float,
         metric_name: str = "avg_score",
+        subject_name: Optional[str] = None,
     ) -> Optional[Dict[str, Any]]:
         """
         Detect regression against the best and mean of prior runs.
 
         Invariant: scores are dimensionless and bounded in [0, 1], so the drop
         is measured in the same units as ``regression_threshold``.
+
+        History is scoped to ``subject_name`` when given, so a run is only ever
+        compared against prior runs of the same model or agent.
 
         Dropping below the historical best by more than ``regression_threshold``
         is a *necessary* condition. Once enough prior runs exist (n >= 2), the
@@ -973,7 +1022,7 @@ class AutomaticEvaluationHarness:
         """
         prior_scores = [
             float(row[metric_name])
-            for row in self._load_history(suite_name=suite_name)
+            for row in self._load_history(suite_name=suite_name, subject_name=subject_name)
             if metric_name in row and row[metric_name] is not None
         ]
         if not prior_scores:
