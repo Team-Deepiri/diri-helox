@@ -12,6 +12,7 @@ from deepiri_helox_sdk.evaluation.automatic_evaluation_harness import (
     is_retryable_error,
     retry_after_seconds,
 )
+from deepiri_helox_sdk.evaluation.judge import JudgeParseError, LlmJudge
 from deepiri_helox_sdk.evaluation.metrics import (
     classification_metrics,
     score_response,
@@ -774,3 +775,176 @@ def test_api_generators_require_provider_packages():
             assert "ollama" in str(exc)
         else:
             raise AssertionError("expected ImportError without ollama installed")
+
+
+# ----------------------------------------------------------------------
+# LLM-as-judge scoring
+# ----------------------------------------------------------------------
+
+
+def _judge_returning(*replies):
+    """A judge whose model emits the given verdicts, one per call."""
+    remaining = list(replies)
+    seen = []
+
+    def generate(prompt, **kwargs):
+        seen.append(prompt)
+        return remaining.pop(0) if remaining else replies[-1]
+
+    return LlmJudge(CallableGenerator(generate, name="judge_model")), seen
+
+
+def test_judge_normalizes_to_unit_interval():
+    judge, _ = _judge_returning('{"score": 5, "reasoning": "perfect"}')
+    assert judge.score("q", "a") == 1.0
+
+    judge, _ = _judge_returning('{"score": 1, "reasoning": "wrong"}')
+    assert judge.score("q", "a") == 0.0
+
+    judge, _ = _judge_returning('{"score": 4, "reasoning": "close"}')
+    assert judge.score("q", "a") == 0.75
+
+
+def test_judge_prompt_carries_question_and_reference():
+    judge, seen = _judge_returning('{"score": 3}')
+    judge.score("what is 2+2", "four", reference="4")
+    prompt = seen[0]
+    assert "what is 2+2" in prompt
+    assert "four" in prompt
+    assert "[REFERENCE ANSWER]" in prompt and "\n4\n" in prompt
+
+
+def test_judge_omits_reference_block_when_absent():
+    judge, seen = _judge_returning('{"score": 3}')
+    judge.score("q", "a")
+    assert "[REFERENCE ANSWER]" not in seen[0]
+
+
+def test_judge_parses_verdicts_wrapped_in_prose():
+    judge, _ = _judge_returning('Here is my grade:\n```json\n{"score": 5}\n```\nThanks!')
+    assert judge.score("q", "a") == 1.0
+
+
+def test_judge_falls_back_to_a_bare_score_field():
+    judge, _ = _judge_returning("Score: 4 — mostly right")
+    assert judge.score("q", "a") == 0.75
+
+
+def test_judge_clamps_out_of_range_scores():
+    judge, _ = _judge_returning('{"score": 9}')
+    verdict = judge.judge("q", "a")
+    assert verdict["score"] == 1.0
+    # The sloppy verdict is preserved so a miscalibrated judge stays visible.
+    assert verdict["raw_score"] == 9.0
+
+
+def test_unparseable_verdict_raises_rather_than_scoring_zero():
+    judge, _ = _judge_returning("I would rather not grade this.")
+    with pytest.raises(JudgeParseError):
+        judge.score("q", "a")
+
+    judge, _ = _judge_returning("")
+    with pytest.raises(JudgeParseError):
+        judge.score("q", "a")
+
+
+def test_judge_respects_a_custom_scale():
+    judge, _ = _judge_returning('{"score": 5}')
+    judge.low, judge.high = 0, 10
+    assert judge.score("q", "a") == 0.5
+
+    with pytest.raises(ValueError):
+        LlmJudge(CallableGenerator(lambda p, **kw: ""), scale=(5, 5))
+
+
+def test_harness_scores_llm_judge_tests(tmp_path):
+    judge, seen = _judge_returning('{"score": 4, "reasoning": "close"}')
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+    harness.add_test_suite(
+        "gen",
+        [
+            {
+                "id": "j1",
+                "prompt": "explain recursion",
+                "expected": "a function that calls itself",
+                "type": "llm_judge",
+            }
+        ],
+    )
+    subject = CallableGenerator(lambda p, **kw: "a function calling itself", name="model_a")
+    result = harness.evaluate_subject(subject, "gen")
+    assert result["avg_score"] == 0.75
+    assert result["results"][0]["test_type"] == "llm_judge"
+
+    # The harness must forward the question and the reference, not just the
+    # response — a grader with no question cannot tell relevant from fluent.
+    assert "explain recursion" in seen[0]
+    assert "a function calling itself" in seen[0]
+    assert "a function that calls itself" in seen[0]
+
+
+def test_judged_and_deterministic_tests_mix_in_one_suite(tmp_path):
+    judge, _ = _judge_returning('{"score": 1}')
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+    harness.add_test_suite(
+        "gen",
+        [
+            {"id": "d1", "prompt": "write add", "expected": "def add", "type": "contains"},
+            {"id": "j1", "prompt": "explain it", "expected": "", "type": "llm_judge"},
+        ],
+    )
+    subject = CallableGenerator(lambda p, **kw: "def add(a, b)", name="model_a")
+    result = harness.evaluate_subject(subject, "gen")
+    scores = {row["test_id"]: row["score"] for row in result["results"]}
+    assert scores == {"d1": 1.0, "j1": 0.0}
+
+
+def test_judge_tests_without_a_judge_fail_validation(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite(
+        "gen", [{"id": "j1", "prompt": "explain", "expected": "", "type": "llm_judge"}]
+    )
+    report = harness.validate_suite("gen")
+    assert report["valid"] is False
+    assert any("needs a configured judge" in issue for issue in report["issues"])
+
+    subject = CallableGenerator(lambda p, **kw: "anything", name="model_a")
+    with pytest.raises(ValueError, match="requires a judge"):
+        harness.evaluate_subject(subject, "gen")
+
+
+def test_judge_identity_is_recorded_in_run_config(tmp_path):
+    judge, _ = _judge_returning('{"score": 3}')
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+    harness.add_test_suite(
+        "gen", [{"id": "j1", "prompt": "explain", "expected": "", "type": "llm_judge"}]
+    )
+    subject = CallableGenerator(lambda p, **kw: "answer", name="model_a")
+    result = harness.evaluate_subject(subject, "gen")
+    assert result["config"]["judge"]["judge"] == "judge_model"
+    assert result["config"]["judge"]["scale"] == [1, 5]
+
+
+def test_changing_the_rubric_splits_the_baseline(tmp_path):
+    hashes = []
+    for rubric in ("score correctness", "score correctness and style"):
+        judge, _ = _judge_returning('{"score": 3}')
+        judge.rubric = rubric
+        harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+        harness.add_test_suite(
+            "gen", [{"id": "j1", "prompt": "explain", "expected": "", "type": "llm_judge"}]
+        )
+        subject = CallableGenerator(lambda p, **kw: "answer", name="model_a")
+        hashes.append(harness.evaluate_subject(subject, "gen")["config_hash"])
+    assert hashes[0] != hashes[1]
+
+
+def test_unjudged_suites_carry_no_judge_config(tmp_path):
+    judge, _ = _judge_returning('{"score": 3}')
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+    harness.add_test_suite(
+        "gen", [{"id": "d1", "prompt": "write add", "expected": "def add", "type": "contains"}]
+    )
+    subject = CallableGenerator(lambda p, **kw: "def add(a, b)", name="model_a")
+    result = harness.evaluate_subject(subject, "gen")
+    assert "judge" not in result["config"]

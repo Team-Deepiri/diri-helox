@@ -7,6 +7,7 @@ from .classifier import ClassifierEvaluator
 from .comparison import ModelComparisonReport, compare_model_directories
 from .generation import GenerationEvaluator
 from .harness import PostTrainingEvalHarness
+from .judge import DEFAULT_RUBRIC, JUDGE_TEST_TYPE, JudgeParseError, LlmJudge
 from .metrics import (
     classification_metrics,
     rouge_l_recall,
@@ -44,6 +45,7 @@ __all__ = [
     "CallableGenerator",
     "CallablePredictor",
     "ClassifierEvaluator",
+    "DEFAULT_RUBRIC",
     "EvalRunConfig",
     "EvalRunResult",
     "EvalThresholds",
@@ -53,9 +55,12 @@ __all__ = [
     "HFModelGenerator",
     "InferenceBenchmark",
     "InferenceParityTester",
+    "JUDGE_TEST_TYPE",
+    "JudgeParseError",
     "LABEL_TO_ID",
     "LabelPredictor",
     "LegacyModelGenerator",
+    "LlmJudge",
     "ModelComparisonReport",
     "OllamaGenerator",
     "OpenAIGenerator",

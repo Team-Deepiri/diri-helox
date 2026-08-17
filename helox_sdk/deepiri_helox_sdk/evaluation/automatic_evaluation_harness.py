@@ -26,6 +26,7 @@ from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, cast
 
 import numpy as np
 
+from .judge import JUDGE_TEST_TYPE, LlmJudge
 from .metrics import (
     _VALID_TEST_TYPES,
     classification_metrics,
@@ -193,6 +194,7 @@ class AutomaticEvaluationHarness:
         cache_dir: Optional[Path] = None,
         cache_ttl: Optional[float] = None,
         pricing: Optional[Dict[str, Dict[str, float]]] = None,
+        judge: Optional[LlmJudge] = None,
     ):
         """
         Initialize evaluation harness.
@@ -230,6 +232,10 @@ class AutomaticEvaluationHarness:
                 prices change without notice, and a stale built-in table would
                 report confident numbers that are simply wrong. Without this,
                 token counts are still reported and costs stay at zero.
+            judge: Optional :class:`LlmJudge` used to score tests of type
+                ``llm_judge``. Without one, such tests fail validation rather
+                than falling back to string matching — a silent fallback would
+                report overlap scores under a judged suite's name.
         """
         self.eval_dir = Path(eval_dir)
         self.eval_dir.mkdir(parents=True, exist_ok=True)
@@ -249,6 +255,7 @@ class AutomaticEvaluationHarness:
         self.cache_dir = Path(cache_dir) if cache_dir is not None else self.eval_dir / "cache"
         self.cache_ttl = cache_ttl
         self.pricing = pricing or {}
+        self.judge = judge
         if self.cache_enabled:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -356,7 +363,10 @@ class AutomaticEvaluationHarness:
         for index, test in enumerate(tests):
             location = f"test[{index}] (id={test.get('id', '')!r})"
             test_type = test.get("type", "similarity")
-            if test_type not in _VALID_TEST_TYPES:
+            if test_type == JUDGE_TEST_TYPE:
+                if self.judge is None:
+                    issues.append(f"{location}: type {JUDGE_TEST_TYPE!r} needs a configured judge")
+            elif test_type not in _VALID_TEST_TYPES:
                 issues.append(f"{location}: unknown test type {test_type!r}")
             try:
                 threshold = float(test.get("threshold", 0.5))
@@ -799,8 +809,8 @@ class AutomaticEvaluationHarness:
             config=config,
         )
 
-    @staticmethod
     def _run_config(
+        self,
         mode: str,
         tests: List[Dict[str, Any]],
         max_new_tokens: Optional[int] = None,
@@ -810,7 +820,9 @@ class AutomaticEvaluationHarness:
 
         Only inputs that can move a score belong here — gates and thresholds
         are excluded, since tightening a gate should not look like a new
-        baseline.
+        baseline. A judge belongs here for the opposite reason: swapping the
+        grading model or editing its rubric changes what the scores mean, so
+        those runs must not share a baseline.
         """
         config: Dict[str, Any] = {
             "mode": mode,
@@ -818,6 +830,8 @@ class AutomaticEvaluationHarness:
         }
         if max_new_tokens is not None:
             config["max_new_tokens"] = max_new_tokens
+        if self.judge is not None and any(test.get("type") == JUDGE_TEST_TYPE for test in tests):
+            config["judge"] = self.judge.config()
         return config
 
     def _finalize_result(
@@ -1119,7 +1133,7 @@ class AutomaticEvaluationHarness:
         # A cache hit never reached the provider, so it is billed at nothing.
         cost_usd = 0.0 if from_cache else self._sample_cost(rates, prompt_tokens, new_tokens)
 
-        score = self._score_response(generated_text, expected, test_type)
+        score = self._score_response(generated_text, expected, test_type, prompt=prompt)
 
         return {
             "test_id": test.get("id", ""),
@@ -1474,8 +1488,27 @@ class AutomaticEvaluationHarness:
     # Scoring / gating / persistence
     # ------------------------------------------------------------------
 
-    def _score_response(self, generated: str, expected: str, test_type: str) -> float:
-        """Score a generated response (delegates to module-level scorer)."""
+    def _score_response(
+        self,
+        generated: str,
+        expected: str,
+        test_type: str,
+        prompt: str = "",
+    ) -> float:
+        """
+        Score a generated response.
+
+        Deterministic types delegate to the module-level scorer. ``llm_judge``
+        routes to the configured judge, which also sees ``prompt`` — a grader
+        cannot tell a good answer from a bad one without the question.
+        """
+        if test_type == JUDGE_TEST_TYPE:
+            if self.judge is None:
+                raise ValueError(
+                    f"test type {JUDGE_TEST_TYPE!r} requires a judge; "
+                    "pass judge=LlmJudge(...) to the harness"
+                )
+            return self.judge.score(prompt, generated, expected)
         return score_response(generated, expected, test_type)
 
     def _apply_gates(self, result: Dict[str, Any]) -> None:
