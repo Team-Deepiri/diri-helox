@@ -13,6 +13,11 @@ from deepiri_helox_sdk.evaluation.automatic_evaluation_harness import (
     retry_after_seconds,
 )
 from deepiri_helox_sdk.evaluation.judge import JudgeParseError, LlmJudge
+from deepiri_helox_sdk.evaluation.judge_validation import (
+    JudgeValidator,
+    cohen_kappa,
+    validate_judge,
+)
 from deepiri_helox_sdk.evaluation.metrics import (
     classification_metrics,
     score_response,
@@ -1069,3 +1074,158 @@ def test_unjudged_runs_carry_no_self_preference_flag(tmp_path):
     )
     subject = CallableGenerator(lambda p, **kw: "good", name="judge_model")
     assert "judge_self_preference" not in harness.evaluate_subject(subject, "gen")
+
+
+# ----------------------------------------------------------------------
+# Judge validation probes
+# ----------------------------------------------------------------------
+
+
+PROBE_CASES = [
+    {"prompt": "how do you add two numbers", "expected": "use the plus operator"},
+    {"prompt": "how do you reverse a list", "expected": "call the reverse method"},
+    {"prompt": "how do you open a file", "expected": "call the open builtin"},
+]
+
+
+def _reading_judge(correct_score=5.0, length_bias=0.0, wobble=0.0, always_picks=None):
+    """
+    A judge that actually reads the response.
+
+    Scores ``correct_score`` when the response contains the reference and 1
+    when it does not, optionally with a thumb on the scale for length, a
+    fixed slot preference, or a per-call score wobble.
+    """
+    calls = []
+
+    def generate(prompt, **kwargs):
+        if "[RESPONSE A]" in prompt:
+            if always_picks:
+                return '{"winner": "%s"}' % always_picks
+            first = prompt.split("[RESPONSE A]")[1].split("[RESPONSE B]")[0]
+            reference = prompt.split("[REFERENCE ANSWER]")[1].split("[RESPONSE A]")[0].strip()
+            return '{"winner": "A"}' if reference in first else '{"winner": "B"}'
+
+        reference = prompt.split("[REFERENCE ANSWER]")[1].split("[RESPONSE]")[0].strip()
+        response = prompt.split("[RESPONSE]")[1].split("Reply with JSON")[0].strip()
+        score = correct_score if reference in response else 1.0
+        if length_bias:
+            score = min(5.0, score + length_bias * len(response) / 100.0)
+        # Wobble alternates by call, so it never drains and stays reproducible.
+        calls.append(prompt)
+        if wobble and len(calls) % 2 == 0:
+            score = max(1.0, score - wobble)
+        return '{"score": %s}' % score
+
+    return LlmJudge(CallableGenerator(generate, name="judge_model"))
+
+
+def _flattering_judge():
+    """A judge that never reads anything: top marks, and every pairing a tie."""
+
+    def generate(prompt, **kwargs):
+        if "[RESPONSE A]" in prompt:
+            return '{"winner": "tie"}'
+        return '{"score": 5}'
+
+    return LlmJudge(CallableGenerator(generate, name="judge_model"))
+
+
+def test_a_reading_judge_passes_every_probe():
+    report = JudgeValidator(_reading_judge()).validate(PROBE_CASES)
+    assert report["passed"] is True
+    assert report["failed_probes"] == []
+    assert report["probes"]["agreement"]["kappa"] == 1.0
+    assert report["probes"]["agreement"]["verdict"] == "strong"
+
+
+def test_a_judge_that_ignores_the_response_fails_discrimination():
+    # Scores everything highly regardless of content — the classic failure.
+    report = JudgeValidator(_flattering_judge()).validate(PROBE_CASES)
+
+    assert report["passed"] is False
+    assert "discrimination" in report["failed_probes"]
+    assert report["probes"]["discrimination"]["mean"] == 0.0
+
+    # And it carries no information, which kappa reports as no agreement at all.
+    assert report["probes"]["agreement"]["kappa"] == 0.0
+    assert report["probes"]["agreement"]["verdict"] == "unreliable"
+    # Raw accuracy would have called this judge 50% correct.
+    assert report["probes"]["agreement"]["accuracy"] == 0.5
+
+
+def test_length_bias_is_caught_by_the_padding_probe():
+    # Base score sits below the ceiling, so padding has room to move it.
+    biased = _reading_judge(correct_score=3.0, length_bias=1.0)
+    report = JudgeValidator(biased).validate(PROBE_CASES)
+    assert "length_invariance" in report["failed_probes"]
+    assert report["probes"]["length_invariance"]["worst"] > 0.1
+    # The padded answer is no more correct, so every case moved the wrong way.
+    assert len(report["probes"]["length_invariance"]["failures"]) == len(PROBE_CASES)
+
+
+def test_position_bias_is_caught_by_the_swap_probe():
+    report = JudgeValidator(_reading_judge(always_picks="A")).validate(PROBE_CASES)
+    assert "position_invariance" in report["failed_probes"]
+    assert report["probes"]["position_invariance"]["bias_rate"] == 1.0
+
+
+def test_an_unstable_judge_is_caught():
+    # Same input, wildly different verdicts across repeats.
+    wobble = _reading_judge(wobble=3.0)
+    report = JudgeValidator(wobble).validate(PROBE_CASES, include_agreement=False)
+    assert "stability" in report["failed_probes"]
+    assert report["probes"]["stability"]["worst"] > 0.1
+
+
+def test_small_score_wobble_is_tolerated():
+    jitter = _reading_judge(wobble=0.2)
+    report = JudgeValidator(jitter).validate(PROBE_CASES, include_agreement=False)
+    assert "stability" not in report["failed_probes"]
+
+
+def test_cases_are_built_from_an_existing_suite(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite(
+        "gen",
+        [
+            {"id": "t1", "prompt": "write add", "expected": "def add", "type": "contains"},
+            # No reference answer, so there is nothing to perturb.
+            {"id": "t2", "prompt": "say hi", "expected": "", "type": "contains"},
+            {"id": "t3", "prompt": "write sub", "expected": "def sub", "type": "contains"},
+        ],
+    )
+    cases = JudgeValidator.cases_from_suite(harness.get_suite("gen"))
+    assert [case["prompt"] for case in cases] == ["write add", "write sub"]
+
+
+def test_validate_judge_runs_against_a_shipped_suite(tmp_path):
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path)
+    harness.add_test_suite(
+        "gen", [{"prompt": c["prompt"], "expected": c["expected"]} for c in PROBE_CASES]
+    )
+    report = validate_judge(_reading_judge(), harness.get_suite("gen"))
+    assert report["passed"] is True
+    assert report["cases"] == len(PROBE_CASES)
+
+
+def test_validation_refuses_to_run_on_a_single_case():
+    # One case would be compared against itself and pass vacuously.
+    with pytest.raises(ValueError, match="at least 2 cases"):
+        JudgeValidator(_reading_judge()).validate(PROBE_CASES[:1])
+
+
+def test_cohen_kappa_edges():
+    assert cohen_kappa([1, 0, 1, 0], [1, 0, 1, 0]) == 1.0
+    assert cohen_kappa([1, 0, 1, 0], [0, 1, 0, 1]) == -1.0
+    # A constant rater agrees with nothing beyond chance.
+    assert cohen_kappa([1, 0, 1, 0], [1, 1, 1, 1]) == 0.0
+    assert cohen_kappa([], []) == 0.0
+    assert cohen_kappa([1, 0], [1]) == 0.0
+
+
+def test_failed_validation_is_logged_loudly(caplog):
+    with caplog.at_level("WARNING"):
+        JudgeValidator(_flattering_judge()).validate(PROBE_CASES)
+    assert "failed validation probes" in caplog.text
+    assert "not trustworthy" in caplog.text
