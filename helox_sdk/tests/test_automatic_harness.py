@@ -948,3 +948,124 @@ def test_unjudged_suites_carry_no_judge_config(tmp_path):
     subject = CallableGenerator(lambda p, **kw: "def add(a, b)", name="model_a")
     result = harness.evaluate_subject(subject, "gen")
     assert "judge" not in result["config"]
+
+
+# ----------------------------------------------------------------------
+# Judge bias controls
+# ----------------------------------------------------------------------
+
+
+def _order_sensitive_judge(always_picks="A"):
+    """A judge with pure position bias: it always names the same slot."""
+    seen = []
+
+    def generate(prompt, **kwargs):
+        seen.append(prompt)
+        return '{"winner": "%s", "reasoning": "position"}' % always_picks
+
+    return LlmJudge(CallableGenerator(generate, name="judge_model")), seen
+
+
+def _content_judge(preferred):
+    """A judge that picks whichever slot holds ``preferred``, wherever it is."""
+
+    def generate(prompt, **kwargs):
+        first = prompt.split("[RESPONSE A]")[1].split("[RESPONSE B]")[0]
+        return '{"winner": "A"}' if preferred in first else '{"winner": "B"}'
+
+    return LlmJudge(CallableGenerator(generate, name="judge_model"))
+
+
+def test_compare_runs_both_orderings():
+    judge, seen = _order_sensitive_judge()
+    judge.compare("q", "answer one", "answer two")
+    assert len(seen) == 2
+    # The same two answers, swapped between the slots.
+    first_slot = [p.split("[RESPONSE A]")[1].split("[RESPONSE B]")[0].strip() for p in seen]
+    assert first_slot == ["answer one", "answer two"]
+
+
+def test_position_bias_is_caught_and_reported_as_a_tie():
+    judge, _ = _order_sensitive_judge(always_picks="A")
+    verdict = judge.compare("q", "answer one", "answer two")
+    assert verdict["position_bias"] is True
+    assert verdict["winner"] == "tie"
+
+
+def test_consistent_winner_survives_the_order_swap():
+    judge = _content_judge("the good answer")
+    verdict = judge.compare("q", "the good answer", "the bad answer")
+    assert verdict["winner"] == "A"
+    assert verdict["position_bias"] is False
+
+    # And the same answer still wins when it is passed in as B.
+    flipped = judge.compare("q", "the bad answer", "the good answer")
+    assert flipped["winner"] == "B"
+    assert flipped["position_bias"] is False
+
+
+def test_genuine_ties_are_not_reported_as_position_bias():
+    judge = LlmJudge(CallableGenerator(lambda p, **kw: '{"winner": "tie"}', name="judge_model"))
+    verdict = judge.compare("q", "one", "two")
+    assert verdict["winner"] == "tie"
+    assert verdict["position_bias"] is False
+
+
+def test_comparison_verdicts_parse_from_prose_and_fail_loudly():
+    judge = LlmJudge(CallableGenerator(lambda p, **kw: "I pick winner: B here", name="j"))
+    assert judge.compare("q", "one", "two")["first_pass"]["winner"] == "B"
+
+    judge = LlmJudge(CallableGenerator(lambda p, **kw: "hard to say", name="j"))
+    with pytest.raises(JudgeParseError):
+        judge.compare("q", "one", "two")
+
+
+def test_judge_prompts_tell_the_grader_length_is_not_quality():
+    judge, seen = _judge_returning('{"score": 3}')
+    judge.score("q", "a")
+    assert "Length is not quality" in seen[0]
+
+    judge, seen = _order_sensitive_judge()
+    judge.compare("q", "one", "two")
+    assert "Length is not quality" in seen[0]
+
+
+def test_self_preference_is_flagged_when_judge_grades_itself(tmp_path):
+    judge, _ = _judge_returning('{"score": 5}')
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+    harness.add_test_suite(
+        "gen", [{"id": "j1", "prompt": "explain", "expected": "", "type": "llm_judge"}]
+    )
+
+    graded_by_itself = CallableGenerator(lambda p, **kw: "answer", name="judge_model")
+    result = harness.evaluate_subject(graded_by_itself, "gen")
+    # Flagged, not blocked: same-model grading is a valid smoke test, it just
+    # must not pass itself off as independent.
+    assert result["judge_self_preference"] is True
+    assert result["avg_score"] == 1.0
+
+    other = CallableGenerator(lambda p, **kw: "answer", name="model_a")
+    assert harness.evaluate_subject(other, "gen")["judge_self_preference"] is False
+
+
+def test_self_preference_matches_on_model_not_label():
+    judge = LlmJudge(CallableGenerator(lambda p, **kw: "", name="grader"))
+    judge.subject.model = "shared-model"
+
+    disguised = CallableGenerator(lambda p, **kw: "", name="totally-different-name")
+    disguised.model = "Shared-Model"
+    assert judge.self_preference_risk(disguised) is True
+
+    genuine = CallableGenerator(lambda p, **kw: "", name="other")
+    genuine.model = "some-other-model"
+    assert judge.self_preference_risk(genuine) is False
+
+
+def test_unjudged_runs_carry_no_self_preference_flag(tmp_path):
+    judge, _ = _judge_returning('{"score": 5}')
+    harness = AutomaticEvaluationHarness(eval_dir=tmp_path, judge=judge)
+    harness.add_test_suite(
+        "gen", [{"id": "d1", "prompt": "p", "expected": "good", "type": "contains"}]
+    )
+    subject = CallableGenerator(lambda p, **kw: "good", name="judge_model")
+    assert "judge_self_preference" not in harness.evaluate_subject(subject, "gen")

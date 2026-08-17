@@ -501,9 +501,30 @@ class AutomaticEvaluationHarness:
             collect_latency=collect_latency,
             max_workers=max_workers,
         )
+        if "judge" in config:
+            result["judge_self_preference"] = self._flag_self_preference(subject)
         return self._finalize_result(
             result, suite_name, "generation", subject_name=subject.name, config=config
         )
+
+    def _flag_self_preference(self, subject: ResponseGenerator) -> bool:
+        """
+        Warn when the judge is grading its own output.
+
+        Not an error: grading with the same model is a legitimate smoke test,
+        and refusing would leave people with no judge at all. But the score it
+        produces is inflated, so the run carries the flag into its report
+        rather than passing itself off as an independent measurement.
+        """
+        if self.judge is None or not self.judge.self_preference_risk(subject):
+            return False
+        logger.warning(
+            "judge %r is the same model as subject %r; scores are inflated by "
+            "self-preference bias — grade with a different model before trusting them",
+            self.judge.name,
+            subject.name,
+        )
+        return True
 
     def _evaluate_subject_raw(
         self,
