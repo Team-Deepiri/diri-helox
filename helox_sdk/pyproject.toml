@@ -15,7 +15,11 @@ numpy = "^2.1.0"
 scikit-learn = "^1.3.0"
 evaluate = "^0.4.0"
 rouge-score = "^0.1.2"
-deepiri-gpu-utils = { git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.2.0", extras = ["torch"] }
+# gpu-utils itself requires >=3.11, so it is marked rather than dragging the
+# whole SDK back up to 3.11. On 3.10 everything except
+# ``device.resolve_mudspeed_torch_device`` still works; that function already
+# imports gpu-utils lazily, so the rest of the SDK is unaffected.
+deepiri-gpu-utils = { git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.2.0", extras = ["torch"], python = ">=3.11" }
 
 [tool.poetry.group.dev.dependencies]
 pytest = ">=7,<10"
