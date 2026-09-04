@@ -1,0 +1,7 @@
+{"id": "cg-1", "prompt": "Write a Python function that returns the sum of two numbers.", "expected": "def add", "type": "contains", "threshold": 0.5}
+{"id": "cg-2", "prompt": "Write a Python function that returns the larger of two numbers.", "expected": "return a if a > b else b", "type": "contains_any", "threshold": 0.5}
+{"id": "cg-3", "prompt": "What is 2 + 2?", "expected": "4", "type": "numeric_match", "threshold": 1.0}
+{"id": "cg-4", "prompt": "Write a function to reverse a list.", "expected": "def reverse", "type": "regex_match", "threshold": 0.5}
+{"id": "cg-5", "prompt": "Explain how an HTTP request reaches a web server.", "expected": "TCP DNS socket port", "type": "similarity", "threshold": 0.4}
+{"id": "cg-6", "prompt": "Fix this buggy function: def greet(name): return 'hello ' + name", "expected": "hello world", "type": "token_f1", "threshold": 0.5}
+{"id": "cg-7", "prompt": "Return status ok", "expected": "ok", "type": "exact_match", "threshold": 1.0}

@@ -17,6 +17,10 @@ deepiri-modelkit = {git = "https://github.com/Team-Deepiri/deepiri-modelkit.git"
 # deepiri-gpu-utils: single source of truth for GPU/CUDA/MPS/ROCm detection across all
 # Deepiri services. Replaces deepiri-modelkit device utils in helox.
 deepiri-gpu-utils = {git = "https://github.com/Team-Deepiri/deepiri-gpu-utils.git", tag = "v0.2.0", extras = ["torch"]}
+# deepiri-helox-sdk: lives in-repo under helox_sdk/ and holds the canonical
+# evaluation harness. `evaluation/` re-exports from it, so the root env must be
+# able to import it. Path dep (not git tag) since it ships from this repo.
+deepiri-helox-sdk = {path = "helox_sdk", develop = true}
 
 # ML Training Dependencies
 torch = ">=2.8.0,<2.13.0"
